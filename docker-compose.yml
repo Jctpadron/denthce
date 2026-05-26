@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # 1. Base de datos PostgreSQL (Clínica y Keycloak)
+  hce-db:
+    image: postgres:16-alpine
+    container_name: hce-database
+    restart: always
+    environment:
+      POSTGRES_USER: hce_admin
+      POSTGRES_PASSWORD: hce_secure_password_2026
+      POSTGRES_DB: keycloak_db # Base de datos inicial
+    ports:
+      - "5432:5432"
+    volumes:
+      - hce_postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - hce-network
+
+  # 2. Servidor de Identidad Keycloak (OIDC / OAuth 2.0 / SMART on FHIR)
+  hce-identity:
+    image: quay.io/keycloak/keycloak:24.0.2
+    container_name: hce-keycloak
+    restart: always
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin_secure_password_2026
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://hce-db:5432/keycloak_db
+      KC_DB_USERNAME: hce_admin
+      KC_DB_PASSWORD: hce_secure_password_2026
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./configs/keycloak/hce-realm.json:/opt/keycloak/data/import/hce-realm.json:ro
+    depends_on:
+      - hce-db
+    networks:
+      - hce-network
+
+  # 3. Backend REST API (NestJS)
+  hce-api:
+    image: node:20-alpine
+    container_name: hce-backend-api
+    working_dir: /usr/src/app
+    restart: always
+    volumes:
+      - ./hce-backend:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: hce-db
+      DB_PORT: 5432
+      DB_USER: hce_admin
+      DB_PASSWORD: hce_secure_password_2026
+      DB_NAME: hce_fhir
+      PORT: 3000
+    command: npm run start:dev
+    depends_on:
+      - hce-db
+    networks:
+      - hce-network
+
+  # 4. Frontend Web App (React / Vite)
+  hce-client:
+    image: node:20-alpine
+    container_name: hce-frontend-client
+    working_dir: /usr/src/app
+    restart: always
+    volumes:
+      - ./hce-frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - hce-api
+    networks:
+      - hce-network
+
+volumes:
+  hce_postgres_data:
+    driver: local
+
+networks:
+  hce-network:
+    driver: bridge

@@ -1,0 +1,831 @@
+[
+  {
+    "id": "REQ-000-ORQ-0.1",
+    "modulo_id": 0,
+    "modulo_nombre": "Orquestación y Diseño de Agentes",
+    "descripcion": "Creación del script ejecutable de orquestación (scripts/orchestration_runner.py) con parser bidireccional de Markdown.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T00:15:00Z",
+        "agente": "orchestrator",
+        "accion": "Inicialización del flujo de desarrollo e inicio del diseño del script orquestador.",
+        "entregables": []
+      }
+    ]
+  },
+  {
+    "id": "REQ-000-ORQ-0.2",
+    "modulo_id": 0,
+    "modulo_nombre": "Orquestación y Diseño de Agentes",
+    "descripcion": "Definición e implementación del archivo de backlog dinámico (docs/backlog.json).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [
+      "docs/backlog.json"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T00:15:00Z",
+        "agente": "orchestrator",
+        "accion": "Creación de la base de datos de tareas inicial docs/backlog.json.",
+        "entregables": [
+          "docs/backlog.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-000-ORQ-0.3",
+    "modulo_id": 0,
+    "modulo_nombre": "Orquestación y Diseño de Agentes",
+    "descripcion": "Creación de las instrucciones de sistema para los 9 agentes en docs/agents/.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-000-ORQ-0.4",
+    "modulo_id": 0,
+    "modulo_nombre": "Orquestación y Diseño de Agentes",
+    "descripcion": "Creación de los 4 skills en docs/skills/ (Parser, Generador, Seguridad, QA).",
+    "prioridad": "media",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-000-ORQ-0.5",
+    "modulo_id": 0,
+    "modulo_nombre": "Orquestación y Diseño de Agentes",
+    "descripcion": "Documentación final del protocolo de comunicación y especificaciones de las herramientas del Servidor MCP.",
+    "prioridad": "media",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-001-INF-1.1",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Configuración del contenedor de Docker y esquema de despliegue para Keycloak.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "security",
+      "devops"
+    ],
+    "entregables": [
+      "docker-compose.yml",
+      "configs/keycloak/hce-realm.json"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T00:30:00Z",
+        "agente": "devops",
+        "accion": "Configurado archivo docker-compose.yml y aprovisionamiento automático del Realm hce-realm.json.",
+        "entregables": [
+          "docker-compose.yml",
+          "configs/keycloak/hce-realm.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-001-INF-1.2",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Diseño del modelo de datos e inicialización de la base de datos PostgreSQL con soporte JSONB para FHIR.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docker-compose.yml",
+      "scripts/init.sql"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T00:30:00Z",
+        "agente": "architect",
+        "accion": "Diseñada base de datos PostgreSQL. Creado script SQL de inicialización init.sql.",
+        "entregables": [
+          "docker-compose.yml",
+          "scripts/init.sql"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-001-INF-1.3",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Configuración de la federación de identidades y creación de Roles Clínicos (Médico, Enfermero, Recepción, Administrador) en Keycloak.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "security"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-001-INF-1.4",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Implementación de la validación de tokens OAuth 2.0 en el API Gateway para peticiones REST.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "security"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-001-INF-1.5",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Diseño de la tabla de auditoría inmutable clínica que genere registros del recurso AuditEvent de FHIR.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "security",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-001-INF-1.6",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Implementación del Service Mesh (Linkerd o Istio) para cifrado automático TLS mutuo (mTLS) interno.",
+    "prioridad": "baja",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "security",
+      "devops"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-001-INF-1.7",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Creación de políticas de respaldo automatizadas (estrategia 3-2-1) y failover de bases de datos.",
+    "prioridad": "media",
+    "estado": "completado",
+    "agentes_asignados": [
+      "devops"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-001-INF-1.8",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Implementación de aislamiento lógico multi-inquilino (Multi-tenancy) a nivel de base de datos y backend REST API para profesionales independientes y clínicas.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "security"
+    ],
+    "entregables": [
+      "hce-backend/src/auth/jwt.strategy.ts",
+      "hce-backend/src/patient/patient.service.ts"
+    ],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-002-PAT-2.1",
+    "modulo_id": 2,
+    "modulo_nombre": "Registro Demográfico (FHIR Patient)",
+    "descripcion": "Creación de la API de creación/lectura compatible con el recurso Patient de HL7 FHIR R4.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-002-PAT-2.2",
+    "modulo_id": 2,
+    "modulo_nombre": "Registro Demográfico (FHIR Patient)",
+    "descripcion": "Formulario de registro en React para datos demográficos (Nombre, DNI/Pasaporte, Género autopercibido, Cobertura médica).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "ux",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-002-PAT-2.3",
+    "modulo_id": 2,
+    "modulo_nombre": "Registro Demográfico (FHIR Patient)",
+    "descripcion": "Implementación del motor de búsqueda universal de pacientes con control de duplicados (Master Patient Index - MPI).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-002-PAT-2.4",
+    "modulo_id": 2,
+    "modulo_nombre": "Registro Demográfico (FHIR Patient)",
+    "descripcion": "Historial de trazabilidad y auditoría de cambios en datos demográficos del paciente.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-002-PAT-2.5",
+    "modulo_id": 2,
+    "modulo_nombre": "Registro Demográfico (FHIR Patient)",
+    "descripcion": "Integración con padrón gubernamental de personas/coberturas (ej. SISA en Argentina).",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "integrations"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.1",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Creación del recurso Encounter de FHIR para gestionar los episodios (ambulatorio, hospitalización, urgencias).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.2",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Desarrollo de la interfaz de carga de la nota SOAP (Subjetivo, Objetivo, Apreciación, Plan) adaptativa y accesible.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.3",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Motor de autocompletado e integración de diagnósticos codificados con CIE-10 / SNOMED CT.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "fhir-mcp",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.4",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Firma digital avanzada de notas clínicas para profesionales con validación de credenciales.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "architect"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.5",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Diseño de gráficos evolutivos de constantes vitales del paciente (Tensión, FC, Temperatura) extraídos de Observation FHIR.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.6",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Mapeo de antecedentes heredofamiliares y personales del paciente (Condition FHIR).",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.7",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Desarrollo del módulo de Odontograma interactivo SVG (Adulto e Infantil) e historial de tratamiento clínico en español.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "ux",
+      "product",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/Odontogram.tsx"
+    ],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.8",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Ampliación del modelo de datos clínicos para registrar alergias (AllergyIntolerance), mediciones/signos vitales (Observation) y archivos adjuntos (DocumentReference/Media).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "hce-backend/src/patient/clinical-resource.service.ts"
+    ],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-003-ENC-3.9",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Implementación del controlador físico de archivos (Upload) con Multer — endpoint POST /fhir/r4/Patient/:id/upload, validación de tipos MIME (JPG/PNG/PDF/DOC) y límite de 20 MB. Persistencia como recursos FHIR DocumentReference o Media.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "hce-backend/src/patient/file-upload.controller.ts",
+      "hce-backend/src/patient/file-upload.service.ts",
+      "hce-backend/src/patient/patient.module.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T12:55:00Z",
+        "agente": "architect",
+        "accion": "Implementado FileUploadController con Multer y FileUploadService con lógica FHIR. Registrado en PatientModule. Endpoint activo: POST /fhir/r4/Patient/:patientId/upload.",
+        "entregables": [
+          "hce-backend/src/patient/file-upload.controller.ts",
+          "hce-backend/src/patient/file-upload.service.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-003-ENC-3.10",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Implementación de la UI de Ficha Clínica con navegación por pestañas: Odontograma, Alergias (FHIR AllergyIntolerance), Signos Vitales (FHIR Observation / LOINC) y Documentos con drag & drop, galería y previsualización modal.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "ux",
+      "product",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/tabs/AllergyTab.tsx",
+      "hce-frontend/src/components/tabs/VitalsTab.tsx",
+      "hce-frontend/src/components/tabs/DocumentsTab.tsx",
+      "hce-frontend/src/components/PatientSearch.tsx"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T12:55:00Z",
+        "agente": "ux",
+        "accion": "Creados componentes AllergyTab, VitalsTab y DocumentsTab. Integrada barra de pestañas con estado activeTab en PatientSearch.tsx. Corregido path de imports Keycloak en subdirectorio tabs/.",
+        "entregables": [
+          "hce-frontend/src/components/tabs/AllergyTab.tsx",
+          "hce-frontend/src/components/tabs/VitalsTab.tsx",
+          "hce-frontend/src/components/tabs/DocumentsTab.tsx",
+          "hce-frontend/src/components/PatientSearch.tsx"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-004-RX-4.1",
+    "modulo_id": 4,
+    "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
+    "descripcion": "Creación del endpoint compatible con el recurso MedicationRequest de FHIR.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-004-RX-4.2",
+    "modulo_id": 4,
+    "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
+    "descripcion": "Integración de la base de datos de vademécum nacional/comercial (principios activos, dosis y presentaciones).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "integrations",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-004-RX-4.3",
+    "modulo_id": 4,
+    "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
+    "descripcion": "Implementación del motor de reglas CDS Hooks para alertar sobre interacciones fármaco-fármaco y fármaco-alergias del paciente.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "fhir-mcp",
+      "security"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-004-RX-4.4",
+    "modulo_id": 4,
+    "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
+    "descripcion": "Panel de firma digital y emisión de recetas en PDF con códigos QR de validación farmacéutica.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-004-RX-4.5",
+    "modulo_id": 4,
+    "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
+    "descripcion": "Implementación del Kardex de enfermería y registro de administración de medicamentos (eMAR / MAR).",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-004-RX-4.6",
+    "modulo_id": 4,
+    "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
+    "descripcion": "Conciliación de medicamentos en altas hospitalarias.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-005-SCH-5.1",
+    "modulo_id": 5,
+    "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
+    "descripcion": "Endpoint compatible con el recurso Appointment de FHIR para reserva y cancelación de turnos.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-005-SCH-5.2",
+    "modulo_id": 5,
+    "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
+    "descripcion": "Calendario visual interactivo para administración médica por profesional y consultorio.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-005-SCH-5.3",
+    "modulo_id": 5,
+    "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
+    "descripcion": "Automatización de recordatorios de citas vía SMS, Email o WhatsApp API.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "integrations"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-005-SCH-5.4",
+    "modulo_id": 5,
+    "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
+    "descripcion": "Módulo de Triaje Manchester/ESI para priorización de urgencias en guardia.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-005-SCH-5.5",
+    "modulo_id": 5,
+    "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
+    "descripcion": "Módulo de Internación: Bed Management (gestión de camas, estados de limpieza y ocupación) e indicaciones de enfermería.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "architect"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-006-LIS-6.1",
+    "modulo_id": 6,
+    "modulo_nombre": "Integración LIS (Laboratorio) y PACS (Imágenes)",
+    "descripcion": "Adaptador de mensajería HL7 v2.x (ORM/ORU) para recepción de órdenes y carga automática de resultados desde LIS.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "integrations"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-006-LIS-6.2",
+    "modulo_id": 6,
+    "modulo_nombre": "Integración LIS (Laboratorio) y PACS (Imágenes)",
+    "descripcion": "API compatible con el recurso DiagnosticReport de FHIR para visualización histórica de analíticas en HCE.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-006-LIS-6.3",
+    "modulo_id": 6,
+    "modulo_nombre": "Integración LIS (Laboratorio) y PACS (Imágenes)",
+    "descripcion": "Conector DICOM C-FIND/C-MOVE con servidores PACS e integración de visor web de imágenes DICOM (ej. OHIF Viewer).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "integrations",
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-006-LIS-6.4",
+    "modulo_id": 6,
+    "modulo_nombre": "Integración LIS (Laboratorio) y PACS (Imágenes)",
+    "descripcion": "Generación de alertas inmediatas por resultados pánico/críticos al médico tratante.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "security"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-006-LIS-6.5",
+    "modulo_id": 6,
+    "modulo_nombre": "Integración LIS (Laboratorio) y PACS (Imágenes)",
+    "descripcion": "Vinculación directa del informe estructurado del radiólogo al estudio de imagen en la historia del paciente.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-007-POR-7.1",
+    "modulo_id": 7,
+    "modulo_nombre": "Portal del Paciente y Telemedicina (WebRTC)",
+    "descripcion": "Autenticación de pacientes mediante Keycloak y autorización OAuth 2.0 (SMART on FHIR).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-007-POR-7.2",
+    "modulo_id": 7,
+    "modulo_nombre": "Portal del Paciente y Telemedicina (WebRTC)",
+    "descripcion": "Panel del Paciente: Consulta de resultados de lab, recetas activas descargables e historial de vacunas (Immunization).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-007-POR-7.3",
+    "modulo_id": 7,
+    "modulo_nombre": "Portal del Paciente y Telemedicina (WebRTC)",
+    "descripcion": "Integración de videoconsultas segura extremo a extremo utilizando WebRTC (Jitsi/Daily.co).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "integrations",
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-007-POR-7.4",
+    "modulo_id": 7,
+    "modulo_nombre": "Portal del Paciente y Telemedicina (WebRTC)",
+    "descripcion": "Implementación de firmas electrónicas de consentimiento informado del paciente previas a procedimientos.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-007-POR-7.5",
+    "modulo_id": 7,
+    "modulo_nombre": "Portal del Paciente y Telemedicina (WebRTC)",
+    "descripcion": "Chat encriptado de comunicación asincrónica médico-paciente.",
+    "prioridad": "baja",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-008-AI-8.1",
+    "modulo_id": 8,
+    "modulo_nombre": "IA Clínica y Scribe Ambiental (WhisperX/Berta)",
+    "descripcion": "Integración de transcriptor de voz por IA (WhisperX) con el editor de consultas.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "integrations",
+      "ux"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-008-AI-8.2",
+    "modulo_id": 8,
+    "modulo_nombre": "IA Clínica y Scribe Ambiental (WhisperX/Berta)",
+    "descripcion": "Desarrollo del backend de generación de notas SOAP a partir de transcripción de audio (LLM local Ollama/vLLM - Berta Scribe).",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-008-AI-8.3",
+    "modulo_id": 8,
+    "modulo_nombre": "IA Clínica y Scribe Ambiental (WhisperX/Berta)",
+    "descripcion": "Motor de extracción de entidades clínicas mediante procesamiento del lenguaje natural (NLP) para poblar campos FHIR automáticamente.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-008-AI-8.4",
+    "modulo_id": 8,
+    "modulo_nombre": "IA Clínica y Scribe Ambiental (WhisperX/Berta)",
+    "descripcion": "Resumen clínico instantáneo del paciente al abrir su ficha (medicación activa, alergias, últimas consultas).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-008-AI-8.5",
+    "modulo_id": 8,
+    "modulo_nombre": "IA Clínica y Scribe Ambiental (WhisperX/Berta)",
+    "descripcion": "Framework de análisis de cohortes y estadísticas epidemiológicas hospitalarias (LATCH).",
+    "prioridad": "baja",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product",
+      "architect"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  }
+]

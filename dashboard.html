@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCE Agentic Stack - Tablero de Comando</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #020617;
+            --bg-surface: rgba(15, 23, 42, 0.6);
+            --bg-card: rgba(30, 41, 59, 0.4);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(6, 182, 212, 0.3);
+            
+            --color-text: #f8fafc;
+            --color-muted: #94a3b8;
+            
+            --color-cyan: #06b6d4;
+            --color-emerald: #10b981;
+            --color-violet: #6366f1;
+            --color-amber: #f59e0b;
+            --color-rose: #f43f5e;
+            
+            --font-title: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            
+            --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.15);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--color-text);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 40%);
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2.2rem;
+            height: 2.2rem;
+            background: linear-gradient(135deg, var(--color-cyan), var(--color-emerald));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #020617;
+            font-family: var(--font-title);
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-text h1 {
+            font-family: var(--font-title);
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #ffffff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--color-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .link-status-badge {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--color-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Botones */
+        .btn {
+            font-family: var(--font-title);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition-smooth);
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-cyan), var(--color-emerald));
+            color: #020617;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: var(--border-hover);
+            color: var(--color-cyan);
+        }
+
+        .btn-action-trigger {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--color-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 6px;
+        }
+
+        .btn-action-trigger:hover {
+            background: var(--color-cyan);
+            color: #020617;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-approve {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 0.75rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-approve:hover {
+            background: var(--color-emerald);
+            color: #020617;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Estructura Principal */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Paneles */
+        .panel {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            height: fit-content;
+        }
+
+        /* Estado de Inicialización */
+        .welcome-box {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--bg-surface);
+            border: 1px dashed var(--border-hover);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            animation: pulseGlow 4s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { border-color: rgba(6, 182, 212, 0.2); box-shadow: 0 0 10px rgba(6, 182, 212, 0.05); }
+            100% { border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 25px rgba(16, 185, 129, 0.15); }
+        }
+
+        .welcome-box h2 {
+            font-family: var(--font-title);
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .welcome-box p {
+            color: var(--color-muted);
+            max-width: 600px;
+            font-size: 1rem;
+        }
+
+        /* Sidebar - Resumen de Progreso */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .progress-circle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .circle-svg {
+            width: 150px;
+            height: 150px;
+            transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.03);
+            stroke-width: 12;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke: url(#cyan-gradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1s ease-out;
+        }
+
+        .circle-text {
+            position: absolute;
+            font-family: var(--font-title);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .circle-text span {
+            font-size: 0.75rem;
+            color: var(--color-cyan);
+            font-family: var(--font-body);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: -0.2rem;
+        }
+
+        .progress-stat {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .progress-stat h3 {
+            font-family: var(--font-title);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-muted);
+        }
+
+        .progress-stat .total-tasks {
+            font-size: 0.9rem;
+            color: var(--color-emerald);
+            margin-top: 0.2rem;
+        }
+
+        /* Lista de Módulos */
+        .module-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .module-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .module-item:hover, .module-item.active {
+            background: rgba(6, 182, 212, 0.08);
+            border-color: var(--color-cyan);
+            transform: translateX(4px);
+        }
+
+        .module-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+
+        .module-item.active .module-name {
+            color: var(--color-cyan);
+            font-weight: 600;
+        }
+
+        .module-badge {
+            font-family: var(--font-title);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-muted);
+        }
+
+        .module-item.active .module-badge {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--color-cyan);
+        }
+
+        /* Panel Principal - Filtros y Búsqueda */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--color-text);
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border-radius: 10px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-cyan);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-muted);
+            pointer-events: none;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            font-family: var(--font-title);
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--color-muted);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            border-color: var(--color-cyan);
+            color: var(--color-cyan);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        /* Consola de Logs Embebida */
+        .console-panel {
+            background-color: #020617;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+        }
+
+        .console-line {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .console-time {
+            color: #475569;
+            flex-shrink: 0;
+        }
+
+        .console-agent {
+            font-weight: 600;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            width: 110px;
+        }
+
+        .console-agent.orchestrator { color: var(--color-cyan); }
+        .console-agent.architect { color: var(--color-violet); }
+        .console-agent.security { color: var(--color-rose); }
+        .console-agent.fhir-mcp { color: var(--color-emerald); }
+        .console-agent.product { color: var(--color-amber); }
+        .console-agent.devops { color: #f472b6; }
+
+        .console-msg {
+            color: #cbd5e1;
+        }
+
+        /* Tarjetas de Tareas */
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .task-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .task-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .task-card.completed {
+            border-color: rgba(16, 185, 129, 0.15);
+            background: rgba(16, 185, 129, 0.02);
+        }
+
+        .task-card.awaiting {
+            border-color: rgba(245, 158, 11, 0.3);
+            background: rgba(245, 158, 11, 0.03);
+            animation: borderPulse 2s infinite;
+        }
+
+        @keyframes borderPulse {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.3); }
+            50% { border-color: rgba(245, 158, 11, 0.7); }
+        }
+
+        .task-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.35rem;
+            height: 1.35rem;
+            border: 2px solid var(--color-muted);
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.15rem;
+            flex-shrink: 0;
+        }
+
+        .task-checkbox:checked {
+            background: linear-gradient(135deg, var(--color-cyan), var(--color-emerald));
+            border-color: transparent;
+        }
+
+        .task-checkbox:checked::after {
+            content: '✓';
+            color: #020617;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .task-checkbox:hover {
+            border-color: var(--color-cyan);
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+        }
+
+        .task-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .task-text {
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #e2e8f0;
+            transition: var(--transition-smooth);
+        }
+
+        .task-card.completed .task-text {
+            text-decoration: line-through;
+            color: var(--color-muted);
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-priority {
+            font-family: var(--font-title);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge-priority.alta {
+            background: rgba(244, 63, 94, 0.12);
+            color: var(--color-rose);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .badge-priority.media {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--color-amber);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-priority.baja {
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--color-violet);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .task-code {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--color-cyan);
+            background: rgba(6, 182, 212, 0.05);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid rgba(6, 182, 212, 0.1);
+        }
+
+        /* Dropzone */
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            padding: 2.5rem;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            background: rgba(255, 255, 255, 0.01);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--color-cyan);
+            background: rgba(6, 182, 212, 0.02);
+        }
+
+        .dropzone-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--color-cyan);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* Botón de acceso directo */
+        .api-access-box {
+            background: rgba(6, 182, 212, 0.05);
+            border: 1px solid rgba(6, 182, 212, 0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .api-access-box h3 {
+            font-family: var(--font-title);
+            color: #ffffff;
+            font-size: 1.1rem;
+        }
+
+        .api-access-box p {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: #0f172a;
+            border: 1px solid var(--color-emerald);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: #ffffff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            max-width: 650px;
+            width: 100%;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-family: var(--font-title);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .modal-body p {
+            font-size: 0.9rem;
+            color: var(--color-muted);
+            margin-bottom: 1rem;
+        }
+
+        .code-preview {
+            background: #020617;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <svg style="width:0; height:0; position:absolute;">
+        <defs>
+            <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#06b6d4" />
+                <stop offset="100%" stop-color="#10b981" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">H</div>
+            <div class="logo-text">
+                <h1>HCE Agentic Stack</h1>
+                <p>Tablero de Comando</p>
+            </div>
+        </div>
+        <div id="link-status" class="link-status-badge">
+            🔌 Servidor API local desconectado
+        </div>
+        <div class="header-actions" id="active-actions" style="display:none;">
+            <button class="btn btn-secondary" id="btn-save-direct" onclick="saveFileDirectly()" style="display:none;">💾 Guardar en Archivo</button>
+            <button class="btn btn-secondary" id="btn-export-manual" onclick="exportMarkdown()">📥 Exportar Descarga</button>
+            <button class="btn btn-primary" onclick="triggerFileInput()">📁 Cargar otro</button>
+        </div>
+    </header>
+
+    <div class="container" id="welcome-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; grid-column: 1/-1; gap: 1.5rem; margin-top: 4rem;">
+        
+        <!-- Opción A: Conexión al servidor API en tiempo real (Opción 2) -->
+        <div class="api-access-box" id="server-connect-box">
+            <div style="font-size:2rem;">🚀</div>
+            <h3>Conectar al Servidor de Orquestación Local</h3>
+            <p>Se comunica con el microservidor API en el puerto 8000. Te permite controlar en vivo las terminales de los agentes de IA, mandarles tareas de forma independiente y auditar sus progresos.</p>
+            <button class="btn btn-primary" onclick="connectToLocalServer()">🔌 Conectar al Servidor (Puerto 8000)</button>
+        </div>
+
+        <p style="color:var(--color-muted); font-size: 0.9rem;">o utiliza el control mediante archivos locales</p>
+
+        <!-- Opción B: Edición Directa (Chromium File System Access API) -->
+        <div class="api-access-box" id="direct-access-box" style="background: rgba(255,255,255,0.02); border-color: var(--border-color);">
+            <div style="font-size:1.5rem;">⚡</div>
+            <h3>Vincular Archivo Directo (Navegador)</h3>
+            <p>Lee y guarda automáticamente los checkboxes directo sobre el archivo físico de tu disco.</p>
+            <button class="btn btn-secondary" onclick="openFileDirectly()">📂 Vincular tablero_control.md</button>
+        </div>
+
+        <!-- Opción C: Carga manual (Fallbacks) -->
+        <div class="dropzone" id="drop-zone" onclick="triggerFileInput()">
+            <div class="dropzone-icon">📁</div>
+            <h3>Carga de Lectura / Arrastrar Archivo</h3>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--color-muted);">Sube el archivo para visualizarlo en modo pasivo.</p>
+        </div>
+        
+        <input type="file" id="file-input" accept=".md" onchange="handleFileSelect(event)">
+    </div>
+
+    <div class="container" id="dashboard-container" style="display:none;">
+        <!-- Panel Lateral Izquierdo: Progreso y Módulos -->
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="progress-circle-container">
+                    <div style="position:relative; display:flex; align-items:center; justify-content:center;">
+                        <svg class="circle-svg">
+                            <circle class="circle-bg" cx="75" cy="75" r="68"></circle>
+                            <circle class="circle-progress" id="global-circle-progress" cx="75" cy="75" r="68"></circle>
+                        </svg>
+                        <div class="circle-text" id="global-percentage-text">
+                            0%
+                            <span>Completado</span>
+                        </div>
+                    </div>
+                    <div class="progress-stat">
+                        <h3>Progreso Global</h3>
+                        <div class="total-tasks" id="global-stats-text">0 de 49 tareas finalizadas</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; margin-bottom: 1rem; color:var(--color-cyan)">Módulos</h3>
+                <ul class="module-list" id="modules-menu">
+                    <!-- Se poblará dinámicamente -->
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido Central: Tareas y Filtros -->
+        <main class="main-content">
+            <!-- Consola de Ejecución en Tiempo Real -->
+            <div class="panel" id="console-wrapper" style="width: 100%; display:none; border-color: rgba(6, 182, 212, 0.4);">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; margin-bottom: 0.5rem; color:var(--color-cyan); display:flex; justify-content:space-between; align-items:center;">
+                    <span>📟 Terminal de Agentes de IA en Vivo</span>
+                    <button class="btn btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.5rem;" onclick="clearConsole()">Limpiar</button>
+                </h3>
+                <div class="console-panel" id="console-output">
+                    <div class="console-line">
+                        <span class="console-time">[--:--:--]</span>
+                        <span class="console-agent orchestrator">System</span>
+                        <span class="console-msg">Esperando comando de ejecución del Super Admin...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" style="width: 100%;">
+                <div class="filter-bar">
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" id="search-box" placeholder="Buscar tareas..." oninput="filterTasks()">
+                    </div>
+                    <div class="filter-options">
+                        <button class="filter-btn active" id="btn-filter-all" onclick="setPriorityFilter('todas')">Todas</button>
+                        <button class="filter-btn priority-high" id="btn-filter-high" onclick="setPriorityFilter('alta')">Alta</button>
+                        <button class="filter-btn priority-medium" id="btn-filter-medium" onclick="setPriorityFilter('media')">Media</button>
+                    </div>
+                    
+                    <!-- Botón para gatillar desarrollo de este módulo -->
+                    <button class="btn btn-primary btn-action-trigger" id="btn-trigger-module" onclick="triggerModuleDevelopment()" style="display:none;">
+                        🚀 Desarrollar Módulo Completo
+                    </button>
+                </div>
+
+                <h2 id="current-module-title" style="font-family: var(--font-title); font-size: 1.4rem; margin: 1.5rem 0 1rem 0; color: #ffffff;">Módulo</h2>
+                
+                <div class="tasks-container" id="tasks-list">
+                    <!-- Se poblará dinámicamente -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Contenedor Toast -->
+    <div class="toast-container" id="toast-area"></div>
+
+    <!-- Modal para descargar archivo modificado -->
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>¡Cambios Exportados con Éxito!</h3>
+            </div>
+            <div class="modal-body">
+                <p>Se ha generado el archivo <strong>tablero_control.md</strong> con el progreso recalculado. Guarda el archivo descargado sobreescribiendo el original en la raíz de tu proyecto para mantener la sincronización.</p>
+                <div class="code-preview" id="md-preview">
+                    <!-- Vista previa del código -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+                <button class="btn btn-primary" id="btn-confirm-download" onclick="downloadFile()">Descargar Archivo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables de estado
+        let rawMarkdownContent = '';
+        let originalHeader = '';
+        let originalFooter = '';
+        let modulesData = [];
+        let activeModuleIndex = 0;
+        let activePriorityFilter = 'todas';
+        let originalFileName = 'tablero_control.md';
+        let fileHandle = null; // Guardará la referencia al archivo local físico
+        let isConnectedToServer = false; // Estado de conexión API
+        let eventSource = null; // Conexión SSE
+
+        // Ocultar opción de acceso directo si no es compatible con el navegador
+        if (!('showOpenFilePicker' in window)) {
+            document.getElementById('direct-access-box').style.display = 'none';
+        }
+
+        // Elementos DOM
+        const welcomeContainer = document.getElementById('welcome-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const activeActions = document.getElementById('active-actions');
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        // Configuración de Drag and Drop
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        });
+
+        function triggerFileInput() {
+            fileInput.click();
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        function processFile(file) {
+            originalFileName = file.name;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                rawMarkdownContent = e.target.result;
+                parseMarkdown(rawMarkdownContent);
+                welcomeContainer.style.display = 'none';
+                dashboardContainer.style.display = 'grid';
+                activeActions.style.display = 'flex';
+                
+                document.getElementById('link-status').innerHTML = '📂 Lectura (Descarga Manual)';
+                document.getElementById('link-status').style.color = 'var(--color-amber)';
+                document.getElementById('btn-save-direct').style.display = 'none';
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Conectar al Servidor Local API (Opción 2) ---
+        async function connectToLocalServer() {
+            try {
+                const response = await fetch('http://localhost:8000/api/backlog');
+                if (response.ok) {
+                    const backlog = await response.json();
+                    isConnectedToServer = true;
+                    
+                    // Parsear backlog de formato JSON directamente
+                    parseBacklogJSON(backlog);
+                    
+                    welcomeContainer.style.display = 'none';
+                    dashboardContainer.style.display = 'grid';
+                    activeActions.style.display = 'flex';
+                    
+                    // Actualizar estado e interfaz
+                    document.getElementById('link-status').innerHTML = '⚡ Servidor Activo (Puerto 8000)';
+                    document.getElementById('link-status').style.color = 'var(--color-emerald)';
+                    document.getElementById('console-wrapper').style.display = 'block';
+                    document.getElementById('btn-trigger-module').style.display = 'inline-flex';
+                    document.getElementById('btn-save-direct').style.display = 'none'; // El servidor auto-guarda
+                    document.getElementById('btn-export-manual').style.display = 'none';
+                    
+                    // Conectar a eventos SSE en tiempo real
+                    connectToEvents();
+                    
+                    showToast('🔌 Conectado exitosamente al servidor de orquestación.');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('❌ El servidor API local no está corriendo en el puerto 8000.');
+            }
+        }
+
+        function connectToEvents() {
+            if (eventSource) {
+                eventSource.close();
+            }
+            eventSource = new EventSource('http://localhost:8000/api/events');
+            eventSource.onmessage = function(event) {
+                const log = JSON.parse(event.data);
+                appendConsoleLine(log.timestamp, log.agent, log.message);
+                
+                // Si el evento completa una tarea, recargamos el backlog para reflejar cambios
+                if (log.message.includes("COMPLETADA") || log.message.includes("esperando_aprobacion") || log.message.includes("completado con éxito")) {
+                    reloadBacklogFromServer();
+                }
+            };
+        }
+
+        async function reloadBacklogFromServer() {
+            try {
+                const response = await fetch('http://localhost:8000/api/backlog');
+                if (response.ok) {
+                    const backlog = await response.json();
+                    parseBacklogJSON(backlog);
+                }
+            } catch (err) {
+                console.error("Error recargando backlog:", err);
+            }
+        }
+
+        function parseBacklogJSON(backlog) {
+            modulesData = [];
+            
+            // Agrupar por modulo
+            const grouped = {};
+            backlog.forEach(task => {
+                const m_id = task.modulo_id;
+                const m_name = task.modulo_nombre;
+                
+                if (!grouped[m_id]) {
+                    grouped[m_id] = {
+                        name: `${m_id}. ${m_name}`,
+                        tasks: [],
+                        completedCount: 0,
+                        totalCount: 0
+                    };
+                }
+                
+                // Mapear código
+                const code_parts = task.id.split("-");
+                const code = code_parts[code_parts.length - 1];
+                
+                grouped[m_id].tasks.push({
+                    code: code,
+                    id: task.id,
+                    text: task.descripcion,
+                    priority: task.prioridad,
+                    completed: task.estado === "completado",
+                    status: task.estado
+                });
+                
+                grouped[m_id].totalCount++;
+                if (task.estado === "completado") {
+                    grouped[m_id].completedCount++;
+                }
+            });
+            
+            // Mapear a modulesData ordenado
+            const sortedKeys = Object.keys(grouped).sort((a,b) => parseInt(a) - parseInt(b));
+            sortedKeys.forEach(k => {
+                modulesData.push(grouped[k]);
+            });
+            
+            renderSidebar();
+            renderTasks();
+            updateGlobalProgress();
+        }
+
+        // Ejecutar orquestación para el módulo actual
+        async function triggerModuleDevelopment() {
+            if (!isConnectedToServer) return;
+            const module = modulesData[activeModuleIndex];
+            const module_id = activeModuleIndex; // El index corresponde al ID del módulo
+            
+            appendConsoleLine(new Date().toLocaleTimeString(), "system", `Iniciando desarrollo para Módulo ${module.name}...`);
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'develop', module_id: module_id })
+                });
+                
+                if (response.ok) {
+                    showToast(`🚀 Orquestador iniciado para el Módulo ${activeModuleIndex}`);
+                } else {
+                    const errData = await response.json();
+                    showToast(`⚠️ ${errData.error}`);
+                }
+            } catch (err) {
+                console.error("Error al gatillar módulo:", err);
+                showToast("❌ Error al comunicarse con el servidor.");
+            }
+        }
+
+        // Aprobar tarea interactiva (HITL)
+        async function approveTask(task_id) {
+            try {
+                const response = await fetch('http://localhost:8000/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task_id: task_id, approved: true })
+                });
+                if (response.ok) {
+                    showToast("✅ Tarea aprobada exitosamente.");
+                    reloadBacklogFromServer();
+                }
+            } catch (err) {
+                console.error("Error aprobando tarea:", err);
+            }
+        }
+
+        // --- Consola de Log Interactiva ---
+        function appendConsoleLine(timeStr, agent, message) {
+            const consoleOutput = document.getElementById('console-output');
+            
+            // Formatear hora si viene con fecha
+            if (timeStr.includes(" ")) {
+                timeStr = timeStr.split(" ")[1];
+            }
+            
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.innerHTML = `
+                <span class="console-time">[${timeStr}]</span>
+                <span class="console-agent ${agent}">${agent}</span>
+                <span class="console-msg">${message}</span>
+            `;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight; // Auto scroll
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = `
+                <div class="console-line">
+                    <span class="console-time">[--:--:--]</span>
+                    <span class="console-agent orchestrator">System</span>
+                    <span class="console-msg">Consola de logs limpiada. Esperando comando...</span>
+                </div>
+            `;
+        }
+
+        // --- File System Access API (Escritura Directa) ---
+        async function openFileDirectly() {
+            try {
+                const [handle] = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'Archivos Markdown',
+                        accept: { 'text/markdown': ['.md'] }
+                    }],
+                    multiple: false
+                });
+                
+                fileHandle = handle;
+                const file = await fileHandle.getFile();
+                originalFileName = file.name;
+                rawMarkdownContent = await file.text();
+                
+                parseMarkdown(rawMarkdownContent);
+                
+                welcomeContainer.style.display = 'none';
+                dashboardContainer.style.display = 'grid';
+                activeActions.style.display = 'flex';
+                
+                document.getElementById('link-status').innerHTML = '⚡ Vinculado al archivo local';
+                document.getElementById('link-status').style.color = 'var(--color-emerald)';
+                document.getElementById('btn-save-direct').style.display = 'inline-flex';
+                document.getElementById('console-wrapper').style.display = 'none'; // Sin servidor, no hay terminal viva
+                document.getElementById('btn-trigger-module').style.display = 'none';
+                
+                showToast('⚡ Conexión directa establecida con tablero_control.md');
+            } catch (err) {
+                console.warn(err);
+            }
+        }
+
+        async function saveFileDirectly() {
+            if (!fileHandle) return;
+            try {
+                const updatedMD = buildMarkdownOutput();
+                const writable = await fileHandle.createWritable();
+                await writable.write(updatedMD);
+                await writable.close();
+                
+                rawMarkdownContent = updatedMD; 
+                showToast('💾 tablero_control.md guardado directamente en tu disco.');
+            } catch (err) {
+                console.error(err);
+                showToast('❌ Error al guardar. Intenta exportar la descarga.');
+            }
+        }
+
+        // Mostrar Notificaciones
+        function showToast(message) {
+            const area = document.getElementById('toast-area');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span>✓</span> ${message}`;
+            area.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                toast.style.transition = 'all 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        // --- Parser del Markdown ---
+        function parseMarkdown(mdText) {
+            modulesData = [];
+            const lines = mdText.split(/\r?\n/);
+            
+            let currentModule = null;
+            let headerPart = true;
+            let footerPart = false;
+            
+            let parsedHeader = [];
+            let parsedFooter = [];
+
+            const taskRegex = /^\s*-\s*\[([ xX])\]\s*\*\*Tarea\s+([0-9.]+):\*\*\s*(.*?)\s*\.\s*\*(?:Prioridad|PRIORIDAD):\s*([a-zA-Záéíóú]+)\*/;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                if (line.startsWith('### Módulo')) {
+                    headerPart = false;
+                    
+                    if (currentModule) {
+                        modulesData.push(currentModule);
+                    }
+
+                    const moduleName = line.replace('### Módulo ', '').trim();
+                    currentModule = {
+                        name: moduleName,
+                        tasks: [],
+                        completedCount: 0,
+                        totalCount: 0
+                    };
+                    continue;
+                }
+
+                if (line.startsWith('## 💡 Propuestas')) {
+                    footerPart = true;
+                    if (currentModule) {
+                        modulesData.push(currentModule);
+                        currentModule = null;
+                    }
+                }
+
+                if (headerPart) {
+                    parsedHeader.push(line);
+                } else if (footerPart) {
+                    parsedFooter.push(line);
+                } else if (currentModule) {
+                    const match = line.match(taskRegex);
+                    if (match) {
+                        const isCompleted = match[1].trim().toLowerCase() === 'x';
+                        const code = match[2];
+                        const text = match[3];
+                        const priority = match[4].toLowerCase();
+
+                        currentModule.tasks.push({
+                            code: code,
+                            id: `REQ-${code}`,
+                            text: text,
+                            priority: priority,
+                            completed: isCompleted,
+                            status: isCompleted ? "completado" : "pendiente",
+                            rawLineIndex: i
+                        });
+
+                        currentModule.totalCount++;
+                        if (isCompleted) {
+                            currentModule.completedCount++;
+                        }
+                    }
+                }
+            }
+
+            if (currentModule) {
+                modulesData.push(currentModule);
+            }
+
+            originalHeader = parsedHeader.join('\n');
+            originalFooter = parsedFooter.join('\n');
+
+            activeModuleIndex = 0;
+            renderSidebar();
+            renderTasks();
+            updateGlobalProgress();
+        }
+
+        // Renderizar menú de módulos
+        function renderSidebar() {
+            const menu = document.getElementById('modules-menu');
+            menu.innerHTML = '';
+
+            modulesData.forEach((mod, index) => {
+                const li = document.createElement('li');
+                li.className = `module-item ${index === activeModuleIndex ? 'active' : ''}`;
+                li.onclick = () => selectModule(index);
+
+                const percentage = mod.totalCount > 0 ? Math.round((mod.completedCount / mod.totalCount) * 100) : 0;
+
+                li.innerHTML = `
+                    <span class="module-name">${mod.name}</span>
+                    <span class="module-badge">${percentage}%</span>
+                `;
+                menu.appendChild(li);
+            });
+        }
+
+        function selectModule(index) {
+            activeModuleIndex = index;
+            renderSidebar();
+            renderTasks();
+        }
+
+        // Renderizar lista de tareas
+        function renderTasks() {
+            const container = document.getElementById('tasks-list');
+            const searchVal = document.getElementById('search-box').value.toLowerCase().trim();
+            const module = modulesData[activeModuleIndex];
+            
+            document.getElementById('current-module-title').innerText = module.name;
+            container.innerHTML = '';
+
+            if (!module || module.tasks.length === 0) {
+                container.innerHTML = '<div style="color: var(--color-muted); text-align: center; padding: 2rem;">No hay tareas cargadas en este módulo.</div>';
+                return;
+            }
+
+            let filteredTasks = module.tasks;
+
+            if (activePriorityFilter !== 'todas') {
+                filteredTasks = filteredTasks.filter(t => t.priority === activePriorityFilter);
+            }
+
+            if (searchVal !== '') {
+                filteredTasks = filteredTasks.filter(t => 
+                    t.text.toLowerCase().includes(searchVal) || 
+                    t.code.toLowerCase().includes(searchVal)
+                );
+            }
+
+            if (filteredTasks.length === 0) {
+                container.innerHTML = '<div style="color: var(--color-muted); text-align: center; padding: 2rem;">Ninguna tarea coincide con los filtros aplicados.</div>';
+                return;
+            }
+
+            filteredTasks.forEach((task) => {
+                const card = document.createElement('div');
+                
+                // Determinar clases de la tarjeta
+                let cardClass = 'task-card';
+                if (task.completed) cardClass += ' completed';
+                if (task.status === 'esperando_aprobacion') cardClass += ' awaiting';
+                
+                card.className = cardClass;
+                
+                // Si está conectado al servidor, deshabilitamos cambios manuales en tareas finalizadas 
+                // o añadimos botón de aprobación si está en espera.
+                let actionArea = '';
+                if (isConnectedToServer && task.status === 'esperando_aprobacion') {
+                    actionArea = `<button class="btn-approve" onclick="approveTask('${task.id}')">✅ Aprobar Desarrollo</button>`;
+                }
+                
+                card.innerHTML = `
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                        ${isConnectedToServer ? 'disabled' : ''}
+                        onchange="toggleTask('${task.code}', this.checked)">
+                    <div class="task-details">
+                        <span class="task-text">${task.text}</span>
+                        <div class="task-meta">
+                            <span class="task-code">Tarea ${task.code}</span>
+                            <span class="badge-priority ${task.priority}">${task.priority}</span>
+                            ${task.status === 'esperando_aprobacion' ? '<span class="badge-priority media">Esperando Aprobación</span>' : ''}
+                            ${actionArea}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Cambiar estado manual (Modo Archivo)
+        function toggleTask(code, checked) {
+            modulesData.forEach((mod) => {
+                const t = mod.tasks.find(x => x.code === code);
+                if (t) {
+                    t.completed = checked;
+                    mod.completedCount = mod.tasks.filter(x => x.completed).length;
+                }
+            });
+
+            updateGlobalProgress();
+            renderSidebar();
+            renderTasks();
+
+            if (fileHandle) {
+                saveFileDirectly();
+            }
+        }
+
+        // Recalcular progreso global y animar anillo
+        function updateGlobalProgress() {
+            let total = 0;
+            let completed = 0;
+
+            modulesData.forEach(mod => {
+                total += mod.totalCount;
+                completed += mod.completedCount;
+            });
+
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            document.getElementById('global-percentage-text').innerHTML = `${percentage}%<span>Completado</span>`;
+            document.getElementById('global-stats-text').innerText = `${completed} de ${total} tareas finalizadas`;
+
+            const circle = document.getElementById('global-circle-progress');
+            const circumference = 2 * Math.PI * 68;
+            const strokeDashoffset = circumference - (percentage / 100) * circumference;
+            circle.style.strokeDasharray = circumference;
+            circle.style.strokeDashoffset = strokeDashoffset;
+        }
+
+        // Filtros de Prioridad
+        function setPriorityFilter(priority) {
+            activePriorityFilter = priority;
+            
+            document.getElementById('btn-filter-all').className = `filter-btn ${priority === 'todas' ? 'active' : ''}`;
+            document.getElementById('btn-filter-high').className = `filter-btn priority-high ${priority === 'alta' ? 'active' : ''}`;
+            document.getElementById('btn-filter-medium').className = `filter-btn priority-medium ${priority === 'media' ? 'active' : ''}`;
+            
+            renderTasks();
+        }
+
+        function filterTasks() {
+            renderTasks();
+        }
+
+        // Re-construir el Markdown
+        function buildMarkdownOutput() {
+            const lines = rawMarkdownContent.split(/\r?\n/);
+            
+            let totalGlobal = 0;
+            let completedGlobal = 0;
+            const moduleStats = [];
+
+            modulesData.forEach(mod => {
+                totalGlobal += mod.totalCount;
+                completedGlobal += mod.completedCount;
+                moduleStats.push({
+                    name: mod.name,
+                    completed: mod.completedCount,
+                    total: mod.totalCount,
+                    percentage: mod.totalCount > 0 ? Math.round((mod.completedCount / mod.totalCount) * 100) : 0
+                });
+            });
+
+            const globalPercentage = totalGlobal > 0 ? Math.round((completedGlobal / totalGlobal) * 100) : 0;
+
+            modulesData.forEach(mod => {
+                mod.tasks.forEach(task => {
+                    const lineIndex = task.rawLineIndex;
+                    const charCheck = task.completed ? 'x' : ' ';
+                    
+                    let line = lines[lineIndex];
+                    lines[lineIndex] = line.replace(/^(\s*-\s*\[)[ xX](\])/, `$1${charCheck}$2`);
+                });
+            });
+
+            // Re-construir la tabla de progreso general del Markdown
+            let inTable = false;
+            let tableStart = -1;
+            let tableEnd = -1;
+
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].includes('| Módulo / Componente | Tareas Completadas |')) {
+                    inTable = true;
+                    tableStart = i;
+                    continue;
+                }
+                if (inTable) {
+                    if (line.trim() === '' || line.startsWith('---') || line.startsWith('###')) {
+                        tableEnd = i;
+                        break;
+                    }
+                }
+            }
+
+            if (tableStart !== -1 && tableEnd !== -1) {
+                const newTableLines = [];
+                newTableLines.push('| Módulo / Componente | Tareas Completadas | Tareas Totales | Progreso | Estado |');
+                newTableLines.push('| :--- | :---: | :---: | :---: | :--- |');
+
+                const drawBar = (pct) => {
+                    const filled = Math.round(pct / 10);
+                    let bar = "█" * filled + "░" * (10 - filled);
+                    return `\`[${bar}] ${pct}%\``;
+                };
+
+                moduleStats.forEach(stat => {
+                    const estadoStr = stat.percentage === 100 ? 'Completado' : (stat.percentage > 0 ? 'En Progreso' : 'Pendiente');
+                    newTableLines.push(`| **${stat.name}** | ${stat.completed} | ${stat.total} | ${drawBar(stat.percentage)} | ${estadoStr} |`);
+                });
+
+                const globalEstado = globalPercentage === 100 ? '**Completado**' : (globalPercentage > 0 ? '**En Progreso**' : '**Pendiente**');
+                newTableLines.push(`| **PROGRESO GLOBAL DEL PROYECTO** | **${completedGlobal}** | **${totalGlobal}** | ${drawBar(globalPercentage)} | ${globalEstado} |`);
+
+                lines.splice(tableStart, tableEnd - tableStart, ...newTableLines);
+            }
+
+            return lines.join('\n');
+        }
+
+        // Exportar a archivo manual
+        let currentGeneratedMD = '';
+
+        function exportMarkdown() {
+            currentGeneratedMD = buildMarkdownOutput();
+            document.getElementById('md-preview').innerText = currentGeneratedMD.substring(0, 1000) + '\n\n... (contenido restante)';
+            document.getElementById('download-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('download-modal').style.display = 'none';
+        }
+
+        function downloadFile() {
+            const blob = new Blob([currentGeneratedMD], { type: 'text/markdown;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', originalFileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            closeModal();
+            showToast('📥 Descarga de tablero_control.md completada.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+-- Script de Inicialización de Base de Datos HCE
+-- Se ejecuta de forma automática en el primer arranque del contenedor de PostgreSQL
+
+-- 1. Crear base de datos para los recursos clínicos (HCE FHIR) si no existe
+SELECT 'CREATE DATABASE hce_fhir'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'hce_fhir')\gexec
+
+-- 2. Otorgar todos los privilegios al usuario administrador sobre la base de datos clínica
+GRANT ALL PRIVILEGES ON DATABASE hce_fhir TO hce_admin;
+
+-- Mensaje de éxito en logs de PostgreSQL
+\echo 'Base de datos hce_fhir creada y privilegios configurados exitosamente.'
+
+-- 3. Inicializar la tabla de auditoría clínica en hce_fhir
+\c hce_fhir;
+
+-- Habilitar extensiones para generación de UUID y optimización de búsquedas parciales
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- Crear la tabla de auditoría clínica
+CREATE TABLE IF NOT EXISTS clinical_audit_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recorded TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    user_role VARCHAR(100) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    resource_type VARCHAR(100) NOT NULL,
+    resource_id VARCHAR(255),
+    client_ip VARCHAR(45) NOT NULL,
+    outcome VARCHAR(50) NOT NULL,
+    outcome_description TEXT,
+    payload JSONB NOT NULL
+);
+
+-- Crear índices optimizados para auditoría forense y analítica clínica
+CREATE INDEX IF NOT EXISTS idx_audit_recorded ON clinical_audit_events (recorded DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_user_id ON clinical_audit_events (user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_resource_action ON clinical_audit_events (resource_type, action_type);
+CREATE INDEX IF NOT EXISTS idx_audit_payload_gin ON clinical_audit_events USING gin (payload);
+
+-- Crear la función para forzar inmutabilidad de los registros (WORM)
+CREATE OR REPLACE FUNCTION block_audit_alterations()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Operación denegada: Los registros de auditoría clínica en clinical_audit_events son estrictamente inmutables por regulaciones HIPAA/GDPR.';
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear trigger de protección ante modificaciones (UPDATE/DELETE)
+DROP TRIGGER IF EXISTS trg_clinical_audit_inmutability ON clinical_audit_events;
+CREATE TRIGGER trg_clinical_audit_inmutability
+BEFORE UPDATE OR DELETE ON clinical_audit_events
+FOR EACH ROW
+EXECUTE FUNCTION block_audit_alterations();
+
+\echo 'Tabla de auditoría clinical_audit_events e índices creados con éxito.'
+
+-- 4. Inicializar la tabla de pacientes fhir_patients
+CREATE TABLE IF NOT EXISTS fhir_patients (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id VARCHAR(255),
+    active BOOLEAN DEFAULT TRUE NOT NULL,
+    dni VARCHAR(50) NOT NULL,
+    family_name VARCHAR(150) NOT NULL,
+    given_name VARCHAR(150) NOT NULL,
+    gender VARCHAR(50) NOT NULL,
+    birth_date DATE NOT NULL,
+    payload JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_dni_tenant UNIQUE (dni, tenant_id)
+);
+
+-- Crear índices demográficos y de patrones para optimizar búsquedas LIKE a gran escala (10.000+ registros)
+CREATE INDEX IF NOT EXISTS idx_patients_tenant ON fhir_patients (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_patients_dni ON fhir_patients (dni);
+-- Índice B-Tree de patrón para búsquedas DNI LIKE '123%' (prefijo)
+CREATE INDEX IF NOT EXISTS idx_patients_dni_pattern ON fhir_patients (dni varchar_pattern_ops);
+
+-- Índices GIN Trigram para búsquedas de nombres/apellidos con comodines LIKE '%nombre%'
+CREATE INDEX IF NOT EXISTS idx_patients_family_name_trgm ON fhir_patients USING gin (family_name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_patients_given_name_trgm ON fhir_patients USING gin (given_name gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_patients_birth_date ON fhir_patients (birth_date);
+CREATE INDEX IF NOT EXISTS idx_patients_payload_gin ON fhir_patients USING gin (payload);
+
+\echo 'Tabla fhir_patients e índices creados con éxito.'
+
+-- 5. Inicializar la tabla de recursos clínicos fhir_clinical_resources (Odontograma, Alergias, Signos Vitales, Documentos)
+CREATE TABLE IF NOT EXISTS fhir_clinical_resources (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id VARCHAR(255) NOT NULL,
+    patient_id UUID NOT NULL,
+    resource_type VARCHAR(100) NOT NULL, -- 'Condition', 'Procedure', 'AllergyIntolerance', 'Observation', etc.
+    payload JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (patient_id) REFERENCES fhir_patients(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_clinical_resources_tenant_patient ON fhir_clinical_resources (tenant_id, patient_id);
+CREATE INDEX IF NOT EXISTS idx_clinical_resources_payload_gin ON fhir_clinical_resources USING gin (payload);
+
+\echo 'Tabla fhir_clinical_resources e índices creados con éxito.'
+
+-- 6. Tabla de Configuración de Tenant (Personalización White-Label por Consultorio)
+CREATE TABLE IF NOT EXISTS tenant_config (
+    tenant_id       VARCHAR(255) PRIMARY KEY,
+    -- Identidad del Consultorio
+    clinic_name     VARCHAR(255) NOT NULL DEFAULT 'Mi Consultorio',
+    specialty       VARCHAR(255) DEFAULT 'Odontología General',
+    logo_url        VARCHAR(500),
+    primary_color   VARCHAR(20) DEFAULT '#0284c7',
+    dark_mode       BOOLEAN DEFAULT FALSE,
+    -- Datos del Profesional (para recetas y reportes)
+    doctor_name     VARCHAR(255),
+    doctor_license  VARCHAR(100),   -- Número de matrícula
+    doctor_title    VARCHAR(100),   -- Ej: "Dr.", "Dra.", "Od."
+    -- Datos del Consultorio (para encabezado de recetas)
+    address         VARCHAR(500),
+    city            VARCHAR(100),
+    province        VARCHAR(100),
+    postal_code     VARCHAR(20),
+    phone           VARCHAR(50),
+    email           VARCHAR(255),
+    cuit            VARCHAR(20),    -- Para facturación
+    health_insurance VARCHAR(255),  -- Obra social / prepaga
+    -- Horarios de Atención
+    schedule_json   JSONB DEFAULT '{"lunes":"09:00-18:00","martes":"09:00-18:00","miercoles":"09:00-18:00","jueves":"09:00-18:00","viernes":"09:00-18:00","sabado":"","domingo":""}',
+    -- Firma Digital
+    signature_url   VARCHAR(500),   -- URL de imagen de firma PNG
+    -- Metadata
+    updated_at      TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+\echo 'Tabla tenant_config creada con éxito.'
