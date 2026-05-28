@@ -1,26 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Lato:wght@300;400;700;900&display=swap');
 
 :root {
-  --bg-base: #f8fafc; /* Slate-50: Gris claro azulado suave */
-  --bg-surface: #ffffff; /* Blanco puro para tarjetas principales */
-  --bg-card: #f1f5f9; /* Slate-100 para contenedores e inputs */
-  --border-color: #e2e8f0; /* Slate-200 para bordes discretos */
-  --border-hover: #0284c7; /* Sky-600: Acento de foco */
+  /* Fondo y Superficies estilo Mercado Pago */
+  --bg-base: #f6f8f9; /* Gris ultra suave y amigable */
+  --bg-surface: #ffffff; /* Blanco puro para tarjetas */
+  --bg-card: #f8f9fa; /* Gris claro para celdas/inputs */
+  --border-color: #ebedef; /* Bordes extremadamente finos y sutiles */
+  --border-hover: #2962ff; /* Azul premium para foco */
   
-  --color-text: #0f172a; /* Slate-900: Texto oscuro de alto contraste */
-  --color-muted: #64748b; /* Slate-500: Leyendas y secundarios */
+  --color-text: #1e293b; /* Charcoal/Slate-800: Menos agresivo que el negro */
+  --color-muted: #64748b; /* Slate-500: Secundarios */
   
-  --color-cyan: #0284c7; /* Sky-600: Curaciones y primarios */
-  --color-emerald: #10b981; /* Emerald-500: Éxito y salud */
-  --color-violet: #4f46e5; /* Indigo-600 */
-  --color-amber: #d97706; /* Amber-600: Conducto / Pendientes */
-  --color-rose: #e11d48; /* Rose-600: Caries / Alertas */
+  /* Acentos de Color Modernos */
+  --color-cyan: #0284c7; /* Azul médico premium */
+  --color-emerald: #10b981; /* Verde esmeralda para salud/éxito */
+  --color-violet: #6366f1; /* Índigo */
+  --color-amber: #f59e0b; /* Ámbar para advertencias */
+  --color-rose: #ef4444; /* Rojo para alertas/caries */
   
-  --font-title: 'Outfit', sans-serif;
+  --font-title: 'Inter', sans-serif;
   
-  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-glow: 0 4px 14px rgba(2, 132, 199, 0.15);
-  --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.02);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.03);
 }
 
 body {
@@ -45,7 +48,7 @@ body {
   border: 1px solid var(--border-color);
   color: var(--color-text);
   padding: 0.75rem 1.25rem;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.9rem;
   font-family: inherit;
   transition: var(--transition-smooth);
@@ -54,7 +57,7 @@ body {
 
 .search-input:focus {
   border-color: var(--border-hover);
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+  box-shadow: 0 0 0 4px rgba(41, 98, 255, 0.06);
   background: var(--bg-surface);
 }
 
@@ -67,8 +70,8 @@ body {
   font-family: inherit;
   font-weight: 600;
   font-size: 0.85rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -79,14 +82,14 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-cyan), #0369a1);
+  background: linear-gradient(135deg, #2962ff, #0039cb); /* Gradiente azul premium */
   color: #ffffff;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 4px 12px rgba(41, 98, 255, 0.2);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 6px 18px rgba(41, 98, 255, 0.35);
 }
 
 .btn-primary:disabled {
@@ -101,12 +104,13 @@ body {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   color: var(--color-text);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
   background: var(--bg-base);
-  border-color: var(--color-cyan);
-  color: var(--color-cyan);
+  border-color: #2962ff;
+  color: #2962ff;
 }
 
 /* Tarjetas y Paneles */
@@ -115,14 +119,64 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.75rem;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-md);
 }
 
-/* Animaciones y Transiciones */
+/* Segmented Control (Pills) para Pestañas */
+.segmented-control {
+  display: flex;
+  background: #f1f3f5;
+  padding: 0.25rem;
+  border-radius: 14px;
+  gap: 0.25rem;
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+  flex-shrink: 0;               /* No se comprime con el contenido */
+}
+
+.segmented-control::-webkit-scrollbar {
+  display: none;                /* Chrome/Safari */
+}
+
+.segmented-button {
+  flex: 0 0 auto;               /* No se estira ni comprime */
+  min-width: max-content;       /* Ocupa el ancho del texto + icon */
+  padding: 0.6rem 0.9rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.segmented-button.active {
+  background: var(--bg-surface);
+  color: #2962ff;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.segmented-button:hover:not(.active) {
+  color: var(--color-text);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Animaciones */
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -138,3 +192,42 @@ body {
     opacity: 1;
   }
 }
+
+/* Estilos interactivos para el Odontograma SVG */
+.tooth-polygon {
+  cursor: pointer;
+  stroke: #cbd5e1;
+  stroke-width: 1px;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+
+@media (hover: hover) {
+  .tooth-polygon:hover {
+    fill: rgba(41, 98, 255, 0.1) !important;
+    stroke: #2962ff !important;
+  }
+}
+
+.tooth-polygon:active {
+  fill: rgba(41, 98, 255, 0.25) !important;
+  stroke: #2962ff !important;
+  transition: none;
+}
+
+/* Animaciones de entrada premium para la Landing Page */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+

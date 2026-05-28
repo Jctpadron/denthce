@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import keycloak from '../utils/keycloak-config';
-import { useTheme, TenantConfig } from '../context/ThemeContext';
+import { useTheme, type TenantConfig } from '../context/ThemeContext';
 
 const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 const DIAS_LABELS: Record<string, string> = {
@@ -47,7 +47,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
   const handleSave = async () => {
     setSaving(true);
     try {
-      await axios.put('http://localhost:3000/api/tenant/config', form, {
+      await axios.put(import.meta.env.VITE_API_URL + '/api/tenant/config', form, {
         headers: { Authorization: `Bearer ${keycloak.token}` },
       });
       await reload();
@@ -65,7 +65,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const res = await axios.post('http://localhost:3000/api/tenant/logo', fd, {
+      const res = await axios.post(import.meta.env.VITE_API_URL + '/api/tenant/logo', fd, {
         headers: { Authorization: `Bearer ${keycloak.token}`, 'Content-Type': 'multipart/form-data' },
       });
       setLogoPreview(res.data.logoUrl);
@@ -83,7 +83,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const res = await axios.post('http://localhost:3000/api/tenant/signature', fd, {
+      const res = await axios.post(import.meta.env.VITE_API_URL + '/api/tenant/signature', fd, {
         headers: { Authorization: `Bearer ${keycloak.token}`, 'Content-Type': 'multipart/form-data' },
       });
       setSignaturePreview(res.data.signatureUrl);

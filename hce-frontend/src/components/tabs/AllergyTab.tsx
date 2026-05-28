@@ -45,7 +45,7 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
     setLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:3000/fhir/r4/Patient/${patientId}/clinical-resource`,
+        `${import.meta.env.VITE_API_URL}/fhir/r4/Patient/${patientId}/clinical-resource`,
         { headers: { Authorization: `Bearer ${keycloak.token}` } }
       );
       const all: Allergy[] = res.data.filter(
@@ -90,7 +90,7 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
         },
       };
       await axios.post(
-        `http://localhost:3000/fhir/r4/Patient/${patientId}/clinical-resource`,
+        `${import.meta.env.VITE_API_URL}/fhir/r4/Patient/${patientId}/clinical-resource`,
         payload,
         { headers: { Authorization: `Bearer ${keycloak.token}` } }
       );

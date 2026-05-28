@@ -3,15 +3,21 @@ import { PatientForm } from './components/PatientForm';
 import { PatientSearch } from './components/PatientSearch';
 import { HomeScreen } from './components/HomeScreen';
 import { BrandingSettings } from './components/BrandingSettings';
+import { UserManagement } from './components/UserManagement';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import keycloak from './utils/keycloak-config';
-import { LogOut, User, Shield, Home } from 'lucide-react';
+import { LogOut, User, Shield } from 'lucide-react';
+import { LandingLogin } from './components/LandingLogin';
 
-type AppView = 'home' | 'patients' | 'form' | 'settings';
+type AppView = 'home' | 'patients' | 'form' | 'settings' | 'users';
 
 function AppContent() {
   const [activeView, setActiveView] = useState<AppView>('home');
-  const { config, loading, isAdmin } = useTheme();
+  const { config, loading, canConfigure } = useTheme();
+
+  if (!keycloak.authenticated) {
+    return <LandingLogin />;
+  }
 
   const username = keycloak.tokenParsed?.preferred_username || 'Profesional Clínico';
   const fullName = `${keycloak.tokenParsed?.given_name || ''} ${keycloak.tokenParsed?.family_name || ''}`.trim() || username;
@@ -36,7 +42,10 @@ function AppContent() {
     { key: 'home' as AppView, label: 'Inicio', icon: '🏠' },
     { key: 'patients' as AppView, label: 'Historia Clínica', icon: '🏥' },
     { key: 'form' as AppView, label: 'Admisión', icon: '➕' },
-    ...(isAdmin ? [{ key: 'settings' as AppView, label: 'Personalización', icon: '🎨' }] : []),
+    ...(canConfigure ? [
+      { key: 'users' as AppView, label: 'Personal', icon: '👥' },
+      { key: 'settings' as AppView, label: 'Personalización', icon: '🎨' }
+    ] : []),
   ];
 
   if (loading) {
@@ -63,7 +72,7 @@ function AppContent() {
       {/* Cabecera Principal */}
       <header style={{
         borderBottom: '1px solid var(--border-color)',
-        background: 'rgba(255, 255, 255, 0.9)',
+        background: 'rgba(255, 255, 255, 0.96)',
         backdropFilter: 'blur(12px)',
         position: 'sticky',
         top: 0,
@@ -72,7 +81,7 @@ function AppContent() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.02)',
       }}>
         {/* Logo + Nombre del Consultorio (dinámico) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -80,13 +89,13 @@ function AppContent() {
             <img
               src={config.logoUrl}
               alt="Logo"
-              style={{ height: '2.2rem', width: '2.2rem', objectFit: 'contain', borderRadius: '6px' }}
+              style={{ height: '2.2rem', width: '2.2rem', objectFit: 'contain', borderRadius: '8px' }}
             />
           ) : (
             <div style={{
               width: '2.2rem',
               height: '2.2rem',
-              background: `linear-gradient(135deg, ${config.primaryColor || 'var(--color-cyan)'}, #10b981)`,
+              background: 'linear-gradient(135deg, #2962ff, #00d2ff)',
               borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
@@ -94,43 +103,43 @@ function AppContent() {
               fontWeight: 800,
               color: '#ffffff',
               fontSize: '1.1rem',
-              boxShadow: `0 2px 10px ${config.primaryColor || 'var(--color-cyan)'}33`,
+              boxShadow: '0 2px 10px rgba(41, 98, 255, 0.2)',
             }}>
-              {(config.clinicName || 'D').charAt(0)}
+              {(config.clinicName || 'D').charAt(0).toUpperCase()}
             </div>
           )}
           <div>
-            <h1 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text)' }}>
+            <h1 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>
               {config.clinicName || 'DentHCE Portal Clínico'}
             </h1>
-            <p style={{ fontSize: '0.68rem', color: config.primaryColor || 'var(--color-cyan)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, margin: 0 }}>
+            <p style={{ fontSize: '0.68rem', color: '#2962ff', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, margin: 0 }}>
               {config.specialty || 'Sistema Clínico FHIR R4'}
             </p>
           </div>
         </div>
 
         {/* Navegación central */}
-        <nav style={{ display: 'flex', gap: '0.25rem' }}>
+        <nav style={{ display: 'flex', gap: '0.35rem' }}>
           {NAV_ITEMS.map(item => (
             <button
               key={item.key}
               onClick={() => setActiveView(item.key)}
               style={{
-                background: activeView === item.key ? `${config.primaryColor || '#0284c7'}12` : 'transparent',
+                background: activeView === item.key ? 'rgba(41, 98, 255, 0.06)' : 'transparent',
                 border: 'none',
-                borderRadius: '8px',
-                color: activeView === item.key ? (config.primaryColor || 'var(--color-cyan)') : 'var(--color-muted)',
-                padding: '0.45rem 0.9rem',
+                borderRadius: '10px',
+                color: activeView === item.key ? '#2962ff' : 'var(--color-muted)',
+                padding: '0.5rem 1rem',
                 fontSize: '0.85rem',
                 fontWeight: activeView === item.key ? 700 : 500,
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
+                transition: 'var(--transition-smooth)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',
               }}
             >
-              <span>{item.icon}</span>
+              <span style={{ filter: activeView === item.key ? 'none' : 'grayscale(1)' }}>{item.icon}</span>
               {item.label}
             </button>
           ))}
@@ -139,22 +148,22 @@ function AppContent() {
         {/* Panel del Profesional */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
-            <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(0,0,0,0.04)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)' }}>
+            <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)' }}>
               <User style={{ width: '1rem', height: '1rem' }} />
             </div>
             <div>
               <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', display: 'block' }}>{fullName}</span>
-              <div style={{ display: 'flex', gap: '0.2rem', marginTop: '0.1rem' }}>
+              <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.15rem' }}>
                 {clinicalRoles.map(role => (
                   <span key={role} style={{
                     fontSize: '0.6rem',
                     fontWeight: 700,
                     textTransform: 'uppercase',
-                    background: role === 'administrador' ? 'rgba(124,58,237,0.08)' : role === 'medico' ? `${config.primaryColor || '#0284c7'}12` : 'rgba(16,185,129,0.08)',
-                    color: role === 'administrador' ? '#7c3aed' : role === 'medico' ? (config.primaryColor || 'var(--color-cyan)') : '#10b981',
-                    border: `1px solid ${role === 'administrador' ? 'rgba(124,58,237,0.2)' : role === 'medico' ? `${config.primaryColor || '#0284c7'}25` : 'rgba(16,185,129,0.2)'}`,
-                    padding: '0.05rem 0.3rem',
-                    borderRadius: '4px',
+                    background: role === 'administrador' ? 'rgba(99,102,241,0.06)' : role === 'medico' ? 'rgba(41,98,255,0.06)' : 'rgba(16,185,129,0.06)',
+                    color: role === 'administrador' ? 'var(--color-violet)' : role === 'medico' ? '#2962ff' : 'var(--color-emerald)',
+                    border: `1px solid ${role === 'administrador' ? 'rgba(99,102,241,0.15)' : role === 'medico' ? 'rgba(41,98,255,0.15)' : 'rgba(16,185,129,0.15)'}`,
+                    padding: '0.05rem 0.35rem',
+                    borderRadius: '5px',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.15rem',
@@ -171,20 +180,26 @@ function AppContent() {
             onClick={() => keycloak.logout()}
             style={{
               background: 'transparent',
-              border: '1px solid rgba(225,29,72,0.2)',
+              border: '1px solid rgba(239,68,68,0.2)',
               color: 'var(--color-rose)',
-              padding: '0.45rem 0.9rem',
-              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              borderRadius: '10px',
               fontSize: '0.82rem',
               fontWeight: 600,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
-              transition: 'all 0.2s',
+              transition: 'var(--transition-smooth)',
             }}
-            onMouseOver={e => (e.currentTarget.style.background = 'rgba(225,29,72,0.05)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            onMouseOver={e => {
+              e.currentTarget.style.background = 'rgba(239,68,68,0.05)';
+              e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'rgba(239,68,68,0.2)';
+            }}
           >
             <LogOut style={{ width: '0.9rem', height: '0.9rem' }} />
             Salir
@@ -199,10 +214,16 @@ function AppContent() {
         )}
         {activeView === 'patients' && <PatientSearch />}
         {activeView === 'form' && <PatientForm onSuccess={() => setActiveView('patients')} />}
-        {activeView === 'settings' && isAdmin && <BrandingSettings onClose={() => setActiveView('home')} />}
-        {activeView === 'settings' && !isAdmin && (
+        {activeView === 'users' && canConfigure && <UserManagement />}
+        {activeView === 'users' && !canConfigure && (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
-            🔒 Solo el Administrador puede acceder a la Personalización.
+            🔒 Solo el Administrador o los Médicos pueden acceder a la Gestión de Personal.
+          </div>
+        )}
+        {activeView === 'settings' && canConfigure && <BrandingSettings onClose={() => setActiveView('home')} />}
+        {activeView === 'settings' && !canConfigure && (
+          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
+            🔒 Solo el Administrador o los Médicos pueden acceder a la Personalización.
           </div>
         )}
       </div>

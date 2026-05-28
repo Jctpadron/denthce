@@ -25,9 +25,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const realmAccess = payload.realm_access || {};
     const roles = realmAccess.roles || [];
     
+    let tenantId = payload.tenant_id || payload.sub;
+    if (Array.isArray(tenantId) && tenantId.length > 0) {
+      tenantId = tenantId[0];
+    }
+    
     return {
       userId: payload.sub,
-      tenantId: payload.sub, // Identificador de inquilino (inicialmente el id del profesional)
+      tenantId: tenantId,
       username: payload.preferred_username,
       email: payload.email,
       roles: roles,

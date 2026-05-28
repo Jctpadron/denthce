@@ -225,6 +225,61 @@
     "historial_auditoria": []
   },
   {
+    "id": "REQ-001-INF-1.9",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Implementación de la API de creación y listado de sub-usuarios en el backend conectada a Keycloak Admin API con atributos multi-inquilino.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "security"
+    ],
+    "entregables": [
+      "hce-backend/src/tenant/keycloak-admin.service.ts",
+      "hce-backend/src/tenant/users.controller.ts",
+      "hce-backend/src/tenant/tenant.module.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T17:55:00Z",
+        "agente": "architect",
+        "accion": "Implementado KeycloakAdminService y UsersController para gestionar sub-usuarios (secretarias/enfermeros) aislados por tenantId.",
+        "entregables": [
+          "hce-backend/src/tenant/keycloak-admin.service.ts",
+          "hce-backend/src/tenant/users.controller.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-001-INF-1.10",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Interfaz de usuario en React para la Gestión de Personal (Secretarias/Enfermeros) y asignación automática al consultorio del doctor.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "ux",
+      "product"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/UserManagement.tsx",
+      "hce-frontend/src/App.tsx",
+      "hce-frontend/src/components/HomeScreen.tsx"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T17:55:00Z",
+        "agente": "ux",
+        "accion": "Creado componente UserManagement e integrado menú y dashboard principal de HomeScreen.",
+        "entregables": [
+          "hce-frontend/src/components/UserManagement.tsx"
+        ]
+      }
+    ]
+  },
+  {
     "id": "REQ-002-PAT-2.1",
     "modulo_id": 2,
     "modulo_nombre": "Registro Demográfico (FHIR Patient)",
@@ -272,7 +327,7 @@
     "modulo_nombre": "Registro Demográfico (FHIR Patient)",
     "descripcion": "Historial de trazabilidad y auditoría de cambios en datos demográficos del paciente.",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "security"
     ],
@@ -285,7 +340,7 @@
     "modulo_nombre": "Registro Demográfico (FHIR Patient)",
     "descripcion": "Integración con padrón gubernamental de personas/coberturas (ej. SISA en Argentina).",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "integrations"
     ],
@@ -293,12 +348,36 @@
     "historial_auditoria": []
   },
   {
+    "id": "REQ-002-PAT-2.6",
+    "modulo_id": 2,
+    "modulo_nombre": "Registro Demográfico (FHIR Patient)",
+    "descripcion": "Pruebas de integración automatizadas para la admisión de pacientes, validación de esquemas FHIR Patient R4 y control de duplicados.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [
+      "scripts/test_patient_clinical.js"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T18:23:00Z",
+        "agente": "orchestrator",
+        "accion": "Diseño y ejecución exitosa de pruebas de integración para admisiones de pacientes.",
+        "entregables": [
+          "scripts/test_patient_clinical.js"
+        ]
+      }
+    ]
+  },
+  {
     "id": "REQ-003-ENC-3.1",
     "modulo_id": 3,
     "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
     "descripcion": "Creación del recurso Encounter de FHIR para gestionar los episodios (ambulatorio, hospitalización, urgencias).",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "architect",
       "fhir-mcp"
@@ -312,7 +391,7 @@
     "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
     "descripcion": "Desarrollo de la interfaz de carga de la nota SOAP (Subjetivo, Objetivo, Apreciación, Plan) adaptativa y accesible.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "ux",
       "product"
@@ -326,7 +405,7 @@
     "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
     "descripcion": "Motor de autocompletado e integración de diagnósticos codificados con CIE-10 / SNOMED CT.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "fhir-mcp",
       "product"
@@ -340,7 +419,7 @@
     "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
     "descripcion": "Firma digital avanzada de notas clínicas para profesionales con validación de credenciales.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "security",
       "architect"
@@ -354,7 +433,7 @@
     "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
     "descripcion": "Diseño de gráficos evolutivos de constantes vitales del paciente (Tensión, FC, Temperatura) extraídos de Observation FHIR.",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "ux",
       "fhir-mcp"
@@ -368,7 +447,7 @@
     "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
     "descripcion": "Mapeo de antecedentes heredofamiliares y personales del paciente (Condition FHIR).",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "product",
       "fhir-mcp"
@@ -470,12 +549,54 @@
     ]
   },
   {
+    "id": "REQ-003-ENC-3.11",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Pruebas de integración automatizadas para el registro de signos vitales (Observation), alergias (AllergyIntolerance), odontograma (Procedure) y validación de aislamiento multi-inquilino (Zero Trust).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [
+      "scripts/test_patient_clinical.js"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-05-26T18:23:00Z",
+        "agente": "orchestrator",
+        "accion": "Diseño y ejecución exitosa de pruebas de integración para la historia clínica y aislamiento multi-inquilino.",
+        "entregables": [
+          "scripts/test_patient_clinical.js"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-003-ENC-3.12",
+    "modulo_id": 3,
+    "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
+    "descripcion": "Rediseño y actualización de la pantalla de inicio (HomeScreen / Dashboard principal) para incorporar widgets clínicos/administrativos dinámicos según el rol de Keycloak, y accesos directos a los módulos activos (Receta Electrónica, Agenda de citas).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "product",
+      "architect"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/HomeScreen.tsx",
+      "hce-frontend/src/App.tsx"
+    ],
+    "historial_auditoria": []
+  },
+  {
     "id": "REQ-004-RX-4.1",
     "modulo_id": 4,
     "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
     "descripcion": "Creación del endpoint compatible con el recurso MedicationRequest de FHIR.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "architect",
       "fhir-mcp"
@@ -489,7 +610,7 @@
     "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
     "descripcion": "Integración de la base de datos de vademécum nacional/comercial (principios activos, dosis y presentaciones).",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "integrations",
       "product"
@@ -503,7 +624,7 @@
     "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
     "descripcion": "Implementación del motor de reglas CDS Hooks para alertar sobre interacciones fármaco-fármaco y fármaco-alergias del paciente.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "fhir-mcp",
       "security"
@@ -531,7 +652,7 @@
     "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
     "descripcion": "Implementación del Kardex de enfermería y registro de administración de medicamentos (eMAR / MAR).",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "product",
       "ux"

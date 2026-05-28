@@ -18,15 +18,15 @@ Este es un **documento bidireccional y vivo**:
 | Módulo / Componente | Tareas Completadas | Tareas Totales | Progreso | Estado |
 | :--- | :---: | :---: | :---: | :--- |
 | **0. Orquestación y Diseño de Agentes** | 5 | 5 | `[██████████] 100%` | Completado |
-| **1. Infraestructura y Seguridad (Zero Trust)** | 8 | 8 | `[██████████] 100%` | Completado |
-| **2. Registro Demográfico (FHIR Patient)** | 3 | 5 | `[██████░░░░] 60%` | En Progreso |
-| **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 4 | 10 | `[████░░░░░░] 40%` | En Progreso |
-| **4. Receta Electrónica y Vademécum (CDS Hooks)** | 0 | 6 | `[░░░░░░░░░░] 0%` | Pendiente |
+| **1. Infraestructura y Seguridad (Zero Trust)** | 10 | 10 | `[██████████] 100%` | Completado |
+| **2. Registro Demográfico (FHIR Patient)** | 6 | 6 | `[██████████] 100%` | Completado |
+| **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 11 | 12 | `[█████████░] 92%` | En Progreso |
+| **4. Receta Electrónica y Vademécum (CDS Hooks)** | 4 | 6 | `[███████░░░] 67%` | En Progreso |
 | **5. Agenda, Citas y Admisión Hospitalaria** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **6. Integración LIS (Laboratorio) y PACS (Imágenes)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **7. Portal del Paciente y Telemedicina (WebRTC)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **8. IA Clínica y Scribe Ambiental (WhisperX/Berta)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
-| **PROGRESO GLOBAL DEL PROYECTO** | **20** | **54** | `[████░░░░░░] 37%` | **En Progreso** |
+| **PROGRESO GLOBAL DEL PROYECTO** | **36** | **59** | `[██████░░░░] 61%` | **En Progreso** |
 
 ---
 
@@ -54,6 +54,8 @@ Este es un **documento bidireccional y vivo**:
 - [x] **Tarea 1.6:** Implementación del Service Mesh (Linkerd o Istio) para cifrado automático TLS mutuo (mTLS) interno. *(Prioridad: Baja)*
 - [x] **Tarea 1.7:** Creación de políticas de respaldo automatizadas (estrategia 3-2-1) y failover de bases de datos. *(Prioridad: Media)*
 - [x] **Tarea 1.8:** Implementación de aislamiento lógico multi-inquilino (Multi-tenancy) a nivel de base de datos y backend REST API para profesionales independientes y clínicas. *(Prioridad: Alta)*
+- [x] **Tarea 1.9:** Implementación de la API de creación y listado de sub-usuarios en el backend conectada a Keycloak Admin API con atributos multi-inquilino. *(Prioridad: Alta)*
+- [x] **Tarea 1.10:** Interfaz de usuario en React para la Gestión de Personal (Secretarias/Enfermeros) y asignación automática al consultorio del doctor. *(Prioridad: Alta)*
 
 ---
 
@@ -63,34 +65,37 @@ Este es un **documento bidireccional y vivo**:
 - [x] **Tarea 2.1:** Creación de la API de creación/lectura compatible con el recurso `Patient` de HL7 FHIR R4. *(Prioridad: Alta)*
 - [x] **Tarea 2.2:** Formulario de registro en React para datos demográficos (Nombre, DNI/Pasaporte, Género autopercibido, Cobertura médica). *(Prioridad: Alta)*
 - [x] **Tarea 2.3:** Implementación del motor de búsqueda universal de pacientes con control de duplicados (Master Patient Index - MPI). *(Prioridad: Alta)*
-- [ ] **Tarea 2.4:** Historial de trazabilidad y auditoría de cambios en datos demográficos del paciente. *(Prioridad: Media)*
-- [ ] **Tarea 2.5:** Integración con padrón gubernamental de personas/coberturas (ej. SISA en Argentina). *(Prioridad: Media)*
+- [x] **Tarea 2.4:** Historial de trazabilidad y auditoría de cambios en datos demográficos del paciente. *(Prioridad: Media)*
+- [x] **Tarea 2.5:** Integración con padrón gubernamental de personas/coberturas (ej. SISA en Argentina). *(Adaptador mock listo, credenciales reales via .env SISA_USER/SISA_PASSWORD/SISA_MOCK=false)*
+- [x] **Tarea 2.6:** Pruebas de integración automatizadas para la admisión de pacientes, validación de esquemas FHIR Patient R4 y control de duplicados. *(Prioridad: Alta)*
 
 ---
 
 ### Módulo 3: Historia Clínica y Notas SOAP (FHIR Encounter)
 *El núcleo asistencial de documentación para el profesional de la salud.*
 
-- [ ] **Tarea 3.1:** Creación del recurso `Encounter` de FHIR para gestionar los episodios (ambulatorio, hospitalización, urgencias). *(Prioridad: Alta)*
-- [ ] **Tarea 3.2:** Desarrollo de la interfaz de carga de la nota SOAP (Subjetivo, Objetivo, Apreciación, Plan) adaptativa y accesible. *(Prioridad: Alta)*
-- [ ] **Tarea 3.3:** Motor de autocompletado e integración de diagnósticos codificados con CIE-10 / SNOMED CT. *(Prioridad: Alta)*
-- [ ] **Tarea 3.4:** Firma digital avanzada de notas clínicas para profesionales con validación de credenciales. *(Prioridad: Alta)*
-- [ ] **Tarea 3.5:** Diseño de gráficos evolutivos de constantes vitales del paciente (Tensión, FC, Temperatura) extraídos de `Observation` FHIR. *(Prioridad: Media)*
-- [ ] **Tarea 3.6:** Mapeo de antecedentes heredofamiliares y personales del paciente (`Condition` FHIR). *(Prioridad: Media)*
+- [x] **Tarea 3.1:** Creación del recurso `Encounter` de FHIR para gestionar los episodios (ambulatorio, hospitalización, urgencias). *(Prioridad: Alta)*
+- [x] **Tarea 3.2:** Desarrollo de la interfaz de carga de la nota SOAP (Subjetivo, Objetivo, Apreciación, Plan) adaptativa y accesible. *(Prioridad: Alta)*
+- [x] **Tarea 3.3:** Motor de autocompletado e integración de diagnósticos codificados con CIE-10 / SNOMED CT. *(Prioridad: Alta)*
+- [x] **Tarea 3.4:** Firma digital avanzada de notas clínicas para profesionales con validación de credenciales. *(Prioridad: Alta)*
+- [x] **Tarea 3.5:** Diseño de gráficos evolutivos de constantes vitales del paciente (Tensión, FC, Temperatura) extraídos de `Observation` FHIR. *(Prioridad: Media)*
+- [x] **Tarea 3.6:** Mapeo de antecedentes heredofamiliares y personales del paciente (`Condition` FHIR). *(Prioridad: Media)*
 - [x] **Tarea 3.7:** Desarrollo del módulo de Odontograma interactivo SVG (Adulto e Infantil) e historial de tratamiento clínico en español. *(Prioridad: Alta)*
 - [x] **Tarea 3.8:** Ampliación del modelo de datos clínicos para registrar alergias (AllergyIntolerance), mediciones/signos vitales (Observation) y archivos adjuntos (DocumentReference/Media). *(Prioridad: Alta)*
 - [x] **Tarea 3.9:** Implementación del controlador físico de archivos (Upload) con Multer — endpoint `POST /fhir/r4/Patient/:id/upload`, validación de tipos MIME (JPG/PNG/PDF/DOC) y límite de 20 MB. Persistencia como recursos FHIR `DocumentReference` o `Media`. *(Prioridad: Alta)*
 - [x] **Tarea 3.10:** Implementación de la UI de Ficha Clínica con navegación por pestañas: 🦷 Odontograma · ⚠️ Alergias (FHIR AllergyIntolerance) · 💓 Signos Vitales (FHIR Observation / LOINC) · 📋 Documentos con drag & drop, galería y previsualización. *(Prioridad: Alta)*
+- [x] **Tarea 3.11:** Pruebas de integración automatizadas para el registro de signos vitales (Observation), alergias (AllergyIntolerance), odontograma (Procedure) y validación de aislamiento multi-inquilino (Zero Trust). *(Prioridad: Alta)*
+- [ ] **Tarea 3.12:** Rediseño y actualización de la pantalla de inicio (HomeScreen / Dashboard principal) para incorporar widgets clínicos/administrativos dinámicos según el rol de Keycloak, y accesos directos a los módulos activos (Receta Electrónica, Agenda de citas). *(Prioridad: Alta)*
 
 ---
 
 ### Módulo 4: Receta Electrónica y Vademécum (e-Prescribing)
 *Prescripción y administración controlada de fármacos.*
 
-- [ ] **Tarea 4.1:** Creación del endpoint compatible con el recurso `MedicationRequest` de FHIR. *(Prioridad: Alta)*
-- [ ] **Tarea 4.2:** Integración de la base de datos de vademécum nacional/comercial (principios activos, dosis y presentaciones). *(Prioridad: Alta)*
-- [ ] **Tarea 4.3:** Implementación del motor de reglas **CDS Hooks** para alertar sobre interacciones fármaco-fármaco y fármaco-alergias del paciente. *(Prioridad: Alta)*
-- [ ] **Tarea 4.5:** Panel de firma digital y emisión de recetas en PDF con códigos QR de validación farmacéutica. *(Prioridad: Alta)*
+- [x] **Tarea 4.1:** Creación del endpoint compatible con el recurso `MedicationRequest` de FHIR. *(Prioridad: Alta)*
+- [x] **Tarea 4.2:** Integración de la base de datos de vademécum nacional/comercial (principios activos, dosis y presentaciones). *(Prioridad: Alta)*
+- [x] **Tarea 4.3:** Implementación del motor de reglas **CDS Hooks** para alertar sobre interacciones fármaco-fármaco y fármaco-alergias del paciente. *(Prioridad: Alta)*
+- [x] **Tarea 4.5:** Panel de firma digital y emisión de recetas en PDF con códigos QR de validación farmacéutica. *(Prioridad: Alta)*
 - [ ] **Tarea 4.6:** Implementación del Kardex de enfermería y registro de administración de medicamentos (eMAR / MAR). *(Prioridad: Media)*
 - [ ] **Tarea 4.7:** Conciliación de medicamentos en altas hospitalarias. *(Prioridad: Media)*
 

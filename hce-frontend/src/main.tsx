@@ -7,20 +7,15 @@ import keycloak from './utils/keycloak-config.ts';
 // Inicializar Keycloak antes de renderizar la aplicación React
 keycloak
   .init({
-    onLoad: 'login-required',
+    onLoad: 'check-sso',
     pkceMethod: 'S256',
   })
-  .then((authenticated) => {
-    if (authenticated) {
-      createRoot(document.getElementById('root')!).render(
-        <StrictMode>
-          <App />
-        </StrictMode>,
-      );
-    } else {
-      console.warn('Fallo en la autenticación con Keycloak.');
-      window.location.reload();
-    }
+  .then(() => {
+    createRoot(document.getElementById('root')!).render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    );
   })
   .catch((err) => {
     console.error('Error al inicializar Keycloak:', err);

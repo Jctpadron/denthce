@@ -1,0 +1,23 @@
+version: '3.8'
+
+# Archivo de despliegue para AWS Elastic Beanstalk (Plataforma Docker)
+# Esta configuración asume que se usa una base de datos externa Amazon RDS
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    command: start
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://${RDS_HOSTNAME}:${RDS_PORT}/${RDS_DB_NAME}
+      KC_DB_USERNAME: ${RDS_USERNAME}
+      KC_DB_PASSWORD: ${RDS_PASSWORD}
+      KC_HOSTNAME: ${KEYCLOAK_PUBLIC_DOMAIN}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: "true"
+      # Optimización de memoria para t3.small
+      JAVA_OPTS_APPEND: "-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"
+    ports:
+      - "80:8080"

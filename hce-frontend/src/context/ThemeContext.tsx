@@ -59,6 +59,7 @@ interface ThemeContextValue {
   loading: boolean;
   reload: () => Promise<void>;
   isAdmin: boolean;
+  canConfigure: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
@@ -66,6 +67,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   loading: true,
   reload: async () => {},
   isAdmin: false,
+  canConfigure: false,
 });
 
 export const useTheme = () => useContext(ThemeContext);
@@ -96,11 +98,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const roles: string[] = keycloak.tokenParsed?.realm_access?.roles || [];
   const isAdmin = roles.includes('administrador');
+  const isMedico = roles.includes('medico');
+  const canConfigure = isAdmin || isMedico;
 
   const reload = useCallback(async () => {
     if (!keycloak.token) return;
     try {
-      const res = await axios.get('http://localhost:3000/api/tenant/config', {
+      const res = await axios.get(import.meta.env.VITE_API_URL + '/api/tenant/config', {
         headers: { Authorization: `Bearer ${keycloak.token}` },
       });
       const data: TenantConfig = res.data;
@@ -119,7 +123,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [reload]);
 
   return (
-    <ThemeContext.Provider value={{ config, loading, reload, isAdmin }}>
+    <ThemeContext.Provider value={{ config, loading, reload, isAdmin, canConfigure }}>
       {children}
     </ThemeContext.Provider>
   );
