@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { MedicationRequestEntity } from './medication-request.entity';
 import { ClinicalResourceEntity } from '../patient/clinical-resource.entity';
+import { PatientEntity } from '../patient/patient.entity';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -13,6 +14,9 @@ export class MedicationRequestService {
 
     @InjectRepository(ClinicalResourceEntity)
     private readonly clinicalResourceRepository: Repository<ClinicalResourceEntity>,
+
+    @InjectRepository(PatientEntity)
+    private readonly patientRepository: Repository<PatientEntity>,
   ) {}
 
   // Diccionario del Vademécum Odontológico y Clínico Frecuente (50 fármacos)
@@ -203,6 +207,36 @@ export class MedicationRequestService {
       signedAt: m.signedAt,
       contentHash: m.contentHash,
       qrCodeData: m.qrCodeData
+    }));
+  }
+
+  /**
+   * Recetas pendientes de firma del consultorio (status='draft').
+   * Alimenta el widget del Dashboard "Recetas pendientes de firma" (Tarea 3.12).
+   * Aislamiento multi-inquilino: filtra siempre por tenantId.
+   */
+  async findPendingDrafts(tenantId: string): Promise<any[]> {
+    const drafts = await this.medicationRequestRepository.find({
+      where: { tenantId, status: 'draft' },
+      order: { createdAt: 'DESC' },
+    });
+
+    if (drafts.length === 0) return [];
+
+    // Enriquecer con el nombre del paciente (una sola consulta por lote)
+    const patientIds = [...new Set(drafts.map(d => d.patientId))];
+    const patients = await this.patientRepository.find({ where: { id: In(patientIds) } });
+    const nameById = new Map(
+      patients.map((p: PatientEntity) => [p.id, `${p.givenName} ${p.familyName}`.trim()]),
+    );
+
+    return drafts.map(d => ({
+      id: d.id,
+      patientId: d.patientId,
+      patientName: nameById.get(d.patientId) || 'Paciente',
+      medicationName: d.payload?.medicationCodeableConcept?.text || 'Medicamento',
+      authoredOn: d.payload?.authoredOn || d.createdAt,
+      status: d.status,
     }));
   }
 

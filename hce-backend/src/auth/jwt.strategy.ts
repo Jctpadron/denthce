@@ -9,14 +9,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      // audience: ['hce-app', 'account'], // Permite tokens emitidos para hce-app
-      issuer: 'http://localhost:8080/realms/hce-realm',
+      issuer: process.env.KEYCLOAK_ISSUER_URL || 'http://localhost:8080/realms/hce-realm',
       algorithms: ['RS256'],
       secretOrKeyProvider: passportJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: 'http://localhost:8080/realms/hce-realm/protocol/openid-connect/certs',
+        jwksUri: process.env.KEYCLOAK_JWKS_URI || 'http://localhost:8080/realms/hce-realm/protocol/openid-connect/certs',
       }),
     });
   }

@@ -20,13 +20,13 @@ Este es un **documento bidireccional y vivo**:
 | **0. Orquestación y Diseño de Agentes** | 5 | 5 | `[██████████] 100%` | Completado |
 | **1. Infraestructura y Seguridad (Zero Trust)** | 10 | 10 | `[██████████] 100%` | Completado |
 | **2. Registro Demográfico (FHIR Patient)** | 6 | 6 | `[██████████] 100%` | Completado |
-| **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 11 | 12 | `[█████████░] 92%` | En Progreso |
+| **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 12 | 12 | `[██████████] 100%` | Completado |
 | **4. Receta Electrónica y Vademécum (CDS Hooks)** | 4 | 6 | `[███████░░░] 67%` | En Progreso |
 | **5. Agenda, Citas y Admisión Hospitalaria** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **6. Integración LIS (Laboratorio) y PACS (Imágenes)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **7. Portal del Paciente y Telemedicina (WebRTC)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **8. IA Clínica y Scribe Ambiental (WhisperX/Berta)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
-| **PROGRESO GLOBAL DEL PROYECTO** | **36** | **59** | `[██████░░░░] 61%` | **En Progreso** |
+| **PROGRESO GLOBAL DEL PROYECTO** | **37** | **59** | `[██████░░░░] 63%` | **En Progreso** |
 
 ---
 
@@ -85,7 +85,7 @@ Este es un **documento bidireccional y vivo**:
 - [x] **Tarea 3.9:** Implementación del controlador físico de archivos (Upload) con Multer — endpoint `POST /fhir/r4/Patient/:id/upload`, validación de tipos MIME (JPG/PNG/PDF/DOC) y límite de 20 MB. Persistencia como recursos FHIR `DocumentReference` o `Media`. *(Prioridad: Alta)*
 - [x] **Tarea 3.10:** Implementación de la UI de Ficha Clínica con navegación por pestañas: 🦷 Odontograma · ⚠️ Alergias (FHIR AllergyIntolerance) · 💓 Signos Vitales (FHIR Observation / LOINC) · 📋 Documentos con drag & drop, galería y previsualización. *(Prioridad: Alta)*
 - [x] **Tarea 3.11:** Pruebas de integración automatizadas para el registro de signos vitales (Observation), alergias (AllergyIntolerance), odontograma (Procedure) y validación de aislamiento multi-inquilino (Zero Trust). *(Prioridad: Alta)*
-- [ ] **Tarea 3.12:** Rediseño y actualización de la pantalla de inicio (HomeScreen / Dashboard principal) para incorporar widgets clínicos/administrativos dinámicos según el rol de Keycloak, y accesos directos a los módulos activos (Receta Electrónica, Agenda de citas). *(Prioridad: Alta)*
+- [x] **Tarea 3.12:** Rediseño y actualización de la pantalla de inicio (HomeScreen / Dashboard principal) para incorporar widgets clínicos/administrativos dinámicos según el rol de Keycloak, y accesos directos a los módulos activos (Receta Electrónica, Agenda de citas). *(Prioridad: Alta)* *(Orquestado con product/ux/architect. Helper `useRoles` + catálogo declarativo `dashboard-modules`. Widget de recetas pendientes con endpoint agregado `GET /fhir/r4/MedicationRequest?status=draft`. Agenda queda como futuro: Módulo 5 al 0%.)*
 
 ---
 

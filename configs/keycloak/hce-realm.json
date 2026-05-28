@@ -91,7 +91,10 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["medico"]
+      "realmRoles": ["medico"],
+      "attributes": {
+        "tenant_id": ["mi_consultorio_dent_hce"]
+      }
     },
     {
       "username": "nurse_maria",
@@ -121,7 +124,10 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["administrador"]
+      "realmRoles": ["administrador"],
+      "attributes": {
+        "tenant_id": ["mi_consultorio_dent_hce"]
+      }
     }
   ]
 }

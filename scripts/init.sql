@@ -136,3 +136,62 @@ CREATE TABLE IF NOT EXISTS tenant_config (
 );
 
 \echo 'Tabla tenant_config creada con éxito.'
+
+-- 7. Tabla de Auditoría de Cambios de Paciente (patient_audit_log)
+CREATE TABLE IF NOT EXISTS patient_audit_log (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    patient_id VARCHAR(255) NOT NULL,
+    tenant_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255),
+    user_name VARCHAR(255),
+    action VARCHAR(50) NOT NULL,
+    changed_fields JSONB,
+    payload_snapshot JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_patient_audit_patient ON patient_audit_log (patient_id);
+CREATE INDEX IF NOT EXISTS idx_patient_audit_tenant ON patient_audit_log (tenant_id);
+
+\echo 'Tabla patient_audit_log creada con éxito.'
+
+-- 8. Tabla de Encuentros Médicos (fhir_encounters)
+CREATE TABLE IF NOT EXISTS fhir_encounters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    patient_id VARCHAR(255) NOT NULL,
+    tenant_id VARCHAR(255) NOT NULL,
+    status VARCHAR(100) NOT NULL DEFAULT 'in-progress',
+    class_code VARCHAR(50) NOT NULL DEFAULT 'AMB',
+    start_date TIMESTAMP WITH TIME ZONE,
+    end_date TIMESTAMP WITH TIME ZONE,
+    payload JSONB,
+    signed_by VARCHAR(255),
+    signed_at TIMESTAMP WITH TIME ZONE,
+    content_hash VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_encounters_patient_tenant ON fhir_encounters (tenant_id, patient_id);
+
+\echo 'Tabla fhir_encounters creada con éxito.'
+
+-- 9. Tabla de Recetas Médicas (fhir_medication_requests)
+CREATE TABLE IF NOT EXISTS fhir_medication_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    patient_id VARCHAR(255) NOT NULL,
+    tenant_id VARCHAR(255) NOT NULL,
+    status VARCHAR(100) NOT NULL DEFAULT 'draft',
+    payload JSONB NOT NULL,
+    signed_by VARCHAR(255),
+    signed_at TIMESTAMP WITH TIME ZONE,
+    content_hash VARCHAR(255),
+    qr_code_data VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_medication_requests_patient_tenant ON fhir_medication_requests (tenant_id, patient_id);
+
+\echo 'Tabla fhir_medication_requests creada con éxito.'
+

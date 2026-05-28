@@ -41,6 +41,29 @@ body {
   padding: 0;
 }
 
+/* Accesibilidad: foco visible para navegación por teclado (WCAG 2.1 AA).
+   Antes el hover se hacía solo por JS y no había indicador de foco. */
+:focus-visible {
+  outline: 2px solid var(--border-hover);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* No mostrar el outline cuando el foco viene del puntero (solo teclado). */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Respeta a usuarios sensibles al movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Estilos de Controles de Entrada (Inputs y Selects) */
 .search-input {
   width: 100%;

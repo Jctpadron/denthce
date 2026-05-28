@@ -578,7 +578,7 @@
     "modulo_nombre": "Historia Clínica y Notas SOAP (FHIR Encounter)",
     "descripcion": "Rediseño y actualización de la pantalla de inicio (HomeScreen / Dashboard principal) para incorporar widgets clínicos/administrativos dinámicos según el rol de Keycloak, y accesos directos a los módulos activos (Receta Electrónica, Agenda de citas).",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "ux",
       "product",
@@ -586,9 +586,36 @@
     ],
     "entregables": [
       "hce-frontend/src/components/HomeScreen.tsx",
-      "hce-frontend/src/App.tsx"
+      "hce-frontend/src/App.tsx",
+      "hce-frontend/src/utils/roles.ts",
+      "hce-frontend/src/hooks/useRoles.ts",
+      "hce-frontend/src/config/dashboard-modules.ts",
+      "hce-frontend/src/context/ThemeContext.tsx",
+      "hce-frontend/src/index.css",
+      "hce-backend/src/medication-request/medication-request-summary.controller.ts",
+      "hce-backend/src/medication-request/medication-request.service.ts",
+      "hce-backend/src/medication-request/medication-request.module.ts"
     ],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "fecha": "2026-05-28",
+        "orquestador": "Claude Code",
+        "agentes": [
+          "product",
+          "ux",
+          "architect"
+        ],
+        "accion": "Fase de Diseno (product/ux/architect en paralelo) + Codificacion + Quality Gates.",
+        "quality_gates": {
+          "build_backend": "OK (nest build)",
+          "build_frontend": "OK (tsc -b + vite build)",
+          "lint_codigo_nuevo": "OK (0 problemas en archivos tocados)",
+          "seguridad": "Endpoint con @Roles(medico) + aislamiento por tenantId. Ocultamiento en frontend es solo UX.",
+          "e2e_jest": "NO ejecutado (requiere DB/Keycloak vivos)."
+        },
+        "notas": "Widget Agenda queda futuro (Modulo 5 al 0%). Fuente unica de roles via useRoles; canConfigure removido de ThemeContext."
+      }
+    ]
   },
   {
     "id": "REQ-004-RX-4.1",

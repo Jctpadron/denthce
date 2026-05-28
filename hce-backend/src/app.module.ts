@@ -26,7 +26,7 @@ import { MedicationRequestEntity } from './medication-request/medication-request
       database: process.env.DB_NAME || 'hce_fhir',
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
       entities: [PatientEntity, PatientAuditEntity, ClinicalResourceEntity, TenantConfigEntity, EncounterEntity, MedicationRequestEntity],
-      synchronize: false,
+      synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: true,
     }),
     AuthModule,

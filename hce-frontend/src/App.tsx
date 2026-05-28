@@ -5,6 +5,8 @@ import { HomeScreen } from './components/HomeScreen';
 import { BrandingSettings } from './components/BrandingSettings';
 import { UserManagement } from './components/UserManagement';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { useRoles } from './hooks/useRoles';
+import { roleDisplayName } from './utils/roles';
 import keycloak from './utils/keycloak-config';
 import { LogOut, User, Shield } from 'lucide-react';
 import { LandingLogin } from './components/LandingLogin';
@@ -13,7 +15,8 @@ type AppView = 'home' | 'patients' | 'form' | 'settings' | 'users';
 
 function AppContent() {
   const [activeView, setActiveView] = useState<AppView>('home');
-  const { config, loading, canConfigure } = useTheme();
+  const { config, loading } = useTheme();
+  const { roles: clinicalRoles, canConfigure } = useRoles();
 
   if (!keycloak.authenticated) {
     return <LandingLogin />;
@@ -22,21 +25,7 @@ function AppContent() {
   const username = keycloak.tokenParsed?.preferred_username || 'Profesional Clínico';
   const fullName = `${keycloak.tokenParsed?.given_name || ''} ${keycloak.tokenParsed?.family_name || ''}`.trim() || username;
 
-  const roles: string[] = keycloak.tokenParsed?.realm_access?.roles || [];
-  const clinicalRoles = roles.filter(role =>
-    ['medico', 'enfermero', 'recepcionista', 'administrador', 'paciente'].includes(role)
-  );
-
-  const getRoleDisplayName = (role: string) => {
-    switch (role.toLowerCase()) {
-      case 'medico': return 'Médico';
-      case 'enfermero': return 'Enfermero/a';
-      case 'recepcionista': return 'Recepcionista';
-      case 'administrador': return 'Administrador';
-      case 'paciente': return 'Paciente';
-      default: return role;
-    }
-  };
+  const getRoleDisplayName = roleDisplayName;
 
   const NAV_ITEMS = [
     { key: 'home' as AppView, label: 'Inicio', icon: '🏠' },

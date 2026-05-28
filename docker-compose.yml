@@ -60,7 +60,10 @@ services:
       DB_PASSWORD: hce_secure_password_2026
       DB_NAME: hce_fhir
       PORT: 3000
-    command: npm run start:dev
+      KEYCLOAK_ISSUER_URL: http://localhost:8080/realms/hce-realm
+      KEYCLOAK_JWKS_URI: http://hce-keycloak:8080/realms/hce-realm/protocol/openid-connect/certs
+      DB_SYNCHRONIZE: "false"
+    command: sh -c "npm install && npm run start:dev"
     depends_on:
       - hce-db
     networks:
@@ -77,7 +80,7 @@ services:
       - /usr/src/app/node_modules
     ports:
       - "5173:5173"
-    command: npm run dev -- --host 0.0.0.0
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - hce-api
     networks:

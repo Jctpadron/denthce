@@ -6,7 +6,7 @@ version: '3.8'
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.4
-    command: start
+    command: start-dev
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://${RDS_HOSTNAME}:${RDS_PORT}/${RDS_DB_NAME}

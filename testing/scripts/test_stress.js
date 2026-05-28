@@ -186,13 +186,13 @@ async function runStressTest() {
     // ----------------------------------------------------
     // 2. POBLADO MASIVO Y MEDICIÓN DE RENDIMIENTO
     // ----------------------------------------------------
-    console.log('💾 2. Sembrando 50 pacientes (25 por Doctor/Inquilino) e Historias Clínicas...');
+    console.log('💾 2. Sembrando 200 pacientes (100 por Doctor/Inquilino) e Historias Clínicas...');
     let successCount = 0;
     let failedCount = 0;
 
     const tenants = [
-      { name: 'Dr. Julio (Inquilino A)', token: tokenA, patientsCount: 25 },
-      { name: 'Dr. Admin HCE (Inquilino B)', token: tokenB, patientsCount: 25 }
+      { name: 'Dr. Julio (Inquilino A)', token: tokenA, patientsCount: 100 },
+      { name: 'Dr. Admin HCE (Inquilino B)', token: tokenB, patientsCount: 100 }
     ];
 
     for (const tenant of tenants) {
@@ -288,9 +288,77 @@ async function runStressTest() {
           }, procedurePayload);
           requestDurations.push(Date.now() - tProc);
 
+          // E. Crear Encuentro SOAP (Encounter FHIR)
+          const encounterPayload = {
+            class: { code: 'AMB', display: 'Ambulatorio' },
+            reasonCode: [
+              {
+                coding: [{
+                  system: 'http://hl7.org/fhir/sid/icd-10',
+                  code: 'K02.1',
+                  display: 'Caries de la dentina'
+                }]
+              }
+            ],
+            note: [
+              { text: 'S: Paciente refiere sensibilidad dental al frío.' },
+              { text: 'O: Lesión cariosa oclusal en pieza 16.' },
+              { text: 'A: Caries activa de esmalte y dentina.' },
+              { text: 'P: Obturación estética con composite.' }
+            ]
+          };
+          const tEncounter = Date.now();
+          const encRes = await request(`${BACKEND_URL}/fhir/r4/Patient/${patientId}/encounter`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${tenant.token}` }
+          }, encounterPayload);
+          requestDurations.push(Date.now() - tEncounter);
+
+          if (encRes.statusCode === 201) {
+            const createdEncounter = JSON.parse(encRes.body);
+            const encounterId = createdEncounter.id;
+
+            // Firmar Encuentro
+            const tSignEnc = Date.now();
+            await request(`${BACKEND_URL}/fhir/r4/Patient/${patientId}/encounter/${encounterId}/sign`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${tenant.token}` }
+            }, {});
+            requestDurations.push(Date.now() - tSignEnc);
+          }
+
+          // F. Crear Receta Electrónica (MedicationRequest FHIR)
+          const rxPayload = {
+            medicationName: getRandomItem(['Ibuprofeno 600 mg', 'Amoxicilina 500 mg', 'Paracetamol 500 mg', 'Clonazepam 0.5 mg']),
+            medicationCode: 'RX-MED',
+            doseValue: '1',
+            frequencyHours: '8',
+            durationDays: '5',
+            dosageText: 'Tomar 1 comprimido cada 8 horas.'
+          };
+          const tRx = Date.now();
+          const rxRes = await request(`${BACKEND_URL}/fhir/r4/Patient/${patientId}/MedicationRequest`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${tenant.token}` }
+          }, rxPayload);
+          requestDurations.push(Date.now() - tRx);
+
+          if (rxRes.statusCode === 201) {
+            const createdRx = JSON.parse(rxRes.body);
+            const rxId = createdRx.id;
+
+            // Firmar Receta
+            const tSignRx = Date.now();
+            await request(`${BACKEND_URL}/fhir/r4/Patient/${patientId}/MedicationRequest/${rxId}/sign`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${tenant.token}` }
+            }, {});
+            requestDurations.push(Date.now() - tSignRx);
+          }
+
           successCount++;
-          if (successCount % 5 === 0) {
-            console.log(`   Processed ${successCount}/50 patients (DNI ${uniqueDni}: ${patientData.name[0].given[0]} ${patientData.name[0].family})`);
+          if (successCount % 10 === 0) {
+            console.log(`   Processed ${successCount}/200 patients (DNI ${uniqueDni}: ${patientData.name[0].given[0]} ${patientData.name[0].family})`);
           }
         } catch (err) {
           console.error(`   ❌ Fallo al procesar paciente número ${i}:`, err.message);
@@ -310,7 +378,7 @@ async function runStressTest() {
     const throughput = totalRequests / durationSec;
 
     console.log('\n📊 3. Métricas de Rendimiento del Sistema:');
-    console.log(`   - Pacientes sembrados con éxito: ${successCount}/50`);
+    console.log(`   - Pacientes sembrados con éxito: ${successCount}/200`);
     console.log(`   - Fallos de transacción: ${failedCount}`);
     console.log(`   - Peticiones REST enviadas totales: ${totalRequests}`);
     console.log(`   - Tiempo total de prueba de estrés: ${durationSec.toFixed(2)} segundos`);
