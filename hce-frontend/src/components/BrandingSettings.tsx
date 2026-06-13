@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import keycloak from '../utils/keycloak-config';
-import { useTheme, TenantConfig } from '../context/ThemeContext';
+import { useTheme, type TenantConfig } from '../context/ThemeContext';
 
 const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 const DIAS_LABELS: Record<string, string> = {
@@ -25,7 +25,8 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
   const [form, setForm] = useState<Partial<TenantConfig>>({ ...config });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [activeSection, setActiveSection] = useState<'identidad' | 'profesional' | 'contacto' | 'horarios' | 'firma'>('identidad');
+  const [activeSection, setActiveSection] = useState<'identidad' | 'profesional' | 'contacto' | 'horarios' | 'firma' | 'integracion'>('identidad');
+  const [showSecret, setShowSecret] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(config.logoUrl);
@@ -47,7 +48,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
   const handleSave = async () => {
     setSaving(true);
     try {
-      await axios.put('http://localhost:3000/api/tenant/config', form, {
+      await axios.put(import.meta.env.VITE_API_URL + '/api/tenant/config', form, {
         headers: { Authorization: `Bearer ${keycloak.token}` },
       });
       await reload();
@@ -65,7 +66,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const res = await axios.post('http://localhost:3000/api/tenant/logo', fd, {
+      const res = await axios.post(import.meta.env.VITE_API_URL + '/api/tenant/logo', fd, {
         headers: { Authorization: `Bearer ${keycloak.token}`, 'Content-Type': 'multipart/form-data' },
       });
       setLogoPreview(res.data.logoUrl);
@@ -83,7 +84,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const res = await axios.post('http://localhost:3000/api/tenant/signature', fd, {
+      const res = await axios.post(import.meta.env.VITE_API_URL + '/api/tenant/signature', fd, {
         headers: { Authorization: `Bearer ${keycloak.token}`, 'Content-Type': 'multipart/form-data' },
       });
       setSignaturePreview(res.data.signatureUrl);
@@ -102,6 +103,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
     { key: 'contacto', label: '📍 Contacto', icon: '📍' },
     { key: 'horarios', label: '🕐 Horarios', icon: '🕐' },
     { key: 'firma', label: '✍️ Firma Digital', icon: '✍️' },
+    { key: 'integracion', label: '🔌 Integraciones', icon: '🔌' },
   ] as const;
 
   const inputStyle: React.CSSProperties = {
@@ -131,9 +133,9 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.2s ease' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="module-header" style={{ alignItems: 'flex-start' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 700, color: 'var(--color-text)' }}>
+          <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 700, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>
             🎨 Personalización del Consultorio
           </h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
@@ -141,14 +143,26 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
           </p>
         </div>
         {onClose && (
-          <button onClick={onClose} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.4rem 0.9rem', cursor: 'pointer', color: 'var(--color-muted)', fontSize: '0.85rem' }}>
+          <button onClick={onClose} className="module-header-btn" style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 1.2rem', cursor: 'pointer', color: 'var(--color-muted)', fontSize: '0.85rem', transition: 'all 0.15s' }}>
             ← Volver
           </button>
         )}
       </div>
 
       {/* Tabs de Secciones */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid var(--border-color)', paddingBottom: '0' }}>
+      <div style={{
+        display: 'flex',
+        gap: '0.25rem',
+        borderBottom: '2px solid var(--border-color)',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        width: '100%',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}>
+        <style dangerouslySetInnerHTML={{__html: `
+          .branding-tabs-container::-webkit-scrollbar { display: none; }
+        `}} className="branding-tabs-container" />
         {SECTIONS.map(s => (
           <button
             key={s.key}
@@ -164,6 +178,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
               fontWeight: activeSection === s.key ? 700 : 500,
               transition: 'all 0.2s ease',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             {s.label}
@@ -172,7 +187,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
       </div>
 
       {/* Contenido de la Sección Activa */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem', alignItems: 'start' }}>
+      <div className="branding-settings-grid">
 
         {/* Panel Izquierdo: Formulario */}
         <div className="panel" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
@@ -225,7 +240,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
                 )}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem' }}>
+              <div className="grid-2col-responsive">
                 <div style={fieldStyle}>
                   <label style={labelStyle}>Nombre del Consultorio</label>
                   <input style={inputStyle} value={form.clinicName || ''} onChange={e => update('clinicName', e.target.value)} placeholder="Ej: Consultorio Odontológico Dr. García" />
@@ -239,7 +254,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
               {/* Color Primario */}
               <div style={fieldStyle}>
                 <label style={labelStyle}>Color Primario del Sistema</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '0.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(36px, 1fr))', gap: '0.5rem' }}>
                   {COLOR_PRESETS.map(c => (
                     <button
                       key={c.value}
@@ -283,7 +298,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)' }}>Datos del Profesional</h3>
               <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-muted)' }}>Estos datos aparecen en el encabezado de recetas e informes.</p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem' }}>
+              <div className="grid-profesional-responsive">
                 <div style={fieldStyle}>
                   <label style={labelStyle}>Título</label>
                   <select style={inputStyle} value={form.doctorTitle || 'Dr.'} onChange={e => update('doctorTitle', e.target.value)}>
@@ -306,7 +321,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
                 <input style={inputStyle} value={form.healthInsurance || ''} onChange={e => update('healthInsurance', e.target.value)} placeholder="Ej: OSDE, Swiss Medical, Particular..." />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid-form-2col">
                 <div style={fieldStyle}>
                   <label style={labelStyle}>CUIT</label>
                   <input style={inputStyle} value={form.cuit || ''} onChange={e => update('cuit', e.target.value)} placeholder="Ej: 20-12345678-9" />
@@ -329,7 +344,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
                 <input style={inputStyle} value={form.address || ''} onChange={e => update('address', e.target.value)} placeholder="Ej: Av. Corrientes 1234, Piso 3, Of. 301" />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid-3col-responsive">
                 <div style={fieldStyle}>
                   <label style={labelStyle}>Ciudad</label>
                   <input style={inputStyle} value={form.city || ''} onChange={e => update('city', e.target.value)} placeholder="Ej: Buenos Aires" />
@@ -431,6 +446,75 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
                   {uploadingSignature ? 'Subiendo...' : '↻ Cambiar firma'}
                 </button>
               )}
+            </div>
+          )}
+
+          {/* SECCIÓN: INTEGRACIONES */}
+          {activeSection === 'integracion' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)' }}>🔌 Integraciones Externas</h3>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-muted)' }}>
+                Configurá las credenciales y claves de seguridad para conectar la HCE con sistemas externos autorizados.
+              </p>
+              
+              <div style={{
+                background: 'rgba(2, 132, 199, 0.05)',
+                border: '1px solid rgba(2, 132, 199, 0.15)',
+                borderRadius: '8px',
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+              }}>
+                <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-cyan)' }}>💬 Integración CliniChat (WhatsApp)</h4>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-muted)', lineHeight: '1.25rem' }}>
+                  Habilita la sincronización automática de turnos en tiempo real. Cuando agendes o canceles citas en este panel, se notificará al bot de WhatsApp para que envíe los recordatorios.
+                </p>
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>CliniChat Webhook Secret</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type={showSecret ? 'text' : 'password'}
+                    style={inputStyle}
+                    value={form.hceWebhookSecret || ''}
+                    onChange={e => update('hceWebhookSecret', e.target.value)}
+                    placeholder="Pegá el secreto de webhook (se genera en CliniChat)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecret(!showSecret)}
+                    style={{
+                      padding: '0.6rem 0.85rem',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '8px',
+                      background: 'var(--bg-surface)',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      color: 'var(--color-text)',
+                      minWidth: '40px',
+                    }}
+                  >
+                    {showSecret ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                <p style={{ margin: '0.2rem 0 0', fontSize: '0.75rem', color: 'var(--color-muted)' }}>
+                  Clave simétrica para firmar y validar la procedencia de los eventos salientes.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: form.hceWebhookSecret ? '#10b981' : '#ef4444',
+                }} />
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)' }}>
+                  Estado de la Integración: {form.hceWebhookSecret ? 'Conectado / Firma Activa' : 'Desconectado'}
+                </span>
+              </div>
             </div>
           )}
         </div>

@@ -18,15 +18,16 @@ Este es un **documento bidireccional y vivo**:
 | Módulo / Componente | Tareas Completadas | Tareas Totales | Progreso | Estado |
 | :--- | :---: | :---: | :---: | :--- |
 | **0. Orquestación y Diseño de Agentes** | 5 | 5 | `[██████████] 100%` | Completado |
-| **1. Infraestructura y Seguridad (Zero Trust)** | 8 | 8 | `[██████████] 100%` | Completado |
-| **2. Registro Demográfico (FHIR Patient)** | 3 | 5 | `[██████░░░░] 60%` | En Progreso |
-| **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 4 | 10 | `[████░░░░░░] 40%` | En Progreso |
-| **4. Receta Electrónica y Vademécum (CDS Hooks)** | 0 | 6 | `[░░░░░░░░░░] 0%` | Pendiente |
-| **5. Agenda, Citas y Admisión Hospitalaria** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
+| **1. Infraestructura y Seguridad (Zero Trust)** | 10 | 10 | `[██████████] 100%` | Completado |
+| **2. Registro Demográfico (FHIR Patient)** | 6 | 6 | `[██████████] 100%` | Completado |
+| **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 12 | 12 | `[██████████] 100%` | Completado |
+| **4. Receta Electrónica y Vademécum (CDS Hooks)** | 4 | 6 | `[███████░░░] 67%` | En Progreso |
+| **5. Agenda, Citas y Admisión Hospitalaria** | 5 | 5 | `[██████████] 100%` | Completado (versión consultorio) |
 | **6. Integración LIS (Laboratorio) y PACS (Imágenes)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **7. Portal del Paciente y Telemedicina (WebRTC)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **8. IA Clínica y Scribe Ambiental (WhisperX/Berta)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
-| **PROGRESO GLOBAL DEL PROYECTO** | **20** | **54** | `[████░░░░░░] 37%` | **En Progreso** |
+| **9. HC Odontológica PAMI (módulo aislado)** | 11 | 11 | `[██████████] 100%` | Completado |
+| **PROGRESO GLOBAL DEL PROYECTO** | **53** | **70** | `[████████░░] 76%` | **En Progreso** |
 
 ---
 
@@ -54,6 +55,8 @@ Este es un **documento bidireccional y vivo**:
 - [x] **Tarea 1.6:** Implementación del Service Mesh (Linkerd o Istio) para cifrado automático TLS mutuo (mTLS) interno. *(Prioridad: Baja)*
 - [x] **Tarea 1.7:** Creación de políticas de respaldo automatizadas (estrategia 3-2-1) y failover de bases de datos. *(Prioridad: Media)*
 - [x] **Tarea 1.8:** Implementación de aislamiento lógico multi-inquilino (Multi-tenancy) a nivel de base de datos y backend REST API para profesionales independientes y clínicas. *(Prioridad: Alta)*
+- [x] **Tarea 1.9:** Implementación de la API de creación y listado de sub-usuarios en el backend conectada a Keycloak Admin API con atributos multi-inquilino. *(Prioridad: Alta)*
+- [x] **Tarea 1.10:** Interfaz de usuario en React para la Gestión de Personal (Secretarias/Enfermeros) y asignación automática al consultorio del doctor. *(Prioridad: Alta)*
 
 ---
 
@@ -63,34 +66,37 @@ Este es un **documento bidireccional y vivo**:
 - [x] **Tarea 2.1:** Creación de la API de creación/lectura compatible con el recurso `Patient` de HL7 FHIR R4. *(Prioridad: Alta)*
 - [x] **Tarea 2.2:** Formulario de registro en React para datos demográficos (Nombre, DNI/Pasaporte, Género autopercibido, Cobertura médica). *(Prioridad: Alta)*
 - [x] **Tarea 2.3:** Implementación del motor de búsqueda universal de pacientes con control de duplicados (Master Patient Index - MPI). *(Prioridad: Alta)*
-- [ ] **Tarea 2.4:** Historial de trazabilidad y auditoría de cambios en datos demográficos del paciente. *(Prioridad: Media)*
-- [ ] **Tarea 2.5:** Integración con padrón gubernamental de personas/coberturas (ej. SISA en Argentina). *(Prioridad: Media)*
+- [x] **Tarea 2.4:** Historial de trazabilidad y auditoría de cambios en datos demográficos del paciente. *(Prioridad: Media)*
+- [x] **Tarea 2.5:** Integración con padrón gubernamental de personas/coberturas (ej. SISA en Argentina). *(Adaptador mock listo, credenciales reales via .env SISA_USER/SISA_PASSWORD/SISA_MOCK=false)*
+- [x] **Tarea 2.6:** Pruebas de integración automatizadas para la admisión de pacientes, validación de esquemas FHIR Patient R4 y control de duplicados. *(Prioridad: Alta)*
 
 ---
 
 ### Módulo 3: Historia Clínica y Notas SOAP (FHIR Encounter)
 *El núcleo asistencial de documentación para el profesional de la salud.*
 
-- [ ] **Tarea 3.1:** Creación del recurso `Encounter` de FHIR para gestionar los episodios (ambulatorio, hospitalización, urgencias). *(Prioridad: Alta)*
-- [ ] **Tarea 3.2:** Desarrollo de la interfaz de carga de la nota SOAP (Subjetivo, Objetivo, Apreciación, Plan) adaptativa y accesible. *(Prioridad: Alta)*
-- [ ] **Tarea 3.3:** Motor de autocompletado e integración de diagnósticos codificados con CIE-10 / SNOMED CT. *(Prioridad: Alta)*
-- [ ] **Tarea 3.4:** Firma digital avanzada de notas clínicas para profesionales con validación de credenciales. *(Prioridad: Alta)*
-- [ ] **Tarea 3.5:** Diseño de gráficos evolutivos de constantes vitales del paciente (Tensión, FC, Temperatura) extraídos de `Observation` FHIR. *(Prioridad: Media)*
-- [ ] **Tarea 3.6:** Mapeo de antecedentes heredofamiliares y personales del paciente (`Condition` FHIR). *(Prioridad: Media)*
+- [x] **Tarea 3.1:** Creación del recurso `Encounter` de FHIR para gestionar los episodios (ambulatorio, hospitalización, urgencias). *(Prioridad: Alta)*
+- [x] **Tarea 3.2:** Desarrollo de la interfaz de carga de la nota SOAP (Subjetivo, Objetivo, Apreciación, Plan) adaptativa y accesible. *(Prioridad: Alta)*
+- [x] **Tarea 3.3:** Motor de autocompletado e integración de diagnósticos codificados con CIE-10 / SNOMED CT. *(Prioridad: Alta)*
+- [x] **Tarea 3.4:** Firma digital avanzada de notas clínicas para profesionales con validación de credenciales. *(Prioridad: Alta)*
+- [x] **Tarea 3.5:** Diseño de gráficos evolutivos de constantes vitales del paciente (Tensión, FC, Temperatura) extraídos de `Observation` FHIR. *(Prioridad: Media)*
+- [x] **Tarea 3.6:** Mapeo de antecedentes heredofamiliares y personales del paciente (`Condition` FHIR). *(Prioridad: Media)*
 - [x] **Tarea 3.7:** Desarrollo del módulo de Odontograma interactivo SVG (Adulto e Infantil) e historial de tratamiento clínico en español. *(Prioridad: Alta)*
 - [x] **Tarea 3.8:** Ampliación del modelo de datos clínicos para registrar alergias (AllergyIntolerance), mediciones/signos vitales (Observation) y archivos adjuntos (DocumentReference/Media). *(Prioridad: Alta)*
 - [x] **Tarea 3.9:** Implementación del controlador físico de archivos (Upload) con Multer — endpoint `POST /fhir/r4/Patient/:id/upload`, validación de tipos MIME (JPG/PNG/PDF/DOC) y límite de 20 MB. Persistencia como recursos FHIR `DocumentReference` o `Media`. *(Prioridad: Alta)*
 - [x] **Tarea 3.10:** Implementación de la UI de Ficha Clínica con navegación por pestañas: 🦷 Odontograma · ⚠️ Alergias (FHIR AllergyIntolerance) · 💓 Signos Vitales (FHIR Observation / LOINC) · 📋 Documentos con drag & drop, galería y previsualización. *(Prioridad: Alta)*
+- [x] **Tarea 3.11:** Pruebas de integración automatizadas para el registro de signos vitales (Observation), alergias (AllergyIntolerance), odontograma (Procedure) y validación de aislamiento multi-inquilino (Zero Trust). *(Prioridad: Alta)*
+- [x] **Tarea 3.12:** Rediseño y actualización de la pantalla de inicio (HomeScreen / Dashboard principal) para incorporar widgets clínicos/administrativos dinámicos según el rol de Keycloak, y accesos directos a los módulos activos (Receta Electrónica, Agenda de citas). *(Prioridad: Alta)* *(Orquestado con product/ux/architect. Helper `useRoles` + catálogo declarativo `dashboard-modules`. Widget de recetas pendientes con endpoint agregado `GET /fhir/r4/MedicationRequest?status=draft`. Agenda queda como futuro: Módulo 5 al 0%.)*
 
 ---
 
 ### Módulo 4: Receta Electrónica y Vademécum (e-Prescribing)
 *Prescripción y administración controlada de fármacos.*
 
-- [ ] **Tarea 4.1:** Creación del endpoint compatible con el recurso `MedicationRequest` de FHIR. *(Prioridad: Alta)*
-- [ ] **Tarea 4.2:** Integración de la base de datos de vademécum nacional/comercial (principios activos, dosis y presentaciones). *(Prioridad: Alta)*
-- [ ] **Tarea 4.3:** Implementación del motor de reglas **CDS Hooks** para alertar sobre interacciones fármaco-fármaco y fármaco-alergias del paciente. *(Prioridad: Alta)*
-- [ ] **Tarea 4.5:** Panel de firma digital y emisión de recetas en PDF con códigos QR de validación farmacéutica. *(Prioridad: Alta)*
+- [x] **Tarea 4.1:** Creación del endpoint compatible con el recurso `MedicationRequest` de FHIR. *(Prioridad: Alta)*
+- [x] **Tarea 4.2:** Integración de la base de datos de vademécum nacional/comercial (principios activos, dosis y presentaciones). *(Prioridad: Alta)*
+- [x] **Tarea 4.3:** Implementación del motor de reglas **CDS Hooks** para alertar sobre interacciones fármaco-fármaco y fármaco-alergias del paciente. *(Prioridad: Alta)*
+- [x] **Tarea 4.5:** Panel de firma digital y emisión de recetas en PDF con códigos QR de validación farmacéutica. *(Prioridad: Alta)*
 - [ ] **Tarea 4.6:** Implementación del Kardex de enfermería y registro de administración de medicamentos (eMAR / MAR). *(Prioridad: Media)*
 - [ ] **Tarea 4.7:** Conciliación de medicamentos en altas hospitalarias. *(Prioridad: Media)*
 
@@ -99,11 +105,11 @@ Este es un **documento bidireccional y vivo**:
 ### Módulo 5: Agenda, Citas y Admisión Hospitalaria
 *Control operativo de la ocupación, disponibilidad de profesionales y flujos de atención.*
 
-- [ ] **Tarea 5.1:** Endpoint compatible con el recurso `Appointment` de FHIR para reserva y cancelación de turnos. *(Prioridad: Alta)*
-- [ ] **Tarea 5.2:** Calendario visual interactivo para administración médica por profesional y consultorio. *(Prioridad: Alta)*
-- [ ] **Tarea 5.3:** Automatización de recordatorios de citas vía SMS, Email o WhatsApp API. *(Prioridad: Media)*
-- [ ] **Tarea 5.4:** Módulo de Triaje Manchester/ESI para priorización de urgencias en guardia. *(Prioridad: Alta)*
-- [ ] **Tarea 5.5:** Módulo de Internación: Bed Management (gestión de camas, estados de limpieza y ocupación) e indicaciones de enfermería. *(Prioridad: Media)*
+- [x] **Tarea 5.1:** Endpoint compatible con el recurso `Appointment` de FHIR para reserva y cancelación de turnos. *(Prioridad: Alta)* *(Backend: `appointment/` con idempotencia, anti-double-booking, auditoría y webhooks CliniChat. + `PATCH /:id/status` para transiciones llegada/atendido/ausente.)*
+- [x] **Tarea 5.2:** Calendario visual interactivo para administración médica por profesional y consultorio. *(Prioridad: Alta)* *(Frontend `components/agenda/`: vista Día/Semana desde scheduleJson, alta/cancelación/cambio de estado. Walkthrough `2026-06-13_modulo5_agenda_visual.md`.)*
+- [x] **Tarea 5.3:** Automatización de recordatorios de citas vía SMS, Email o WhatsApp API. *(Prioridad: Media)* *(Recordatorios automáticos los emite CliniChat (canal WhatsApp); la HCE dispara recordatorios manuales puntuales vía `POST /:id/reminder` → webhook `reminder` firmado HMAC.)*
+- [x] **Tarea 5.4:** Módulo de Triaje Manchester/ESI para priorización de urgencias en guardia. *(Prioridad: Alta)* *(VERSIÓN CONSULTORIO: priorización de sala de espera ESI simplificado 1-5 sobre el turno (`WaitingRoom`). El algoritmo hospitalario de guardia completo queda fuera del alcance del producto consultorio.)*
+- [x] **Tarea 5.5:** Módulo de Internación: Bed Management (gestión de camas, estados de limpieza y ocupación) e indicaciones de enfermería. *(Prioridad: Media)* *(VERSIÓN CONSULTORIO: widget Estado del box/sillón derivado del turno en atención (mono-profesional = 1 box). El bed management hospitalario completo queda fuera del alcance del producto consultorio.)*
 
 ---
 
@@ -137,6 +143,23 @@ Este es un **documento bidireccional y vivo**:
 - [ ] **Tarea 8.3:** Motor de extracción de entidades clínicas mediante procesamiento del lenguaje natural (NLP) para poblar campos FHIR automáticamente. *(Prioridad: Media)*
 - [ ] **Tarea 8.4:** Resumen clínico instantáneo del paciente al abrir su ficha (medicación activa, alergias, últimas consultas). *(Prioridad: Alta)*
 - [ ] **Tarea 8.5:** Framework de análisis de cohortes y estadísticas epidemiológicas hospitalarias (LATCH). *(Prioridad: Baja)*
+
+---
+
+### Módulo 9: Historia Clínica Odontológica PAMI (módulo AISLADO)
+*HC odontológica completa modelo PAMI / Círculo Odontológico de Jujuy, como servicio separado de la ficha original (tabla y endpoints propios). Detalle en `docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md`.*
+
+- [x] **Tarea 9.1:** Módulo backend aislado `odontology/` con tabla propia `odontology_clinical_resources` y endpoints `/odontology`, filtrado por tenantId. *(Prioridad: Alta)*
+- [x] **Tarea 9.2:** Pantalla `OdontologyHC` (búsqueda con padrón compartido) colgada del dashboard como servicio `odonto-hc`. *(Prioridad: Alta)*
+- [x] **Tarea 9.3:** Odontograma de doble capa (existente rojo / a realizar azul) con catálogo de simbología centralizado (13 estados), glifos por tipo, barra agrupada, toast flotante y leyenda. *(Prioridad: Alta)*
+- [x] **Tarea 9.4:** Anamnesis odontológica PAMI (cuestionario + higiene) con firma del paciente (QuestionnaireResponse). *(Prioridad: Alta)*
+- [x] **Tarea 9.5:** Estado bucal general + diagnóstico presuntivo + plan + observaciones (Observation). *(Prioridad: Media)*
+- [x] **Tarea 9.6:** Datos de afiliado / obra social (Coverage). *(Prioridad: Media)*
+- [x] **Tarea 9.7:** Consentimiento informado con doble firma y matrícula (Consent). *(Prioridad: Alta)*
+- [x] **Tarea 9.8:** Anexo de evolución (fecha / tratamiento / conformidad del afiliado). *(Prioridad: Media)*
+- [x] **Tarea 9.9:** Exportación de la HC en PDF formato oficial PAMI (3 hojas). *(Prioridad: Alta)*
+- [x] **Tarea 9.10a:** Quality Gates (security/qa): Diseño de tests unitarios/integración de controlador/servicio, validación de aislamiento tenant y firma de auditoría de seguridad. *(Prioridad: Alta)*
+- [x] **Tarea 9.10b:** Despliegue a AWS: Creación de la tabla `odontology_clinical_resources` en RDS, recompilación y publicación del backend. *(Prioridad: Alta)*
 
 ---
 

@@ -3,7 +3,7 @@
   "realm": "hce-realm",
   "enabled": true,
   "displayName": "Historia Clínica Electrónica - Identidad y Seguridad",
-  "sslRequired": "external",
+  "sslRequired": "none",
   "registrationAllowed": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
@@ -47,7 +47,23 @@
       "redirectUris": ["*"],
       "attributes": {
         "pkce.code.challenge.method.supported": "S256"
-      }
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
     },
     {
       "clientId": "hce-backend",
@@ -75,7 +91,10 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["medico"]
+      "realmRoles": ["medico"],
+      "attributes": {
+        "tenant_id": ["mi_consultorio_dent_hce"]
+      }
     },
     {
       "username": "nurse_maria",
@@ -105,7 +124,10 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["administrador"]
+      "realmRoles": ["administrador"],
+      "attributes": {
+        "tenant_id": ["mi_consultorio_dent_hce"]
+      }
     }
   ]
 }

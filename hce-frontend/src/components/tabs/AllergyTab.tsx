@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import keycloak from '../../utils/keycloak-config';
+import { AlertCircle } from 'lucide-react';
 
 interface AllergyTabProps {
   patientId: string;
@@ -45,7 +46,7 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
     setLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:3000/fhir/r4/Patient/${patientId}/clinical-resource`,
+        `${import.meta.env.VITE_API_URL}/fhir/r4/Patient/${patientId}/clinical-resource`,
         { headers: { Authorization: `Bearer ${keycloak.token}` } }
       );
       const all: Allergy[] = res.data.filter(
@@ -90,7 +91,7 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
         },
       };
       await axios.post(
-        `http://localhost:3000/fhir/r4/Patient/${patientId}/clinical-resource`,
+        `${import.meta.env.VITE_API_URL}/fhir/r4/Patient/${patientId}/clinical-resource`,
         payload,
         { headers: { Authorization: `Bearer ${keycloak.token}` } }
       );
@@ -145,7 +146,7 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
           gap: '0.85rem',
           animation: 'fadeIn 0.2s ease',
         }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div className="grid-form-2col" style={{ gap: '0.75rem' }}>
             <div>
               <label style={{ fontSize: '0.75rem', color: 'var(--color-muted)', fontWeight: 600 }}>
                 Alérgeno *
@@ -171,7 +172,7 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
               />
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem' }}>
+          <div className="grid-form-2col" style={{ gap: '0.75rem' }}>
             <div>
               <label style={{ fontSize: '0.75rem', color: 'var(--color-muted)', fontWeight: 600 }}>
                 Criticidad
@@ -239,7 +240,7 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
           ✅ Sin alergias registradas
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {allergies.map((a, idx) => {
             const criticality = a.criticality || 'unable-to-assess';
             const color = SEVERITY_COLORS[criticality] || '#94a3b8';
@@ -250,48 +251,54 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
             const notes = a.note?.[0]?.text;
 
             return (
-              <div key={a.id || idx} style={{
-                background: 'var(--bg-surface)',
-                border: `1px solid var(--border-color)`,
-                borderLeft: `4px solid ${color}`,
-                borderRadius: '10px',
-                padding: '0.9rem 1.1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
-              }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-text)' }}>
-                    {allergenName}
-                  </span>
-                  {reaction && (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-                      Reacción: {reaction}
+              <div 
+                key={a.id || idx} 
+                className="card-premium-health"
+                style={{ borderLeft: `4px solid ${color}` }}
+              >
+                <div className="card-premium-left">
+                  <div className="card-premium-title-container">
+                    <span className="card-premium-icon-sutil">
+                      <AlertCircle style={{ width: '1.1rem', height: '1.1rem', color }} />
                     </span>
-                  )}
-                  {notes && (
-                    <span style={{ fontSize: '0.78rem', color: 'var(--color-muted)', fontStyle: 'italic' }}>
-                      Nota: {notes}
+                    <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--color-text)' }}>
+                      {allergenName}
                     </span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
-                  <span style={{
-                    background: `${color}22`,
-                    color,
-                    border: `1px solid ${color}44`,
-                    borderRadius: '20px',
-                    padding: '0.15rem 0.65rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                  }}>
-                    {label}
-                  </span>
-                  {date && (
-                    <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>
-                      {date}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{
+                      background: `${color}15`,
+                      color,
+                      border: `1px solid ${color}30`,
+                      borderRadius: '20px',
+                      padding: '0.15rem 0.6rem',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                    }}>
+                      Criticidad: {label}
                     </span>
+                    {date && (
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>
+                        · Registrado: {date}
+                      </span>
+                    )}
+                  </div>
+
+                  {(reaction || notes) && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.15rem' }}>
+                      {reaction && (
+                        <span style={{ fontSize: '0.82rem', color: 'var(--color-muted)' }}>
+                          <strong>Reacción:</strong> {reaction}
+                        </span>
+                      )}
+                      {notes && (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--color-muted)', fontStyle: 'italic' }}>
+                          <strong>Nota:</strong> {notes}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

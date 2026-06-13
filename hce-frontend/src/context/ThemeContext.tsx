@@ -22,6 +22,7 @@ export interface TenantConfig {
   healthInsurance: string;
   scheduleJson: Record<string, string>;
   signatureUrl: string | null;
+  hceWebhookSecret: string | null;
 }
 
 const DEFAULT_CONFIG: TenantConfig = {
@@ -52,20 +53,19 @@ const DEFAULT_CONFIG: TenantConfig = {
     domingo: '',
   },
   signatureUrl: null,
+  hceWebhookSecret: null,
 };
 
 interface ThemeContextValue {
   config: TenantConfig;
   loading: boolean;
   reload: () => Promise<void>;
-  isAdmin: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   config: DEFAULT_CONFIG,
   loading: true,
   reload: async () => {},
-  isAdmin: false,
 });
 
 export const useTheme = () => useContext(ThemeContext);
@@ -94,13 +94,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [config, setConfig] = useState<TenantConfig>(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
 
-  const roles: string[] = keycloak.tokenParsed?.realm_access?.roles || [];
-  const isAdmin = roles.includes('administrador');
-
   const reload = useCallback(async () => {
     if (!keycloak.token) return;
     try {
-      const res = await axios.get('http://localhost:3000/api/tenant/config', {
+      const res = await axios.get(import.meta.env.VITE_API_URL + '/api/tenant/config', {
         headers: { Authorization: `Bearer ${keycloak.token}` },
       });
       const data: TenantConfig = res.data;
@@ -119,7 +116,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [reload]);
 
   return (
-    <ThemeContext.Provider value={{ config, loading, reload, isAdmin }}>
+    <ThemeContext.Provider value={{ config, loading, reload }}>
       {children}
     </ThemeContext.Provider>
   );

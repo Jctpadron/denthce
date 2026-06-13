@@ -40,10 +40,10 @@ export class TenantConfigController {
 
   /**
    * PUT /api/tenant/config
-   * Solo administrador puede guardar cambios de personalización
+   * Solo administrador y medico pueden guardar cambios de personalización
    */
   @Put('config')
-  @Roles('administrador')
+  @Roles('administrador', 'medico')
   async updateConfig(@Body() body: any, @Request() req: any) {
     // Sanitizar campos permitidos (evitar inyección de campos no permitidos)
     const allowed = [
@@ -51,7 +51,7 @@ export class TenantConfigController {
       'doctorName', 'doctorLicense', 'doctorTitle',
       'address', 'city', 'province', 'postalCode',
       'phone', 'email', 'cuit', 'healthInsurance',
-      'scheduleJson',
+      'scheduleJson', 'hceWebhookSecret',
     ];
     const dto: Record<string, any> = {};
     allowed.forEach(key => {
@@ -64,10 +64,10 @@ export class TenantConfigController {
   /**
    * POST /api/tenant/logo
    * Upload de logo del consultorio (PNG/SVG/JPG, max 1MB)
-   * Solo administrador
+   * Solo administrador y medico
    */
   @Post('logo')
-  @Roles('administrador')
+  @Roles('administrador', 'medico')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -104,10 +104,10 @@ export class TenantConfigController {
   /**
    * POST /api/tenant/signature
    * Upload de imagen de firma digital del doctor (PNG, max 500KB)
-   * Solo administrador
+   * Solo administrador y medico
    */
   @Post('signature')
-  @Roles('administrador')
+  @Roles('administrador', 'medico')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

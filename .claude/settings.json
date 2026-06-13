@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/.claude/skills/design-system/**)",
+      "Bash(docker exec *)",
+      "Bash(node testing/scripts/test_odontology.js)",
+      "Bash(echo \"EXIT=$?\")",
+      "Read(//tmp/**)",
+      "Bash(sed 's/8000/30000/g; s/TIMEOUT /TIMEOUT30 /g' /tmp/odo_post.js)",
+      "Bash(node /tmp/odo_post30.js)",
+      "PowerShell(docker exec hce-frontend-client node /usr/src/app/tmp_axios_test.cjs 2>&1)",
+      "PowerShell($t = node testing/scripts/get_token.js; if \\($t.StartsWith\\('ERR'\\)\\) { Write-Output $t } else { Write-Output \"token len: $\\($t.Length\\)\"; docker exec -e TOKEN=$t hce-frontend-client node /usr/src/app/tmp_axios_test.cjs 2>&1 })",
+      "PowerShell($t = node testing/scripts/get_token.js; docker exec -e TOKEN=$t hce-frontend-client node /usr/src/app/tmp_anamnesis_test.cjs 2>&1)",
+      "PowerShell(Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas'; $t = node testing/scripts/get_token.js; docker exec -e TOKEN=$t hce-frontend-client node /usr/src/app/tmp_anamnesis_test.cjs 2>&1)",
+      "PowerShell(Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas\\\\hce-frontend'; npm run build 2>&1 | Select-Object -Last 4; Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas'; $t = node testing/scripts/get_token.js; docker exec -e TOKEN=$t hce-frontend-client node /usr/src/app/tmp_oral_test.cjs 2>&1)",
+      "PowerShell(Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas\\\\hce-frontend'; npm run build 2>&1 | Select-Object -Last 4; Write-Output \"--- reinicio backend ---\"; docker restart hce-backend-api 2>&1 | Out-Null; Start-Sleep -Seconds 18; Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas'; $t = node testing/scripts/get_token.js; docker exec -e TOKEN=$t hce-frontend-client node /usr/src/app/tmp_cov_consent_test.cjs 2>&1)",
+      "PowerShell(Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas\\\\hce-frontend'; npm run build 2>&1 | Select-Object -Last 3; Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas'; $t = node testing/scripts/get_token.js; docker exec -e TOKEN=$t hce-frontend-client node /usr/src/app/tmp_evol_test.cjs 2>&1)",
+      "PowerShell(docker restart hce-frontend-client 2>&1)",
+      "PowerShell(Set-Location 'D:\\\\APP-jct\\\\app-historias-clinicas'; $t = node testing/scripts/get_token.js; docker exec -e TOKEN=$t hce-frontend-client node /usr/src/app/tmp_catalog_test.cjs 2>&1; Remove-Item 'hce-frontend\\\\tmp_catalog_test.cjs' -Force; docker restart hce-frontend-client 2>&1 | Out-Null; Write-Output \"frontend reiniciado\")"
+    ]
+  }
+}

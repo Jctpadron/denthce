@@ -1,0 +1,133 @@
+{
+  "id": "hce-realm",
+  "realm": "hce-realm",
+  "enabled": true,
+  "displayName": "Historia Clínica Electrónica - Identidad y Seguridad",
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  
+  "roles": {
+    "realm": [
+      {
+        "name": "medico",
+        "description": "Profesional de medicina. Acceso a diagnósticos, evolución SOAP y e-prescribing."
+      },
+      {
+        "name": "enfermero",
+        "description": "Personal de enfermería. Acceso a constantes vitales, administración de medicamentos (Kardex)."
+      },
+      {
+        "name": "recepcionista",
+        "description": "Personal administrativo. Acceso a datos demográficos de pacientes y agendas de citas."
+      },
+      {
+        "name": "administrador",
+        "description": "Administrador clínico del sistema. Gestión de usuarios y configuraciones del establecimiento."
+      },
+      {
+        "name": "paciente",
+        "description": "Paciente del centro de salud. Acceso a su propio portal médico."
+      }
+    ]
+  },
+  
+  "clients": [
+    {
+      "clientId": "hce-app",
+      "name": "HCE Portal Cliente",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "webOrigins": ["https://app.systia.ar", "http://localhost:5173"],
+      "redirectUris": ["https://app.systia.ar/*", "http://localhost:5173/*"],
+      "attributes": {
+        "pkce.code.challenge.method.supported": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "hce-backend",
+      "name": "HCE Servicios Backend",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "hce_backend_super_secret_key_2026",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  
+  "users": [
+    {
+      "username": "doctor_julio",
+      "enabled": true,
+      "email": "julio.doctor@hce-hospital.com",
+      "firstName": "Julio",
+      "lastName": "Mendoza",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "doctor_pass_2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["medico"],
+      "attributes": {
+        "tenant_id": ["mi_consultorio_dent_hce"]
+      }
+    },
+    {
+      "username": "nurse_maria",
+      "enabled": true,
+      "email": "maria.enfermera@hce-hospital.com",
+      "firstName": "María",
+      "lastName": "Gómez",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "nurse_pass_2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["enfermero"]
+    },
+    {
+      "username": "admin_hce",
+      "enabled": true,
+      "email": "admin.hce@hce-hospital.com",
+      "firstName": "Super",
+      "lastName": "Administrador",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin_pass_2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["administrador"],
+      "attributes": {
+        "tenant_id": ["mi_consultorio_dent_hce"]
+      }
+    }
+  ]
+}
