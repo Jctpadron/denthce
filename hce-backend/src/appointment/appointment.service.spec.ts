@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import { AppointmentEntity } from './appointment.entity';
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentAuditService } from './appointment-audit.service';
 import { WebhookService } from '../webhook/webhook.service';
+import { ModulesService } from '../platform/modules.service';
 
 /**
  * Tests de la lógica nueva del Módulo 5 (Tareas 5.2/5.3/5.4):
@@ -25,6 +26,7 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
   const mockPatientRepo = { findOne: jest.fn() };
   const mockAudit = { log: jest.fn() };
   const mockWebhook = { dispatch: jest.fn() };
+  const mockModules = { isEnabled: jest.fn() };
 
   const actor = { actorId: 'u1', actorName: 'Dr. Test', isServiceAccount: false };
 
@@ -36,11 +38,13 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
         { provide: getRepositoryToken(PatientEntity), useValue: mockPatientRepo },
         { provide: AppointmentAuditService, useValue: mockAudit },
         { provide: WebhookService, useValue: mockWebhook },
+        { provide: ModulesService, useValue: mockModules },
       ],
     }).compile();
 
     service = module.get<AppointmentService>(AppointmentService);
     jest.clearAllMocks();
+    mockModules.isEnabled.mockResolvedValue(true); // por defecto, módulo WhatsApp contratado
   });
 
   describe('changeStatus', () => {
@@ -104,6 +108,37 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
     it('lanza NotFound si el turno no es del tenant', async () => {
       mockApptRepo.findOne.mockResolvedValue(null);
       await expect(service.sendReminder('a1', 't1')).rejects.toThrow(NotFoundException);
+    });
+
+    it('rechaza con Forbidden si la clínica NO contrató el módulo WhatsApp', async () => {
+      mockModules.isEnabled.mockResolvedValue(false);
+      await expect(service.sendReminder('a1', 't1')).rejects.toThrow(ForbiddenException);
+      expect(mockWebhook.dispatch).not.toHaveBeenCalled();
+      // ni siquiera consulta el turno: el gate corta antes
+      expect(mockApptRepo.findOne).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('gate de webhook en cancel (módulo WhatsApp)', () => {
+    it('NO despacha webhook si la clínica no contrató WhatsApp', async () => {
+      mockModules.isEnabled.mockResolvedValue(false);
+      const appt: any = { id: 'a1', tenantId: 't1', status: 'booked', payload: {}, originChannel: 'recepcion' };
+      mockApptRepo.findOne.mockResolvedValue(appt);
+      mockApptRepo.save.mockImplementation(async (e: any) => e);
+
+      await service.cancel('a1', 'motivo', 't1', actor);
+      expect(mockWebhook.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('despacha webhook de cancelación si SÍ contrató WhatsApp', async () => {
+      mockModules.isEnabled.mockResolvedValue(true);
+      const appt: any = { id: 'a1', tenantId: 't1', status: 'booked', payload: {}, originChannel: 'recepcion' };
+      mockApptRepo.findOne.mockResolvedValue(appt);
+      mockApptRepo.save.mockImplementation(async (e: any) => e);
+      mockWebhook.dispatch.mockResolvedValue(undefined);
+
+      await service.cancel('a1', 'motivo', 't1', actor);
+      expect(mockWebhook.dispatch).toHaveBeenCalledWith('CANCEL', expect.anything(), 't1');
     });
   });
 });

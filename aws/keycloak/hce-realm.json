@@ -30,6 +30,14 @@
       {
         "name": "paciente",
         "description": "Paciente del centro de salud. Acceso a su propio portal médico."
+      },
+      {
+        "name": "superadmin",
+        "description": "Super Administrador de la plataforma. Gestión cross-tenant de clínicas, módulos contratados y provisión. NO scoped por tenant."
+      },
+      {
+        "name": "servicio-turnos",
+        "description": "Service-account de CliniChat (bot WhatsApp). Mínimo privilegio: solo turnos, pacientes y slots de su tenant. NO accede a la historia clínica completa."
       }
     ]
   },

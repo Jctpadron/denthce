@@ -72,7 +72,8 @@ export class KeycloakAdminService {
     email: string;
     firstName: string;
     lastName: string;
-    role: 'recepcionista' | 'enfermero';
+    /** Rol clínico a asignar. El SuperAdmin lo usa con 'administrador' al provisionar una clínica. */
+    role: 'recepcionista' | 'enfermero' | 'administrador' | 'medico';
     tenantId: string;
   }): Promise<any> {
     const token = await this.getAdminToken();
@@ -226,5 +227,99 @@ export class KeycloakAdminService {
     }
 
     return mappedUsers;
+  }
+
+  /**
+   * Fase 4A — Genera (o recupera) el service-account de Keycloak para una clínica.
+   *
+   * Crea un client confidential `clinichat-{tenantId}` con:
+   *  - serviceAccountsEnabled=true y SOLO client_credentials (sin login interactivo).
+   *  - protocol mapper que inyecta `tenant_id` en el token (aislamiento Zero Trust).
+   *  - rol de realm `servicio-turnos` (mínimo privilegio: turnos/pacientes/slots).
+   * Devuelve { clientId, clientSecret } para entregárselos a CliniChat (Fase 4B).
+   * Idempotente: si el client ya existe, recupera su secret en lugar de fallar.
+   */
+  async createClinicServiceAccount(tenantId: string): Promise<{ clientId: string; clientSecret: string; tenantId: string }> {
+    if (!tenantId) throw new HttpException('tenantId es obligatorio.', HttpStatus.BAD_REQUEST);
+    const token = await this.getAdminToken();
+    const clientId = `clinichat-${tenantId}`;
+    const base = `${this.keycloakUrl}/admin/realms/${this.realm}`;
+    const authH = { Authorization: `Bearer ${token}` };
+
+    const clientPayload = {
+      clientId,
+      name: `CliniChat Service Account — ${tenantId}`,
+      enabled: true,
+      publicClient: false,
+      serviceAccountsEnabled: true,
+      standardFlowEnabled: false,
+      directAccessGrantsEnabled: false,
+      implicitFlowEnabled: false,
+      protocolMappers: [
+        {
+          name: 'tenant_id',
+          protocol: 'openid-connect',
+          protocolMapper: 'oidc-hardcoded-claim-mapper',
+          config: {
+            'claim.name': 'tenant_id',
+            'claim.value': tenantId,
+            'jsonType.label': 'String',
+            'id.token.claim': 'true',
+            'access.token.claim': 'true',
+            'userinfo.token.claim': 'true',
+          },
+        },
+      ],
+    };
+
+    // 1. Crear el client (si ya existe, Keycloak devuelve 409 → seguimos a recuperarlo).
+    const createRes = await fetch(`${base}/clients`, {
+      method: 'POST',
+      headers: { ...authH, 'Content-Type': 'application/json' },
+      body: JSON.stringify(clientPayload),
+    });
+    if (!createRes.ok && createRes.status !== 409) {
+      const err = await createRes.text();
+      this.logger.error(`Error creando client ${clientId}: ${err}`);
+      throw new HttpException('No se pudo crear el service-account en Keycloak.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // 2. Resolver el id interno del client.
+    const listRes = await fetch(`${base}/clients?clientId=${encodeURIComponent(clientId)}`, { headers: authH });
+    const clients = await listRes.json();
+    const internalId = clients?.[0]?.id;
+    if (!internalId) {
+      throw new HttpException('No se pudo resolver el client recién creado.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // 3. Obtener el client_secret.
+    const secretRes = await fetch(`${base}/clients/${internalId}/client-secret`, { headers: authH });
+    const secretData = await secretRes.json();
+    const clientSecret = secretData?.value;
+    if (!clientSecret) {
+      throw new HttpException('No se pudo obtener el client_secret.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // 4. Service-account user del client.
+    const saUserRes = await fetch(`${base}/clients/${internalId}/service-account-user`, { headers: authH });
+    const saUser = await saUserRes.json();
+    if (!saUser?.id) {
+      throw new HttpException('No se pudo resolver el usuario del service-account.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // 5. Asignar el rol de realm `servicio-turnos` (mínimo privilegio).
+    const roleRes = await fetch(`${base}/roles/servicio-turnos`, { headers: authH });
+    if (!roleRes.ok) {
+      throw new HttpException('El rol "servicio-turnos" no existe en el realm.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const roleData = await roleRes.json();
+    await fetch(`${base}/users/${saUser.id}/role-mappings/realm`, {
+      method: 'POST',
+      headers: { ...authH, 'Content-Type': 'application/json' },
+      body: JSON.stringify([roleData]),
+    });
+
+    this.logger.log(`Service-account ${clientId} listo (rol servicio-turnos + mapper tenant_id).`);
+    return { clientId, clientSecret, tenantId };
   }
 }

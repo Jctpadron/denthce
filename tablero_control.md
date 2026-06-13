@@ -163,6 +163,19 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
+### Iniciativa transversal: Plataforma SaaS — Super Admin y Servicios Anexables
+*El HCE es el producto base; los demás productos (WhatsApp/CliniChat, etc.) son servicios que se anexan a una clínica solo si la contrató. Rama `feature/superadmin-servicios`. Diseño: `docs/design/superadmin-servicios-anexables.md`. Walkthrough: `docs/walkthroughs/2026-06-13_superadmin_servicios_anexables.md`. (Fuera del conteo de los 70 del plan original.)*
+
+- [x] **SA.1:** Modelo de datos de módulos/suscripción (`platform_modules` + `tenant_modules` + `plan`/`is_active`) + rol `superadmin` + `SuperAdminGuard`. *(Prioridad: Alta)*
+- [x] **SA.2:** Entitlements (`ModulesService.isEnabled`) + gate del módulo WhatsApp en recordatorios/webhooks. Cierra el GAP del producto modular. *(Prioridad: Alta)*
+- [x] **SA.3:** API Super Admin cross-tenant: listar/crear clínicas, togglear módulos, métricas. *(Prioridad: Alta)*
+- [x] **SA.5:** Panel Super Admin (React, estética DentHCE): Resumen, Clínicas, toggles de módulos, alta de clínica. *(Prioridad: Alta)*
+- [x] **SA.4A:** Generación del service-account de Keycloak por clínica (rol `servicio-turnos` mínimo privilegio + mapper `tenant_id`). Verificado contra Keycloak real. *(Prioridad: Alta)*
+- [ ] **SA.4B:** Orquestación HCE→CliniChat (entrega automática de credenciales al anexar). BLOQUEADA: requiere endpoint nuevo en `clinichat-assistant` (handoff entregado: `docs/integraciones/HANDOFF-CLINICHAT-orquestacion-hce.md`). *(Prioridad: Media)*
+- [ ] **SA.6:** Despliegue a producción (migración RDS de módulos + roles Keycloak + usuario superadmin) y verificación visual del panel. *(Prioridad: Media)*
+
+---
+
 ## 💡 Propuestas de Nuevas Funciones (Buzón de Entrada)
 *Agrega aquí tus nuevas ideas o necesidades para que la IA las analice e incorpore al desglose anterior.*
 

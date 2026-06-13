@@ -7,11 +7,13 @@ import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentAuditService } from './appointment-audit.service';
 import { AppointmentAuditEntity } from './appointment-audit.entity';
 import { WebhookModule } from '../webhook/webhook.module';
+import { PlatformModule } from '../platform/platform.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([AppointmentEntity, PatientEntity, AppointmentAuditEntity]),
     WebhookModule,
+    PlatformModule,
   ],
   controllers: [AppointmentController],
   providers: [AppointmentService, AppointmentAuditService],
