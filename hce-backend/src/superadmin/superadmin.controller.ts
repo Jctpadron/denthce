@@ -58,6 +58,7 @@ export class SuperAdminController {
       body?.moduleKey,
       body?.enabled === true || body?.enabled === 'true',
       body?.expiresAt ?? null,
+      body?.pairingCode,
     );
   }
 }

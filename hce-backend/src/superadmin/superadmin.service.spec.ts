@@ -8,6 +8,7 @@ import { PlatformModuleEntity } from '../platform/platform-module.entity';
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentEntity } from '../appointment/appointment.entity';
 import { KeycloakAdminService } from '../tenant/keycloak-admin.service';
+import { ClinichatOrchestrationService } from './clinichat-orchestration.service';
 
 describe('SuperAdminService (cross-tenant)', () => {
   let service: SuperAdminService;
@@ -17,6 +18,7 @@ describe('SuperAdminService (cross-tenant)', () => {
   const patientRepo = { count: jest.fn() };
   const appointmentRepo = { count: jest.fn() };
   const keycloakAdmin = { createUser: jest.fn(), createClinicServiceAccount: jest.fn() };
+  const clinichat = { enableWhatsapp: jest.fn(), disableWhatsapp: jest.fn() };
 
   beforeEach(async () => {
     const mod: TestingModule = await Test.createTestingModule({
@@ -28,6 +30,7 @@ describe('SuperAdminService (cross-tenant)', () => {
         { provide: getRepositoryToken(PatientEntity), useValue: patientRepo },
         { provide: getRepositoryToken(AppointmentEntity), useValue: appointmentRepo },
         { provide: KeycloakAdminService, useValue: keycloakAdmin },
+        { provide: ClinichatOrchestrationService, useValue: clinichat },
       ],
     }).compile();
     service = mod.get<SuperAdminService>(SuperAdminService);
@@ -95,6 +98,38 @@ describe('SuperAdminService (cross-tenant)', () => {
     it('NotFound si la clínica no existe', async () => {
       tenantConfigRepo.findOne.mockResolvedValue(null);
       await expect(service.setModule('tx', 'whatsapp', true)).rejects.toThrow(NotFoundException);
+    });
+
+    it('anexar WhatsApp orquesta CliniChat (enable) con el pairing code antes del entitlement', async () => {
+      tenantConfigRepo.findOne.mockResolvedValue({ tenantId: 't1' });
+      platformModuleRepo.findOne.mockResolvedValue({ key: 'whatsapp', isBase: false });
+      tenantModuleRepo.findOne.mockResolvedValue(null);
+      tenantModuleRepo.save.mockImplementation(async (x) => x);
+      clinichat.enableWhatsapp.mockResolvedValue(undefined);
+
+      await service.setModule('t1', 'whatsapp', true, null, 'PAIR-123');
+      expect(clinichat.enableWhatsapp).toHaveBeenCalledWith('t1', 'PAIR-123');
+      expect(tenantModuleRepo.save).toHaveBeenCalled();
+    });
+
+    it('si la orquestación de WhatsApp falla, NO se anexa el entitlement', async () => {
+      tenantConfigRepo.findOne.mockResolvedValue({ tenantId: 't1' });
+      platformModuleRepo.findOne.mockResolvedValue({ key: 'whatsapp', isBase: false });
+      clinichat.enableWhatsapp.mockRejectedValue(new Error('CliniChat 404'));
+
+      await expect(service.setModule('t1', 'whatsapp', true, null, 'BAD')).rejects.toThrow();
+      expect(tenantModuleRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('dar de baja WhatsApp orquesta CliniChat (disable)', async () => {
+      tenantConfigRepo.findOne.mockResolvedValue({ tenantId: 't1' });
+      platformModuleRepo.findOne.mockResolvedValue({ key: 'whatsapp', isBase: false });
+      tenantModuleRepo.findOne.mockResolvedValue({ tenantId: 't1', moduleKey: 'whatsapp', enabled: true });
+      tenantModuleRepo.save.mockImplementation(async (x) => x);
+      clinichat.disableWhatsapp.mockResolvedValue(undefined);
+
+      await service.setModule('t1', 'whatsapp', false);
+      expect(clinichat.disableWhatsapp).toHaveBeenCalledWith('t1');
     });
   });
 

@@ -7,9 +7,11 @@ import { PlatformModuleEntity } from '../platform/platform-module.entity';
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentEntity } from '../appointment/appointment.entity';
 import { KeycloakAdminService } from '../tenant/keycloak-admin.service';
+import { ClinichatOrchestrationService } from './clinichat-orchestration.service';
 
 /** Módulos que se entregan por defecto al provisionar una clínica (no incluye WhatsApp). */
 const DEFAULT_MODULES = ['hc-base', 'agenda', 'odontologia-pami'];
+const WHATSAPP_MODULE = 'whatsapp';
 
 /**
  * SuperAdminService — gestión CROSS-TENANT de la plataforma.
@@ -32,6 +34,7 @@ export class SuperAdminService {
     @InjectRepository(AppointmentEntity)
     private readonly appointmentRepo: Repository<AppointmentEntity>,
     private readonly keycloakAdmin: KeycloakAdminService,
+    private readonly clinichat: ClinichatOrchestrationService,
   ) {}
 
   /** Catálogo de módulos contratables. */
@@ -146,6 +149,7 @@ export class SuperAdminService {
     moduleKey: string,
     enabled: boolean,
     expiresAt?: string | null,
+    pairingCode?: string,
   ): Promise<any> {
     const clinic = await this.tenantConfigRepo.findOne({ where: { tenantId } });
     if (!clinic) throw new NotFoundException(`Clínica "${tenantId}" no encontrada.`);
@@ -154,6 +158,17 @@ export class SuperAdminService {
     if (!module) throw new BadRequestException(`Módulo "${moduleKey}" no existe en el catálogo.`);
     if (module.isBase && !enabled) {
       throw new BadRequestException(`El módulo "${moduleKey}" es parte del producto base y no se puede dar de baja.`);
+    }
+
+    // WhatsApp es un servicio orquestado: antes de anexar/dar de baja el entitlement,
+    // configuramos el lado de CliniChat. Si esa orquestación falla, NO tocamos el entitlement
+    // (no anexamos un servicio que no quedó configurado del otro lado).
+    if (moduleKey === WHATSAPP_MODULE) {
+      if (enabled) {
+        await this.clinichat.enableWhatsapp(tenantId, pairingCode || '');
+      } else {
+        await this.clinichat.disableWhatsapp(tenantId);
+      }
     }
 
     let tm = await this.tenantModuleRepo.findOne({ where: { tenantId, moduleKey } });

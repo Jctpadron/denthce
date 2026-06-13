@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SuperAdminController } from './superadmin.controller';
 import { SuperAdminService } from './superadmin.service';
+import { ClinichatOrchestrationService } from './clinichat-orchestration.service';
 import { TenantConfigEntity } from '../tenant/tenant-config.entity';
 import { TenantModuleEntity } from '../platform/tenant-module.entity';
 import { PlatformModuleEntity } from '../platform/platform-module.entity';
@@ -23,6 +24,6 @@ import { KeycloakAdminService } from '../tenant/keycloak-admin.service';
     ]),
   ],
   controllers: [SuperAdminController],
-  providers: [SuperAdminService, KeycloakAdminService],
+  providers: [SuperAdminService, KeycloakAdminService, ClinichatOrchestrationService],
 })
 export class SuperAdminModule {}

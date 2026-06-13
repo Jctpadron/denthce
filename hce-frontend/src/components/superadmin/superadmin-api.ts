@@ -53,7 +53,8 @@ export const saSetModule = (
   moduleKey: string,
   enabled: boolean,
   expiresAt?: string | null,
+  pairingCode?: string,
 ): Promise<any> =>
   axios
-    .patch(`${API}/api/superadmin/clinics/${tenantId}/modules`, { moduleKey, enabled, expiresAt }, auth())
+    .patch(`${API}/api/superadmin/clinics/${tenantId}/modules`, { moduleKey, enabled, expiresAt, pairingCode }, auth())
     .then((r) => r.data);

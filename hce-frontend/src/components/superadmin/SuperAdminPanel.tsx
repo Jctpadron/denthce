@@ -207,10 +207,17 @@ const ModulesModal: React.FC<{ clinic: SaClinic; catalog: SaModule[]; onClose: (
 
   const toggle = async (mod: SaModule) => {
     const isOn = active.includes(mod.key);
+    // WhatsApp se anexa con un Código de Enlace (pairing code) que la clínica obtiene en CliniChat.
+    let pairingCode: string | undefined;
+    if (mod.key === 'whatsapp' && !isOn) {
+      const code = window.prompt('Código de Enlace (Pairing Code) generado en CliniChat para esta clínica:');
+      if (!code || !code.trim()) return; // cancelado
+      pairingCode = code.trim();
+    }
     setBusy(mod.key);
     setErr(null);
     try {
-      await saSetModule(clinic.tenantId, mod.key, !isOn);
+      await saSetModule(clinic.tenantId, mod.key, !isOn, undefined, pairingCode);
       setActive((prev) => (isOn ? prev.filter((k) => k !== mod.key) : [...prev, mod.key]));
       onChanged();
     } catch (e: any) {
