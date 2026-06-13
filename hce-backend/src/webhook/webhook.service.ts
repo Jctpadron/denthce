@@ -38,7 +38,7 @@ export class WebhookService {
   /**
    * Despacha un webhook firmado hacia CliniChat notificando un cambio en un turno.
    */
-  async dispatch(action: 'CREATE' | 'CANCEL', appt: AppointmentEntity, tenantId: string): Promise<void> {
+  async dispatch(action: 'CREATE' | 'CANCEL' | 'REMINDER', appt: AppointmentEntity, tenantId: string): Promise<void> {
     try {
       // 1. Obtener configuración del tenant
       const config = await this.tenantConfigRepository.findOne({ where: { tenantId } });
@@ -84,6 +84,7 @@ export class WebhookService {
       const eventMapping: Record<string, string> = {
         CREATE: 'created',
         CANCEL: 'cancelled',
+        REMINDER: 'reminder',
       };
       const eventStr = eventMapping[action] || 'updated';
 

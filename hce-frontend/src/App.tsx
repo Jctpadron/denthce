@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PatientForm } from './components/PatientForm';
 import { PatientSearch } from './components/PatientSearch';
 import { OdontologyHC } from './components/odontology/OdontologyHC';
+import { AgendaView } from './components/agenda/AgendaView';
 import { HomeScreen } from './components/HomeScreen';
 import { BrandingSettings } from './components/BrandingSettings';
 import { UserManagement } from './components/UserManagement';
@@ -12,7 +13,7 @@ import keycloak from './utils/keycloak-config';
 import { LogOut, User, Shield } from 'lucide-react';
 import { LandingLogin } from './components/LandingLogin';
 
-type AppView = 'home' | 'patients' | 'odonto-hc' | 'form' | 'settings' | 'users';
+type AppView = 'home' | 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'settings' | 'users';
 
 function AppContent() {
   const [activeView, setActiveView] = useState<AppView>('home');
@@ -32,6 +33,7 @@ function AppContent() {
     { key: 'home' as AppView, label: 'Inicio', icon: '🏠' },
     { key: 'patients' as AppView, label: 'Historia Clínica', icon: '🏥' },
     { key: 'odonto-hc' as AppView, label: 'HC Odontológica', icon: '🦷' },
+    { key: 'agenda' as AppView, label: 'Agenda', icon: '📅' },
     { key: 'form' as AppView, label: 'Admisión', icon: '➕' },
     ...(canConfigure ? [
       { key: 'users' as AppView, label: 'Personal', icon: '👥' },
@@ -194,6 +196,7 @@ function AppContent() {
         )}
         {activeView === 'patients' && <PatientSearch />}
         {activeView === 'odonto-hc' && <OdontologyHC />}
+        {activeView === 'agenda' && <AgendaView />}
         {activeView === 'form' && <PatientForm onSuccess={() => setActiveView('patients')} />}
         {activeView === 'users' && canConfigure && <UserManagement />}
         {activeView === 'users' && !canConfigure && (

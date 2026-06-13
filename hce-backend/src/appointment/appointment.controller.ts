@@ -57,6 +57,28 @@ export class AppointmentController {
     return this.appointmentService.findOne(id, req.user.tenantId);
   }
 
+  @Post(':id/reminder')
+  @Roles('medico', 'recepcionista', 'administrador')
+  async sendReminder(@Param('id') id: string, @Request() req: any) {
+    return this.appointmentService.sendReminder(id, req.user.tenantId);
+  }
+
+  @Patch(':id/status')
+  @Roles('medico', 'recepcionista', 'administrador')
+  async changeStatus(
+    @Param('id') id: string,
+    @Body() body: any,
+    @Request() req: any,
+  ) {
+    return this.appointmentService.changeStatus(
+      id,
+      body?.status,
+      req.user.tenantId,
+      this.getUserCtx(req),
+      body?.priority,
+    );
+  }
+
   @Patch(':id')
   @Roles('medico', 'recepcionista', 'administrador', 'servicio-turnos')
   async cancel(

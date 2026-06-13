@@ -22,12 +22,12 @@ Este es un **documento bidireccional y vivo**:
 | **2. Registro Demográfico (FHIR Patient)** | 6 | 6 | `[██████████] 100%` | Completado |
 | **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 12 | 12 | `[██████████] 100%` | Completado |
 | **4. Receta Electrónica y Vademécum (CDS Hooks)** | 4 | 6 | `[███████░░░] 67%` | En Progreso |
-| **5. Agenda, Citas y Admisión Hospitalaria** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
+| **5. Agenda, Citas y Admisión Hospitalaria** | 5 | 5 | `[██████████] 100%` | Completado (versión consultorio) |
 | **6. Integración LIS (Laboratorio) y PACS (Imágenes)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **7. Portal del Paciente y Telemedicina (WebRTC)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **8. IA Clínica y Scribe Ambiental (WhisperX/Berta)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **9. HC Odontológica PAMI (módulo aislado)** | 11 | 11 | `[██████████] 100%` | Completado |
-| **PROGRESO GLOBAL DEL PROYECTO** | **48** | **70** | `[████████░░] 68%` | **En Progreso** |
+| **PROGRESO GLOBAL DEL PROYECTO** | **53** | **70** | `[████████░░] 76%` | **En Progreso** |
 
 ---
 
@@ -105,11 +105,11 @@ Este es un **documento bidireccional y vivo**:
 ### Módulo 5: Agenda, Citas y Admisión Hospitalaria
 *Control operativo de la ocupación, disponibilidad de profesionales y flujos de atención.*
 
-- [ ] **Tarea 5.1:** Endpoint compatible con el recurso `Appointment` de FHIR para reserva y cancelación de turnos. *(Prioridad: Alta)*
-- [ ] **Tarea 5.2:** Calendario visual interactivo para administración médica por profesional y consultorio. *(Prioridad: Alta)*
-- [ ] **Tarea 5.3:** Automatización de recordatorios de citas vía SMS, Email o WhatsApp API. *(Prioridad: Media)*
-- [ ] **Tarea 5.4:** Módulo de Triaje Manchester/ESI para priorización de urgencias en guardia. *(Prioridad: Alta)*
-- [ ] **Tarea 5.5:** Módulo de Internación: Bed Management (gestión de camas, estados de limpieza y ocupación) e indicaciones de enfermería. *(Prioridad: Media)*
+- [x] **Tarea 5.1:** Endpoint compatible con el recurso `Appointment` de FHIR para reserva y cancelación de turnos. *(Prioridad: Alta)* *(Backend: `appointment/` con idempotencia, anti-double-booking, auditoría y webhooks CliniChat. + `PATCH /:id/status` para transiciones llegada/atendido/ausente.)*
+- [x] **Tarea 5.2:** Calendario visual interactivo para administración médica por profesional y consultorio. *(Prioridad: Alta)* *(Frontend `components/agenda/`: vista Día/Semana desde scheduleJson, alta/cancelación/cambio de estado. Walkthrough `2026-06-13_modulo5_agenda_visual.md`.)*
+- [x] **Tarea 5.3:** Automatización de recordatorios de citas vía SMS, Email o WhatsApp API. *(Prioridad: Media)* *(Recordatorios automáticos los emite CliniChat (canal WhatsApp); la HCE dispara recordatorios manuales puntuales vía `POST /:id/reminder` → webhook `reminder` firmado HMAC.)*
+- [x] **Tarea 5.4:** Módulo de Triaje Manchester/ESI para priorización de urgencias en guardia. *(Prioridad: Alta)* *(VERSIÓN CONSULTORIO: priorización de sala de espera ESI simplificado 1-5 sobre el turno (`WaitingRoom`). El algoritmo hospitalario de guardia completo queda fuera del alcance del producto consultorio.)*
+- [x] **Tarea 5.5:** Módulo de Internación: Bed Management (gestión de camas, estados de limpieza y ocupación) e indicaciones de enfermería. *(Prioridad: Media)* *(VERSIÓN CONSULTORIO: widget Estado del box/sillón derivado del turno en atención (mono-profesional = 1 box). El bed management hospitalario completo queda fuera del alcance del producto consultorio.)*
 
 ---
 

@@ -124,6 +124,8 @@ export class AppointmentService {
     entity.endDate = endDate;
     entity.originChannel = originChannel;
     entity.idempotencyKey = idempotencyKey;
+    const prioNum = Number(dto.priority);
+    entity.priority = Number.isInteger(prioNum) && prioNum >= 1 && prioNum <= 5 ? prioNum : null;
 
     entity.payload = this.buildFhir(entity, patientDisplay, dto.comment);
 
@@ -198,6 +200,77 @@ export class AppointmentService {
     return saved.payload;
   }
 
+  /**
+   * Transición de estado del turno (llegada / atendido / ausente / reactivar).
+   * No cubre 'cancelled' (usar cancel(), que además dispara webhook). Auditado como UPDATE.
+   */
+  async changeStatus(
+    id: string,
+    newStatus: string,
+    tenantId: string,
+    actor: ActorCtx,
+    priority?: number,
+  ): Promise<any> {
+    const allowed = ['booked', 'arrived', 'fulfilled', 'noshow'];
+    if (!allowed.includes(newStatus)) {
+      throw new BadRequestException(
+        `Estado de turno inválido: "${newStatus}". Permitidos: ${allowed.join(', ')} (para cancelar usá el endpoint de cancelación).`,
+      );
+    }
+
+    const appt = await this.appointmentRepository.findOne({ where: { id, tenantId } });
+    if (!appt) {
+      throw new NotFoundException(`Turno con ID ${id} no encontrado en tu consultorio.`);
+    }
+
+    appt.status = newStatus;
+    appt.payload = { ...appt.payload, status: newStatus };
+
+    // Clasificación de urgencia para la sala de espera (5.4).
+    if (priority !== undefined && priority !== null) {
+      const p = Number(priority);
+      if (!Number.isInteger(p) || p < 1 || p > 5) {
+        throw new BadRequestException('La prioridad debe ser un entero entre 1 (más urgente) y 5.');
+      }
+      appt.priority = p;
+      appt.payload.priority = p;
+    }
+
+    const saved = await this.appointmentRepository.save(appt);
+
+    await this.auditService.log({
+      appointmentId: saved.id,
+      tenantId,
+      actorId: actor.actorId,
+      actorName: actor.actorName,
+      isServiceAccount: actor.isServiceAccount,
+      originChannel: saved.originChannel,
+      action: 'UPDATE',
+      payloadSnapshot: saved.payload,
+    });
+
+    return saved.payload;
+  }
+
+  /**
+   * Dispara un recordatorio puntual del turno hacia CliniChat (canal WhatsApp).
+   * Los recordatorios programados/automáticos los emite CliniChat; este endpoint
+   * permite el envío manual desde la agenda. Solo para turnos activos (booked/arrived).
+   */
+  async sendReminder(id: string, tenantId: string): Promise<any> {
+    const appt = await this.appointmentRepository.findOne({ where: { id, tenantId } });
+    if (!appt) {
+      throw new NotFoundException(`Turno con ID ${id} no encontrado en tu consultorio.`);
+    }
+    if (!['booked', 'arrived', 'proposed'].includes(appt.status)) {
+      throw new BadRequestException(
+        `No se puede enviar un recordatorio de un turno en estado "${appt.status}".`,
+      );
+    }
+    await this.webhookService.dispatch('REMINDER', appt, tenantId);
+    return { status: 'sent', appointmentId: appt.id };
+  }
+
   /** Búsqueda tenant-scoped (Zero Trust) que devuelve un Bundle FHIR searchset. */
   async search(
     query: { date?: string; dateFrom?: string; dateTo?: string; patient?: string; practitioner?: string; status?: string },
@@ -266,6 +339,7 @@ export class AppointmentService {
     return {
       resourceType: 'Appointment',
       status: entity.status,
+      priority: entity.priority ?? undefined,
       serviceType: entity.serviceType ? [{ text: entity.serviceType }] : undefined,
       start: entity.startDate.toISOString(),
       end: entity.endDate ? entity.endDate.toISOString() : undefined,

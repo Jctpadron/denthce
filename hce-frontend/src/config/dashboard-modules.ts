@@ -1,7 +1,7 @@
 import { ROLES, hasAnyRole, type AppRole } from '../utils/roles';
 
 /** Destinos de navegación del shell (coinciden con AppView en App.tsx). */
-export type ModuleKey = 'patients' | 'odonto-hc' | 'form' | 'users' | 'settings';
+export type ModuleKey = 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'users' | 'settings';
 
 export interface DashboardModule {
   key: ModuleKey;
@@ -38,6 +38,16 @@ export const DASHBOARD_MODULES: DashboardModule[] = [
     color: 'var(--color-primary)',
     badge: 'Nuevo',
     allowedRoles: [ROLES.MEDICO, ROLES.ENFERMERO, ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
+  },
+  {
+    key: 'agenda',
+    icon: '📅',
+    title: 'Agenda de Turnos',
+    description: 'Calendario de turnos por día y semana. Reservá, marcá llegada/atención, gestioná la sala de espera y sincronizá con WhatsApp (CliniChat).',
+    color: 'var(--color-cyan)',
+    badge: 'Nuevo',
+    // Coherente con el backend: endpoints de Appointment permiten médico, recepción y administrador.
+    allowedRoles: [ROLES.MEDICO, ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
   },
   {
     key: 'form',

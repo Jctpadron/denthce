@@ -69,6 +69,13 @@ export class AppointmentEntity {
   @Column({ name: 'cancellation_reason', type: 'text', nullable: true })
   cancellationReason: string | null;
 
+  /**
+   * Nivel de urgencia para la sala de espera (Tarea 5.4, ESI simplificado 1-5; 1 = más urgente).
+   * Mapea a Appointment.priority de FHIR R4. Null = sin clasificar.
+   */
+  @Column({ name: 'priority', type: 'int', nullable: true })
+  priority: number | null;
+
   /** Recurso FHIR R4 Appointment completo en JSONB. */
   @Column({ type: 'jsonb', nullable: true })
   payload: any;

@@ -215,6 +215,7 @@ CREATE TABLE IF NOT EXISTS fhir_appointments (
     origin_channel VARCHAR(50) DEFAULT 'recepcion',
     idempotency_key VARCHAR(255) UNIQUE,
     cancellation_reason TEXT,
+    priority INT,
     payload JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
