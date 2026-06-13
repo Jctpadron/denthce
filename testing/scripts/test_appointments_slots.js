@@ -2,7 +2,7 @@ const http = require('http');
 const { Client } = require('pg');
 const crypto = require('crypto');
 
-const KEYCLOAK_URL = 'https://pills-brother-demonstrated-jeans.trycloudflare.com';
+const KEYCLOAK_URL = 'https://auth.systia.ar';
 const BACKEND_URL = 'http://localhost:3000';
 const REALM = 'hce-realm';
 const TENANT_ID = 'mi_consultorio_dent_hce';

@@ -35,7 +35,7 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
       KC_PROXY: "edge"
-      KC_HOSTNAME: "pills-brother-demonstrated-jeans.trycloudflare.com"
+      KC_HOSTNAME: "auth.systia.ar"
     ports:
       - "8080:8080"
     volumes:
@@ -63,8 +63,8 @@ services:
       DB_PASSWORD: hce_secure_password_2026
       DB_NAME: hce_fhir
       PORT: 3000
-      KEYCLOAK_ISSUER_URL: https://pills-brother-demonstrated-jeans.trycloudflare.com/realms/hce-realm
-      KEYCLOAK_JWKS_URI: https://pills-brother-demonstrated-jeans.trycloudflare.com/realms/hce-realm/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER_URL: https://auth.systia.ar/realms/hce-realm
+      KEYCLOAK_JWKS_URI: https://auth.systia.ar/realms/hce-realm/protocol/openid-connect/certs
       DB_SYNCHRONIZE: "false"
       CLINICHAT_WEBHOOK_URL: https://hooks.systia.ar/api/public/hooks/sync-appointment
     command: sh -c "npm install && npm run start:dev"
