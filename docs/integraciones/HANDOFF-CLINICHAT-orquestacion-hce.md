@@ -65,8 +65,7 @@ A diferencia de los webhooks de turnos (que firman con el `hce_webhook_secret` *
 {
   "action": "enable",
   "hce_tenant_id": "clinica_santa_lucia",        // identidad de la clínica en el HCE (obligatorio)
-  "clinic_slug": "santalucia",                    // para que ustedes resuelvan/creen la fila clinics
-  "clinic_name": "Clínica Santa Lucía",
+  "pairing_code": "A8F9-2BK1",                   // Código de Enlace generado en CliniChat (obligatorio)
   "credentials": {
     "hce_fhir_base_url":        "https://api.systia.ar/fhir/r4",
     "hce_keycloak_token_url":   "https://auth.systia.ar/realms/hce-realm/protocol/openid-connect/token",
@@ -88,10 +87,10 @@ A diferencia de los webhooks de turnos (que firman con el `hce_webhook_secret` *
 
 ### 2.5 Lógica que debe ejecutar el endpoint
 1. Leer el **body crudo** (bytes) → validar la firma HMAC con `PLATFORM_SYNC_SECRET`. Si no coincide → `401`.
-2. Resolver la fila `clinics` destino (ver §3 — decisión a confirmar).
+2. Resolver la fila `clinics` destino usando el `pairing_code` (ver §3). Si no se encuentra, devolver `404`.
 3. Según `action`:
-   - **`enable`**: `UPDATE clinics SET hce_enabled = true, hce_fhir_base_url = ..., hce_keycloak_* = ..., hce_tenant_id = ..., hce_webhook_secret = ...` con los valores de `credentials`.
-   - **`disable`**: `UPDATE clinics SET hce_enabled = false` (NO borrar credenciales — solo apagar, para poder re-anexar sin re-generar todo).
+   - **`enable`**: `UPDATE clinics SET hce_enabled = true, hce_fhir_base_url = ..., hce_keycloak_* = ..., hce_tenant_id = ..., hce_webhook_secret = ...` con los valores de `credentials` `WHERE hce_pairing_code = payload.pairing_code`.
+   - **`disable`**: `UPDATE clinics SET hce_enabled = false` `WHERE hce_tenant_id = payload.hce_tenant_id` (NO borrar credenciales — solo apagar, para poder re-anexar sin re-generar todo).
 4. Responder `200 { synced: true, action }`.
 
 ### 2.6 Respuestas esperadas
@@ -104,15 +103,16 @@ A diferencia de los webhooks de turnos (que firman con el `hce_webhook_secret` *
 
 ---
 
-## 3. Decisión a confirmar entre ambos equipos — ¿cómo resuelven la clínica destino?
+## 3. Decisión confirmada: Resolución por Código de Enlace (Pairing Code)
 
-El HCE identifica la clínica por `hce_tenant_id`. Ustedes la identifican por `clinics.id` (UUID) o `clinics.slug`. Necesitamos acordar el match. Opciones:
+Para garantizar la seguridad y evitar colisiones de identificadores, la clínica debe **pre-existir en CliniChat**. 
+El flujo es el siguiente:
+1. El administrador ingresa a CliniChat, donde se le proveerá un **Código de Enlace** (ej. `A8F9-2BK1`). Este código estará guardado en la columna `hce_pairing_code` de la tabla `clinics`.
+2. El administrador ingresa ese código exacto en el panel del HCE.
+3. El HCE envía el `pairing_code` en el payload de `action: enable`.
+4. El endpoint de CliniChat busca la clínica `WHERE hce_pairing_code = payload.pairing_code`. Si hace match, realiza el `UPDATE` para habilitar la integración.
 
-- **(A) Por `clinic_slug`** (recomendada): el HCE envía el slug; ustedes hacen match `WHERE slug = :clinic_slug`. Si no existe, la crean con los datos básicos del payload. Simple y legible.
-- **(B) Por `hce_tenant_id`**: ustedes guardan/buscan por `clinics.hce_tenant_id`. Requiere que la clínica ya exista de su lado.
-- **(C) La clínica debe pre-existir** en CliniChat (creada por su Super Admin) y esta llamada solo "enciende" la integración (nunca crea filas).
-
-> **Pregunta para ustedes:** ¿la clínica se crea primero en CliniChat (su panel) y el HCE solo la "enciende", o el HCE puede provocar el alta de la fila `clinics`? Esto define si la opción es A (crear-si-no-existe) o C (solo encender).
+Esto asegura que la conexión es legítima y autorizada en ambas puntas.
 
 ---
 
@@ -127,7 +127,7 @@ El HCE identifica la clínica por `hce_tenant_id`. Ustedes la identifican por `c
 - [ ] Crear el endpoint `POST /api/public/hooks/configure-hce-integration`.
 - [ ] Validar la firma HMAC con `PLATFORM_SYNC_SECRET` (reusar `validateHceWebhookSignature`).
 - [ ] Implementar `action: enable` (upsert credenciales + `hce_enabled=true`) y `action: disable` (`hce_enabled=false`).
-- [ ] Acordar con el HCE la resolución de la clínica destino (§3: slug / tenant_id / pre-existe).
+- [ ] Implementar la migración a la base de datos para añadir `hce_pairing_code VARCHAR(12) UNIQUE` a `clinics`.
 - [ ] Cargar `PLATFORM_SYNC_SECRET` como env var del Worker (lo generamos juntos).
 - [ ] Confirmar que `resolveHceConfig()` funciona con `grant_type=client_credentials` + el `client_secret` real (debería, ya está soportado en `hce-client.ts`).
 - [ ] Self-test: enviar un `enable` de prueba firmado y verificar que el bot pasa a modo HCE; luego un `disable` y verificar que vuelve a modo local.
