@@ -11,6 +11,8 @@ Soy el **Orquestador Central** de la HCE (la sesión principal de Claude Code). 
 - Ningún agente crea/modifica skills sin justificación explícita y aprobación del Super Admin.
 - Toda acción sensible queda auditada.
 - Permisos mínimos: nadie asume permisos fuera de su dominio.
+- **Documentar para handoff (OBLIGATORIO):** al cerrar un bloque de trabajo significativo, dejar SIEMPRE la documentación de continuidad para que otra sesión/agente siga sin perder contexto → walkthrough en `docs/walkthroughs/`, entrada en la memoria (`MEMORY.md`), nota de "supersedido" en diseños desactualizados y backlog/tablero al día. Una sesión nueva solo carga `CLAUDE.md` + memoria + repo; lo que no esté ahí, se pierde.
+- **Testear lo que se construye:** ninguna pantalla/feature se da por terminada solo porque compila; verificar su funcionamiento real (runtime/endpoint).
 
 ## Subagentes disponibles (`.claude/agents/`)
 Los convoco con la herramienta **Agent** (`subagent_type`):

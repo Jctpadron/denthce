@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Activity, Heart, Thermometer, Scale, Ruler, Wind } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 
 interface VitalsTabProps {
@@ -20,12 +21,12 @@ interface VitalSign {
 
 // Códigos LOINC estándar para signos vitales odontológicos
 const VITAL_PRESETS = [
-  { label: 'Presión Arterial', code: '55284-4', unit: 'mmHg', isComposite: true },
-  { label: 'Temperatura', code: '8310-5', unit: '°C', isComposite: false },
-  { label: 'Pulso / FC', code: '8867-4', unit: 'lpm', isComposite: false },
-  { label: 'Peso', code: '29463-7', unit: 'kg', isComposite: false },
-  { label: 'Talla', code: '8302-2', unit: 'cm', isComposite: false },
-  { label: 'Saturación O₂', code: '59408-5', unit: '%', isComposite: false },
+  { label: 'Presión Arterial', code: '55284-4', unit: 'mmHg', isComposite: true, color: '#3b82f6' },
+  { label: 'Temperatura', code: '8310-5', unit: '°C', isComposite: false, color: '#f59e0b' },
+  { label: 'Pulso / FC', code: '8867-4', unit: 'lpm', isComposite: false, color: '#ef4444' },
+  { label: 'Peso', code: '29463-7', unit: 'kg', isComposite: false, color: '#10b981' },
+  { label: 'Talla', code: '8302-2', unit: 'cm', isComposite: false, color: '#6366f1' },
+  { label: 'Saturación O₂', code: '59408-5', unit: '%', isComposite: false, color: '#06b6d4' },
 ];
 
 export const VitalsTab: React.FC<VitalsTabProps> = ({ patientId }) => {
@@ -44,6 +45,46 @@ export const VitalsTab: React.FC<VitalsTabProps> = ({ patientId }) => {
     label: VITAL_PRESETS[0].label,
     date: new Date().toISOString().slice(0, 16),
   });
+
+  const getLatestVital = (code: string): VitalSign | undefined => {
+    const matching = vitals.filter(v => v.code?.coding?.[0]?.code === code);
+    if (matching.length === 0) return undefined;
+    const sorted = [...matching].sort((a, b) => {
+      const dateA = a.effectiveDateTime ? new Date(a.effectiveDateTime).getTime() : 0;
+      const dateB = b.effectiveDateTime ? new Date(b.effectiveDateTime).getTime() : 0;
+      return dateB - dateA;
+    });
+    return sorted[0];
+  };
+
+  const getVitalIcon = (code: string) => {
+    switch (code) {
+      case '55284-4': // Presión Arterial
+        return <Heart style={{ width: '1.2rem', height: '1.2rem', color: '#3b82f6' }} />;
+      case '8310-5': // Temperatura
+        return <Thermometer style={{ width: '1.2rem', height: '1.2rem', color: '#f59e0b' }} />;
+      case '8867-4': // Pulso / FC
+        return <Activity style={{ width: '1.2rem', height: '1.2rem', color: '#ef4444' }} />;
+      case '29463-7': // Peso
+        return <Scale style={{ width: '1.2rem', height: '1.2rem', color: '#10b981' }} />;
+      case '8302-2': // Talla
+        return <Ruler style={{ width: '1.2rem', height: '1.2rem', color: '#6366f1' }} />;
+      case '59408-5': // Saturación O2
+        return <Wind style={{ width: '1.2rem', height: '1.2rem', color: '#06b6d4' }} />;
+      default:
+        return <Activity style={{ width: '1.2rem', height: '1.2rem', color: '#64748b' }} />;
+    }
+  };
+
+  const formatVitalNumberOnly = (vital: VitalSign): string => {
+    if (vital.component && vital.component.length >= 2) {
+      const sys = vital.component[0]?.valueQuantity?.value;
+      const dia = vital.component[1]?.valueQuantity?.value;
+      return `${sys}/${dia}`;
+    }
+    const val = vital.valueQuantity?.value;
+    return val !== undefined ? `${val}` : '—';
+  };
 
   const fetchVitals = async () => {
     setLoading(true);
@@ -401,8 +442,67 @@ export const VitalsTab: React.FC<VitalsTabProps> = ({ patientId }) => {
         </button>
       </div>
 
+      {/* Tarjetas Premium de Signos Vitales (Estilo Samsung Health - Menos es Más) */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap: '0.75rem',
+        width: '100%'
+      }}>
+        {VITAL_PRESETS.map((preset) => {
+          const latest = getLatestVital(preset.code);
+          return (
+            <div 
+              key={preset.code}
+              className="card-premium-health"
+              style={{
+                borderLeft: `4px solid ${preset.color}`,
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '0.4rem',
+                cursor: 'pointer',
+                background: '#ffffff',
+                padding: '1rem',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+              }}
+              onClick={() => {
+                if (preset.code === '55284-4') setActiveChart('BP');
+                else if (preset.code === '8867-4') setActiveChart('Pulse');
+                else if (preset.code === '8310-5') setActiveChart('Temp');
+                
+                handleTypeChange(preset.code);
+              }}
+            >
+              <div className="card-premium-left" style={{ gap: '0.25rem' }}>
+                <div className="card-premium-title-container" style={{ gap: '0.35rem' }}>
+                  <span className="card-premium-icon-sutil">
+                    {getVitalIcon(preset.code)}
+                  </span>
+                  <span style={{ fontWeight: 600, fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+                    {preset.label}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.15rem', marginTop: '0.15rem' }}>
+                  <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-text)' }}>
+                    {latest ? formatVitalNumberOnly(latest) : '—'}
+                  </span>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-muted)' }}>
+                    {preset.unit}
+                  </span>
+                </div>
+                {latest && (
+                  <span style={{ fontSize: '0.62rem', color: 'var(--color-muted)', marginTop: '0.05rem' }}>
+                    {formatDate(latest.effectiveDateTime).split(' ')[0]}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Selector de Gráfico Evolutivo */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+      <div className="vitals-chart-header">
         <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-text)' }}>Gráfico evolutivo de:</span>
         <div className="segmented-control" style={{ background: 'rgba(0,0,0,0.03)' }}>
           <button

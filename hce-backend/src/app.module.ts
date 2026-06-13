@@ -14,6 +14,12 @@ import { EncounterModule } from './encounter/encounter.module';
 import { EncounterEntity } from './encounter/encounter.entity';
 import { MedicationRequestModule } from './medication-request/medication-request.module';
 import { MedicationRequestEntity } from './medication-request/medication-request.entity';
+import { OdontologyModule } from './odontology/odontology.module';
+import { OdontologyResourceEntity } from './odontology/odontology-resource.entity';
+import { AppointmentModule } from './appointment/appointment.module';
+import { AppointmentEntity } from './appointment/appointment.entity';
+import { AppointmentAuditEntity } from './appointment/appointment-audit.entity';
+import { SlotModule } from './slot/slot.module';
 
 @Module({
   imports: [
@@ -25,7 +31,17 @@ import { MedicationRequestEntity } from './medication-request/medication-request
       password: process.env.DB_PASSWORD || 'hce_secure_password_2026',
       database: process.env.DB_NAME || 'hce_fhir',
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-      entities: [PatientEntity, PatientAuditEntity, ClinicalResourceEntity, TenantConfigEntity, EncounterEntity, MedicationRequestEntity],
+      entities: [
+        PatientEntity, 
+        PatientAuditEntity, 
+        ClinicalResourceEntity, 
+        TenantConfigEntity, 
+        EncounterEntity, 
+        MedicationRequestEntity, 
+        OdontologyResourceEntity,
+        AppointmentEntity,
+        AppointmentAuditEntity
+      ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: true,
     }),
@@ -35,10 +51,15 @@ import { MedicationRequestEntity } from './medication-request/medication-request
     SisaModule,
     EncounterModule,
     MedicationRequestModule,
+    OdontologyModule,
+    AppointmentModule,
+    SlotModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+
+
 
 

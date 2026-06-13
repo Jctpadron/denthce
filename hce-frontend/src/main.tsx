@@ -3,6 +3,28 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 import keycloak from './utils/keycloak-config.ts';
+import axios from 'axios';
+
+// Configurar interceptor global de Axios para renovación de tokens de Keycloak
+axios.interceptors.request.use(
+  async (config) => {
+    if (keycloak.authenticated && keycloak.token) {
+      try {
+        // Refrescar el token si expira en menos de 30 segundos
+        await keycloak.updateToken(30);
+        config.headers.Authorization = `Bearer ${keycloak.token}`;
+      } catch (error) {
+        console.error('No se pudo refrescar el token de Keycloak automáticamente:', error);
+        // Si el refresh token también expiró, forzar reautenticación
+        keycloak.login();
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Inicializar Keycloak antes de renderizar la aplicación React
 keycloak

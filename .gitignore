@@ -26,6 +26,22 @@ out/
 # === Logs ===
 logs/
 *.log
+keycloak_logs*.txt
+temp_logs.txt
+*_logs*.txt
+
+# === Artefactos de debug / despliegue (NO versionar) ===
+debug_output.pdf
+test.pdf
+test_only_output.pdf
+debug_*.pdf
+aws/scripts/*.zip
+testing/scripts/*.pdf
+
+# === Imágenes de debug/capturas sueltas ===
+img/error*.jpeg
+img/error*.jpg
+img/WhatsApp Image*.jpeg
 
 # === Uploads (archivos binarios de pacientes - NO subir) ===
 uploads/

@@ -26,7 +26,8 @@ Este es un **documento bidireccional y vivo**:
 | **6. Integración LIS (Laboratorio) y PACS (Imágenes)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **7. Portal del Paciente y Telemedicina (WebRTC)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **8. IA Clínica y Scribe Ambiental (WhisperX/Berta)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
-| **PROGRESO GLOBAL DEL PROYECTO** | **37** | **59** | `[██████░░░░] 63%` | **En Progreso** |
+| **9. HC Odontológica PAMI (módulo aislado)** | 11 | 11 | `[██████████] 100%` | Completado |
+| **PROGRESO GLOBAL DEL PROYECTO** | **48** | **70** | `[████████░░] 68%` | **En Progreso** |
 
 ---
 
@@ -142,6 +143,23 @@ Este es un **documento bidireccional y vivo**:
 - [ ] **Tarea 8.3:** Motor de extracción de entidades clínicas mediante procesamiento del lenguaje natural (NLP) para poblar campos FHIR automáticamente. *(Prioridad: Media)*
 - [ ] **Tarea 8.4:** Resumen clínico instantáneo del paciente al abrir su ficha (medicación activa, alergias, últimas consultas). *(Prioridad: Alta)*
 - [ ] **Tarea 8.5:** Framework de análisis de cohortes y estadísticas epidemiológicas hospitalarias (LATCH). *(Prioridad: Baja)*
+
+---
+
+### Módulo 9: Historia Clínica Odontológica PAMI (módulo AISLADO)
+*HC odontológica completa modelo PAMI / Círculo Odontológico de Jujuy, como servicio separado de la ficha original (tabla y endpoints propios). Detalle en `docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md`.*
+
+- [x] **Tarea 9.1:** Módulo backend aislado `odontology/` con tabla propia `odontology_clinical_resources` y endpoints `/odontology`, filtrado por tenantId. *(Prioridad: Alta)*
+- [x] **Tarea 9.2:** Pantalla `OdontologyHC` (búsqueda con padrón compartido) colgada del dashboard como servicio `odonto-hc`. *(Prioridad: Alta)*
+- [x] **Tarea 9.3:** Odontograma de doble capa (existente rojo / a realizar azul) con catálogo de simbología centralizado (13 estados), glifos por tipo, barra agrupada, toast flotante y leyenda. *(Prioridad: Alta)*
+- [x] **Tarea 9.4:** Anamnesis odontológica PAMI (cuestionario + higiene) con firma del paciente (QuestionnaireResponse). *(Prioridad: Alta)*
+- [x] **Tarea 9.5:** Estado bucal general + diagnóstico presuntivo + plan + observaciones (Observation). *(Prioridad: Media)*
+- [x] **Tarea 9.6:** Datos de afiliado / obra social (Coverage). *(Prioridad: Media)*
+- [x] **Tarea 9.7:** Consentimiento informado con doble firma y matrícula (Consent). *(Prioridad: Alta)*
+- [x] **Tarea 9.8:** Anexo de evolución (fecha / tratamiento / conformidad del afiliado). *(Prioridad: Media)*
+- [x] **Tarea 9.9:** Exportación de la HC en PDF formato oficial PAMI (3 hojas). *(Prioridad: Alta)*
+- [x] **Tarea 9.10a:** Quality Gates (security/qa): Diseño de tests unitarios/integración de controlador/servicio, validación de aislamiento tenant y firma de auditoría de seguridad. *(Prioridad: Alta)*
+- [x] **Tarea 9.10b:** Despliegue a AWS: Creación de la tabla `odontology_clinical_resources` en RDS, recompilación y publicación del backend. *(Prioridad: Alta)*
 
 ---
 

@@ -1,23 +1,27 @@
 version: '3.8'
 
 # Archivo de despliegue para AWS Elastic Beanstalk (Plataforma Docker)
-# Esta configuración asume que se usa una base de datos externa Amazon RDS
+# Dominio de producción: auth.systia.ar (CloudFront + ACM TLS 1.3)
+# KC_PROXY=edge: CloudFront inyecta X-Forwarded-Proto: https → Keycloak genera URLs HTTPS
 
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.4
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://${RDS_HOSTNAME}:${RDS_PORT}/${RDS_DB_NAME}
       KC_DB_USERNAME: ${RDS_USERNAME}
       KC_DB_PASSWORD: ${RDS_PASSWORD}
-      KC_HOSTNAME: ${KEYCLOAK_PUBLIC_DOMAIN}
+      KC_HOSTNAME: ${KEYCLOAK_CF_DOMAIN}
+      KC_HOSTNAME_STRICT_HTTPS: "true"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_PROXY: edge
       KC_HTTP_ENABLED: "true"
-      # Optimización de memoria para t3.small
-      JAVA_OPTS_APPEND: "-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"
+      # Optimización de memoria para t3.small y estrategia de importación
+      JAVA_OPTS_APPEND: "-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
+    volumes:
+      - ./hce-realm.json:/opt/keycloak/data/import/hce-realm.json:ro
     ports:
       - "80:8080"

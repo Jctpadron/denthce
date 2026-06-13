@@ -1,7 +1,7 @@
 import { ROLES, hasAnyRole, type AppRole } from '../utils/roles';
 
 /** Destinos de navegación del shell (coinciden con AppView en App.tsx). */
-export type ModuleKey = 'patients' | 'form' | 'users' | 'settings';
+export type ModuleKey = 'patients' | 'odonto-hc' | 'form' | 'users' | 'settings';
 
 export interface DashboardModule {
   key: ModuleKey;
@@ -28,6 +28,15 @@ export const DASHBOARD_MODULES: DashboardModule[] = [
     description: 'Buscá, registrá y gestioná pacientes. Odontograma, alergias, signos vitales y documentos clínicos.',
     color: 'var(--color-emerald)',
     badge: null,
+    allowedRoles: [ROLES.MEDICO, ROLES.ENFERMERO, ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
+  },
+  {
+    key: 'odonto-hc',
+    icon: '🦷',
+    title: 'Historia Clínica Odontológica',
+    description: 'Ficha odontológica completa modelo PAMI: odontograma de doble capa (existente/a realizar), anamnesis, consentimiento y exportación oficial.',
+    color: 'var(--color-primary)',
+    badge: 'Nuevo',
     allowedRoles: [ROLES.MEDICO, ROLES.ENFERMERO, ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
   },
   {

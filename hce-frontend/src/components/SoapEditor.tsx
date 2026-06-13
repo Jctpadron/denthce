@@ -179,7 +179,7 @@ export const SoapEditor: React.FC<SoapEditorProps> = ({ encounter, onSave, onSig
       )}
 
       {/* Grid del Formulario */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '1.5rem', alignItems: 'start' }}>
+      <div className="soap-editor-grid">
         
         {/* Editor SOAP (4 Campos) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

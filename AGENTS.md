@@ -27,6 +27,7 @@ El Orquestador liderará el desarrollo de cada módulo o requerimiento invocando
 3. **Fase de Definición Funcional y Usabilidad:**
    - Invoca a **Producto Clínico** para definir criterios de aceptación e historias de usuario médicas.
    - Invoca a **UX/HCE** para diseñar la interfaz de usuario, atajos de teclado y flujos de navegación optimizados para mitigar el desgaste médico.
+   - Invoca al **Diseñador Android** para adaptar la usabilidad clínica a pantallas táctiles compactas y contextos de uso en movilidad bajo Material Design 3.
    - Invoca a **Integraciones** si el requerimiento interactúa con sistemas externos (LIS, PACS, SISA, etc.).
 4. **Fase de Codificación:** El Orquestador consolida los diseños y especificaciones en `docs/design/` y `docs/specs/` y ejecuta el motor de generación de código (skills) para escribir la solución.
 5. **Quality Gates (Control de Calidad Obligatorio):**

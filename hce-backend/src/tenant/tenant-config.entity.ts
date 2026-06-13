@@ -75,6 +75,10 @@ export class TenantConfigEntity {
   @Column({ name: 'signature_url', nullable: true })
   signatureUrl: string;
 
+  // Integración CliniChat
+  @Column({ name: 'hce_webhook_secret', type: 'varchar', nullable: true })
+  hceWebhookSecret: string | null;
+
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

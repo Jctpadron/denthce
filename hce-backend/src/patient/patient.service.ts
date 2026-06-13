@@ -23,10 +23,11 @@ export class PatientService {
       throw new BadRequestException('Campos obligatorios FHIR faltantes (identifier/DNI, name, birthDate).');
     }
 
-    // El DNI debe ser único por cada profesional (tenant)
-    const existing = await this.patientRepository.findOne({ where: { dni, tenantId } });
+    // La identidad demográfica es (dni, gender) por tenant: en Argentina dos personas distintas
+    // pueden compartir el número de DNI con distinto sexo (Libreta de Enrolamiento / Cívica).
+    const existing = await this.patientRepository.findOne({ where: { dni, gender, tenantId } });
     if (existing) {
-      throw new ConflictException(`El paciente con DNI/identifier ${dni} ya se encuentra registrado en tu consultorio.`);
+      throw new ConflictException(`El paciente con DNI ${dni} y sexo ${gender} ya se encuentra registrado en tu consultorio.`);
     }
 
     const entity = new PatientEntity();
@@ -126,11 +127,11 @@ export class PatientService {
       throw new BadRequestException('Campos obligatorios FHIR faltantes (identifier/DNI, name, birthDate).');
     }
 
-    // Si el DNI cambia, verificar que no haya conflicto con otro paciente en el mismo tenant
-    if (dni !== entity.dni) {
-      const existing = await this.patientRepository.findOne({ where: { dni, tenantId } });
-      if (existing) {
-        throw new ConflictException(`El paciente con DNI/identifier ${dni} ya se encuentra registrado en tu consultorio.`);
+    // Si cambia la identidad (dni o gender), verificar que no colisione con otro paciente del tenant.
+    if (dni !== entity.dni || gender !== entity.gender) {
+      const existing = await this.patientRepository.findOne({ where: { dni, gender, tenantId } });
+      if (existing && existing.id !== entity.id) {
+        throw new ConflictException(`El paciente con DNI ${dni} y sexo ${gender} ya se encuentra registrado en tu consultorio.`);
       }
     }
 
@@ -220,7 +221,7 @@ export class PatientService {
     return entity.payload;
   }
 
-  async search(query: { dni?: string; name?: string; age?: string; admissionDate?: string }, tenantId: string): Promise<any> {
+  async search(query: { dni?: string; name?: string; age?: string; admissionDate?: string; gender?: string }, tenantId: string): Promise<any> {
     const qb = this.patientRepository.createQueryBuilder('patient');
 
     // Filtrar estrictamente por el tenant (aislamiento)
@@ -228,6 +229,9 @@ export class PatientService {
 
     if (query.dni) {
       qb.andWhere('patient.dni LIKE :dni', { dni: `${query.dni}%` });
+    }
+    if (query.gender) {
+      qb.andWhere('patient.gender = :gender', { gender: query.gender });
     }
     if (query.name) {
       qb.andWhere(
@@ -270,7 +274,7 @@ export class PatientService {
   // --- Auxiliares para procesamiento FHIR ---
   private extractDni(fhirPatient: any): string | null {
     const identifiers = fhirPatient.identifier || [];
-    const dniIdentifier = identifiers.find((id: any) => id.value);
+    const dniIdentifier = identifiers.find((id: any) => id.system === 'http://hospital.gov/dni') || identifiers.find((id: any) => id.value);
     return dniIdentifier ? dniIdentifier.value : null;
   }
 

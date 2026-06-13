@@ -239,7 +239,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({ patientId }) => {
                     gap: '0.6rem',
                   }}>
                     {Object.entries(changedFields).map(([field, diff]: [string, any]) => (
-                      <div key={field} style={{ display: 'grid', gridTemplateColumns: '110px 1fr 1fr', gap: '0.5rem', alignItems: 'start', fontSize: '0.8rem' }}>
+                      <div key={field} className="audit-diff-grid">
                         <span style={{ fontWeight: 600, color: 'var(--color-muted)', fontSize: '0.73rem', textTransform: 'uppercase', paddingTop: '2px' }}>
                           {FIELD_LABELS[field] || field}
                         </span>

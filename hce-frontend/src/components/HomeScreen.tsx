@@ -6,7 +6,7 @@ import { getVisibleModules } from '../config/dashboard-modules';
 import keycloak from '../utils/keycloak-config';
 
 interface HomeScreenProps {
-  onNavigate: (to: 'patients' | 'form' | 'settings' | 'users' | 'dashboard') => void;
+  onNavigate: (to: 'patients' | 'odonto-hc' | 'form' | 'settings' | 'users' | 'dashboard') => void;
 }
 
 interface PendingPrescription {

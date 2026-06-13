@@ -3,7 +3,7 @@
   "realm": "hce-realm",
   "enabled": true,
   "displayName": "Historia Clínica Electrónica - Identidad y Seguridad",
-  "sslRequired": "external",
+  "sslRequired": "none",
   "registrationAllowed": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,

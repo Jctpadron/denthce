@@ -14,7 +14,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
   const [givenName, setGivenName] = useState('');
   const [familyName, setFamilyName] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [gender, setGender] = useState('unknown');
+  const [gender, setGender] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [addressLine, setAddressLine] = useState('');
@@ -82,7 +82,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
       setGivenName(given);
       setFamilyName(family);
       setBirthDate(patient.birthDate || '');
-      setGender(patient.gender || 'unknown');
+      setGender(patient.gender || '');
       setPhone(phoneObj ? phoneObj.value : '');
       setEmail(emailObj ? emailObj.value : '');
       setAddressLine(line);
@@ -92,7 +92,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
       setGivenName('');
       setFamilyName('');
       setBirthDate('');
-      setGender('unknown');
+      setGender('');
       setPhone('');
       setEmail('');
       setAddressLine('');
@@ -102,6 +102,10 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!gender || gender === 'unknown') {
+      setMessage({ type: 'error', text: 'El género es obligatorio. Por favor seleccione una opción.' });
+      return;
+    }
     setLoading(true);
     setMessage(null);
 
@@ -182,7 +186,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
         setGivenName('');
         setFamilyName('');
         setBirthDate('');
-        setGender('unknown');
+        setGender('');
         setPhone('');
         setEmail('');
         setAddressLine('');
@@ -228,7 +232,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <form onSubmit={handleSubmit} className="grid-form-2col">
         
         {/* Identificación DNI + Verificación SISA */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -307,12 +311,13 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
             className="search-input"
             style={{ paddingLeft: '1rem', height: '43px', background: 'var(--bg-card)' }}
             value={gender}
+            required
             onChange={(e) => setGender(e.target.value)}
           >
+            <option value="" disabled>Seleccione una opción...</option>
             <option value="male">Masculino</option>
             <option value="female">Femenino</option>
             <option value="other">Otro</option>
-            <option value="unknown">Desconocido</option>
           </select>
         </div>
 
@@ -371,7 +376,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
         </div>
 
         {/* Email */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: 'span 2' }}>
+        <div className="grid-span-full" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <label style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-muted)' }}>Correo Electrónico</label>
           <input
             type="email"
@@ -410,13 +415,13 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
         </div>
 
         {/* Botones de Acción */}
-        <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+        <div className="form-actions-container">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="btn btn-secondary"
-              style={{ padding: '0.75rem 2rem', fontSize: '1rem', width: '150px' }}
+              className="btn btn-secondary form-btn"
+              style={{ minWidth: '150px' }}
             >
               Cancelar
             </button>
@@ -424,8 +429,8 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', width: '200px' }}
+            className="btn btn-primary form-btn"
+            style={{ minWidth: '200px' }}
           >
             {loading ? (patient ? 'Guardando...' : 'Registrando...') : (patient ? 'Guardar Cambios' : 'Registrar')}
           </button>

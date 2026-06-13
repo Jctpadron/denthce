@@ -171,8 +171,8 @@ export const PatientSearch: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'slideIn 0.25s ease' }}>
         
         {/* Barra superior de retorno */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="ficha-clinica-header">
+          <div className="ficha-clinica-header-top">
             <button
               onClick={() => {
                 setSelectedPatient(null);
@@ -187,19 +187,24 @@ export const PatientSearch: React.FC = () => {
               Volver al Buscador
             </button>
             
-            <h2 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-title)', fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
-              Ficha Clínica Digital
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#edf2f7', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#4a5568' }} className="mobile-badge-paciente">
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2962ff' }} />
+              Paciente Activo
+            </div>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#edf2f7', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#4a5568' }}>
+          <h2 className="ficha-clinica-header-title">
+            Ficha Clínica Digital
+          </h2>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#edf2f7', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#4a5568' }} className="desktop-badge-paciente">
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2962ff' }} />
             Paciente Activo
           </div>
         </div>
 
         {/* Layout: columna izquierda + área principal con pestañas */}
-        <div style={{ display: 'grid', gridTemplateColumns: '290px minmax(0, 1fr)', gap: '1.5rem', alignItems: 'start' }}>
+        <div className="ficha-clinica-layout">
           
           {/* Columna Izquierda: Datos Demográficos del Paciente */}
           <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -332,7 +337,7 @@ export const PatientSearch: React.FC = () => {
           </div>
 
           {/* Área principal: barra de pestañas segmentada + panel de contenido o formulario de edición */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
             {isEditingPatient ? (
               <PatientForm
                 patient={selectedPatient}
@@ -376,7 +381,7 @@ export const PatientSearch: React.FC = () => {
                 </div>
 
                 {/* Panel de Contenido del Tab Activo */}
-                <div className="panel" style={{ minHeight: '450px', padding: '2rem', overflow: 'hidden' }}>
+                <div className="panel ficha-clinica-content-panel" style={{ overflow: 'visible' }}>
                   {activeTab === 'encounter' && <EncountersTab patientId={selectedPatient.id} />}
                   {activeTab === 'antecedents' && <AntecedentsTab patientId={selectedPatient.id} />}
                   {activeTab === 'odontogram' && <Odontogram patientId={selectedPatient.id} />}
@@ -400,7 +405,7 @@ export const PatientSearch: React.FC = () => {
   const hasActiveFilters = searchTerm.trim() !== '' || dniFilter.trim() !== '' || ageFilter.trim() !== '' || admissionDateFilter.trim() !== '';
 
   return (
-    <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem' }}>
+    <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       
       {/* Cabecera de búsqueda */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -472,7 +477,7 @@ export const PatientSearch: React.FC = () => {
         borderRadius: '16px', 
         border: '1px solid var(--border-color)' 
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: showAdvanced ? '1.5fr 1fr 1fr 1.2fr' : '1fr', gap: '1.25rem', transition: 'all 0.3s ease' }}>
+        <div className={showAdvanced ? "grid-filters-advanced" : ""} style={{ display: showAdvanced ? 'grid' : 'block', gap: '1.25rem' }}>
           
           {/* Término Principal (DNI o Nombre/Apellido) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -589,27 +594,17 @@ export const PatientSearch: React.FC = () => {
               return (
                 <div 
                   key={patient.id} 
-                  style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '16px',
-                    padding: '1rem 1.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    transition: 'var(--transition-smooth)',
-                    boxShadow: 'var(--shadow-sm)'
-                  }}
+                  className="patient-card"
                   onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = '#2962ff';
-                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(41,98,255,0.05)';
+                    e.currentTarget.style.borderColor = 'var(--border-hover)';
+                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.04)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = 'var(--border-color)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-premium)';
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                  <div className="patient-card-left">
                     <div style={{ 
                       width: '2.8rem', 
                       height: '2.8rem', 
@@ -620,7 +615,8 @@ export const PatientSearch: React.FC = () => {
                       alignItems: 'center', 
                       justifyContent: 'center', 
                       fontWeight: 700,
-                      fontSize: '1.05rem'
+                      fontSize: '1.05rem',
+                      flexShrink: 0
                     }}>
                       {(familyName.charAt(0) || 'P').toUpperCase()}
                     </div>
@@ -628,15 +624,21 @@ export const PatientSearch: React.FC = () => {
                       <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text)', margin: 0, fontFamily: 'var(--font-title)' }}>
                         {familyName}, {givenName}
                       </h4>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--color-muted)', marginTop: '0.2rem', margin: 0 }}>
-                        DNI: <strong style={{ color: '#2962ff' }}>{dni}</strong> | Género: {getGenderDisplayName(patient.gender)} | Edad: {calculateAge(patient.birthDate)} años | Ingreso: {formatAdmissionDate(patient.extension)}
-                      </p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem 0.65rem', fontSize: '0.8rem', color: 'var(--color-muted)', marginTop: '0.25rem' }}>
+                        <span>DNI: <strong style={{ color: '#2962ff' }}>{dni}</strong></span>
+                        <span style={{ opacity: 0.5 }}>|</span>
+                        <span>Género: {getGenderDisplayName(patient.gender)}</span>
+                        <span style={{ opacity: 0.5 }}>|</span>
+                        <span>Edad: {calculateAge(patient.birthDate)} años</span>
+                        <span style={{ opacity: 0.5 }}>|</span>
+                        <span>Ingreso: {formatAdmissionDate(patient.extension)}</span>
+                      </div>
                     </div>
                   </div>
 
                   <button
                     onClick={() => setSelectedPatient(patient)}
-                    className="btn btn-primary"
+                    className="btn btn-primary patient-card-btn"
                     style={{ padding: '0.5rem 1.1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                   >
                     Ficha Clínica

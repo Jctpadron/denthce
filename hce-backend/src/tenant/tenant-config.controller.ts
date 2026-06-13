@@ -51,7 +51,7 @@ export class TenantConfigController {
       'doctorName', 'doctorLicense', 'doctorTitle',
       'address', 'city', 'province', 'postalCode',
       'phone', 'email', 'cuit', 'healthInsurance',
-      'scheduleJson',
+      'scheduleJson', 'hceWebhookSecret',
     ];
     const dto: Record<string, any> = {};
     allowed.forEach(key => {

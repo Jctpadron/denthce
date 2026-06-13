@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PatientForm } from './components/PatientForm';
 import { PatientSearch } from './components/PatientSearch';
+import { OdontologyHC } from './components/odontology/OdontologyHC';
 import { HomeScreen } from './components/HomeScreen';
 import { BrandingSettings } from './components/BrandingSettings';
 import { UserManagement } from './components/UserManagement';
@@ -11,7 +12,7 @@ import keycloak from './utils/keycloak-config';
 import { LogOut, User, Shield } from 'lucide-react';
 import { LandingLogin } from './components/LandingLogin';
 
-type AppView = 'home' | 'patients' | 'form' | 'settings' | 'users';
+type AppView = 'home' | 'patients' | 'odonto-hc' | 'form' | 'settings' | 'users';
 
 function AppContent() {
   const [activeView, setActiveView] = useState<AppView>('home');
@@ -30,6 +31,7 @@ function AppContent() {
   const NAV_ITEMS = [
     { key: 'home' as AppView, label: 'Inicio', icon: '🏠' },
     { key: 'patients' as AppView, label: 'Historia Clínica', icon: '🏥' },
+    { key: 'odonto-hc' as AppView, label: 'HC Odontológica', icon: '🦷' },
     { key: 'form' as AppView, label: 'Admisión', icon: '➕' },
     ...(canConfigure ? [
       { key: 'users' as AppView, label: 'Personal', icon: '👥' },
@@ -59,21 +61,9 @@ function AppContent() {
     }}>
 
       {/* Cabecera Principal */}
-      <header style={{
-        borderBottom: '1px solid var(--border-color)',
-        background: 'rgba(255, 255, 255, 0.96)',
-        backdropFilter: 'blur(12px)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        padding: '0.75rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.02)',
-      }}>
+      <header className="app-header">
         {/* Logo + Nombre del Consultorio (dinámico) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div className="app-logo-container">
           {config.logoUrl ? (
             <img
               src={config.logoUrl}
@@ -108,11 +98,12 @@ function AppContent() {
         </div>
 
         {/* Navegación central */}
-        <nav style={{ display: 'flex', gap: '0.35rem' }}>
+        <nav className="app-nav">
           {NAV_ITEMS.map(item => (
             <button
               key={item.key}
               onClick={() => setActiveView(item.key)}
+              className="app-nav-btn"
               style={{
                 background: activeView === item.key ? 'rgba(41, 98, 255, 0.06)' : 'transparent',
                 border: 'none',
@@ -135,12 +126,12 @@ function AppContent() {
         </nav>
 
         {/* Panel del Profesional */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="app-user-container">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
-            <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)' }}>
+            <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)', flexShrink: 0 }}>
               <User style={{ width: '1rem', height: '1rem' }} />
             </div>
-            <div>
+            <div className="user-info-text">
               <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', display: 'block' }}>{fullName}</span>
               <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.15rem' }}>
                 {clinicalRoles.map(role => (
@@ -191,7 +182,7 @@ function AppContent() {
             }}
           >
             <LogOut style={{ width: '0.9rem', height: '0.9rem' }} />
-            Salir
+            <span className="logout-btn-text">Salir</span>
           </button>
         </div>
       </header>
@@ -202,6 +193,7 @@ function AppContent() {
           <HomeScreen onNavigate={(to) => setActiveView(to === 'dashboard' ? 'home' : to)} />
         )}
         {activeView === 'patients' && <PatientSearch />}
+        {activeView === 'odonto-hc' && <OdontologyHC />}
         {activeView === 'form' && <PatientForm onSuccess={() => setActiveView('patients')} />}
         {activeView === 'users' && canConfigure && <UserManagement />}
         {activeView === 'users' && !canConfigure && (

@@ -162,7 +162,7 @@ export const PrescriptionsTab: React.FC<PrescriptionsTabProps> = ({ patientId })
               Sin recetas registradas para este paciente. Presione "Nueva Receta" arriba para prescribir.
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {prescriptions.map((pr) => {
                 const isDraft = pr.status === 'draft';
                 const medName = pr.medicationCodeableConcept?.text || 'Fármaco sin nombre';
@@ -173,49 +173,51 @@ export const PrescriptionsTab: React.FC<PrescriptionsTabProps> = ({ patientId })
                 return (
                   <div
                     key={pr.id}
+                    className="card-premium-health"
                     style={{
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border-color)',
                       borderLeft: `4px solid ${isDraft ? 'var(--color-amber)' : 'var(--color-emerald)'}`,
-                      borderRadius: '12px',
-                      padding: '1.25rem',
-                      display: 'flex',
                       flexDirection: 'column',
-                      gap: '0.65rem',
-                      boxShadow: 'var(--shadow-sm)',
-                      position: 'relative'
+                      alignItems: 'stretch',
+                      gap: '0.75rem',
                     }}
                   >
-                    {/* Badge de estado superior derecho */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 800,
-                        textTransform: 'uppercase',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '6px',
-                        background: isDraft ? 'rgba(245,158,11,0.06)' : 'rgba(16,185,129,0.06)',
-                        color: isDraft ? 'var(--color-amber)' : 'var(--color-emerald)',
-                        letterSpacing: '0.03em'
-                      }}>
-                        {isDraft ? 'Borrador' : 'Firma Activa'}
-                      </span>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)', fontWeight: 500 }}>
-                        {formatDate(createdDate)}
-                      </span>
-                    </div>
+                    <div className="card-premium-left" style={{ gap: '0.4rem' }}>
+                      <div className="card-premium-title-container">
+                        <span className="card-premium-icon-sutil">
+                          <FileText style={{ width: '1.1rem', height: '1.1rem', color: isDraft ? 'var(--color-amber)' : 'var(--color-emerald)' }} />
+                        </span>
+                        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--color-text)' }}>
+                          {medName}
+                        </span>
+                      </div>
 
-                    {/* Fármaco y Dosificación */}
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: 'var(--color-text)' }}>
-                        {medName}
-                      </h4>
-                      <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'var(--color-muted)', fontWeight: 500, lineHeight: 1.4 }}>
-                        Posología: {dosage}
-                      </p>
-                      <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
-                        Duración: {duration} días de tratamiento
-                      </p>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 800,
+                          textTransform: 'uppercase',
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '6px',
+                          background: isDraft ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)',
+                          color: isDraft ? 'var(--color-amber)' : 'var(--color-emerald)',
+                          border: `1px solid ${isDraft ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)'}`,
+                          letterSpacing: '0.03em'
+                        }}>
+                          {isDraft ? 'Borrador' : 'Firma Activa'}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)', fontWeight: 500 }}>
+                          · {formatDate(createdDate)}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.15rem' }}>
+                        <p style={{ margin: 0, fontSize: '0.83rem', color: 'var(--color-text)', fontWeight: 500, lineHeight: 1.4 }}>
+                          Posología: {dosage}
+                        </p>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+                          Duración: {duration} días de tratamiento
+                        </p>
+                      </div>
                     </div>
 
                     {/* Acciones e Info de Firma */}
@@ -225,7 +227,9 @@ export const PrescriptionsTab: React.FC<PrescriptionsTabProps> = ({ patientId })
                       alignItems: 'center',
                       borderTop: '1px solid var(--border-color)',
                       paddingTop: '0.75rem',
-                      marginTop: '0.25rem'
+                      marginTop: '0.15rem',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem'
                     }}>
                       {/* Firma lógica o Botón de Editar */}
                       {isDraft ? (

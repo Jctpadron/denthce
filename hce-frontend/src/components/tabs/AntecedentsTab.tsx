@@ -136,7 +136,7 @@ export const AntecedentsTab: React.FC<AntecedentsTabProps> = ({ patientId }) => 
   const familiarAntecedents = conditions.filter(c => c.category === 'familiar');
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem', alignItems: 'start' }}>
+    <div className="antecedents-grid">
       
       {/* Listas de Antecedentes */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

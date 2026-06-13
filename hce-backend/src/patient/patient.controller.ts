@@ -16,8 +16,8 @@ export class PatientController {
   /** Extrae el contexto de usuario del token JWT para la auditoría */
   private getUserCtx(req: any) {
     return {
-      userId: req.user?.sub || req.user?.userId || 'unknown',
-      userName: req.user?.preferred_username || req.user?.name || 'Desconocido',
+      userId: req.user?.userId || req.user?.sub || 'unknown',
+      userName: req.user?.preferred_username || req.user?.name || req.user?.username || 'Desconocido',
     };
   }
 
@@ -32,12 +32,19 @@ export class PatientController {
   async search(
     @Request() req: any,
     @Query('identifier') identifier?: string,
+    @Query('gender') gender?: string,
     @Query('name') name?: string,
     @Query('age') age?: string,
     @Query('admissionDate') admissionDate?: string,
   ) {
+    let extractedDni = identifier;
+    if (identifier && identifier.includes('|')) {
+      extractedDni = identifier.split('|')[1];
+    }
+
     return this.patientService.search({
-      dni: identifier,
+      dni: extractedDni,
+      gender,
       name,
       age,
       admissionDate,

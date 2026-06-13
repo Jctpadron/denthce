@@ -22,6 +22,7 @@ export interface TenantConfig {
   healthInsurance: string;
   scheduleJson: Record<string, string>;
   signatureUrl: string | null;
+  hceWebhookSecret: string | null;
 }
 
 const DEFAULT_CONFIG: TenantConfig = {
@@ -52,6 +53,7 @@ const DEFAULT_CONFIG: TenantConfig = {
     domingo: '',
   },
   signatureUrl: null,
+  hceWebhookSecret: null,
 };
 
 interface ThemeContextValue {

@@ -93,9 +93,9 @@ export const UserManagement: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.2s ease' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="module-header">
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-text)' }}>
+          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>
             👥 Gestión de Personal del Consultorio
           </h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
@@ -108,6 +108,7 @@ export const UserManagement: React.FC = () => {
             setSuccessMsg('');
             setErrorMsg('');
           }}
+          className="module-header-btn"
           style={{
             background: 'var(--color-cyan)',
             color: '#fff',
@@ -117,9 +118,6 @@ export const UserManagement: React.FC = () => {
             fontSize: '0.88rem',
             fontWeight: 600,
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
             transition: 'all 0.15s ease',
           }}
         >
@@ -170,60 +168,62 @@ export const UserManagement: React.FC = () => {
             No se encontró personal registrado.
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Usuario</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Nombre Completo</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Email</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Rol</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((u) => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>{u.username}</td>
-                  <td style={{ padding: '0.85rem 1rem' }}>{u.lastName}, {u.firstName}</td>
-                  <td style={{ padding: '0.85rem 1rem', color: 'var(--color-muted)' }}>{u.email}</td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
-                    <span style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      background: u.role === 'recepcionista' ? 'rgba(2,132,199,0.08)' : 'rgba(16,185,129,0.08)',
-                      color: u.role === 'recepcionista' ? 'var(--color-cyan)' : '#10b981',
-                      border: `1px solid ${u.role === 'recepcionista' ? 'rgba(2,132,199,0.2)' : 'rgba(16,185,129,0.2)'}`,
-                      padding: '0.15rem 0.45rem',
-                      borderRadius: '4px',
-                      textTransform: 'uppercase',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.2rem',
-                    }}>
-                      <Shield style={{ width: '0.7rem', height: '0.7rem' }} />
-                      {u.role === 'recepcionista' ? 'Secretaria' : u.role === 'enfermero' ? 'Enfermero/a' : u.role}
-                    </span>
-                  </td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
-                    <span style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      background: u.enabled ? 'rgba(16,185,129,0.08)' : 'rgba(244,63,94,0.08)',
-                      color: u.enabled ? '#10b981' : '#f43f5e',
-                      padding: '0.15rem 0.45rem',
-                      borderRadius: '4px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.2rem',
-                    }}>
-                      <UserCheck style={{ width: '0.7rem', height: '0.7rem' }} />
-                      {u.enabled ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', minWidth: '700px' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid var(--border-color)' }}>
+                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Usuario</th>
+                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Nombre Completo</th>
+                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Email</th>
+                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Rol</th>
+                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-muted)' }}>Estado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => (
+                  <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <td style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>{u.username}</td>
+                    <td style={{ padding: '0.85rem 1rem' }}>{u.lastName}, {u.firstName}</td>
+                    <td style={{ padding: '0.85rem 1rem', color: 'var(--color-muted)' }}>{u.email}</td>
+                    <td style={{ padding: '0.85rem 1rem' }}>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        background: u.role === 'recepcionista' ? 'rgba(2,132,199,0.08)' : 'rgba(16,185,129,0.08)',
+                        color: u.role === 'recepcionista' ? 'var(--color-cyan)' : '#10b981',
+                        border: `1px solid ${u.role === 'recepcionista' ? 'rgba(2,132,199,0.2)' : 'rgba(16,185,129,0.2)'}`,
+                        padding: '0.15rem 0.45rem',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                      }}>
+                        <Shield style={{ width: '0.7rem', height: '0.7rem' }} />
+                        {u.role === 'recepcionista' ? 'Secretaria' : u.role === 'enfermero' ? 'Enfermero/a' : u.role}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem' }}>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        background: u.enabled ? 'rgba(16,185,129,0.08)' : 'rgba(244,63,94,0.08)',
+                        color: u.enabled ? '#10b981' : '#f43f5e',
+                        padding: '0.15rem 0.45rem',
+                        borderRadius: '4px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                      }}>
+                        <UserCheck style={{ width: '0.7rem', height: '0.7rem' }} />
+                        {u.enabled ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
@@ -241,6 +241,7 @@ export const UserManagement: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
+          padding: '1rem',
         }}>
           <div style={{
             background: '#fff',
@@ -248,12 +249,14 @@ export const UserManagement: React.FC = () => {
             borderRadius: '16px',
             width: '100%',
             maxWidth: '520px',
-            padding: '2rem',
+            padding: 'clamp(1rem, 5vw, 2rem)',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             display: 'flex',
             flexDirection: 'column',
             gap: '1.25rem',
             animation: 'scaleIn 0.15s ease-out',
+            maxHeight: 'calc(100vh - 2rem)',
+            overflowY: 'auto',
           }}>
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Agregar Personal de Ayuda</h3>
             
