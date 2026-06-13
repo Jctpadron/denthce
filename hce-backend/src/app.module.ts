@@ -22,6 +22,7 @@ import { AppointmentAuditEntity } from './appointment/appointment-audit.entity';
 import { SlotModule } from './slot/slot.module';
 import { PlatformModuleEntity } from './platform/platform-module.entity';
 import { TenantModuleEntity } from './platform/tenant-module.entity';
+import { PlatformModule } from './platform/platform.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { TenantModuleEntity } from './platform/tenant-module.entity';
     OdontologyModule,
     AppointmentModule,
     SlotModule,
+    PlatformModule,
   ],
   controllers: [AppController],
   providers: [AppService],

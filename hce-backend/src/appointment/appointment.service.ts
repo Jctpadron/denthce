@@ -1,10 +1,14 @@
-import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppointmentEntity } from './appointment.entity';
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentAuditService } from './appointment-audit.service';
 import { WebhookService } from '../webhook/webhook.service';
+import { ModulesService } from '../platform/modules.service';
+
+/** Clave del módulo de integración WhatsApp/CliniChat en el catálogo de servicios. */
+const WHATSAPP_MODULE = 'whatsapp';
 
 const ORIGIN_CHANNEL_EXT = 'http://hospital.gov/fhir/StructureDefinition/origin-channel';
 const STATUSES_REQUIRING_END = ['booked', 'arrived', 'fulfilled'];
@@ -24,6 +28,7 @@ export class AppointmentService {
     private patientRepository: Repository<PatientEntity>,
     private readonly auditService: AppointmentAuditService,
     private readonly webhookService: WebhookService,
+    private readonly modulesService: ModulesService,
   ) {}
 
   /**
@@ -144,8 +149,9 @@ export class AppointmentService {
       payloadSnapshot: saved.payload,
     });
 
-    // Disparar Webhook si el origen es Recepción (evitar bucles infinitos con WhatsApp)
-    if (saved.originChannel === 'recepcion') {
+    // Disparar Webhook a CliniChat solo si el origen es Recepción (evitar bucles con WhatsApp)
+    // Y solo si la clínica tiene contratado el módulo WhatsApp (gate de servicio anexable).
+    if (saved.originChannel === 'recepcion' && (await this.modulesService.isEnabled(tenantId, WHATSAPP_MODULE))) {
       this.webhookService.dispatch('CREATE', saved, tenantId).catch(() => {});
     }
 
@@ -194,8 +200,10 @@ export class AppointmentService {
       payloadSnapshot: saved.payload,
     });
 
-    // Disparar Webhook para notificar la cancelación a CliniChat
-    this.webhookService.dispatch('CANCEL', saved, tenantId).catch(() => {});
+    // Notificar la cancelación a CliniChat solo si la clínica tiene el módulo WhatsApp contratado.
+    if (await this.modulesService.isEnabled(tenantId, WHATSAPP_MODULE)) {
+      this.webhookService.dispatch('CANCEL', saved, tenantId).catch(() => {});
+    }
 
     return saved.payload;
   }
@@ -258,6 +266,12 @@ export class AppointmentService {
    * permite el envío manual desde la agenda. Solo para turnos activos (booked/arrived).
    */
   async sendReminder(id: string, tenantId: string): Promise<any> {
+    // Gate del servicio anexable: el recordatorio por WhatsApp requiere el módulo contratado.
+    if (!(await this.modulesService.isEnabled(tenantId, WHATSAPP_MODULE))) {
+      throw new ForbiddenException(
+        'El módulo WhatsApp no está contratado para esta clínica. Contratá el servicio para enviar recordatorios.',
+      );
+    }
     const appt = await this.appointmentRepository.findOne({ where: { id, tenantId } });
     if (!appt) {
       throw new NotFoundException(`Turno con ID ${id} no encontrado en tu consultorio.`);
