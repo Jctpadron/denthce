@@ -168,6 +168,16 @@ export class SuperAdminService {
     return { tenantId, moduleKey, enabled: tm.enabled, expiresAt: tm.expiresAt };
   }
 
+  /**
+   * Fase 4A — genera (o recupera) el service-account de Keycloak de una clínica.
+   * Devuelve las credenciales que luego se le entregan a CliniChat (Fase 4B).
+   */
+  async generateServiceAccount(tenantId: string): Promise<any> {
+    const clinic = await this.tenantConfigRepo.findOne({ where: { tenantId } });
+    if (!clinic) throw new NotFoundException(`Clínica "${tenantId}" no encontrada.`);
+    return this.keycloakAdmin.createClinicServiceAccount(tenantId);
+  }
+
   /** Métricas globales de la plataforma para el panel de resumen. */
   async metrics(): Promise<any> {
     const [clinics, patients, appointments] = await Promise.all([

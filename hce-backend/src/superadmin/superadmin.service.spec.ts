@@ -16,7 +16,7 @@ describe('SuperAdminService (cross-tenant)', () => {
   const platformModuleRepo = { find: jest.fn(), findOne: jest.fn() };
   const patientRepo = { count: jest.fn() };
   const appointmentRepo = { count: jest.fn() };
-  const keycloakAdmin = { createUser: jest.fn() };
+  const keycloakAdmin = { createUser: jest.fn(), createClinicServiceAccount: jest.fn() };
 
   beforeEach(async () => {
     const mod: TestingModule = await Test.createTestingModule({
@@ -95,6 +95,21 @@ describe('SuperAdminService (cross-tenant)', () => {
     it('NotFound si la clínica no existe', async () => {
       tenantConfigRepo.findOne.mockResolvedValue(null);
       await expect(service.setModule('tx', 'whatsapp', true)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('generateServiceAccount', () => {
+    it('genera el service-account si la clínica existe', async () => {
+      tenantConfigRepo.findOne.mockResolvedValue({ tenantId: 't1' });
+      keycloakAdmin.createClinicServiceAccount.mockResolvedValue({ clientId: 'clinichat-t1', clientSecret: 'sec', tenantId: 't1' });
+      const res = await service.generateServiceAccount('t1');
+      expect(res.clientId).toBe('clinichat-t1');
+      expect(keycloakAdmin.createClinicServiceAccount).toHaveBeenCalledWith('t1');
+    });
+
+    it('NotFound si la clínica no existe', async () => {
+      tenantConfigRepo.findOne.mockResolvedValue(null);
+      await expect(service.generateServiceAccount('tx')).rejects.toThrow(NotFoundException);
     });
   });
 

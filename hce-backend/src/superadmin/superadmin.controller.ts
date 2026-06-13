@@ -44,6 +44,12 @@ export class SuperAdminController {
     });
   }
 
+  /** Fase 4A — genera el service-account de Keycloak para la clínica (llave para CliniChat). */
+  @Post('clinics/:tenantId/service-account')
+  async generateServiceAccount(@Param('tenantId') tenantId: string) {
+    return this.superAdminService.generateServiceAccount(tenantId);
+  }
+
   /** Anexa o da de baja un módulo de una clínica. */
   @Patch('clinics/:tenantId/modules')
   async setModule(@Param('tenantId') tenantId: string, @Body() body: any) {
