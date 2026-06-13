@@ -20,6 +20,8 @@ import { AppointmentModule } from './appointment/appointment.module';
 import { AppointmentEntity } from './appointment/appointment.entity';
 import { AppointmentAuditEntity } from './appointment/appointment-audit.entity';
 import { SlotModule } from './slot/slot.module';
+import { PlatformModuleEntity } from './platform/platform-module.entity';
+import { TenantModuleEntity } from './platform/tenant-module.entity';
 
 @Module({
   imports: [
@@ -40,7 +42,9 @@ import { SlotModule } from './slot/slot.module';
         MedicationRequestEntity, 
         OdontologyResourceEntity,
         AppointmentEntity,
-        AppointmentAuditEntity
+        AppointmentAuditEntity,
+        PlatformModuleEntity,
+        TenantModuleEntity
       ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: true,

@@ -30,6 +30,10 @@
       {
         "name": "paciente",
         "description": "Paciente del centro de salud. Acceso a su propio portal médico."
+      },
+      {
+        "name": "superadmin",
+        "description": "Super Administrador de la plataforma. Gestión cross-tenant de clínicas, módulos contratados y provisión. NO scoped por tenant."
       }
     ]
   },

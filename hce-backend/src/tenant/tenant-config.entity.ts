@@ -79,6 +79,15 @@ export class TenantConfigEntity {
   @Column({ name: 'hce_webhook_secret', type: 'varchar', nullable: true })
   hceWebhookSecret: string | null;
 
+  // Suscripción / estado de la clínica (Super Admin)
+  /** Plan contratado: 'basic' | 'pro' | 'enterprise'. Agrupa el nivel; los módulos finos viven en tenant_modules. */
+  @Column({ type: 'varchar', default: 'basic' })
+  plan: string;
+
+  /** Clínica activa. Si false, queda suspendida (no opera). */
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  isActive: boolean;
+
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

@@ -247,4 +247,41 @@ CREATE INDEX IF NOT EXISTS idx_appt_audit_tenant ON appointment_audit_log (tenan
 \echo 'Tabla appointment_audit_log creada con éxito.'
 
 
+-- 12. Super Admin — Servicios anexables (plan/módulos por clínica)
+ALTER TABLE tenant_config
+    ADD COLUMN IF NOT EXISTS plan VARCHAR(50) NOT NULL DEFAULT 'basic',
+    ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+
+CREATE TABLE IF NOT EXISTS platform_modules (
+    key         VARCHAR(64) PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL,
+    description TEXT,
+    price       NUMERIC(10,2),
+    available   BOOLEAN NOT NULL DEFAULT true,
+    is_base     BOOLEAN NOT NULL DEFAULT false,
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tenant_modules (
+    tenant_id    VARCHAR(255) NOT NULL,
+    module_key   VARCHAR(64)  NOT NULL REFERENCES platform_modules(key) ON DELETE CASCADE,
+    enabled      BOOLEAN NOT NULL DEFAULT true,
+    activated_at TIMESTAMP WITH TIME ZONE,
+    expires_at   TIMESTAMP WITH TIME ZONE,
+    created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (tenant_id, module_key)
+);
+CREATE INDEX IF NOT EXISTS idx_tenant_modules_tenant ON tenant_modules (tenant_id);
+
+INSERT INTO platform_modules (key, name, description, available, is_base) VALUES
+    ('hc-base',          'Historia Clínica',             'Núcleo asistencial: pacientes, odontograma, alergias, signos vitales, documentos.', true, true),
+    ('agenda',           'Agenda de Turnos',             'Calendario de turnos por día/semana, sala de espera y estado del box.',             true, false),
+    ('whatsapp',         'WhatsApp / CliniChat',         'Recordatorios y sincronización de turnos por WhatsApp (bot CliniChat).',            true, false),
+    ('odontologia-pami', 'Historia Clínica Odontológica', 'Ficha odontológica completa modelo PAMI con exportación oficial.',                  true, false)
+ON CONFLICT (key) DO NOTHING;
+
+\echo 'Tablas platform_modules y tenant_modules creadas con éxito.'
+
+
 
