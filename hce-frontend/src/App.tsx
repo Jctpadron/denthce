@@ -3,6 +3,7 @@ import { PatientForm } from './components/PatientForm';
 import { PatientSearch } from './components/PatientSearch';
 import { OdontologyHC } from './components/odontology/OdontologyHC';
 import { AgendaView } from './components/agenda/AgendaView';
+import { SuperAdminPanel } from './components/superadmin/SuperAdminPanel';
 import { HomeScreen } from './components/HomeScreen';
 import { BrandingSettings } from './components/BrandingSettings';
 import { UserManagement } from './components/UserManagement';
@@ -18,10 +19,16 @@ type AppView = 'home' | 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'settings
 function AppContent() {
   const [activeView, setActiveView] = useState<AppView>('home');
   const { config, loading } = useTheme();
-  const { roles: clinicalRoles, canConfigure } = useRoles();
+  const { roles: clinicalRoles, canConfigure, isSuperAdmin } = useRoles();
 
   if (!keycloak.authenticated) {
     return <LandingLogin />;
+  }
+
+  // El Super Admin opera cross-tenant: tiene su propia experiencia (gestión de clínicas y módulos),
+  // separada del shell clínico scoped por tenant.
+  if (isSuperAdmin) {
+    return <SuperAdminPanel />;
   }
 
   const username = keycloak.tokenParsed?.preferred_username || 'Profesional Clínico';
@@ -192,7 +199,18 @@ function AppContent() {
       {/* Contenedor Principal */}
       <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
         {activeView === 'home' && (
-          <HomeScreen onNavigate={(to) => setActiveView(to === 'dashboard' ? 'home' : to)} />
+          <HomeScreen onNavigate={(to) => {
+            const views: Record<string, AppView> = {
+              home: 'home',
+              patients: 'patients',
+              'odonto-hc': 'odonto-hc',
+              agenda: 'agenda',
+              form: 'form',
+              settings: 'settings',
+              users: 'users'
+            };
+            setActiveView(to === 'dashboard' ? 'home' : (views[to] || 'home'));
+          }} />
         )}
         {activeView === 'patients' && <PatientSearch />}
         {activeView === 'odonto-hc' && <OdontologyHC />}

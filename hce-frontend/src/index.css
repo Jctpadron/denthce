@@ -229,6 +229,12 @@ body {
   }
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Estilos interactivos para el Odontograma SVG */
 .tooth-polygon {
   cursor: pointer;
