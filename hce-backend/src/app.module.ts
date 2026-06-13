@@ -23,6 +23,7 @@ import { SlotModule } from './slot/slot.module';
 import { PlatformModuleEntity } from './platform/platform-module.entity';
 import { TenantModuleEntity } from './platform/tenant-module.entity';
 import { PlatformModule } from './platform/platform.module';
+import { SuperAdminModule } from './superadmin/superadmin.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { PlatformModule } from './platform/platform.module';
     AppointmentModule,
     SlotModule,
     PlatformModule,
+    SuperAdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

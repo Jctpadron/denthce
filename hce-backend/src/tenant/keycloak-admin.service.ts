@@ -72,7 +72,8 @@ export class KeycloakAdminService {
     email: string;
     firstName: string;
     lastName: string;
-    role: 'recepcionista' | 'enfermero';
+    /** Rol clínico a asignar. El SuperAdmin lo usa con 'administrador' al provisionar una clínica. */
+    role: 'recepcionista' | 'enfermero' | 'administrador' | 'medico';
     tenantId: string;
   }): Promise<any> {
     const token = await this.getAdminToken();
