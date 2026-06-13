@@ -260,8 +260,14 @@ sequenceDiagram
 
 ---
 
-## 7. Mockups (nano banana → correr en Gemini)
-Ver prompts entregados para: (1) dashboard listado de clínicas, (2) panel de gestión de módulos con toggles, (3) modal crear clínica. Estética DentHCE: fondo claro, tarjetas 24px, acento `#2962ff`, Samsung Health.
+## 8. Mockups aprobados (nano banana / Gemini) — referencia visual del panel
+
+Diseño aprobado por el Super Admin del proyecto (2026-06-13), implementado en `SuperAdminPanel.tsx`:
+- `docs/design/mockups/dashboard_resumen_saas.png` — vista Resumen (4 tarjetas de métricas, ícono centrado, plan con %).
+- `docs/design/mockups/gestion_clinicas_saas.png` — vista Clínicas (lista con plan, estado, chips de módulos, botón Módulos).
+- `docs/design/mockups/modal_modulos_saas.png` — modal de gestión de módulos (íconos por servicio + toggles anexar/baja; base bloqueado).
+
+Estética: fondo claro `#f8fafc`, tarjetas blancas 24px, acento `#2962ff`, toggles iOS azules, Samsung Health. La implementación se alineó a estos mockups (íconos por módulo, métricas con ícono centrado, plan + porcentaje).
 
 ---
 

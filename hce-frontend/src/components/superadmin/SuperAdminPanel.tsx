@@ -2,7 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Shield, LayoutDashboard, Building2, Users, CalendarClock, Plus, X,
   CheckCircle2, XCircle, Settings2, Loader2, LogOut, AlertTriangle,
+  FileText, CalendarDays, MessageCircle, Stethoscope, Boxes,
 } from 'lucide-react';
+
+/** Ícono representativo de cada módulo del catálogo (para el modal de gestión). */
+function moduleIcon(key: string): React.ReactNode {
+  const s = { width: '1.15rem', height: '1.15rem' };
+  switch (key) {
+    case 'hc-base': return <FileText style={s} />;
+    case 'agenda': return <CalendarDays style={s} />;
+    case 'whatsapp': return <MessageCircle style={s} />;
+    case 'odontologia-pami': return <Stethoscope style={s} />;
+    default: return <Boxes style={s} />;
+  }
+}
 import keycloak from '../../utils/keycloak-config';
 import {
   saGetMetrics, saGetClinics, saGetCatalog, saCreateClinic, saSetModule,
@@ -111,32 +124,37 @@ export const SuperAdminPanel: React.FC = () => {
 };
 
 // ---------------- Resumen ----------------
-const MetricCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; color: string }> = ({ icon, label, value, color }) => (
-  <div className="card-premium-health" style={{ padding: '1.1rem 1.25rem', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--color-muted)', letterSpacing: '0.03em' }}>{label}</span>
-      <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: `${color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', color }}>{icon}</div>
-    </div>
-    <span style={{ fontSize: '1.7rem', fontWeight: 800, color: 'var(--color-text)' }}>{value}</span>
+const MetricCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; sub?: string; color: string }> = ({ icon, label, value, sub, color }) => (
+  <div className="card-premium-health" style={{ padding: '1.25rem', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem', textAlign: 'center' }}>
+    <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--color-muted)', letterSpacing: '0.03em' }}>{label}</span>
+    {sub && <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-text)' }}>{sub}</span>}
+    <span style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--color-text)', lineHeight: 1 }}>{value}</span>
+    <div style={{ width: '2.6rem', height: '2.6rem', borderRadius: '50%', background: `${color}1f`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, marginTop: '0.2rem' }}>{icon}</div>
   </div>
 );
 
 const Overview: React.FC<{ metrics: SaMetrics | null; clinics: SaClinic[] }> = ({ metrics, clinics }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.2s ease' }}>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-      <MetricCard icon={<Building2 style={{ width: '1rem', height: '1rem' }} />} label="Clínicas activas" value={metrics ? `${metrics.activeClinics} / ${metrics.totalClinics}` : '—'} color="#059669" />
-      <MetricCard icon={<Users style={{ width: '1rem', height: '1rem' }} />} label="Pacientes totales" value={metrics?.totalPatients ?? '—'} color="#2962ff" />
-      <MetricCard icon={<CalendarClock style={{ width: '1rem', height: '1rem' }} />} label="Turnos totales" value={metrics?.totalAppointments ?? '—'} color="#7c3aed" />
-      <MetricCard icon={<Shield style={{ width: '1rem', height: '1rem' }} />} label="Plan más común" value={planMasComun(clinics)} color="#d97706" />
+      <MetricCard icon={<Building2 style={{ width: '1.15rem', height: '1.15rem' }} />} label="Clínicas activas" value={metrics ? `${metrics.activeClinics} / ${metrics.totalClinics}` : '—'} color="#059669" />
+      <MetricCard icon={<Users style={{ width: '1.15rem', height: '1.15rem' }} />} label="Pacientes totales" value={metrics?.totalPatients ?? '—'} color="#2962ff" />
+      <MetricCard icon={<CalendarClock style={{ width: '1.15rem', height: '1.15rem' }} />} label="Turnos totales" value={metrics?.totalAppointments ?? '—'} color="#7c3aed" />
+      <MetricCard icon={<Shield style={{ width: '1.15rem', height: '1.15rem' }} />} label="Plan más común" sub={planStats(clinics).label} value={planStats(clinics).pct} color="#d97706" />
     </div>
   </div>
 );
 
-function planMasComun(clinics: SaClinic[]): string {
-  if (clinics.length === 0) return '—';
+const PLAN_LABELS: Record<string, string> = { basic: 'Plan Básico', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+
+function planStats(clinics: SaClinic[]): { label: string; pct: string } {
+  if (clinics.length === 0) return { label: '—', pct: '—' };
   const counts: Record<string, number> = {};
   clinics.forEach((c) => { counts[c.plan] = (counts[c.plan] || 0) + 1; });
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  const [topPlan, topCount] = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return {
+    label: (PLAN_LABELS[topPlan] || topPlan).toUpperCase(),
+    pct: `${Math.round((topCount / clinics.length) * 100)}%`,
+  };
 }
 
 // ---------------- Clínicas ----------------
@@ -215,6 +233,9 @@ const ModulesModal: React.FC<{ clinic: SaClinic; catalog: SaModule[]; onClose: (
           const on = active.includes(mod.key);
           return (
             <div key={mod.key} className="card-premium-health" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.75rem 0.9rem', border: '1px solid var(--border-color)' }}>
+              <div style={{ width: '2.6rem', height: '2.6rem', borderRadius: '12px', background: 'rgba(41,98,255,0.06)', color: '#2962ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {moduleIcon(mod.key)}
+              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   {mod.name}
