@@ -204,27 +204,37 @@ const ModulesModal: React.FC<{ clinic: SaClinic; catalog: SaModule[]; onClose: (
   const [busy, setBusy] = useState<string | null>(null);
   const [active, setActive] = useState<string[]>(clinic.modules);
   const [err, setErr] = useState<string | null>(null);
+  // Anexado de WhatsApp: pide el Código de Enlace con un input grande (en vez de window.prompt).
+  const [pairingMod, setPairingMod] = useState<SaModule | null>(null);
+  const [pairingInput, setPairingInput] = useState('');
 
-  const toggle = async (mod: SaModule) => {
+  const doToggle = async (mod: SaModule, pairingCode?: string) => {
     const isOn = active.includes(mod.key);
-    // WhatsApp se anexa con un Código de Enlace (pairing code) que la clínica obtiene en CliniChat.
-    let pairingCode: string | undefined;
-    if (mod.key === 'whatsapp' && !isOn) {
-      const code = window.prompt('Código de Enlace (Pairing Code) generado en CliniChat para esta clínica:');
-      if (!code || !code.trim()) return; // cancelado
-      pairingCode = code.trim();
-    }
     setBusy(mod.key);
     setErr(null);
     try {
       await saSetModule(clinic.tenantId, mod.key, !isOn, undefined, pairingCode);
       setActive((prev) => (isOn ? prev.filter((k) => k !== mod.key) : [...prev, mod.key]));
       onChanged();
+      setPairingMod(null);
+      setPairingInput('');
     } catch (e: any) {
       setErr(e?.response?.data?.message || 'No se pudo actualizar el módulo.');
     } finally {
       setBusy(null);
     }
+  };
+
+  const toggle = async (mod: SaModule) => {
+    const isOn = active.includes(mod.key);
+    // WhatsApp al activarse pide el Código de Enlace generado en CliniChat.
+    if (mod.key === 'whatsapp' && !isOn) {
+      setErr(null);
+      setPairingInput('');
+      setPairingMod(mod);
+      return;
+    }
+    await doToggle(mod);
   };
 
   return (
@@ -234,7 +244,41 @@ const ModulesModal: React.FC<{ clinic: SaClinic; catalog: SaModule[]; onClose: (
         <button onClick={onClose} className="btn btn-secondary" style={{ padding: '0.4rem', borderRadius: '10px' }}><X style={{ width: '1.1rem', height: '1.1rem' }} /></button>
       </div>
       <p style={{ fontSize: '0.78rem', color: 'var(--color-muted)', margin: '0.3rem 0 0' }}>Anexá o dá de baja los servicios contratados por esta clínica.</p>
-      {err && <div style={{ fontSize: '0.78rem', color: '#dc2626', fontWeight: 600 }}>{err}</div>}
+      {err && <div style={{ fontSize: '0.9rem', color: '#dc2626', fontWeight: 600 }}>{err}</div>}
+
+      {/* Anexado de WhatsApp: input grande para el Código de Enlace (reemplaza window.prompt) */}
+      {pairingMod && (
+        <div className="card-premium-health" style={{ padding: '1rem', border: '1px solid rgba(41,98,255,0.3)', background: 'rgba(41,98,255,0.04)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-text)' }}>Anexar {pairingMod.name}</div>
+          <label style={{ fontSize: '0.85rem', color: 'var(--color-muted)', fontWeight: 600 }}>
+            Ingresá el <strong>Código de Enlace</strong> que generó la clínica en CliniChat:
+          </label>
+          <input
+            autoFocus
+            value={pairingInput}
+            onChange={(e) => setPairingInput(e.target.value.toUpperCase())}
+            onKeyDown={(e) => { if (e.key === 'Enter' && pairingInput.trim()) doToggle(pairingMod, pairingInput.trim()); }}
+            placeholder="Ej: A8F9-2BK1"
+            className="search-input"
+            style={{ fontSize: '1.1rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, padding: '0.8rem' }}
+          />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => doToggle(pairingMod, pairingInput.trim())}
+              disabled={!pairingInput.trim() || busy === pairingMod.key}
+              className="btn btn-primary"
+              style={{ flex: 1, padding: '0.8rem', fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+            >
+              {busy === pairingMod.key ? <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} /> : <CheckCircle2 style={{ width: '1rem', height: '1rem' }} />}
+              Anexar servicio
+            </button>
+            <button onClick={() => { setPairingMod(null); setPairingInput(''); }} className="btn btn-secondary" style={{ padding: '0.8rem 1.1rem', fontSize: '0.9rem' }}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginTop: '0.5rem' }}>
         {catalog.map((mod) => {
           const on = active.includes(mod.key);

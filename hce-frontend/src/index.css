@@ -9,7 +9,7 @@
   --border-hover: #2962ff; /* Azul premium para foco */
   
   --color-text: #1e293b; /* Charcoal/Slate-800: Menos agresivo que el negro */
-  --color-muted: #64748b; /* Slate-500: Secundarios */
+  --color-muted: #475569; /* Slate-600: Secundarios. Oscurecido (antes Slate-500) para contraste WCAG AA en texto pequeño — accesibilidad para operador de 65 años. */
   
   /* Acentos de Color Modernos */
   --color-cyan: #0284c7; /* Azul médico premium */
@@ -33,13 +33,31 @@
   --color-pastel-blue: #eef2ff;
 }
 
+/* Base tipográfica agrandada (16px -> 17px): escala TODOS los `rem` ~6% de forma
+   proporcional (texto y espaciado). Mejora la legibilidad para el operador de 65 años
+   sin romper proporciones. Las fuentes en rem suben todas a la vez. */
+html {
+  font-size: 17px;
+}
+
 body {
   margin: 0;
   background-color: var(--bg-base);
   color: var(--color-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5; /* más aire entre líneas para lectura cómoda */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Piso de legibilidad: ningún texto por debajo de ~12.5px reales.
+   Atrapa los tamaños muy chicos (0.66-0.72rem) que quedaban duros de leer. */
+.search-input,
+button,
+input,
+select,
+textarea {
+  font-size: max(0.8rem, 13.5px);
 }
 
 * {
