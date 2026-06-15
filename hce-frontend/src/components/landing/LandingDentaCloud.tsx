@@ -30,7 +30,7 @@ export const LandingDentaCloud: React.FC = () => {
 
   return (
     <div className={`landing-root${variant === 'pro' ? ' landing--pro' : ''}`}>
-      <LandingNav onDemo={openDemo} onLogin={login} />
+      <LandingNav onLogin={login} />
       <main>
         <Hero onDemo={openDemo} />
         <Transformacion />

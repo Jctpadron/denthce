@@ -373,13 +373,19 @@ textarea {
 }
 @media (min-width: 1024px) { .app-header { padding: 0.75rem 2rem; } }
 
-/* Logo: tamaño fijo, no se encoge */
+/* Logo + nombre: puede encogerse y truncar el nombre largo (no empuja al usuario) */
 .app-logo-container {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   min-width: 0;
+}
+.app-logo-container > div { min-width: 0; }
+.app-logo-container h1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Cinta de navegación: ocupa el medio, se achica y scrollea (nunca pisa al usuario).
@@ -407,7 +413,68 @@ textarea {
   flex: 0 0 auto;
 }
 
-.app-nav-btn { flex-shrink: 0; }
+/* Avatar + Salir: solo en desktop. En mobile van al drawer (header limpio). */
+.app-user-desktop {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+@media (max-width: 1023px) {
+  .app-user-desktop { display: none; }
+}
+
+/* Separador y acción de salir dentro del drawer (mobile) */
+.app-drawer__sep {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0.4rem 0;
+}
+.app-drawer__logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-rose);
+  cursor: pointer;
+  width: 100%;
+  justify-content: flex-start;
+  transition: var(--transition-smooth);
+}
+.app-drawer__logout:hover { background: rgba(239, 68, 68, 0.06); }
+
+/* Botones de navegación: base + hover + activo, con color de marca (tokens) */
+.app-nav-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-smooth);
+}
+@media (hover: hover) {
+  .app-nav-btn:hover {
+    background: color-mix(in srgb, var(--color-primary, var(--color-cyan)) 8%, transparent);
+    color: var(--color-primary, var(--color-cyan));
+  }
+}
+.app-nav-btn.is-active {
+  background: color-mix(in srgb, var(--color-primary, var(--color-cyan)) 10%, transparent);
+  color: var(--color-primary, var(--color-cyan));
+  font-weight: 700;
+}
 
 /* Botón hamburguesa: oculto en desktop, visible al colapsar */
 .app-burger {
@@ -422,7 +489,10 @@ textarea {
   color: var(--color-text);
   transition: var(--transition-smooth);
 }
-.app-burger:hover { border-color: #2962ff; color: #2962ff; }
+.app-burger:hover {
+  border-color: var(--color-primary, var(--color-cyan));
+  color: var(--color-primary, var(--color-cyan));
+}
 
 /* Drawer desplegable (debajo del header) en pantallas chicas */
 .app-drawer {

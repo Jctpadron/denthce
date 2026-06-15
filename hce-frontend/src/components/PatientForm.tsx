@@ -405,8 +405,10 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
 
         {/* Género biológico */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-muted)' }}>Género *</label>
+          <label htmlFor="patient-gender" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-muted)' }}>Género *</label>
           <select
+            id="patient-gender"
+            aria-label="Género"
             className="search-input"
             style={{ paddingLeft: '1rem', height: '43px', background: 'var(--bg-card)' }}
             value={gender}
@@ -450,8 +452,10 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
 
         {/* Fecha de nacimiento */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-muted)' }}>Fecha de Nacimiento *</label>
+          <label htmlFor="patient-birthdate" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-muted)' }}>Fecha de Nacimiento *</label>
           <input
+            id="patient-birthdate"
+            aria-label="Fecha de nacimiento"
             type="date"
             required
             className="search-input"

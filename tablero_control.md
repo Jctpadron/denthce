@@ -10,6 +10,7 @@ Este es un **documento bidireccional y vivo**:
 1. **Para Cambiar el Estado:** Puedes marcar las tareas completadas cambiando el checkbox de `- [ ]` a `- [x]` manualmente aquí. El script orquestador detectará el cambio y recalculará los porcentajes de avance automáticamente.
 2. **Para Agregar Nuevas Funciones/Tareas:** Puedes escribir directamente una nueva línea bajo el módulo correspondiente usando el formato `- [ ] Tarea X.Y: Descripción de la nueva función. *(Prioridad: Alta/Media/Baja)*`. El motor de orquestación la registrará en la base de datos del backlog y la asignará a los agentes en la siguiente ejecución.
 3. **Propuestas de los Agentes:** Si un agente de IA identifica un requerimiento faltante o una mejora en la seguridad/FHIR durante el análisis, te presentará una propuesta de tarea en la sección final de este documento para que la revises y apruebes.
+4. **Responsable por tarea (coordinación multi-agente):** toda tarea/iniciativa en curso debe declarar su dueño con el sufijo **`(Responsable: Claude|Gemini|…)`**. Esto evita que dos agentes trabajen lo mismo. Este tablero (+ `docs/backlog.json` y `docs/adr/`) es la **fuente única de verdad**; las memorias privadas de cada agente NO lo son. Editar este archivo **solo si está libre** (no pisar a otro agente). Detalle del protocolo en `AGENTS.md` → "Fuente Única de Verdad y Arranque de Sesión".
 
 ---
 
@@ -173,6 +174,19 @@ Este es un **documento bidireccional y vivo**:
 - [x] **SA.4A:** Generación del service-account de Keycloak por clínica (rol `servicio-turnos` mínimo privilegio + mapper `tenant_id`). Verificado contra Keycloak real. *(Prioridad: Alta)*
 - [ ] **SA.4B:** Orquestación HCE→CliniChat (entrega automática de credenciales al anexar). BLOQUEADA: requiere endpoint nuevo en `clinichat-assistant` (handoff entregado: `docs/integraciones/HANDOFF-CLINICHAT-orquestacion-hce.md`). *(Prioridad: Media)*
 - [ ] **SA.6:** Despliegue a producción (migración RDS de módulos + roles Keycloak + usuario superadmin) y verificación visual del panel. *(Prioridad: Media)*
+
+---
+
+### Iniciativa transversal: Auditoría de Responsividad/Accesibilidad Móvil (QA)
+*Auditoría E2E móvil (Android) de la HCE. **Documento CANÓNICO:** `docs/qa/auditoria_responsividad_movil.md` (v2, realineada al sistema actual). El doc `docs/specs/auditoria_general_hce.md` quedó **SUPERSEDIDO** (duplicado desalineado, con "65 años" y componentes ocultos) — no usar. Responsable: Claude. (Fuera del conteo de los 70 del plan.)*
+
+- [x] **QA.1:** Framework de auditoría v2 (matriz de control + flujo E2E realineado: login Keycloak, HC Odontológica + Imágenes/docs, Home nuevo, landing + automatización axe/Lighthouse/BrowserStack + gate de release). *(Prioridad: Alta)*
+- [x] **QA.2:** Hallazgos ya corregidos en Home/header móvil (overflow → "Salir" fuera de pantalla; íconos lucide; admin movido al avatar). *(Prioridad: Alta)*
+- [ ] **QA.3:** Ejecución de la auditoría pantalla por pantalla (screenshots + axe) y registro en la tabla consolidada del doc canónico. *(Prioridad: Media)*
+
+---
+
+> 🤝 **Coordinación entre agentes (Claude + Gemini):** la **fuente única de verdad del estado** es este `tablero_control.md` + `docs/backlog.json`. Todo trabajo/propuesta se registra acá con **responsable**. Regla de artefactos: **uno canónico**; los duplicados se marcan **SUPERSEDIDO** apuntando al vigente. Las memorias privadas de cada agente **no** son estado compartido. Editar el tablero **solo si está libre** (no pisar al otro agente).
 
 ---
 

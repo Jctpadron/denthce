@@ -3,12 +3,12 @@ import { Menu, X, LogIn } from 'lucide-react';
 import { DentaCloudLogo, NAV_LINKS } from './content';
 
 interface LandingNavProps {
-  onDemo: () => void;
   onLogin: () => void;
 }
 
-/** Barra superior sticky: logo + anclas + CTAs. Drawer en mobile. */
-export const LandingNav: React.FC<LandingNavProps> = ({ onDemo, onLogin }) => {
+/** Barra superior sticky: logo + anclas + "Iniciar sesión". Drawer en mobile.
+ *  El CTA "Solicitar demo" NO va acá (vive en hero, sección final y footer). */
+export const LandingNav: React.FC<LandingNavProps> = ({ onLogin }) => {
   const [scrolled, setScrolled] = useState(false);
   const [drawer, setDrawer] = useState(false);
 
@@ -44,9 +44,6 @@ export const LandingNav: React.FC<LandingNavProps> = ({ onDemo, onLogin }) => {
           <button type="button" className="landing-btn-secondary landing-nav__login-text" onClick={onLogin}>
             <LogIn size={18} aria-hidden="true" /> Iniciar sesión
           </button>
-          <button type="button" className="landing-btn-primary" onClick={onDemo}>
-            Solicitar demo
-          </button>
           <button
             type="button"
             className="landing-nav__burger"
@@ -68,9 +65,6 @@ export const LandingNav: React.FC<LandingNavProps> = ({ onDemo, onLogin }) => {
           ))}
           <button type="button" className="landing-btn-secondary" onClick={() => { setDrawer(false); onLogin(); }}>
             <LogIn size={18} aria-hidden="true" /> Iniciar sesión
-          </button>
-          <button type="button" className="landing-btn-primary" onClick={() => { setDrawer(false); onDemo(); }}>
-            Solicitar demo
           </button>
         </div>
       )}

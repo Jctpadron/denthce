@@ -16,6 +16,31 @@ Este repositorio contiene el blueprint operativo de una HCE gobernada por agente
 - **Idioma obligatorio:** Toda la comunicación con el usuario, pensamientos internos (bloques de pensamiento del modelo), procesos, logs y notificaciones de todos los agentes deben realizarse exclusivamente en español.
 - **Diseño Responsivo Obligatorio:** Toda interfaz de usuario, vista y componente desarrollado en el frontend debe ser 100% responsivo (mobile-safe), adaptándose dinámicamente mediante CSS flexible (Flexbox, Grid, Media Queries) a pantallas pequeñas, medianas y grandes, evitando roturas de cajas, desbordamientos de texto o inaccesibilidad de botones clínicos.
 
+## Fuente Única de Verdad y Arranque de Sesión (multi-agente)
+> Este proyecto lo trabajan VARIOS agentes (Claude, Gemini, etc.) y personas, en paralelo. Para no divergir, el **estado canónico vive en el repositorio**, no en la memoria privada de cada agente.
+
+**Fuente única de verdad (en orden de autoridad):**
+1. `AGENTS.md` (este archivo) — gobernanza y reglas vendor-neutral. Lo lee CUALQUIER agente.
+2. `tablero_control.md` + `docs/backlog.json` — estado vivo: avance, tareas, **responsables**, propuestas.
+3. `docs/adr/` — decisiones tomadas (inmutables). Antes de re-discutir algo, revisar si ya hay un ADR.
+4. `docs/walkthroughs/` — bitácora de cambios significativos (handoff).
+5. Historial de Git (commits/PRs) — memoria compartida de implementación.
+
+> Las **memorias privadas** de cada agente (p. ej. `MEMORY.md` de Claude) son **caché, NO fuente de verdad**: solo reflejan lo que ya está en el repo. Lo que deba coordinarse, va al repo.
+
+**Bootstrap de sesión (todo agente, al iniciar):**
+1. Leer `AGENTS.md` + el archivo de vendor si existe (`CLAUDE.md` / `GEMINI.md`).
+2. Leer `tablero_control.md` → dónde estamos, qué está en curso, quién es responsable.
+3. Revisar `docs/adr/` y los últimos `docs/walkthroughs/` (decisiones y bitácora vigentes).
+4. Mirar `git log` para el estado real del código.
+
+**Reglas de coordinación (anti-"ensalada"):**
+- **Un artefacto = un dueño canónico.** Si aparece un duplicado, marcar el viejo **SUPERSEDIDO** apuntando al vigente.
+- **Responsable por tarea/iniciativa** declarado en el tablero (`Responsable: Claude|Gemini|…`).
+- **Editar archivos compartidos solo si están libres** (tablero, AGENTS.md, realm, etc.); ante duda, proponer y confirmar.
+- Toda propuesta "para llevar adelante" se **registra en el tablero**.
+- Los vendor files (`CLAUDE.md`, `GEMINI.md`) son **finos** y apuntan a esta fuente; no duplican estado.
+
 ## Flujo de trabajo de Orquestación y Desarrollo
 El Orquestador liderará el desarrollo de cada módulo o requerimiento invocando a los agentes especializados de forma secuencial y estructurada. Ningún cambio de código o configuración se dará por completado sin cumplir con los siguientes pasos y controles de calidad:
 
