@@ -5,7 +5,9 @@
  * Salvaguarda: DNI 90000900-90000909, apellido " QA-TEST".
  */
 const KC = 'https://auth.systia.ar';
-const API = 'http://localhost:3000';
+// Parametrizable por entorno (default LOCAL). Para prod: API_BASE=https://api.systia.ar DNI_BASE=90000910
+const API = process.env.API_BASE || 'http://localhost:3000';
+const DNI_BASE = parseInt(process.env.DNI_BASE || '90000900', 10);
 const ODONTO_LAYER = 'http://denthce.local/fhir/StructureDefinition/odontogram-layer';
 
 const NOMBRES_M = ['Juan', 'Carlos', 'Roberto', 'Miguel', 'Jorge'];
@@ -48,7 +50,7 @@ async function main() {
   baseDate.setHours(9, 0, 0, 0);
 
   for (let i = 0; i < 10; i++) {
-    const dni = String(90000900 + i);
+    const dni = String(DNI_BASE + i);
     const female = i % 2 === 0;
     const gender = female ? 'female' : 'male';
     const given = (female ? NOMBRES_F : NOMBRES_M)[i % 5];

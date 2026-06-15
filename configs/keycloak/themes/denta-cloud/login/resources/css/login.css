@@ -1,0 +1,160 @@
+/* ============================================================
+   Denta Cloud — Tema de login de Keycloak
+   Identidad: tema claro/clínico, azul (#1e6fd9) + menta (#2aa57c),
+   tipografía Inter, logo de marca. Hereda del tema base "keycloak".
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --dc-blue: #1e6fd9;
+  --dc-mint: #2aa57c;
+  --dc-ink: #1e293b;
+  --dc-muted: #475569;
+  --dc-border: #e5e9ef;
+  --dc-bg: #f6f8f9;
+}
+
+/* --- Fondo claro con glows azul/menta (igual que la landing) --- */
+html, body { height: 100%; }
+.login-pf, body.login-pf, body {
+  background:
+    radial-gradient(60% 55% at 85% -5%, rgba(30, 111, 217, 0.10), transparent 70%),
+    radial-gradient(55% 50% at -5% 105%, rgba(42, 165, 124, 0.12), transparent 70%),
+    var(--dc-bg) !important;
+  background-attachment: fixed !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  color: var(--dc-ink);
+}
+.login-pf body { background: transparent !important; }
+
+/* --- Sin selector de idioma (refuerzo; el realm ya deja solo español) --- */
+#kc-locale, #kc-locale-wrapper, #kc-locale-dropdown { display: none !important; }
+
+/* --- Centrado vertical de toda la página de login --- */
+.login-pf-page {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* --- Header: ícono SVG de marca (transparente, sin caja blanca) --- */
+#kc-header { width: 100%; }
+.login-pf-page-header, #kc-header { margin-bottom: 0.5rem !important; }
+#kc-header-wrapper {
+  font-size: 0 !important;
+  color: transparent !important;
+  padding: 0 !important;
+  background-image: url('../img/denta-icon.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  height: 72px;
+  width: 78px;
+  margin: 0 auto 0.5rem;
+}
+
+/* --- Tarjeta de login: contenida y centrada (~420px) --- */
+.card-pf {
+  max-width: 420px !important;
+  width: 100% !important;
+  border: 1px solid var(--dc-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 60px -24px rgba(15, 23, 42, 0.22) !important;
+  padding: 2rem 2.25rem !important;
+  background: #ffffff !important;
+  margin: 0 auto !important;
+  float: none !important;
+}
+
+/* --- Título "Ingrese a su cuenta" --- */
+#kc-page-title {
+  color: var(--dc-ink) !important;
+  font-weight: 800 !important;
+  font-family: 'Inter', sans-serif !important;
+  letter-spacing: -0.01em;
+}
+
+/* --- Etiquetas y textos --- */
+.pf-c-form__label, label, .control-label {
+  color: var(--dc-muted) !important;
+  font-weight: 600 !important;
+}
+
+/* --- Campos --- */
+.pf-c-form-control,
+input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+  border-radius: 10px !important;
+  border: 1px solid var(--dc-border) !important;
+  padding: 0.7rem 0.9rem !important;
+  height: auto !important;
+  font-size: 0.95rem !important;
+  background: #fff !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+.pf-c-form-control:focus,
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+  border-color: var(--dc-blue) !important;
+  box-shadow: 0 0 0 3px rgba(30, 111, 217, 0.15) !important;
+  outline: none !important;
+}
+
+/* --- Botón primario (Ingresar) --- */
+.pf-c-button.pf-m-primary,
+input[type="submit"], button[type="submit"], #kc-login, .btn-primary {
+  background: var(--dc-blue) !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-family: 'Inter', sans-serif !important;
+  padding: 0.8rem 1rem !important;
+  font-size: 0.98rem !important;
+  box-shadow: none !important;
+  transition: filter 0.2s !important;
+}
+.pf-c-button.pf-m-primary:hover,
+input[type="submit"]:hover, #kc-login:hover, .btn-primary:hover {
+  filter: brightness(0.94) !important;
+}
+
+/* --- Enlaces (Olvidé contraseña / Registrarse) --- */
+a, #kc-registration a, #kc-info a, .pf-c-button.pf-m-link {
+  color: var(--dc-blue) !important;
+}
+a:hover { color: var(--dc-mint) !important; }
+
+/* --- Pie de la tarjeta (registro) --- */
+#kc-info, #kc-registration { color: var(--dc-muted) !important; }
+
+/* --- Campo contraseña: input + ojo como UN solo control (mismo ancho que usuario) --- */
+.pf-c-input-group { display: flex !important; width: 100% !important; }
+.pf-c-input-group > .pf-c-form-control {
+  flex: 1 1 auto !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right: none !important;
+}
+.pf-c-input-group > .pf-c-button.pf-m-control {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  border: 1px solid var(--dc-border) !important;
+  border-left: none !important;
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  background: #fff !important;
+  color: var(--dc-muted) !important;
+}
+.pf-c-input-group:focus-within > .pf-c-form-control,
+.pf-c-input-group:focus-within > .pf-c-button.pf-m-control {
+  border-color: var(--dc-blue) !important;
+}
+
+/* --- Alertas de error: legibles sobre tema claro --- */
+.pf-c-alert, .alert-error, .alert-warning { border-radius: 10px !important; }

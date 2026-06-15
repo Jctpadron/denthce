@@ -75,6 +75,9 @@ keycloak-data/
 # === Antigravity IDE (contexto local de IA — no subir) ===
 .gemini/
 
+# === Override de docker-compose para entorno local (no versionar) ===
+docker-compose.override.yml
+
 # === Certificados y llaves privadas ===
 *.pem
 *.key

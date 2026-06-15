@@ -40,6 +40,7 @@ services:
       - "8080:8080"
     volumes:
       - ./configs/keycloak/hce-realm.json:/opt/keycloak/data/import/hce-realm.json:ro
+      - ./configs/keycloak/themes:/opt/keycloak/themes
     depends_on:
       - hce-db
     networks:
@@ -65,7 +66,7 @@ services:
       PORT: 3000
       KEYCLOAK_ISSUER_URL: https://auth.systia.ar/realms/hce-realm
       KEYCLOAK_JWKS_URI: https://auth.systia.ar/realms/hce-realm/protocol/openid-connect/certs
-      DB_SYNCHRONIZE: "false"
+      DB_SYNCHRONIZE: "true"
       CLINICHAT_WEBHOOK_URL: https://hooks.systia.ar/api/public/hooks/sync-appointment
     command: sh -c "npm install && npm run start:dev"
     depends_on:

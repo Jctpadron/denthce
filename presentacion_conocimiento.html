@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base de Conocimiento Odontológico e IA - Propuesta de UX e Infraestructura</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Variables y Sistema de Diseño Premium - LIGHT MODE (Samsung Health Inspired) */
+    :root {
+      --bg-primary: #f4f6fa;
+      --panel-bg: #ffffff;
+      --panel-border: rgba(0, 0, 0, 0.06);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      
+      --accent-primary: #2563eb; /* Azul clínico moderno */
+      --accent-secondary: #7c3aed; /* Violeta */
+      --accent-success: #059669; /* Verde clínico */
+      --accent-warning: #d97706; /* Naranja/Amarillo aviso */
+      --accent-danger: #dc2626; /* Rojo */
+      
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+      
+      --font-title: 'Outfit', 'Inter', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Fondo dinámico y sutil para Light Mode */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.35;
+    }
+
+    .bg-blob-1 {
+      top: -10%;
+      left: -5%;
+      width: 40vw;
+      height: 40vw;
+      background-color: rgba(37, 99, 235, 0.12);
+    }
+
+    .bg-blob-2 {
+      bottom: -10%;
+      right: -5%;
+      width: 45vw;
+      height: 45vw;
+      background-color: rgba(124, 58, 237, 0.1);
+    }
+
+    /* Estructura del Layout (Espaciados de 8px según directriz UX) */
+    header {
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      padding: 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .logo-title {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+
+    .logo-badge {
+      background: rgba(37, 99, 235, 0.08);
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      color: var(--accent-primary);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 30px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-tab.active {
+      background: #ffffff;
+      color: var(--accent-primary);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Secciones de Contenido (Tabs) */
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.35s ease-out forwards;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas de Presentación y Paneles */
+    .hero-panel {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-text {
+      flex: 1.2;
+    }
+
+    .hero-text h1 {
+      font-family: var(--font-title);
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .hero-text p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: #f8fafc;
+      border: 1px solid rgba(0, 0, 0, 0.03);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      border-color: rgba(37, 99, 235, 0.15);
+    }
+
+    .stat-value {
+      font-family: var(--font-title);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* Grid de Presentación */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 968px) {
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-panel {
+        flex-direction: column;
+        padding: 32px;
+      }
+    }
+
+    .feature-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(37, 99, 235, 0.1);
+    }
+
+    .feature-icon {
+      background: rgba(37, 99, 235, 0.06);
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-title);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    /* --- SIMULADORES E INTERACTIVIDAD --- */
+    .simulator-container {
+      display: grid;
+      grid-template-columns: 1.25fr 1.75fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .simulator-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .control-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .interactive-display {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      min-height: 400px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    textarea, input, select {
+      background: #f8fafc;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      color: var(--text-primary);
+      padding: 10px 14px;
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    textarea:focus, input:focus, select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: #ffffff;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent-primary), #1d4ed8);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      color: var(--text-secondary);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      box-shadow: none;
+      color: var(--text-primary);
+    }
+
+    /* Gráfico de Embedding (Light Mode) */
+    .embedding-viz {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      height: 160px;
+      overflow-y: auto;
+      align-content: flex-start;
+    }
+
+    .vector-cell {
+      width: calc(10% - 4px);
+      height: 14px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .vector-cell:hover::after {
+      content: attr(data-val);
+      position: absolute;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 5px;
+      border-radius: 3px;
+      z-index: 10;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* --- SIMULADOR DE BÚSQUEDA SEMÁNTICA --- */
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .result-item {
+      background: #f8fafc;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .result-item:hover {
+      border-color: rgba(37, 99, 235, 0.15);
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .patient-tag {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .score-badge {
+      background: rgba(5, 150, 105, 0.08);
+      color: var(--accent-success);
+      border: 1px solid rgba(5, 150, 105, 0.15);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .result-content {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .result-footer {
+      display: flex;
+      gap: 10px;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    .tenant-badge {
+      background: rgba(124, 58, 237, 0.08);
+      color: var(--accent-secondary);
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* Alerta Zero Trust */
+    .block-alert {
+      background: rgba(220, 38, 38, 0.05);
+      border: 1px solid rgba(220, 38, 38, 0.15);
+      color: var(--accent-danger);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    /* --- VISUALIZADOR DE GRAFO CLINICO (GraphRAG) --- */
+    .canvas-container {
+      position: relative;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      height: 380px;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    .graph-legend {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--panel-border);
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .legend-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .graph-info {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--panel-border);
+      padding: 16px;
+      border-radius: 10px;
+      width: 260px;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      opacity: 0;
+      box-shadow: var(--shadow-md);
+    }
+
+    .graph-info.active {
+      opacity: 1;
+    }
+
+    /* Diapositivas de Presentación Estructural */
+    .slide-viewer {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .slide-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .slide-steps {
+      display: flex;
+      gap: 8px;
+    }
+
+    .slide-step-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .slide-step-dot.active {
+      background: var(--accent-primary);
+      transform: scale(1.25);
+    }
+
+    .slide-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 32px;
+      min-height: 280px;
+      display: none;
+      align-items: center;
+      gap: 32px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .slide-box.active {
+      display: flex;
+    }
+
+    .slide-img-placeholder {
+      flex: 1;
+      height: 200px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(124, 58, 237, 0.05));
+      border-radius: 12px;
+      border: 1px dashed rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .slide-content-text {
+      flex: 1.6;
+    }
+
+    .slide-content-text h2 {
+      font-family: var(--font-title);
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .slide-content-text p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .tag-architect { background: rgba(37, 99, 235, 0.08); color: var(--accent-primary); }
+    .tag-security { background: rgba(220, 38, 38, 0.08); color: var(--accent-danger); }
+    .tag-fhir { background: rgba(5, 150, 105, 0.08); color: var(--accent-success); }
+
+    /* Footer */
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--panel-border);
+      margin-top: auto;
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Elementos de Fondo -->
+  <div class="bg-decoration">
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+  </div>
+
+  <!-- Encabezado de Navegación -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">
+        <i data-lucide="database" style="color: #ffffff; width: 22px; height: 22px;"></i>
+      </div>
+      <div>
+        <h1 class="logo-title">HCE Knowledge Base</h1>
+        <p style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 600;">Clínica Odontológica</p>
+      </div>
+      <span class="logo-badge">Agente UX Certificado</span>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('arq')">
+        <i data-lucide="layers" style="width: 16px; height: 16px;"></i>
+        Arquitectura
+      </button>
+      <button class="nav-tab" onclick="switchTab('vector')">
+        <i data-lucide="binary" style="width: 16px; height: 16px;"></i>
+        Simulador Vectorial
+      </button>
+      <button class="nav-tab" onclick="switchTab('search')">
+        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+        Búsqueda Semántica
+      </button>
+      <button class="nav-tab" onclick="switchTab('graph')">
+        <i data-lucide="network" style="width: 16px; height: 16px;"></i>
+        GraphRAG Clínico
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main>
+
+    <!-- PESTAÑA 1: ARQUITECTURA -->
+    <div id="tab-arq" class="tab-content active">
+      <div class="hero-panel">
+        <div class="hero-text">
+          <h1>Data Lake del Conocimiento Odontológico</h1>
+          <p>Unificando la precisión clínica del <strong>Odontograma y recursos HL7 FHIR</strong>, las <strong>reglas de negocio odontológicas</strong> y los <strong>blueprints de código y arquitectura</strong> para entrenar, guiar y optimizar a los agentes de IA en el desarrollo de software dental.</p>
+          <div class="hero-stats">
+            <div class="stat-card">
+              <div class="stat-value">3 Capas</div>
+              <div class="stat-label">Dominio, FHIR y Código</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">pgvector</div>
+              <div class="stat-label">Indexación Híbrida</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">Blueprints</div>
+              <div class="stat-label">Patrones Reutilizables</div>
+            </div>
+          </div>
+        </div>
+        <div style="flex: 0.8; display: flex; justify-content: center;">
+          <div style="background: #ffffff; border: 1px solid var(--panel-border); padding: 24px; border-radius: 16px; box-shadow: var(--shadow-md); width: 100%;">
+            <h3 style="font-family: var(--font-title); margin-bottom: 12px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="sparkles" style="color: var(--accent-primary);"></i>
+              ¿Cómo entrena y guía a los Agentes?
+            </h3>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--text-secondary); font-size: 0.88rem;">
+              <li style="display: flex; gap: 10px;"><i data-lucide="check" style="color: var(--accent-success); width: 16px; flex-shrink: 0;"></i> <span><strong>Evita Programar desde Cero:</strong> Los agentes de IA consultan el Data Lake para recuperar las reglas preestablecidas de citas, odontogramas y turnos.</span></li>
+              <li style="display: flex; gap: 10px;"><i data-lucide="check" style="color: var(--accent-success); width: 16px; flex-shrink: 0;"></i> <span><strong>Patrones Tecnológicos Reutilizables:</strong> Contiene planos (blueprints) de código NestJS y React listos para ser desplegados en cualquier clínica dental.</span></li>
+              <li style="display: flex; gap: 10px;"><i data-lucide="check" style="color: var(--accent-success); width: 16px; flex-shrink: 0;"></i> <span><strong>Alineación del Negocio:</strong> Centraliza la semántica y flujos de la práctica (recordatorios por WhatsApp y alertas CDS Hooks).</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diapositivas Estructurales de la Reunión -->
+      <div class="slide-viewer" style="margin-top: 32px;">
+        <div class="slide-nav">
+          <h3 style="font-family: var(--font-title); font-size: 1.35rem; font-weight: 600; color: var(--text-primary);">Las 4 Capas del Data Lake Clínico-Tecnológico</h3>
+          <div class="slide-steps">
+            <span class="slide-step-dot active" onclick="showSlide(0)"></span>
+            <span class="slide-step-dot" onclick="showSlide(1)"></span>
+            <span class="slide-step-dot" onclick="showSlide(2)"></span>
+            <span class="slide-step-dot" onclick="showSlide(3)"></span>
+          </div>
+        </div>
+
+        <!-- Diapositiva 1 -->
+        <div class="slide-box active" id="slide-0">
+          <div class="slide-content-text">
+            <span class="tag tag-architect">Capa 1: Reglas de Negocio (Domain Rules)</span>
+            <h2>Semántica del Dominio Odontológico</h2>
+            <p>El Data Lake almacena las reglas de negocio de cualquier clínica de odontología: el comportamiento lógico de los turnos, restricciones de sobre-turnos, agendas de profesionales por especialidad y el flujo de confirmaciones/recordatorios automáticos de WhatsApp.</p>
+            <div style="background: #f8fafc; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.8rem; color: var(--accent-primary); border: 1px solid rgba(0,0,0,0.06);">
+              RULE: whatsapp_reminders_trigger_active = true;<br>
+              TIME_WINDOW: appointment_time - 24_hours;<br>
+              WEBHOOK: sync-appointment-status
+            </div>
+          </div>
+          <div class="slide-img-placeholder">
+            <i data-lucide="check-square" style="width: 56px; height: 56px; color: var(--accent-primary); opacity: 0.7;"></i>
+            <span style="position: absolute; bottom: 12px; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">Reglas y Lógica de Turnos</span>
+          </div>
+        </div>
+
+        <!-- Diapositiva 2 -->
+        <div class="slide-box" id="slide-1">
+          <div class="slide-content-text">
+            <span class="tag tag-security">Capa 2: Interoperabilidad HL7 FHIR</span>
+            <h2>Modelado Clínico Dental Estándar</h2>
+            <p>Modelamos los datos clínicos bajo el estándar HL7 FHIR R4/R5: recursos <code>Patient</code> para demográficos, <code>Appointment</code> para la agenda de turnos, y <code>Procedure</code>/<code>Observation</code> para el odontograma interactivo, aislados inmutablemente por <code>tenantId</code>.</p>
+            <div style="background: rgba(220, 38, 38, 0.03); border-radius: 8px; padding: 12px; font-size: 0.82rem; color: var(--accent-danger); border: 1px solid rgba(220, 38, 38, 0.1); display: flex; gap: 8px; align-items: center;">
+              <i data-lucide="shield-check" style="flex-shrink: 0; width: 16px; height: 16px;"></i>
+              <span>El Agente de Seguridad audita que la información FHIR en el Data Lake esté encriptada y aislada en base a políticas Zero Trust.</span>
+            </div>
+          </div>
+          <div class="slide-img-placeholder">
+            <i data-lucide="shield-alert" style="width: 56px; height: 56px; color: var(--accent-danger); opacity: 0.7;"></i>
+            <span style="position: absolute; bottom: 12px; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">Aislamiento Multi-tenant (Zero Trust)</span>
+          </div>
+        </div>
+
+        <!-- Diapositiva 3 -->
+        <div class="slide-box" id="slide-2">
+          <div class="slide-content-text">
+            <span class="tag tag-fhir">Capa 3: Blueprints de Ingeniería</span>
+            <h2>Patrones de Código NestJS & React</h2>
+            <p>Consolidamos esquemas de código reutilizables: componentes de odontogramas interactivos SVG, APIs de controladores FHIR y webhooks de WhatsApp. Los agentes de IA recuperan semánticamente estos blueprints para programar nuevas funcionalidades odontológicas de forma inmediata.</p>
+            <ul style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 8px; padding-left: 16px; display: flex; flex-direction: column; gap: 4px;">
+              <li>Blueprints de backend: NestJS + TypeORM con aislamiento de inquilinos.</li>
+              <li>Blueprints de frontend: React + atajos de teclado y offline caching.</li>
+            </ul>
+          </div>
+          <div class="slide-img-placeholder">
+            <i data-lucide="code" style="width: 56px; height: 56px; color: var(--accent-success); opacity: 0.7;"></i>
+            <span style="position: absolute; bottom: 12px; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">Blueprints de Software Reutilizables</span>
+          </div>
+        </div>
+
+        <!-- Diapositiva 4 -->
+        <div class="slide-box" id="slide-3">
+          <div class="slide-content-text">
+            <span class="tag tag-fhir" style="background: rgba(124, 58, 237, 0.08); color: var(--accent-secondary);">Capa 4: Mejores Prácticas ADA & HIPAA</span>
+            <h2>Diagnosis-Before-Treatment & Estándares</h2>
+            <p>Modelamos el principio clínico internacional de la ADA: todo procedimiento de tratamiento dental (código <strong>CDT</strong>) debe ser justificado por un diagnóstico (código <strong>SNODENT/SNOMED-CT</strong>). Además, consolidamos el periodontograma LOINC y consentimientos digitales inmutables.</p>
+            <div style="background: #f8fafc; border-radius: 8px; padding: 12px; font-size: 0.8rem; border: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; align-items: center; color: var(--accent-secondary); font-weight: 600;">
+              <i data-lucide="award" style="flex-shrink: 0; width: 16px; height: 16px;"></i>
+              <span>Estándar Integrado: SNODENT (Diagnóstico) + CDT de la ADA (Tratamientos) + LOINC (Periodoncia).</span>
+            </div>
+          </div>
+          <div class="slide-img-placeholder">
+            <i data-lucide="file-check-2" style="width: 56px; height: 56px; color: var(--accent-secondary); opacity: 0.7;"></i>
+            <span style="position: absolute; bottom: 12px; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">Cumplimiento ADA & HIPAA</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PESTAÑA 2: SIMULADOR DE EMBEDDINGS -->
+    <div id="tab-vector" class="tab-content">
+      <div class="simulator-container">
+        
+        <!-- Panel Izquierdo -->
+        <div class="control-panel">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="binary" style="color: var(--accent-primary);"></i>
+            <h2 style="font-family: var(--font-title); font-size: 1.25rem; color: var(--text-primary);">Simulador de Vectorización</h2>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">Escribe un extracto de nota clínica o SOAP de un paciente. Al presionar "Vectorizar", el sistema simulará el cálculo del modelo de embeddings, convirtiendo el lenguaje natural a números estructurados.</p>
+          
+          <div class="form-group">
+            <label for="soap-text">Nota SOAP Odontológica</label>
+            <textarea id="soap-text" rows="5" placeholder="Escribe aquí... Ejemplo: Paciente asiste por dolor dental agudo y punzante en la pieza 36 (molar inferior izquierdo) compatible con pulpitis irreversible. Se planifica tratamiento de conducto (endodoncia) y receta de Ketorolac 10mg."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="patient-select">Paciente FHIR Relacionado</label>
+            <select id="patient-select">
+              <option value="1">Juan Pérez (DNI: 30.123.456) - Tenant A</option>
+              <option value="2">María Gómez (DNI: 28.987.654) - Tenant A</option>
+              <option value="3">Carlos Rodríguez (DNI: 32.456.789) - Tenant B</option>
+            </select>
+          </div>
+
+          <button class="btn" onclick="simulateEmbedding()">
+            <i data-lucide="play" style="width: 16px; height: 16px;"></i>
+            Simular Vectorización
+          </button>
+        </div>
+
+        <!-- Panel Derecho -->
+        <div class="interactive-display">
+          <h3 style="font-family: var(--font-title); margin-bottom: 8px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+            <i data-lucide="cpu" style="color: var(--accent-primary);"></i>
+            Representación Vectorial
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Un vector de embedding es una lista de números decimales que captura el **significado semántico** del texto. Aquí se visualizan las primeras 100 dimensiones mediante un mapa de calor dinámico:
+          </p>
+
+          <!-- Mapa de Calor -->
+          <div class="embedding-viz" id="vector-container">
+            <div style="color: var(--text-secondary); display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 0.85rem;">
+              Presiona "Simular Vectorización" para ver la representación matemática.
+            </div>
+          </div>
+
+          <div id="vector-meta" style="margin-top: 12px; opacity: 0; transition: opacity 0.4s ease;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">
+              <span>Dimensión Total: <strong>1536 dimensiones</strong></span>
+              <span>Modelo: <strong>Ollama Local (nomic-embed-text)</strong></span>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid var(--panel-border); border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 0.75rem; overflow-x: auto;">
+              <strong>Metadatos en BD:</strong> <pre id="meta-json" style="color: var(--accent-primary); font-family: monospace; margin-top: 4px;"></pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PESTAÑA 3: BÚSQUEDA SEMÁNTICA -->
+    <div id="tab-search" class="tab-content">
+      <div class="simulator-container">
+        
+        <!-- Panel Izquierdo -->
+        <div class="control-panel">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="search" style="color: var(--accent-primary);"></i>
+            <h2 style="font-family: var(--font-title); font-size: 1.25rem; color: var(--text-primary);">Consulta Semántica Inteligente</h2>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">Simula cómo un odontólogo o un agente de IA consulta la base de conocimiento utilizando lenguaje natural. La búsqueda no depende de palabras clave exactas, sino del concepto.</p>
+          
+          <div class="form-group">
+            <label for="query-text">¿Qué buscas en el historial?</label>
+            <input type="text" id="query-text" placeholder="Ej: Caries profunda o endodoncia..." value="Tratamiento de conducto en molar y analgésicos">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="current-tenant">Inquilino Clínico Activo</label>
+              <select id="current-tenant">
+                <option value="A">Clínica Odontológica A (Tenant A)</option>
+                <option value="B">Consultorio Independiente B (Tenant B)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="search-metric">Métrica de Distancia</label>
+              <select id="search-metric">
+                <option value="cosine">Similitud de Coseno</option>
+                <option value="l2">Distancia Euclídea (L2)</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn" onclick="executeSemanticSearch()">
+            <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
+            Buscar en la Base de Conocimiento
+          </button>
+        </div>
+
+        <!-- Panel Derecho -->
+        <div class="interactive-display" style="justify-content: flex-start;">
+          <h3 style="font-family: var(--font-title); font-size: 1.05rem; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: var(--text-primary);">
+            <i data-lucide="database" style="color: var(--accent-success);"></i>
+            Resultados de la Base de Datos
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            El motor calcula la distancia angular de los vectores en SQL y recupera únicamente las notas del mismo inquilino, asegurando **aislamiento multi-tenant estricto**.
+          </p>
+
+          <div id="search-results-box">
+            <div style="color: var(--text-secondary); text-align: center; margin-top: 50px; font-size: 0.88rem;">
+              Haz clic en "Buscar" para disparar la consulta semántica.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PESTAÑA 4: GRAPHRAG CLÍNICO -->
+    <div id="tab-graph" class="tab-content">
+      <div class="simulator-container">
+        
+        <!-- Panel Izquierdo -->
+        <div class="control-panel">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="network" style="color: var(--accent-primary);"></i>
+            <h2 style="font-family: var(--font-title); font-size: 1.25rem; color: var(--text-primary);">GraphRAG y Multi-Hop Reasoning</h2>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">
+            Mientras que la búsqueda vectorial recupera fragmentos aislados, un **Grafo de Conocimiento Clínico** conecta las entidades.
+          </p>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">
+            Esto permite que un agente de IA realice consultas complejas de múltiples saltos (multi-hop), cruzando antecedentes de odontograma, alergias del paciente y contraindicaciones de recetas médicas.
+          </p>
+
+          <div style="background: #f8fafc; border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px; font-size: 0.8rem; line-height: 1.4;">
+            <strong style="color: var(--accent-secondary); display: block; margin-bottom: 4px;">Ejemplo de consulta GraphRAG:</strong>
+            <span style="font-style: italic; color: var(--text-secondary);">"¿El anestésico local que voy a aplicar hoy en la pieza 36 tiene riesgo de reacción adversa debido a alguna alergia registrada en la HCE?"</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+            <button class="btn" onclick="highlightGraphPath('allergy')">
+              <i data-lucide="shield-alert" style="width: 16px; height: 16px;"></i>
+              Simular Alerta de Alergia
+            </button>
+            <button class="btn btn-secondary" onclick="resetGraph()">
+              <i data-lucide="rotate-ccw" style="width: 16px; height: 16px;"></i>
+              Restablecer Vista
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel Derecho -->
+        <div class="interactive-display" style="padding: 0;">
+          <div class="canvas-container">
+            <canvas id="graphCanvas"></canvas>
+            
+            <div class="graph-legend">
+              <div class="legend-item"><span class="legend-color" style="background: #2563eb;"></span><span>Paciente (FHIR Patient)</span></div>
+              <div class="legend-item"><span class="legend-color" style="background: #059669;"></span><span>Odontograma (Procedure)</span></div>
+              <div class="legend-item"><span class="legend-color" style="background: #dc2626;"></span><span>Alergia (AllergyIntolerance)</span></div>
+              <div class="legend-item"><span class="legend-color" style="background: #7c3aed;"></span><span>Receta/Fármaco</span></div>
+            </div>
+
+            <div class="graph-info" id="graph-node-info">
+              <h4 id="node-info-title" style="font-family: var(--font-title); font-size: 0.95rem; margin-bottom: 4px; color: var(--text-primary);">Nodo Seleccionado</h4>
+              <p id="node-info-desc" style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">Haz clic en un nodo para ver sus detalles clínicos.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Pie de Página -->
+  <footer>
+    <p>&copy; 2026 Plataforma de HCE de Agentes de IA. Diseñado bajo especificaciones del Agente UX (Light Mode - Samsung Health inspired).</p>
+  </footer>
+
+  <!-- Lógica JavaScript -->
+  <script>
+    // Inicializar Lucide Icons
+    lucide.createIcons();
+
+    // 1. Navegación por pestañas
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      // Marcar activa la pestaña
+      const targetButton = Array.from(document.querySelectorAll('.nav-tab')).find(button => button.innerHTML.includes(tabId === 'arq' ? 'Arquitectura' : tabId === 'vector' ? 'Simulador' : tabId === 'search' ? 'Búsqueda' : 'Graph'));
+      if (targetButton) targetButton.classList.add('active');
+
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      if (tabId === 'graph') {
+        setTimeout(initGraph, 100);
+      }
+    }
+
+    // 2. Control de Diapositivas
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-box');
+    const slideDots = document.querySelectorAll('.slide-step-dot');
+
+    function showSlide(index) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      slideDots.forEach(dot => dot.classList.remove('active'));
+
+      slides[index].classList.add('active');
+      slideDots[index].classList.add('active');
+      currentSlide = index;
+    }
+
+    // 3. Simulador de Embeddings
+    function simulateEmbedding() {
+      const text = document.getElementById('soap-text').value.trim();
+      const patientId = document.getElementById('patient-select').value;
+      const container = document.getElementById('vector-container');
+
+      if (!text) {
+        alert("Por favor, escribe alguna nota SOAP para simular.");
+        return;
+      }
+
+      container.innerHTML = '';
+      
+      for (let i = 0; i < 100; i++) {
+        let charCodeSum = 0;
+        for (let j = 0; j < text.length; j++) {
+          charCodeSum += text.charCodeAt(j) * (i + 1);
+        }
+        const val = ((Math.sin(charCodeSum) + 1) / 2 - 0.5) * 2;
+        
+        const cell = document.createElement('div');
+        cell.className = 'vector-cell';
+        cell.setAttribute('data-val', val.toFixed(4));
+        
+        // Mapear color en base al valor (Escala de azul clínico a violeta para Light Mode)
+        const g = Math.round(150 - (Math.abs(val) * 80));
+        const b = Math.round(235);
+        cell.style.background = `rgba(37, ${g}, ${b}, ${Math.abs(val) * 0.7 + 0.3})`;
+        container.appendChild(cell);
+      }
+
+      const meta = document.getElementById('vector-meta');
+      meta.style.opacity = 1;
+      
+      const patients = {
+        "1": { name: "Juan Pérez", tenant: "Tenant A", dni: "30.123.456" },
+        "2": { name: "María Gómez", tenant: "Tenant A", dni: "28.987.654" },
+        "3": { name: "Carlos Rodríguez", tenant: "Tenant B", dni: "32.456.789" }
+      };
+
+      const selectedPatient = patients[patientId];
+      document.getElementById('meta-json').textContent = JSON.stringify({
+        patient: selectedPatient.name,
+        dni: selectedPatient.dni,
+        tenantId: selectedPatient.tenant,
+        timestamp: new Date().toISOString().slice(0, 19) + "Z"
+      }, null, 2);
+    }
+
+    // 4. Base de datos odontológica simulada
+    const mockDatabase = [
+      {
+        id: "note-1",
+        patient: "Juan Pérez",
+        tenant: "A",
+        content: "Evolución odontológica: Paciente presenta pulpitis irreversible en la pieza dental 36 (primer molar inferior izquierdo). Se realiza apertura cameral y conductometría. Se prescribe Ketorolac 10mg en caso de dolor agudo.",
+        category: "Endodoncia",
+        similarity: 0.9384
+      },
+      {
+        id: "note-2",
+        patient: "María Gómez",
+        tenant: "A",
+        content: "Consulta por inflamación y sangrado gingival difuso al cepillado. Diagnóstico: Gingivitis marginal crónica. Se realiza tartrectomía (limpieza de sarro) ultrasónica y se receta colutorio con Clorhexidina al 0.12%.",
+        category: "Periodoncia",
+        similarity: 0.7950
+      },
+      {
+        id: "note-3",
+        patient: "Carlos Rodríguez",
+        tenant: "B",
+        content: "Nota SOAP: Paciente acude por molestia persistente en tercer molar superior derecho (pieza 18) en posición semi-retenida. Caries oclusal profunda. Se programa cirugía de extracción (exodoncia).",
+        category: "Cirugía Maxilofacial / Bucal",
+        similarity: 0.9124
+      }
+    ];
+
+    function executeSemanticSearch() {
+      const query = document.getElementById('query-text').value.toLowerCase().trim();
+      const currentTenant = document.getElementById('current-tenant').value;
+      const resultsBox = document.getElementById('search-results-box');
+
+      if (!query) {
+        alert("Por favor, ingresa una búsqueda.");
+        return;
+      }
+
+      resultsBox.innerHTML = '';
+
+      const filteredNotes = mockDatabase.filter(note => note.tenant === currentTenant);
+      const blockedNotes = mockDatabase.filter(note => note.tenant !== currentTenant && (note.content.toLowerCase().includes("pulpitis") || query.includes("conducto") || query.includes("molar")));
+
+      if (filteredNotes.length === 0) {
+        resultsBox.innerHTML = `
+          <div style="color: var(--text-secondary); text-align: center; margin-top: 30px;">
+            <i data-lucide="search-code" style="width: 40px; height: 40px; color: var(--accent-warning); margin-bottom: 12px; display: inline-block;"></i>
+            <p>No se encontraron registros en tu Base de Datos para el <strong>Tenant ${currentTenant}</strong>.</p>
+          </div>
+        `;
+      } else {
+        filteredNotes.forEach(note => {
+          const item = document.createElement('div');
+          item.className = 'result-item';
+          item.innerHTML = `
+            <div class="result-header">
+              <span class="patient-tag">
+                <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                ${note.patient}
+              </span>
+              <span class="score-badge">Similitud: ${(note.similarity * 100).toFixed(2)}%</span>
+            </div>
+            <p class="result-content">${note.content}</p>
+            <div class="result-footer">
+              <span class="tenant-badge">Inquilino: Tenant ${note.tenant}</span>
+              <span>Categoría: ${note.category}</span>
+            </div>
+          `;
+          resultsBox.appendChild(item);
+        });
+      }
+
+      if (blockedNotes.length > 0) {
+        const alertBox = document.createElement('div');
+        alertBox.className = 'block-alert';
+        alertBox.innerHTML = `
+          <i data-lucide="shield-alert" style="width: 20px; height: 20px; color: var(--accent-danger); flex-shrink: 0;"></i>
+          <div>
+            <strong style="font-size: 0.85rem;">Bloqueo de Seguridad Multi-Tenant Activo:</strong>
+            <p style="font-size: 0.78rem; margin-top: 2px;">El sistema detectó ${blockedNotes.length} registro(s) odontológico(s) similar(es) en otro Tenant (Inquilino), pero fueron filtrados automáticamente de forma inmutable en SQL.</p>
+          </div>
+        `;
+        resultsBox.appendChild(alertBox);
+      }
+
+      lucide.createIcons();
+    }
+
+    // 5. Grafo Clínico Interactivo (Light Mode)
+    let canvas, ctx;
+    let nodes = [];
+    let links = [];
+    let isDragging = false;
+    let dragNode = null;
+    let offset = { x: 0, y: 0 };
+    let hoverNode = null;
+
+    function initGraph() {
+      canvas = document.getElementById('graphCanvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width || 500;
+      canvas.height = rect.height || 380;
+
+      nodes = [
+        { id: 0, label: "Paciente: Juan Pérez", type: "patient", x: canvas.width / 2, y: canvas.height / 2, r: 18, color: "#2563eb" },
+        { id: 1, label: "Odontograma: Pieza 36", type: "encounter", x: canvas.width / 2 - 120, y: canvas.height / 2 - 60, r: 15, color: "#059669" },
+        { id: 2, label: "Alergia: Anestesia (Lidocaína)", type: "allergy", x: canvas.width / 2 + 120, y: canvas.height / 2 - 70, r: 15, color: "#dc2626" },
+        { id: 3, label: "Tratamiento: Endodoncia Molar", type: "medication", x: canvas.width / 2 - 100, y: canvas.height / 2 + 80, r: 15, color: "#7c3aed" },
+        { id: 4, label: "Anestésico: Lidocaína 2%", type: "medication", x: canvas.width / 2 + 100, y: canvas.height / 2 + 70, r: 15, color: "#7c3aed" }
+      ];
+
+      links = [
+        { source: 0, target: 1, rel: "TIENE_DIAGNOSTICO" },
+        { source: 0, target: 2, rel: "PRESENTA_ALERGIA" },
+        { source: 0, target: 3, rel: "PLAN_TRATAMIENTO" },
+        { source: 0, target: 4, rel: "PROPUESTO" },
+        { source: 1, target: 3, rel: "TRATADO_CON" },
+        { source: 4, target: 2, rel: "PERTENECE_A_FAMILIA", danger: false }
+      ];
+
+      canvas.addEventListener('mousedown', onMouseDown);
+      canvas.addEventListener('mousemove', onMouseMove);
+      canvas.addEventListener('mouseup', onMouseUp);
+
+      drawGraph();
+    }
+
+    function drawGraph() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Enlaces
+      links.forEach(link => {
+        const sourceNode = nodes.find(n => n.id === link.source);
+        const targetNode = nodes.find(n => n.id === link.target);
+        
+        ctx.beginPath();
+        ctx.moveTo(sourceNode.x, sourceNode.y);
+        ctx.lineTo(targetNode.x, targetNode.y);
+        
+        if (link.danger) {
+          ctx.strokeStyle = '#dc2626';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([4, 4]);
+        } else {
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([]);
+        }
+        ctx.stroke();
+
+        if (link.danger) {
+          const midX = (sourceNode.x + targetNode.x) / 2;
+          const midY = (sourceNode.y + targetNode.y) / 2;
+          ctx.fillStyle = '#dc2626';
+          ctx.font = 'bold 9px Inter, sans-serif';
+          ctx.fillText("¡RIESGO DE REACCIÓN!", midX - 45, midY - 6);
+        }
+      });
+
+      // Nodos
+      nodes.forEach(node => {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r, 0, 2 * Math.PI);
+        ctx.fillStyle = node.color;
+        
+        if (node === hoverNode) {
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = node.color;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+        
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '600 10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(node.label.split(":")[1] || node.label, node.x, node.y + node.r + 14);
+      });
+    }
+
+    function onMouseDown(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      dragNode = nodes.find(node => {
+        const dist = Math.hypot(node.x - mouseX, node.y - mouseY);
+        return dist < node.r;
+      });
+
+      if (dragNode) {
+        isDragging = true;
+        offset.x = mouseX - dragNode.x;
+        offset.y = mouseY - dragNode.y;
+        showNodeInfo(dragNode);
+      }
+    }
+
+    function onMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      if (isDragging && dragNode) {
+        dragNode.x = mouseX - offset.x;
+        dragNode.y = mouseY - offset.y;
+        drawGraph();
+      } else {
+        const oldHover = hoverNode;
+        hoverNode = nodes.find(node => {
+          const dist = Math.hypot(node.x - mouseX, node.y - mouseY);
+          return dist < node.r;
+        });
+
+        if (hoverNode !== oldHover) {
+          drawGraph();
+        }
+      }
+    }
+
+    function onMouseUp() {
+      isDragging = false;
+      dragNode = null;
+    }
+
+    function showNodeInfo(node) {
+      const infoBox = document.getElementById('graph-node-info');
+      const title = document.getElementById('node-info-title');
+      const desc = document.getElementById('node-info-desc');
+
+      infoBox.classList.add('active');
+      title.textContent = node.label;
+
+      const descriptions = {
+        "patient": "Recurso FHIR: Patient. Paciente Juan Pérez, DNI 30.123.456, registrado en el Inquilino A. Mantiene relaciones con su historial dental y procedimientos.",
+        "encounter": "Recurso FHIR: Encounter / Procedure. Registro en Odontograma de la Pieza 36 con caries profunda e inflamación pulpar severa (Pulpitis Irreversible).",
+        "allergy": "Recurso FHIR: AllergyIntolerance. Alergia crítica a la Lidocaína (anestésico local dental) registrada en su ficha médica.",
+        "medication": "Recurso FHIR: MedicationRequest / Procedure. Procedimiento planificado de endodoncia (tratamiento de conducto). El anestésico propuesto Lidocaína 2% con epinefrina es el que generará el conflicto."
+      };
+
+      desc.textContent = descriptions[node.type] || "";
+    }
+
+    function highlightGraphPath(type) {
+      if (type === 'allergy') {
+        const link = links.find(l => l.source === 4 && l.target === 2);
+        if (link) {
+          link.danger = true;
+          const allergyNode = nodes.find(n => n.id === 2);
+          allergyNode.color = "#dc2626";
+          
+          const infoBox = document.getElementById('graph-node-info');
+          const title = document.getElementById('node-info-title');
+          const desc = document.getElementById('node-info-desc');
+          infoBox.classList.add('active');
+          title.textContent = "⚠️ Alerta CDS Hooks";
+          desc.innerHTML = `<strong>Interacción Crítica:</strong> Se ha intentado administrar Lidocaína 2% (Anestésico) a un paciente con un recurso <code>AllergyIntolerance</code> activo para la Lidocaína. El sistema bloquea el flujo y recomienda usar Mepivacaína al 3% sin vasoconstrictor.`;
+          
+          drawGraph();
+        }
+      }
+    }
+
+    function resetGraph() {
+      const link = links.find(l => l.source === 4 && l.target === 2);
+      if (link) link.danger = false;
+      
+      const allergyNode = nodes.find(n => n.id === 2);
+      if (allergyNode) allergyNode.color = "#dc2626";
+      
+      const infoBox = document.getElementById('graph-node-info');
+      infoBox.classList.remove('active');
+      
+      initGraph();
+    }
+  </script>
+</body>
+</html>

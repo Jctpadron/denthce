@@ -24,6 +24,9 @@ import { PlatformModuleEntity } from './platform/platform-module.entity';
 import { TenantModuleEntity } from './platform/tenant-module.entity';
 import { PlatformModule } from './platform/platform.module';
 import { SuperAdminModule } from './superadmin/superadmin.module';
+import { InsuranceModule } from './insurance/insurance.module';
+import { InsuranceCompanyEntity } from './insurance/insurance-company.entity';
+import { PatientCoverageEntity } from './insurance/patient-coverage.entity';
 
 @Module({
   imports: [
@@ -46,7 +49,9 @@ import { SuperAdminModule } from './superadmin/superadmin.module';
         AppointmentEntity,
         AppointmentAuditEntity,
         PlatformModuleEntity,
-        TenantModuleEntity
+        TenantModuleEntity,
+        InsuranceCompanyEntity,
+        PatientCoverageEntity
       ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: true,
@@ -62,6 +67,7 @@ import { SuperAdminModule } from './superadmin/superadmin.module';
     SlotModule,
     PlatformModule,
     SuperAdminModule,
+    InsuranceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

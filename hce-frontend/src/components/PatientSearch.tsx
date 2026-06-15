@@ -42,6 +42,7 @@ export const PatientSearch: React.FC = () => {
   const [admissionDateFilter, setAdmissionDateFilter] = useState('');
   const [activeTab, setActiveTab] = useState<'encounter' | 'antecedents' | 'odontogram' | 'allergies' | 'vitals' | 'prescriptions' | 'documents' | 'audit'>('encounter');
   const [isEditingPatient, setIsEditingPatient] = useState(false);
+  const [coverages, setCoverages] = useState<any[]>([]);
 
   const fetchPatients = async (name = '', dni = '', age = '', admissionDate = '') => {
     setLoading(true);
@@ -92,6 +93,20 @@ export const PatientSearch: React.FC = () => {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, dniFilter, ageFilter, admissionDateFilter, selectedPatient]);
+
+  // Cargar coberturas del paciente seleccionado al abrir la vista de detalles
+  useEffect(() => {
+    if (selectedPatient?.id) {
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/insurance/patient/${selectedPatient.id}/coverage`, {
+          headers: { Authorization: `Bearer ${keycloak.token}` }
+        })
+        .then((res) => setCoverages(res.data))
+        .catch(() => setCoverages([]));
+    } else {
+      setCoverages([]);
+    }
+  }, [selectedPatient?.id]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
@@ -284,6 +299,37 @@ export const PatientSearch: React.FC = () => {
                 <div>
                   <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Fecha de Ingreso</div>
                   <div style={{ fontWeight: 600, color: 'var(--color-text)', marginTop: '0.1rem' }}>{formatAdmissionDate(selectedPatient.extension)}</div>
+                </div>
+              </div>
+
+              {/* Cobertura de Salud del Paciente Activo */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+                <Shield style={{ width: '1rem', height: '1rem', color: 'var(--color-muted)', marginTop: '0.15rem', flexShrink: 0 }} />
+                <div style={{ width: '100%' }}>
+                  <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Cobertura de Salud</div>
+                  {coverages.length === 0 ? (
+                    <div style={{ fontWeight: 600, color: 'var(--color-text)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#94a3b8' }} />
+                      Particular
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginTop: '0.3rem' }}>
+                      {coverages.map((cov) => (
+                        <div key={cov.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: cov.principal ? '#6366f1' : '#94a3b8' }} />
+                            <span style={{ fontWeight: 700, color: 'var(--color-text)', fontSize: '0.85rem' }}>{cov.insuranceCompany?.nombre}</span>
+                            {cov.principal && (
+                              <span style={{ fontSize: '0.62rem', background: '#6366f1', color: '#fff', borderRadius: '6px', padding: '0.02rem 0.35rem', fontWeight: 700 }}>Principal</span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--color-muted)', paddingLeft: '0.75rem' }}>
+                            Afil: {cov.nroAfiliado}{cov.plan ? ` · ${cov.plan}` : ''}{!cov.esTitular && cov.nombreTitular ? ` · ${cov.nombreTitular}` : ''}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

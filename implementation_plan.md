@@ -221,3 +221,41 @@ d:\APP julio   - NO BORRAR-\APP historia clinica
 - Inicialización del servidor API en puerto `8000`.
 - Carga de la interfaz `dashboard.html` en Chrome, verificando la conexión automática y la visualización de las tareas y el estado de vinculación (`⚡ Vinculado al servidor local`).
 - Simulación de detonación de acción (desarrollo del Módulo 0) mediante la interfaz gráfica del Dashboard y visualización de logs en la consola web.
+
+---
+
+## 🎨 ANEXO: Rediseño Estético e Hiperrealismo del Odontograma Dental
+
+El usuario ha reportado que la representación actual del diente sigue siendo esquemática y carece de realismo estético. Para lograr un acabado fotorrealista y de calidad profesional médica (morfología dental fiel), implementaremos las siguientes mejoras anatómicas avanzadas:
+
+### 1. Modelado 3D Procedural Avanzado en Three.js (Opción B)
+Para superar las limitaciones del cubo plano deformado de forma tosca, se implementará una simulación procedural de alta densidad poligonal:
+- **Geometría de Alta Resolución:** Incrementaremos la segmentación de la caja (`THREE.BoxGeometry(1.6, 1.2, 1.6, 30, 30, 30)`) para disponer de más de 2,700 vértices interactivos.
+- **Escultura por Ecuaciones Gaussianas (Cúspides Dentales):** En lugar de deformaciones lineales, se modelarán las cúspides superiores utilizando cúpulas gaussianas redondeadas, eliminando esquinas rígidas:
+  $$y_{nuevo} = y + \sum_{j=1}^{4} H \cdot e^{-\frac{(x - x_j)^2 + (z - z_j)^2}{2\sigma^2}}$$
+  Donde $H = 0.38$ es la altura de la cúspide, $\sigma = 0.28$ es el radio de curvatura y $(x_j, z_j)$ son las 4 esquinas oclusales del molar: $(0.45, 0.45)$, $(0.45, -0.45)$, $(-0.45, 0.45)$, y $(-0.45, -0.45)$.
+- **Tallado de Surcos y Fisuras Oclusales (En V):** Se esculpirá la fosa central y los surcos principales (mesiodistal y vestibulolingual) aplicando una función de atenuación matemática en forma de V:
+  $$y_{nuevo} = y_{nuevo} - 0.22 \cdot e^{-\frac{x^2}{2 \cdot 0.08^2}} - 0.22 \cdot e^{-\frac{z^2}{2 \cdot 0.08^2}}$$
+- **Inflado Convexo de la Corona (Forma de Barril):** Para imitar la silueta abombada natural de la corona dental, se aplicará un inflado senoidal lateral en el perfil del diente:
+  $$x_{nuevo} = x \cdot (1.0 + 0.18 \cdot \cos(\pi \cdot y))$$
+  $$z_{nuevo} = z \cdot (1.0 + 0.18 \cdot \cos(\pi \cdot y))$$
+- **Mapa de Normales Procedural (Relieve y Oclusión):** Crearemos dinámicamente un canvas 2D con un gradiente de relieve (ruido de esmalte + surcos oscuros) y lo cargaremos como un `THREE.CanvasTexture` en la propiedad `.bumpMap` o `.normalMap` de los materiales. Esto generará sombras de oclusión realistas en los surcos al reaccionar con la iluminación del estudio 3D, acentuando la tridimensionalidad clínica de la pieza.
+
+### 2. Rediseño del SVG Anatómico de Alta Definición (Opción A)
+Para la Opción A, rediseñaremos por completo las curvas vectoriales (Bézier) para representar fielmente la anatomía clínica:
+- **Perfil de la Corona Molar Frontal:** Reemplazaremos la silueta plana por un contorno ondulado con tres lóbulos superiores redondeados (cúspides) y una línea cervical (cuello) sinuosa y realista.
+- **Detalle de la Vista Oclusal:** Dibujaremos surcos de desarrollo sinuosos y fosas secundarias internas utilizando gradientes radiales oscuros para emular profundidad.
+- **Brillo Especular de Esmalte (Specular Gloss):** Agregaremos múltiples elipses semitransparentes con máscaras de desvanecimiento (`feGaussianBlur`) para simular la luz rebotando en una superficie dental húmeda e inmaculada.
+- **Profundidad de Raíces:** Las raíces tendrán un sombreado degradado cilíndrico en 3D que se difumina hacia el ápice, con canales radiculares finamente delineados.
+
+---
+
+## 📅 Plan de Verificación
+
+### Verificación Automatizada
+- Pruebas sintácticas en el script JavaScript de renderizado para evitar errores de sintaxis al evaluar las funciones gaussianas de deformación de malla.
+- Validación de que los materiales de Three.js no lancen advertencias por parámetros incorrectos en la consola WebGL.
+
+### Verificación Manual
+- Despliegue de la demo en el servidor Vite local e inspección visual en Chrome.
+- Captura de pantalla y grabación de la interacción del molar con el material y sombreado procedural de normales activos para certificar el realismo estético final con el usuario.

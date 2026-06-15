@@ -1,0 +1,350 @@
+/* ==========================================================================
+   ODONTOGRAMA 3D - ESTILOS E INTERACTIVIDAD (SAMSUNG HEALTH LIGHT STYLE)
+   ========================================================================== */
+
+/* ── Escena 3D Contenedor ─────────────────────────────── */
+.tooth-scene {
+  perspective: 800px;
+  perspective-origin: 50% 50%;
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(248,250,252,1) 100%);
+  border-radius: 12px;
+  transition: box-shadow 0.3s ease;
+  touch-action: none; /* Evita scroll en móviles al rotar */
+}
+
+.tooth-scene:active {
+  cursor: grabbing;
+}
+
+.tooth-scene:hover {
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.12);
+}
+
+.tooth-model {
+  transform-style: preserve-3d;
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+  display: block;
+}
+
+/* ── Caras interactivas del SVG ─────────────────────── */
+.tooth-face {
+  transition: fill 0.2s ease, filter 0.2s ease, stroke-width 0.2s ease;
+  cursor: pointer;
+  stroke: #cbd5e1;
+  stroke-width: 1.5;
+}
+
+.tooth-face:hover {
+  filter: brightness(0.92) saturate(1.1);
+  stroke: #3b82f6;
+  stroke-width: 2px;
+}
+
+.tooth-face:focus-visible {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+}
+
+/* Colores de estados clínicos en las caras del diente */
+.tooth-face.state-ausente {
+  fill: #94a3b8;
+  opacity: 0.3;
+}
+
+/* ── Botones de Preset de Vista ─────────────────────────── */
+.tooth-presets-container {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.tooth-preset-btn {
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Inter', -apple-system, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.tooth-preset-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.tooth-preset-btn:active {
+  transform: translateY(0);
+}
+
+.tooth-preset-btn.active {
+  background: #007AFF;
+  color: #ffffff;
+  border-color: #007AFF;
+  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.25);
+}
+
+/* ── Upload de Archivos / Radiografías por Diente ──────── */
+.tooth-upload-container {
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tooth-upload-btn {
+  width: 100%;
+  min-height: 36px;
+  border-radius: 8px;
+  border: 1.5px dashed #cbd5e1;
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 8px;
+}
+
+.tooth-upload-btn:hover {
+  border-color: #007AFF;
+  color: #007AFF;
+  background: #f0f7ff;
+}
+
+.tooth-upload-preview-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.tooth-upload-thumb {
+  width: 100%;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tooth-upload-thumb:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tooth-upload-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.15s ease;
+}
+
+.tooth-upload-remove:hover {
+  background: #dc2626;
+}
+
+/* ── Vista Enfocada (Mobile Detail Bottom Sheet) ────────── */
+.tooth-focused-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+}
+
+.tooth-focused-sheet {
+  background: #ffffff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 36px;
+  box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1), 0 -8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.tooth-focused-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.tooth-focused-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: 'Inter', sans-serif;
+}
+
+.tooth-focused-close {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  transition: background 0.2s ease;
+}
+
+.tooth-focused-close:hover {
+  background: #e2e8f0;
+}
+
+/* ── Surface Chips (Mobile Interaction Tool) ───────────────── */
+.surface-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.surface-chip {
+  min-height: 54px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #475569;
+  font-family: 'Inter', sans-serif;
+}
+
+.surface-chip:hover {
+  border-color: #007AFF;
+  color: #007AFF;
+  background: #f0f7ff;
+}
+
+.surface-chip.marked-existing {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+
+.surface-chip.marked-planned {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #3b82f6;
+}
+
+.surface-chip-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.surface-chip.marked-existing .surface-chip-label {
+  color: #f87171;
+}
+
+.surface-chip.marked-planned .surface-chip-label {
+  color: #60a5fa;
+}
+
+/* ── Micro-animaciones de selección ──────────────────────── */
+@keyframes toothSelect {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.tooth-selected-anim {
+  animation: toothSelect 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ── Responsive e Integración en Grilla ─────────── */
+.tooth-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tooth-card:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 767px) {
+  .tooth-card {
+    min-width: 85px;
+    padding: 8px !important;
+  }
+  
+  .tooth-preset-btn {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 10px;
+    border-radius: 6px;
+  }
+  
+  .tooth-scene {
+    padding: 6px;
+  }
+}

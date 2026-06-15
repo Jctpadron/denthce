@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { PatientForm } from './components/PatientForm';
 import { PatientSearch } from './components/PatientSearch';
 import { OdontologyHC } from './components/odontology/OdontologyHC';
@@ -11,18 +11,19 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useRoles } from './hooks/useRoles';
 import { roleDisplayName } from './utils/roles';
 import keycloak from './utils/keycloak-config';
-import { LogOut, User, Shield } from 'lucide-react';
-import { LandingLogin } from './components/LandingLogin';
+import { LogOut, User, Shield, Menu, X } from 'lucide-react';
+import { LandingDentaCloud } from './components/landing/LandingDentaCloud';
 
 type AppView = 'home' | 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'settings' | 'users';
 
 function AppContent() {
   const [activeView, setActiveView] = useState<AppView>('home');
+  const [navOpen, setNavOpen] = useState(false);
   const { config, loading } = useTheme();
   const { roles: clinicalRoles, canConfigure, isSuperAdmin } = useRoles();
 
   if (!keycloak.authenticated) {
-    return <LandingLogin />;
+    return <LandingDentaCloud />;
   }
 
   // El Super Admin opera cross-tenant: tiene su propia experiencia (gestión de clínicas y módulos),
@@ -38,7 +39,6 @@ function AppContent() {
 
   const NAV_ITEMS = [
     { key: 'home' as AppView, label: 'Inicio', icon: '🏠' },
-    { key: 'patients' as AppView, label: 'Historia Clínica', icon: '🏥' },
     { key: 'odonto-hc' as AppView, label: 'HC Odontológica', icon: '🦷' },
     { key: 'agenda' as AppView, label: 'Agenda', icon: '📅' },
     { key: 'form' as AppView, label: 'Admisión', icon: '➕' },
@@ -47,6 +47,21 @@ function AppContent() {
       { key: 'settings' as AppView, label: 'Personalización', icon: '🎨' }
     ] : []),
   ];
+
+  const navBtnStyle = (active: boolean): CSSProperties => ({
+    background: active ? 'rgba(41, 98, 255, 0.06)' : 'transparent',
+    border: 'none',
+    borderRadius: '10px',
+    color: active ? '#2962ff' : 'var(--color-muted)',
+    padding: '0.5rem 1rem',
+    fontSize: '0.85rem',
+    fontWeight: active ? 700 : 500,
+    cursor: 'pointer',
+    transition: 'var(--transition-smooth)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+  });
 
   if (loading) {
     return (
@@ -106,27 +121,14 @@ function AppContent() {
           </div>
         </div>
 
-        {/* Navegación central */}
+        {/* Navegación central (cinta con degradé + scroll; oculta al colapsar) */}
         <nav className="app-nav">
           {NAV_ITEMS.map(item => (
             <button
               key={item.key}
               onClick={() => setActiveView(item.key)}
               className="app-nav-btn"
-              style={{
-                background: activeView === item.key ? 'rgba(41, 98, 255, 0.06)' : 'transparent',
-                border: 'none',
-                borderRadius: '10px',
-                color: activeView === item.key ? '#2962ff' : 'var(--color-muted)',
-                padding: '0.5rem 1rem',
-                fontSize: '0.85rem',
-                fontWeight: activeView === item.key ? 700 : 500,
-                cursor: 'pointer',
-                transition: 'var(--transition-smooth)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-              }}
+              style={navBtnStyle(activeView === item.key)}
             >
               <span style={{ filter: activeView === item.key ? 'none' : 'grayscale(1)' }}>{item.icon}</span>
               {item.label}
@@ -136,6 +138,15 @@ function AppContent() {
 
         {/* Panel del Profesional */}
         <div className="app-user-container">
+          <button
+            type="button"
+            className="app-burger"
+            aria-label={navOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen(o => !o)}
+          >
+            {navOpen ? <X style={{ width: '1.2rem', height: '1.2rem' }} /> : <Menu style={{ width: '1.2rem', height: '1.2rem' }} />}
+          </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
             <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)', flexShrink: 0 }}>
               <User style={{ width: '1rem', height: '1rem' }} />
@@ -194,6 +205,23 @@ function AppContent() {
             <span className="logout-btn-text">Salir</span>
           </button>
         </div>
+
+        {/* Drawer: menú colapsado en pantallas chicas */}
+        {navOpen && (
+          <div className="app-drawer">
+            {NAV_ITEMS.map(item => (
+              <button
+                key={item.key}
+                className="app-nav-btn"
+                onClick={() => { setActiveView(item.key); setNavOpen(false); }}
+                style={navBtnStyle(activeView === item.key)}
+              >
+                <span style={{ filter: activeView === item.key ? 'none' : 'grayscale(1)' }}>{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Contenedor Principal */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, CheckCircle, ShieldAlert } from 'lucide-react';
+import { Save, CheckCircle, ShieldAlert, Shield } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 
 interface Props {
@@ -8,121 +8,266 @@ interface Props {
 }
 
 export const CoverageForm: React.FC<Props> = ({ patientId }) => {
-  const [obraSocial, setObraSocial] = useState('PAMI');
-  const [afiliado, setAfiliado] = useState('');
-  const [beneficio, setBeneficio] = useState('');
-  const [prestador, setPrestador] = useState('');
-  const [medicoCabecera, setMedicoCabecera] = useState('');
-  const [titular, setTitular] = useState(true);
-  const [parentesco, setParentesco] = useState('');
-  const [existingId, setExistingId] = useState<string | null>(null);
+  const [insuranceList, setInsuranceList] = useState<any[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
+  const [covSearch, setCovSearch] = useState('');
+  const [nroAfiliado, setNroAfiliado] = useState('');
+  const [plan, setPlan] = useState('');
+  const [esTitular, setEsTitular] = useState(true);
+  const [nombreTitular, setNombreTitular] = useState('');
+  
+  const [existingCoverageId, setExistingCoverageId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const apiBase = `${import.meta.env.VITE_API_URL}/odontology`;
   const authHeader = { headers: { Authorization: `Bearer ${keycloak.token}` } };
 
+  // Cargar catálogo de obras sociales y cobertura del paciente
   const load = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${apiBase}/patient/${patientId}/resource`, authHeader);
-      const cov = (res.data as any[]).filter((r) => r.resourceType === 'Coverage').slice(-1)[0];
-      if (cov) {
-        setExistingId(cov.id);
-        setObraSocial(cov.obraSocial || 'PAMI');
-        setAfiliado(cov.subscriberId || '');
-        setBeneficio(cov.beneficio || '');
-        setPrestador(cov.prestador || '');
-        setMedicoCabecera(cov.medicoCabecera || '');
-        setTitular(cov.titular ?? true);
-        setParentesco(cov.parentesco || '');
+      // 1. Cargar catálogo
+      const catRes = await axios.get(`${import.meta.env.VITE_API_URL}/insurance`, authHeader);
+      setInsuranceList(catRes.data);
+
+      // 2. Cargar coberturas del paciente
+      const covRes = await axios.get(
+        `${import.meta.env.VITE_API_URL}/insurance/patient/${patientId}/coverage`,
+        authHeader
+      );
+      
+      // Tomamos la cobertura marcada como principal, o la primera si existe
+      const primaryCov = covRes.data.find((c: any) => c.principal) || covRes.data[0];
+      
+      if (primaryCov) {
+        setExistingCoverageId(primaryCov.id);
+        setSelectedCompanyId(primaryCov.insuranceCompanyId);
+        setCovSearch(primaryCov.insuranceCompany?.nombre || '');
+        setNroAfiliado(primaryCov.nroAfiliado || '');
+        setPlan(primaryCov.plan || '');
+        setEsTitular(primaryCov.esTitular ?? true);
+        setNombreTitular(primaryCov.nombreTitular || '');
+      } else {
+        setExistingCoverageId(null);
+        setSelectedCompanyId('');
+        setCovSearch('');
+        setNroAfiliado('');
+        setPlan('');
+        setEsTitular(true);
+        setNombreTitular('');
       }
     } catch (err) {
-      console.error('Error cargando cobertura:', err);
+      console.error('Error cargando datos de cobertura:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [patientId]);
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientId]);
 
   const handleSave = async () => {
-    setSaving(true); setMessage(null);
+    // Resolver ID por nombre si no se seleccionó explícitamente pero el texto coincide con una obra social del catálogo
+    let companyId = selectedCompanyId;
+    if (!companyId && covSearch.trim()) {
+      const matched = insuranceList.find(
+        (os) => os.nombre.toLowerCase() === covSearch.toLowerCase().trim()
+      );
+      if (matched) {
+        companyId = matched.id;
+        setSelectedCompanyId(matched.id);
+      }
+    }
+
+    if (!companyId) {
+      setMessage({ type: 'error', text: 'Debe seleccionar una Obra Social válida del combo.' });
+      return;
+    }
+    if (!nroAfiliado.trim()) {
+      setMessage({ type: 'error', text: 'El número de afiliado es obligatorio.' });
+      return;
+    }
+    if (!esTitular && !nombreTitular.trim()) {
+      setMessage({ type: 'error', text: 'El nombre del titular es obligatorio si el paciente no es el titular.' });
+      return;
+    }
+
+    setSaving(true);
+    setMessage(null);
     try {
-      const payload: any = {
-        status: 'active',
-        beneficiary: { reference: `Patient/${patientId}` },
-        subscriberId: afiliado,
-        obraSocial, beneficio, prestador, medicoCabecera, titular, parentesco,
-        payor: [{ display: obraSocial }],
+      const payload = {
+        insuranceCompanyId: companyId,
+        nroAfiliado: nroAfiliado.trim(),
+        plan: plan.trim() || undefined,
+        esTitular,
+        nombreTitular: !esTitular ? nombreTitular.trim() : undefined,
+        principal: true,
       };
-      if (existingId) await axios.delete(`${apiBase}/resource/${existingId}`, authHeader);
-      const created = await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'Coverage', payload }, authHeader);
-      setExistingId(created.data.id);
-      setMessage({ type: 'success', text: 'Datos de afiliado guardados correctamente.' });
+
+      let res: any;
+      if (existingCoverageId) {
+        res = await axios.put(
+          `${import.meta.env.VITE_API_URL}/insurance/patient/${patientId}/coverage/${existingCoverageId}`,
+          payload,
+          authHeader
+        );
+        setMessage({ type: 'success', text: 'Datos de cobertura actualizados correctamente.' });
+      } else {
+        res = await axios.post(
+          `${import.meta.env.VITE_API_URL}/insurance/patient/${patientId}/coverage`,
+          payload,
+          authHeader
+        );
+        setExistingCoverageId(res.data.id);
+        setMessage({ type: 'success', text: 'Datos de cobertura guardados correctamente.' });
+      }
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'No se pudo guardar.' });
+      console.error(err);
+      setMessage({ type: 'error', text: err.response?.data?.message || 'No se pudo guardar la cobertura.' });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>Cargando datos de afiliado...</p>;
+  if (loading) return <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>Cargando datos de cobertura...</p>;
 
   const labelStyle: React.CSSProperties = { fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-muted)', display: 'block', marginBottom: '0.3rem' };
-  const field = (label: string, value: string, set: (v: string) => void, placeholder = '') => (
-    <div style={{ flex: 1, minWidth: '200px' }}>
-      <label style={labelStyle}>{label}</label>
-      <input className="search-input" value={value} onChange={(e) => set(e.target.value)} placeholder={placeholder} style={{ width: '100%' }} />
-    </div>
-  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {message && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1rem', borderRadius: '10px',
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1rem', borderRadius: '10px',
           background: message.type === 'success' ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)',
           border: `1px solid ${message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)'}`,
-          color: message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)', fontSize: '0.85rem' }}>
+          color: message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)', fontSize: '0.85rem'
+        }}>
           {message.type === 'success' ? <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} /> : <ShieldAlert style={{ width: '1.1rem', height: '1.1rem' }} />}
           {message.text}
         </div>
       )}
 
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>Afiliado y obra social</h3>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          {field('Obra social', obraSocial, setObraSocial, 'PAMI / OSDE / ...')}
-          {field('Nº de afiliado', afiliado, setAfiliado)}
-          {field('Nº de beneficio', beneficio, setBeneficio)}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+          <Shield style={{ width: '1.2rem', height: '1.2rem', color: '#6366f1' }} />
+          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>Afiliado y Obra Social Oficial</h3>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          {field('Código de prestador', prestador, setPrestador)}
-          {field('Médico de cabecera', medicoCabecera, setMedicoCabecera)}
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <div style={{ minWidth: '200px' }}>
-            <label style={labelStyle}>¿Es titular?</label>
-            <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', flexWrap: 'wrap' }}>
+          
+          {/* Obra Social con Combo Datalist */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <label style={labelStyle}>Obra Social / Cobertura *</label>
+            <input
+              type="text"
+              list="obras-sociales-list"
+              className="search-input"
+              value={covSearch}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCovSearch(val);
+                const matched = insuranceList.find(
+                  (os) => os.nombre.toLowerCase() === val.toLowerCase().trim()
+                );
+                if (matched) {
+                  setSelectedCompanyId(matched.id);
+                } else {
+                  setSelectedCompanyId('');
+                }
+              }}
+              placeholder="Buscar obra social..."
+              style={{ width: '100%' }}
+            />
+            <datalist id="obras-sociales-list">
+              {insuranceList.map((os) => (
+                <option key={os.id} value={os.nombre} />
+              ))}
+            </datalist>
+          </div>
+
+          {/* Nº de Afiliado */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <label style={labelStyle}>Nº de Afiliado *</label>
+            <input
+              className="search-input"
+              value={nroAfiliado}
+              onChange={(e) => setNroAfiliado(e.target.value)}
+              placeholder="Ej: 1234567890"
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Plan / Categoría */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <label style={labelStyle}>Plan / Categoría</label>
+            <input
+              className="search-input"
+              value={plan}
+              onChange={(e) => setPlan(e.target.value)}
+              placeholder="Ej: Plan 310, Activo..."
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Es Titular */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <label style={labelStyle}>¿El paciente es el titular?</label>
+            <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
               {[true, false].map((v) => (
-                <button key={String(v)} type="button" onClick={() => setTitular(v)} className="btn" style={{
-                  padding: '0.4rem 1rem', fontSize: '0.82rem', borderRadius: '8px', fontWeight: 700,
-                  background: titular === v ? 'rgba(41,98,255,0.06)' : 'var(--bg-surface)',
-                  borderColor: titular === v ? 'var(--color-primary)' : 'var(--border-color)',
-                  color: titular === v ? 'var(--color-primary)' : 'var(--color-text)',
-                }}>{v ? 'Sí' : 'No'}</button>
+                <button
+                  key={String(v)}
+                  type="button"
+                  onClick={() => setEsTitular(v)}
+                  className="btn"
+                  style={{
+                    padding: '0.45rem 1.25rem',
+                    fontSize: '0.82rem',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: esTitular === v ? 'rgba(99,102,241,0.08)' : 'var(--bg-surface)',
+                    borderColor: esTitular === v ? '#6366f1' : 'var(--border-color)',
+                    color: esTitular === v ? '#4f46e5' : 'var(--color-text)',
+                    border: '1px solid',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {v ? 'Sí' : 'No'}
+                </button>
               ))}
             </div>
           </div>
-          {!titular && field('Parentesco con el titular', parentesco, setParentesco, 'Ej: cónyuge, hijo/a')}
+
+          {/* Nombre del Titular */}
+          {!esTitular && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', gridColumn: 'span 2', animation: 'fadeIn 0.2s ease' }}>
+              <label style={labelStyle}>Nombre Completo del Titular *</label>
+              <input
+                className="search-input"
+                value={nombreTitular}
+                onChange={(e) => setNombreTitular(e.target.value)}
+                placeholder="Ej: Gómez, Juan Carlos"
+                style={{ width: '100%' }}
+              />
+            </div>
+          )}
+
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ padding: '0.6rem 1.5rem', gap: '0.5rem' }}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleSave}
+          disabled={saving}
+          style={{ padding: '0.6rem 1.5rem', gap: '0.5rem', display: 'flex', alignItems: 'center', fontWeight: 700 }}
+        >
           <Save style={{ width: '1rem', height: '1rem' }} />
-          {saving ? 'Guardando...' : 'Guardar datos de afiliado'}
+          {saving ? 'Guardando...' : 'Guardar Cobertura Oficial'}
         </button>
       </div>
     </div>

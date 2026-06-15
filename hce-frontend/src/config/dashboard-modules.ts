@@ -22,15 +22,6 @@ export interface DashboardModule {
  */
 export const DASHBOARD_MODULES: DashboardModule[] = [
   {
-    key: 'patients',
-    icon: '🏥',
-    title: 'Historia Clínica',
-    description: 'Buscá, registrá y gestioná pacientes. Odontograma, alergias, signos vitales y documentos clínicos.',
-    color: 'var(--color-emerald)',
-    badge: null,
-    allowedRoles: [ROLES.MEDICO, ROLES.ENFERMERO, ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
-  },
-  {
     key: 'odonto-hc',
     icon: '🦷',
     title: 'Historia Clínica Odontológica',

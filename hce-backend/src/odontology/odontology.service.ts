@@ -1,8 +1,19 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { join } from 'path';
+import * as fs from 'fs';
 import { OdontologyResourceEntity } from './odontology-resource.entity';
 import { PatientEntity } from '../patient/patient.entity';
+import { AppointmentEntity } from '../appointment/appointment.entity';
+
+/** Metadatos del archivo subido (radiografía/foto/documento). */
+export interface OdontoFileInfo {
+  originalname: string;
+  filename: string;
+  mimetype: string;
+  size: number;
+}
 
 // URL canónica de la extensión que distingue la capa del odontograma:
 // 'existing' = prestación existente (ya realizada → rojo)
@@ -29,7 +40,81 @@ export class OdontologyService {
     // del paciente al tenant. No escribe ni modifica la HC original.
     @InjectRepository(PatientEntity)
     private readonly patientRepository: Repository<PatientEntity>,
+    // Lectura de turnos SOLO para derivar la "última visita" de la grilla.
+    @InjectRepository(AppointmentEntity)
+    private readonly appointmentRepository: Repository<AppointmentEntity>,
   ) {}
+
+  /**
+   * Enriquece la grilla de pacientes con datos derivados que NO viven en el
+   * padrón demográfico: "última visita" y "obra social". Se resuelve en lote
+   * (sin N+1) para escalar: 3 consultas agregadas, no una por paciente.
+   *
+   * No toca PatientService.search (regla del Super Admin): el frontend busca el
+   * padrón como siempre y luego pide aquí solo los IDs visibles en pantalla.
+   *
+   * @returns mapa { [patientId]: { lastVisit, obraSocial } }
+   */
+  async enrichPatients(
+    patientIds: string[],
+    tenantId: string,
+  ): Promise<Record<string, { lastVisit: string | null; obraSocial: string | null }>> {
+    const result: Record<string, { lastVisit: string | null; obraSocial: string | null }> = {};
+    // Cota defensiva: solo se enriquece lo que se muestra en una página de grilla.
+    const ids = (patientIds || [])
+      .filter((id) => typeof id === 'string' && id.length > 0)
+      .slice(0, 300);
+    if (ids.length === 0) return result;
+    ids.forEach((id) => { result[id] = { lastVisit: null, obraSocial: null }; });
+
+    // 1a) Última visita por turno atendido (fulfilled).
+    const apptRows = await this.appointmentRepository
+      .createQueryBuilder('a')
+      .select('a.patient_id', 'pid')
+      .addSelect('MAX(a.start_date)', 'last')
+      .where('a.tenant_id = :tenantId', { tenantId })
+      .andWhere('a.patient_id IN (:...ids)', { ids })
+      .andWhere("a.status = 'fulfilled'")
+      .groupBy('a.patient_id')
+      .getRawMany();
+
+    // 1b) Última actividad odontológica (registro clínico = hubo visita).
+    const odontoRows = await this.resourceRepository
+      .createQueryBuilder('r')
+      .select('r.patient_id', 'pid')
+      .addSelect('MAX(r.updated_at)', 'last')
+      .where('r.tenant_id = :tenantId', { tenantId })
+      .andWhere('r.patient_id IN (:...ids)', { ids })
+      .groupBy('r.patient_id')
+      .getRawMany();
+
+    const applyVisit = (rows: Array<{ pid: string; last: any }>) => {
+      for (const { pid, last } of rows) {
+        if (!result[pid] || !last) continue;
+        const iso = new Date(last).toISOString();
+        if (!result[pid].lastVisit || iso > (result[pid].lastVisit as string)) {
+          result[pid].lastVisit = iso;
+        }
+      }
+    };
+    applyVisit(apptRows);
+    applyVisit(odontoRows);
+
+    // 2) Obra social: la cobertura más reciente registrada por paciente.
+    const coverages = await this.resourceRepository.find({
+      where: { tenantId, resourceType: 'Coverage', patientId: In(ids) },
+      order: { updatedAt: 'DESC' },
+    });
+    for (const cov of coverages) {
+      const entry = result[cov.patientId];
+      if (entry && !entry.obraSocial) {
+        const os = cov.payload?.obraSocial || cov.payload?.payor?.[0]?.display || null;
+        if (os) entry.obraSocial = os;
+      }
+    }
+
+    return result;
+  }
 
   async getPatient(patientId: string, tenantId: string): Promise<PatientEntity> {
     const patient = await this.patientRepository.findOne({ where: { id: patientId, tenantId } });
@@ -116,6 +201,65 @@ export class OdontologyService {
   }
 
   /**
+   * Guarda una radiografía/foto (FHIR Media) o un documento (FHIR DocumentReference)
+   * en la tabla del módulo odontológico (aislado). El archivo ya fue persistido en
+   * disco por multer; acá guardamos la referencia. La url se almacena RELATIVA
+   * (`/uploads/...`) para no atar el dato a un host (el frontend la prefija).
+   */
+  async saveFile(
+    patientId: string,
+    fileInfo: OdontoFileInfo,
+    description: string,
+    category: string,
+    tenantId: string,
+  ): Promise<any> {
+    await this.assertPatient(patientId, tenantId);
+
+    const isImage = fileInfo.mimetype.startsWith('image/');
+    const resourceType = isImage ? 'Media' : 'DocumentReference';
+    const fileUrl = `/uploads/${fileInfo.filename}`;
+    const title = description?.trim() || fileInfo.originalname;
+    const meta = {
+      _category: category || (isImage ? 'imagen' : 'documento'),
+      _originalName: fileInfo.originalname,
+      _fileName: fileInfo.filename,
+      _contentType: fileInfo.mimetype,
+      _size: fileInfo.size,
+      _uploadedAt: new Date().toISOString(),
+    };
+
+    const payload: any = isImage
+      ? {
+          resourceType: 'Media',
+          status: 'completed',
+          subject: { reference: `Patient/${patientId}` },
+          content: { contentType: fileInfo.mimetype, url: fileUrl, title, size: fileInfo.size },
+          note: description?.trim() ? [{ text: description.trim() }] : undefined,
+          ...meta,
+        }
+      : {
+          resourceType: 'DocumentReference',
+          status: 'current',
+          subject: { reference: `Patient/${patientId}` },
+          description: title,
+          content: [{ attachment: { contentType: fileInfo.mimetype, url: fileUrl, title, size: fileInfo.size } }],
+          date: meta._uploadedAt,
+          ...meta,
+        };
+
+    const entity = new OdontologyResourceEntity();
+    entity.patientId = patientId;
+    entity.resourceType = resourceType;
+    entity.tenantId = tenantId;
+    entity.payload = payload;
+
+    const saved = await this.resourceRepository.save(entity);
+    saved.payload.id = saved.id;
+    await this.resourceRepository.update(saved.id, { payload: saved.payload });
+    return saved.payload;
+  }
+
+  /**
    * Transiciona un hallazgo planificado (azul) a existente (rojo): el
    * tratamiento "a realizar" pasó a "realizado".
    */
@@ -153,6 +297,17 @@ export class OdontologyService {
     if (!resource) {
       throw new NotFoundException('Recurso clínico no encontrado.');
     }
+
+    // Si es un archivo subido (radiografía/foto/documento), borrar también el binario local.
+    const fileName: string | undefined = resource.payload?._fileName;
+    if (fileName) {
+      const safe = String(fileName).replace(/[^a-zA-Z0-9.\-_]/g, '');
+      const filePath = join(process.cwd(), 'uploads', safe);
+      if (fs.existsSync(filePath)) {
+        try { fs.unlinkSync(filePath); } catch { /* archivo ya inexistente: ignorar */ }
+      }
+    }
+
     await this.resourceRepository.remove(resource);
     return { message: 'Recurso clínico eliminado con éxito.' };
   }

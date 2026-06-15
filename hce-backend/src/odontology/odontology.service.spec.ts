@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { OdontologyService, ODONTOGRAM_LAYER_URL } from './odontology.service';
 import { OdontologyResourceEntity } from './odontology-resource.entity';
 import { PatientEntity } from '../patient/patient.entity';
+import { AppointmentEntity } from '../appointment/appointment.entity';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('OdontologyService', () => {
@@ -11,16 +12,31 @@ describe('OdontologyService', () => {
   let resourceRepository: Repository<OdontologyResourceEntity>;
   let patientRepository: Repository<PatientEntity>;
 
+  // QueryBuilder encadenable reutilizable para los agregados de enrichPatients.
+  const makeQb = (rows: any[]) => ({
+    select: jest.fn().mockReturnThis(),
+    addSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue(rows),
+  });
+
   const mockResourceRepository = {
     find: jest.fn(),
     findOne: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
+    createQueryBuilder: jest.fn(),
   };
 
   const mockPatientRepository = {
     findOne: jest.fn(),
+  };
+
+  const mockAppointmentRepository = {
+    createQueryBuilder: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -34,6 +50,10 @@ describe('OdontologyService', () => {
         {
           provide: getRepositoryToken(PatientEntity),
           useValue: mockPatientRepository,
+        },
+        {
+          provide: getRepositoryToken(AppointmentEntity),
+          useValue: mockAppointmentRepository,
         },
       ],
     }).compile();
@@ -207,6 +227,87 @@ describe('OdontologyService', () => {
       await expect(service.completeResource('resource-uuid', 'tenant-xyz')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('saveFile', () => {
+    const mockPatient = { id: 'patient-123', tenantId: 'tenant-abc' } as PatientEntity;
+
+    it('guarda una imagen como FHIR Media con url relativa y categoría', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(mockPatient);
+      mockResourceRepository.save.mockImplementation((e) => { e.id = 'media-1'; return Promise.resolve(e); });
+      mockResourceRepository.update.mockResolvedValue({});
+
+      const result = await service.saveFile(
+        'patient-123',
+        { originalname: 'rx.png', filename: 'odo-123.png', mimetype: 'image/png', size: 5000 },
+        'Panorámica inicial', 'radiografia', 'tenant-abc',
+      );
+
+      expect(result.resourceType).toBe('Media');
+      expect(result.content.url).toBe('/uploads/odo-123.png');
+      expect(result.content.contentType).toBe('image/png');
+      expect(result._category).toBe('radiografia');
+      expect(result.subject.reference).toBe('Patient/patient-123');
+      expect(result.id).toBe('media-1');
+    });
+
+    it('guarda un PDF como FHIR DocumentReference', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(mockPatient);
+      mockResourceRepository.save.mockImplementation((e) => { e.id = 'doc-1'; return Promise.resolve(e); });
+      mockResourceRepository.update.mockResolvedValue({});
+
+      const result = await service.saveFile(
+        'patient-123',
+        { originalname: 'consentimiento.pdf', filename: 'odo-9.pdf', mimetype: 'application/pdf', size: 9000 },
+        '', 'documento', 'tenant-abc',
+      );
+
+      expect(result.resourceType).toBe('DocumentReference');
+      expect(result.content[0].attachment.url).toBe('/uploads/odo-9.pdf');
+      expect(result._category).toBe('documento');
+    });
+
+    it('lanza NotFoundException si el paciente no es del tenant', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(null);
+      await expect(
+        service.saveFile('patient-123', { originalname: 'x.png', filename: 'y.png', mimetype: 'image/png', size: 1 }, '', 'foto', 'tenant-xyz'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('enrichPatients', () => {
+    it('devuelve un mapa vacío si no hay IDs', async () => {
+      const result = await service.enrichPatients([], 'tenant-abc');
+      expect(result).toEqual({});
+    });
+
+    it('toma la fecha más reciente entre turno atendido y actividad odontológica, y la última obra social', async () => {
+      // Turno fulfilled más antiguo que la actividad odonto → debe ganar la odonto.
+      mockAppointmentRepository.createQueryBuilder.mockReturnValue(
+        makeQb([{ pid: 'p1', last: '2026-01-10T10:00:00.000Z' }]),
+      );
+      mockResourceRepository.createQueryBuilder.mockReturnValue(
+        makeQb([{ pid: 'p1', last: '2026-03-20T09:00:00.000Z' }]),
+      );
+      mockResourceRepository.find.mockResolvedValue([
+        { patientId: 'p1', payload: { obraSocial: 'OSDE' } },
+      ]);
+
+      const result = await service.enrichPatients(['p1'], 'tenant-abc');
+
+      expect(result.p1.lastVisit).toBe('2026-03-20T09:00:00.000Z');
+      expect(result.p1.obraSocial).toBe('OSDE');
+    });
+
+    it('deja null cuando un paciente no tiene visitas ni cobertura', async () => {
+      mockAppointmentRepository.createQueryBuilder.mockReturnValue(makeQb([]));
+      mockResourceRepository.createQueryBuilder.mockReturnValue(makeQb([]));
+      mockResourceRepository.find.mockResolvedValue([]);
+
+      const result = await service.enrichPatients(['p2'], 'tenant-abc');
+
+      expect(result.p2).toEqual({ lastVisit: null, obraSocial: null });
     });
   });
 

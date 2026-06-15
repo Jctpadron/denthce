@@ -1,9 +1,24 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, Res } from '@nestjs/common';
+import {
+  Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, Res,
+  UploadedFile, UseInterceptors, BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import * as fs from 'fs';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { OdontologyService } from './odontology.service';
 import { OdontologyPdfService } from './odontology-pdf.service';
+
+// Tipos permitidos: imágenes (radiografías/fotos) y documentos.
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+  'application/pdf', 'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /**
  * API de la HISTORIA CLÍNICA ODONTOLÓGICA (módulo aislado).
@@ -29,6 +44,54 @@ export class OdontologyController {
       patientId,
       body.resourceType,
       body.payload,
+      req.user.tenantId,
+    );
+  }
+
+  @Post('patients/enrich')
+  @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
+  async enrichPatients(
+    @Body() body: { patientIds: string[] },
+    @Request() req: any,
+  ) {
+    return this.odontologyService.enrichPatients(body?.patientIds || [], req.user.tenantId);
+  }
+
+  @Post('patient/:patientId/upload')
+  @Roles('medico', 'enfermero', 'administrador')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          const uploadsDir = join(process.cwd(), 'uploads');
+          if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+          cb(null, uploadsDir);
+        },
+        filename: (_req, file, cb) => {
+          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+          cb(null, `odo-${uniqueSuffix}${extname(file.originalname).toLowerCase()}`);
+        },
+      }),
+      limits: { fileSize: MAX_FILE_SIZE_BYTES },
+      fileFilter: (_req, file, cb) => {
+        if (ALLOWED_MIME_TYPES.includes(file.mimetype)) cb(null, true);
+        else cb(new BadRequestException(`Tipo de archivo no permitido: ${file.mimetype}. Se aceptan imágenes (JPG, PNG, WebP) y documentos (PDF, DOC, DOCX).`), false);
+      },
+    }),
+  )
+  async uploadFile(
+    @Param('patientId') patientId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('description') description: string,
+    @Body('category') category: string,
+    @Request() req: any,
+  ) {
+    if (!file) throw new BadRequestException('No se recibió ningún archivo.');
+    return this.odontologyService.saveFile(
+      patientId,
+      { originalname: file.originalname, filename: file.filename, mimetype: file.mimetype, size: file.size },
+      description,
+      category,
       req.user.tenantId,
     );
   }

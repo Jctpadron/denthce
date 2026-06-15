@@ -1,0 +1,121 @@
+/* ============================================================
+   landing-pro.css — variante "Profesional" (skin sobrio/corporativo)
+   Se activa con la clase .landing--pro sobre .landing-root.
+   Reusa la MISMA estructura/contenido; solo cambia la piel visual.
+   ============================================================ */
+
+.landing-root.landing--pro {
+  --brand-blue: #13477a;   /* navy corporativo */
+  --brand-mint: #2c8c7d;   /* teal sobrio */
+  --accent: var(--brand-blue);
+}
+
+/* --- Forma: esquinas más sobrias (menos "app", más "corporativo") --- */
+.landing--pro .info-card,
+.landing--pro .step-card { border-radius: 6px; }
+.landing--pro .browser-frame { border-radius: 8px; }
+.landing--pro .landing-btn-primary,
+.landing--pro .landing-btn-secondary,
+.landing--pro .landing-btn-ghost,
+.landing--pro .landing-btn-lg { border-radius: 4px; }
+.landing--pro .final-cta-panel { border-radius: 10px; }
+.landing--pro .hero-badge { border-radius: 0; }
+
+/* --- Hero sobrio: sin glows de color ni degradé ni tarjeta flotante --- */
+.landing--pro .hero {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+}
+.landing--pro .hero__glow,
+.landing--pro .hero-visual__glow,
+.landing--pro .hero-float-card { display: none; }
+
+/* Palabra clave sin degradé: navy sólido */
+.landing--pro .hero-highlight {
+  background: none;
+  -webkit-text-fill-color: var(--brand-blue);
+  color: var(--brand-blue);
+}
+
+/* Badge tipo etiqueta editorial (línea a la izquierda, mayúsculas) */
+.landing--pro .hero-badge {
+  background: transparent; border: none; border-left: 3px solid var(--brand-blue);
+  padding: 0.1rem 0 0.1rem 0.7rem; color: var(--color-muted);
+  letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.72rem;
+}
+.landing--pro .hero-badge svg { display: none; }
+
+/* H1 un poco más contenido y serio */
+.landing--pro .hero-h1 { letter-spacing: -0.02em; }
+
+/* --- Encabezados de sección: editorial, alineados a la izquierda --- */
+.landing--pro .landing-heading--center {
+  text-align: left; align-items: flex-start; margin-inline: 0; max-width: 820px;
+}
+/* …salvo el CTA final, que sigue centrado */
+.landing--pro .final-cta-panel .landing-heading--center {
+  text-align: center; align-items: center; margin-inline: auto;
+}
+.landing--pro .landing-kicker { color: var(--brand-blue); }
+
+/* --- Tarjetas: planas, con acento superior al pasar el mouse --- */
+.landing--pro .info-card {
+  box-shadow: none; border-top: 3px solid transparent;
+  transition: border-color 0.2s, transform 0.2s;
+}
+@media (hover: hover) {
+  .landing--pro .info-card--interactive:hover {
+    transform: none; box-shadow: var(--shadow-sm);
+    border-color: var(--border-color); border-top-color: var(--brand-blue);
+  }
+}
+.landing--pro .info-card__chip {
+  border-radius: 4px; background: var(--bg-card); color: var(--brand-blue);
+}
+.landing--pro .info-card__badge {
+  border-radius: 3px; background: var(--bg-card); color: var(--brand-blue);
+}
+
+/* --- Botón primario: plano y firme (sin elevación juguetona) --- */
+.landing--pro .landing-btn-primary { box-shadow: none; }
+@media (hover: hover) {
+  .landing--pro .landing-btn-primary:hover { transform: none; filter: brightness(0.92); box-shadow: none; }
+}
+
+/* --- Marco de navegador más sobrio --- */
+.landing--pro .browser-frame {
+  box-shadow: 0 14px 34px -16px rgba(13, 37, 64, 0.28);
+  border: 1px solid #d6dde6;
+}
+
+/* --- Step cards: numeración cuadrada --- */
+.landing--pro .step-card__num { border-radius: 6px; }
+
+/* --- Banda de transformación: tinte más neutro --- */
+.landing--pro .landing-section--tint {
+  background: var(--bg-base);
+  border-block: 1px solid var(--border-color);
+}
+
+/* --- CTA final: panel sobrio --- */
+.landing--pro .final-cta-panel {
+  background: var(--bg-base);
+  border: 1px solid var(--border-color);
+}
+
+/* --- Footer navy profundo --- */
+.landing--pro .landing-footer { background: #0d2540; }
+
+/* --- Selector de variante (ayuda temporal para decidir) --- */
+.variant-switch {
+  position: fixed; z-index: 200; right: 1rem; bottom: 1rem;
+  display: inline-flex; gap: 0.25rem; padding: 0.3rem;
+  background: var(--bg-surface); border: 1px solid var(--border-color);
+  border-radius: 999px; box-shadow: var(--shadow-card);
+}
+.variant-switch button {
+  border: none; background: transparent; cursor: pointer;
+  font-size: 0.8rem; font-weight: 700; color: var(--color-muted);
+  padding: 0.45rem 0.9rem; border-radius: 999px; transition: var(--transition-smooth);
+}
+.variant-switch button.is-active { background: var(--accent); color: #fff; }
