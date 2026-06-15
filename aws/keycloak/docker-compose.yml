@@ -19,9 +19,12 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_PROXY: edge
       KC_HTTP_ENABLED: "true"
-      # Optimización de memoria para t3.small y estrategia de importación
-      JAVA_OPTS_APPEND: "-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
+      # Optimización de memoria para t3.small.
+      # NOTA: se quitó -Dkeycloak.migration.strategy=OVERWRITE_EXISTING para que el
+      # import SALTE el realm existente y NO pise usuarios/clients creados en runtime.
+      JAVA_OPTS_APPEND: "-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"
     volumes:
       - ./hce-realm.json:/opt/keycloak/data/import/hce-realm.json:ro
+      - ./themes:/opt/keycloak/themes
     ports:
       - "80:8080"
