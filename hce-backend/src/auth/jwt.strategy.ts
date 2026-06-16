@@ -60,6 +60,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     return {
       userId: payload.sub,
+      sub: payload.sub, // alias explícito: varios controllers leen req.user.sub (p.ej. protesis chat → trazabilidad)
       tenantId: tenantId,
       // Exponer ambos para que getUserCtx() resuelva el actor de auditoría sin ambigüedad (QA-2).
       username: payload.preferred_username,

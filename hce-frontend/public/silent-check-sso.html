@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script>
+      // Página de chequeo SSO silencioso de Keycloak (mismo origen que la app).
+      // Keycloak la carga en un iframe oculto y lee el resultado de la sesión vía postMessage.
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>

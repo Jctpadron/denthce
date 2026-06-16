@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
@@ -133,8 +133,17 @@ export class ProtesisService {
     return this.orderRepository.save(order);
   }
 
+  // Estados válidos del flujo de laboratorio (coincide con protesis-order.entity.ts y el portal).
+  static readonly VALID_STATUSES = ['received', 'designing', 'processing', 'ceramic', 'ready', 'delivered', 'cancelled'];
+
   // Actualizar estado de la orden
   async updateStatus(tenantId: string, orderId: string, status: string): Promise<ProtesisOrder> {
+    if (!ProtesisService.VALID_STATUSES.includes(status)) {
+      throw new BadRequestException(
+        `Estado inválido: "${status}". Debe ser uno de: ${ProtesisService.VALID_STATUSES.join(', ')}.`,
+      );
+    }
+
     const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
       throw new NotFoundException('Orden no encontrada');

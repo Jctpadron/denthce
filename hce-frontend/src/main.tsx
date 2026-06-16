@@ -26,26 +26,37 @@ axios.interceptors.request.use(
   }
 );
 
+// Render único de la app (guarda anti-doble-montaje entre el then/catch y la red de seguridad).
+let appRendered = false;
+function renderApp() {
+  if (appRendered) return;
+  appRendered = true;
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}
+
 // Inicializar Keycloak antes de renderizar la aplicación React
 keycloak
   .init({
     onLoad: 'check-sso',
+    // Chequeo SSO silencioso vía iframe del MISMO origen (app.systia.ar/silent-check-sso.html).
+    // Evita el login-status-iframe a auth.systia.ar, que en Android/móvil queda bloqueado por
+    // las cookies de terceros → keycloak.init() colgaba y la app nunca renderizaba (pantalla en blanco).
+    silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+    checkLoginIframe: false,
     pkceMethod: 'S256',
   })
-  .then(() => {
-    createRoot(document.getElementById('root')!).render(
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    );
-  })
+  .then(renderApp)
   .catch((err) => {
+    // No bloquear la app si Keycloak no inicializa: igual mostramos la UI (landing/login).
+    // El login real se dispara cuando el usuario lo pide (keycloak.login()).
     console.error('Error al inicializar Keycloak:', err);
-    document.getElementById('root')!.innerHTML = `
-      <div style="background-color: #020617; color: #f8fafc; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 2rem;">
-        <h2 style="color: #f43f5e; font-size: 1.8rem; margin-bottom: 1rem;">⚠️ Error de Conexión de Seguridad</h2>
-        <p style="color: #94a3b8; max-width: 500px; margin-bottom: 2rem;">No se pudo establecer conexión con el servidor de identidad Keycloak. Por favor, asegúrate de que el contenedor de Docker esté encendido.</p>
-        <button onclick="window.location.reload()" style="background: linear-gradient(135deg, #06b6d4, #10b981); color: #020617; font-weight: bold; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">Reintentar Conexión</button>
-      </div>
-    `;
+    renderApp();
   });
+
+// Red de seguridad: si por cualquier motivo la init de Keycloak no resuelve a tiempo
+// (p.ej. iframe/cookies en móvil), renderizamos igual para no dejar pantalla en blanco.
+setTimeout(renderApp, 8000);
