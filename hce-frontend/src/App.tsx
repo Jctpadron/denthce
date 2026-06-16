@@ -11,10 +11,11 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useRoles } from './hooks/useRoles';
 import { roleDisplayName } from './utils/roles';
 import keycloak from './utils/keycloak-config';
-import { LogOut, User, Shield, Menu, X, Home, CalendarDays, PlusCircle, Users, Palette, ChevronDown } from 'lucide-react';
+import { LogOut, User, Shield, Menu, X, Home, CalendarDays, PlusCircle, Users, Palette, ChevronDown, Wrench } from 'lucide-react';
 import { LandingDentaCloud } from './components/landing/LandingDentaCloud';
+import { DentaLabPortal } from './components/protesis/DentaLabPortal';
 
-type AppView = 'home' | 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'settings' | 'users';
+type AppView = 'home' | 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'settings' | 'users' | 'lab-portal';
 
 /** Ícono de diente (lucide no lo trae) para HC Odontológica. Hereda el color del botón. */
 const ToothIcon = ({ size = 18 }: { size?: number }) => (
@@ -25,11 +26,18 @@ const ToothIcon = ({ size = 18 }: { size?: number }) => (
 );
 
 function AppContent() {
-  const [activeView, setActiveView] = useState<AppView>('home');
+  const { roles: clinicalRoles, canConfigure, isSuperAdmin, isLaboratorio } = useRoles();
+  const [activeView, setActiveView] = useState<AppView>(() => {
+    // Si es laboratorio, forzar que inicie en el portal de laboratorios
+    const roles = keycloak.tokenParsed?.realm_access?.roles ?? [];
+    if (roles.includes('laboratorio-operador') || roles.includes('laboratorio-admin')) {
+      return 'lab-portal';
+    }
+    return 'home';
+  });
   const [navOpen, setNavOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { config, loading } = useTheme();
-  const { roles: clinicalRoles, canConfigure, isSuperAdmin } = useRoles();
 
   if (!keycloak.authenticated) {
     return <LandingDentaCloud />;
@@ -46,15 +54,17 @@ function AppContent() {
 
   const getRoleDisplayName = roleDisplayName;
 
-  // Nav clínico (lo del día a día). Íconos lucide; HC usa el diente de marca.
-  const NAV_ITEMS = [
+  // Nav clínico / laboratorio dinámico según rol
+  const NAV_ITEMS = isLaboratorio ? [
+    { key: 'lab-portal' as AppView, label: 'Portal Prótesis', Icon: Wrench }
+  ] : [
     { key: 'home' as AppView, label: 'Inicio', Icon: Home },
     { key: 'odonto-hc' as AppView, label: 'HC Odontológica', Icon: ToothIcon },
     { key: 'agenda' as AppView, label: 'Agenda', Icon: CalendarDays },
     { key: 'form' as AppView, label: 'Admisión', Icon: PlusCircle },
   ];
   // Ítems de administración: van al menú del usuario (avatar), no al nav principal.
-  const ADMIN_ITEMS = canConfigure ? [
+  const ADMIN_ITEMS = canConfigure && !isLaboratorio ? [
     { key: 'users' as AppView, label: 'Personal', Icon: Users },
     { key: 'settings' as AppView, label: 'Personalización', Icon: Palette },
   ] : [];
@@ -111,7 +121,7 @@ function AppContent() {
             <h1 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>
               {config.clinicName || 'Denta Cloud'}
             </h1>
-            <p style={{ fontSize: '0.68rem', color: 'var(--color-primary, var(--color-cyan))', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, margin: 0 }}>
+            <p style={{ fontSize: '0.68rem', color: 'var(--accent-text)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, margin: 0 }}>
               {config.specialty || 'Odontología Digital'}
             </p>
           </div>
@@ -262,7 +272,8 @@ function AppContent() {
 
       {/* Contenedor Principal */}
       <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
-        {activeView === 'home' && (
+        {activeView === 'lab-portal' && isLaboratorio && <DentaLabPortal />}
+        {activeView === 'home' && !isLaboratorio && (
           <HomeScreen onNavigate={(to) => {
             const views: Record<string, AppView> = {
               home: 'home',
@@ -276,18 +287,18 @@ function AppContent() {
             setActiveView(to === 'dashboard' ? 'home' : (views[to] || 'home'));
           }} />
         )}
-        {activeView === 'patients' && <PatientSearch />}
-        {activeView === 'odonto-hc' && <OdontologyHC />}
-        {activeView === 'agenda' && <AgendaView />}
-        {activeView === 'form' && <PatientForm onSuccess={() => setActiveView('patients')} />}
-        {activeView === 'users' && canConfigure && <UserManagement />}
-        {activeView === 'users' && !canConfigure && (
+        {activeView === 'patients' && !isLaboratorio && <PatientSearch />}
+        {activeView === 'odonto-hc' && !isLaboratorio && <OdontologyHC />}
+        {activeView === 'agenda' && !isLaboratorio && <AgendaView />}
+        {activeView === 'form' && !isLaboratorio && <PatientForm onSuccess={() => setActiveView('patients')} />}
+        {activeView === 'users' && canConfigure && !isLaboratorio && <UserManagement />}
+        {activeView === 'users' && !canConfigure && !isLaboratorio && (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
             🔒 Solo el Administrador o los Médicos pueden acceder a la Gestión de Personal.
           </div>
         )}
-        {activeView === 'settings' && canConfigure && <BrandingSettings onClose={() => setActiveView('home')} />}
-        {activeView === 'settings' && !canConfigure && (
+        {activeView === 'settings' && canConfigure && !isLaboratorio && <BrandingSettings onClose={() => setActiveView('home')} />}
+        {activeView === 'settings' && !canConfigure && !isLaboratorio && (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
             🔒 Solo el Administrador o los Médicos pueden acceder a la Personalización.
           </div>

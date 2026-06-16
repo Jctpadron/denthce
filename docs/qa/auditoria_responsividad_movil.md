@@ -191,8 +191,63 @@ Touch **Enabled**, User-Agent **Android Chrome**.
 | **Crítica** | Admisión / `PatientForm.tsx` | `<select>` Género sin nombre accesible | Idem | `htmlFor`+`id`+`aria-label` | ✅ Corregido |
 | **Alta** | Home / `App.tsx` header | En < 1024px el nombre de la clínica empujaba el contenido → **avatar cortado y "Salir" fuera de pantalla** | No se podía cerrar sesión en móvil | Nombre con `ellipsis`; avatar+Salir al **drawer** (`.app-user-desktop` oculto < 1024) | ✅ Corregido |
 | **Media** | Nav / `App.tsx` | Íconos emoji "grayscale" apagados + ítems que no entraban | Prolijidad / consistencia | Migrado a **lucide** + admin al avatar; hover/activo por tokens | ✅ Corregido |
-| **Alta** | Landing / `landing.css` (`content.tsx`) | **Contraste**: texto en **menta `#2aa57c`** (wordmark "Cloud", kickers, links) sobre blanco ≈ 3:1 (axe ×9) | Texto poco legible (WCAG AA) | Usar variante **oscurecida del acento para texto** (`--accent-text`) o reservar la menta para rellenos/íconos, no texto chico | 🔴 Pendiente |
-| **Alta** | Home / Odonto / Agenda (varias) | **Contraste**: texto en **color primario del tenant** (naranja) sobre blanco < 4.5:1 (axe: Home ×17, Agenda ×11, Odonto ×3, Admisión ×1) | Subtítulos/links/acentos poco legibles | White-label seguro: derivar un `--accent-text` con contraste garantizado; no usar `var(--color-primary)` crudo en texto chico sobre blanco | 🔴 Pendiente |
+| **Alta** | Landing / `landing.css` | **Contraste**: texto en **menta `#2aa57c`** (wordmark "Cloud", kickers, badges) sobre blanco ≈ 3:1 (axe ×9) | Texto poco legible (WCAG AA) | Tonos de marca oscurecidos (`--brand-blue`/`--brand-mint`) + `--color-violet-text` en el badge | ✅ Corregido (Landing axe = **0**) |
+| **Alta** | Home / Odonto / Agenda (varias) | **Contraste**: texto en **color primario del tenant** + paleta fija (azul `#2962ff`, ámbar, esmeralda) sobre blanco/base < 4.5:1 | Subtítulos/links/acentos/badges poco legibles | **`--accent-text` white-label** (derivado por tenant en `ThemeContext`, contraste calculado sobre `--bg-base`) + tokens `--color-{blue,amber,violet,emerald}-text` para la paleta fija | ✅ Corregido (Home axe = **0**; ficha 6/7 tabs = 0) |
 
 ### Pendiente de auditar (próximas pantallas)
-Ficha odontológica tab por tab (odontograma SVG táctil + landscape, anamnesis + firma canvas, estado bucal, cobertura, consentimiento, evolución, imágenes/documentos), Agenda (crear/editar turno, modal), Personalización. Registrar en esta misma tabla.
+~~Ficha odontológica tab por tab~~ ✅ **HECHO** (ver "Ejecución 2026-06-15 (2)" abajo). Resta: **Agenda** (crear/editar turno, modal), **Personalización** (BrandingSettings/UserManagement), y **firma canvas** + **odontograma táctil** con prueba de trazo/precisión en dispositivo real (la emulación no valida el gesto).
+
+---
+
+## Ejecución 2026-06-15 (2) — Ficha odontológica tab por tab (A24 390×844 + landscape 844×390)
+**Método:** `D:\tmp\a24_ficha_tabs.js` (puppeteer-core + Chrome + axe-core). Login real → HC Odontológica → primer paciente → recorrido de tabs con screenshot + axe + overflow por tab. **Responsable:** Claude.
+
+> **Alcance:** se auditaron los **7 tabs activos** del control segmentado de la ficha. El tab **"Prótesis / Laboratorio"** (8º, agregado recientemente) **queda fuera**: está en **desarrollo en paralelo** y aún no aparece en el control segmentado servido. Se audita cuando se estabilice.
+>
+> ⚠️ **Gotcha técnico (entorno):** el frontend corre en **Docker** (`hce-frontend-client`, mount `D:\...\hce-frontend → /usr/src/app`). El `vite.config.ts` **no tiene `server.watch.usePolling`**, así que el watcher **no capta** los cambios del bind-mount de Windows → Vite sirve **transforms stale** y HMR no refresca. Para validar cambios hay que **`docker restart hce-frontend-client`** (o agregar `usePolling: true`). Afecta a toda sesión que edite el frontend.
+
+### Resumen ejecutivo (2)
+- **Overflow horizontal: 0** en los 7 tabs (390px) y en odontograma **landscape** (844px) ✓.
+- **Críticos nuevos: 7** (form controls sin label/nombre accesible en Anamnesis, Estado bucal, Imágenes) → **TODOS CORREGIDOS** esta sesión (`aria-label`; reverificado con axe = 0 críticos).
+- **Serios:** persiste el **contraste de color** transversal (texto en color de marca/acento sobre blanco < 4.5:1), incluido el wordmark **"SONRISA DIGITAL"** del header (`.app-logo-container > div > p`). Es el mismo hallazgo de la 1ª ejecución → ver fila "Contraste" (pendiente, decisión de marca).
+- **Otro serio:** `scrollable-region-focusable` en **Odontograma** y **Consentimiento** (región scrollable sin acceso por teclado) → Media, backlog.
+
+### Hallazgos por tab (axe wcag2a/2aa/21aa)
+| Tab | Overflow | Críticos (label/select-name) | Serios (contraste) | Otros serios | Estado críticos |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 Odontograma | no | — | ×8 | scrollable-region-focusable ×1 | — |
+| 2 Anamnesis | no | **input ×2** (Motivo, Cepillados/Azúcar, etc.) | ×2 | — | ✅ Corregido (`aria-label`) |
+| 3 Estado bucal y plan | no | **textarea/input ×4** (Diagnóstico, Plan, Observaciones, Fecha…) | ×4 | — | ✅ Corregido (`aria-label`) |
+| 4 Afiliado / Obra social | no | — | ×2 | — | — |
+| 5 Consentimiento | no | — | ×3 | scrollable-region-focusable ×1 | — |
+| 6 Evolución | no | — | ×22 (tabla densa) | — | — |
+| 7 Imágenes y documentos | no | **input[file] ×1 + select ×1** | ×2 | — | ✅ Corregido (`aria-label`) |
+| Odontograma LANDSCAPE | no | — | ×8 | scrollable-region-focusable ×1 | — |
+
+### Nuevas filas en la tabla consolidada
+| Severidad | Pantalla / Componente | Defecto | Impacto | Recomendación técnica | Estado |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| **Crítica** | Ficha / `AnamnesisPAMI.tsx` | inputs (Motivo de consulta, Cepillados, Momentos de azúcar, cigarrillos, detalle Sí/No) sin label asociado | TalkBack no anuncia el campo | `aria-label` por input (+`inputMode="numeric"` en los numéricos) | ✅ Corregido |
+| **Crítica** | Ficha / `OralStatusPAMI.tsx` | textareas (Diagnóstico, Plan, Observaciones) + inputs (Zona, Tipo, Fecha) sin label | Idem | `aria-label` por control | ✅ Corregido |
+| **Crítica** | Ficha / `OdontologyDocuments.tsx` | `input[type=file]`, `<select>` Categoría y `input` Descripción sin nombre accesible | Idem | `aria-label` por control | ✅ Corregido |
+| **Media** | Ficha / `OdontogramPAMI` + `ConsentForm` | región scrollable sin foco por teclado (`scrollable-region-focusable`) | Navegación por teclado | `tabindex="0"` + `role`/`aria-label` en el contenedor scrollable | 🔵 Backlog |
+
+## Resolución del contraste (WCAG AA) — 2026-06-15 (3)
+**Decisión del Super Admin:** implementar **`--accent-text`** ahora (white-label). **Responsable:** Claude.
+
+**Solución implementada:**
+1. **`ThemeContext.tsx`** — `applyTheme` deriva `--accent-text` oscureciendo el `primaryColor` del tenant hasta ≥4.5:1, calculado **sobre `--bg-base` (#e9edf3)** (la superficie más exigente; si pasa ahí, pasa en tarjetas blancas). El acento puro (`--color-primary`) se reserva para rellenos/bordes/íconos/títulos grandes.
+2. **`index.css`** — default `--accent-text: #075985` + tokens "texto seguro" de la paleta fija: `--color-blue-text #1d4ed8`, `--color-amber-text #b45309`, `--color-violet-text #4338ca`, `--color-emerald-text #047857`. Nav activo/hover usa `--accent-text`.
+3. **Aplicado en:** `App.tsx` (wordmark), `HomeScreen.tsx` (subtítulo, links de agenda, footer, footers de módulo, CTAs primarios → fondo `--accent-text`), `landing.css` (`--brand-blue`/`--brand-mint` oscurecidos + badge violeta), `agenda-utils.ts` (colores de estado/urgencia de turno), `OdontologyHC.tsx` (género, DNI, badge FHIR), `EvolutionPAMI.tsx`, `OralStatusPAMI.tsx`, `ConsentForm.tsx`.
+
+**Verificación axe (color-contrast, A24 390px):**
+| Pantalla | Antes | Después |
+| :-- | :-- | :-- |
+| Landing | 9 | **0** ✅ |
+| Home | 17 | **0** ✅ |
+| Ficha — anamnesis / estado bucal / afiliado / consentimiento / evolución / imágenes | 2–22 | **0** ✅ |
+| Ficha — **Odontograma** | 8 | **6** 🟡 residual |
+
+**Residual (🟡 Media, backlog):** `OdontogramPAMI.tsx` — etiquetas de capa/herramienta donde el **color del texto = color de la marca SVG** (Diagnóstico `#ef4444` ≈3.76:1; herramientas inactivas slate `#64748b` ≈4.35:1). Requiere desacoplar el color del label del color de la marca (token `--color-rose-text` para el texto, manteniendo el rojo en el trazo SVG). No se tocó para no desestabilizar el odontograma (componente complejo, en zona de trabajo paralelo del odontograma/prótesis).
+
+> **Nota de gobernanza:** el **tab 8 "Prótesis / Laboratorio"** (`ProtesisTab.tsx`) y `OdontogramPAMI.tsx` están en **desarrollo paralelo** — no se auditaron/modificaron en profundidad. Quedan para una pasada dedicada cuando se estabilicen.

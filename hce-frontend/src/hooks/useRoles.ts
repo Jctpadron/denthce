@@ -35,6 +35,9 @@ export function useRoles() {
     isEnfermero: roles.includes(ROLES.ENFERMERO),
     isRecepcionista: roles.includes(ROLES.RECEPCIONISTA),
     isSuperAdmin: roles.includes(ROLES.SUPERADMIN),
+    isLaboratorio: roles.includes(ROLES.LAB_OPERADOR) || roles.includes(ROLES.LAB_ADMIN),
+    isLabAdmin: roles.includes(ROLES.LAB_ADMIN),
+    isLabOperador: roles.includes(ROLES.LAB_OPERADOR),
     /** Equivale al antiguo `canConfigure` de ThemeContext: médico o administrador. */
     canConfigure: hasAnyRole(roles, [ROLES.ADMINISTRADOR, ROLES.MEDICO]),
   };

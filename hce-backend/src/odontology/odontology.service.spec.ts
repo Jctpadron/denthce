@@ -3,9 +3,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OdontologyService, ODONTOGRAM_LAYER_URL } from './odontology.service';
 import { OdontologyResourceEntity } from './odontology-resource.entity';
+import { OdontologyEncounterEntity } from './odontology-encounter.entity';
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentEntity } from '../appointment/appointment.entity';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 
 describe('OdontologyService', () => {
   let service: OdontologyService;
@@ -39,6 +40,10 @@ describe('OdontologyService', () => {
     createQueryBuilder: jest.fn(),
   };
 
+  const mockEncounterRepository = {
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -54,6 +59,10 @@ describe('OdontologyService', () => {
         {
           provide: getRepositoryToken(AppointmentEntity),
           useValue: mockAppointmentRepository,
+        },
+        {
+          provide: getRepositoryToken(OdontologyEncounterEntity),
+          useValue: mockEncounterRepository,
         },
       ],
     }).compile();
@@ -332,6 +341,136 @@ describe('OdontologyService', () => {
       await expect(service.deleteResource('resource-uuid', 'tenant-xyz')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // INVARIANTE 7: Inmutabilidad transversal de prestaciones de una visita firmada.
+  // Una prestación cuyo encounter_id apunta a una visita 'finished' no puede
+  // mutarse ni borrarse (ForbiddenException). Asociar a una visita activa
+  // setea encounter_id + payload.encounter + performedDateTime (Procedure).
+  // ──────────────────────────────────────────────────────────────────────────
+  describe('inmutabilidad por visita firmada (encuentro)', () => {
+    const mockPatient = { id: 'patient-123', tenantId: 'tenant-abc' } as PatientEntity;
+
+    it('saveResource lanza ForbiddenException si sobrescribe una prestación de una visita finished', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(mockPatient);
+      // Recurso existente para la misma pieza/cara/capa, vinculado a una visita firmada.
+      const existingResource = {
+        id: 'existing-id',
+        patientId: 'patient-123',
+        resourceType: 'Condition',
+        tenantId: 'tenant-abc',
+        encounterId: 'enc-finished',
+        payload: {
+          id: 'existing-id',
+          bodySite: { coding: [{ code: '18' }, { code: 'O' }] },
+          extension: [{ url: ODONTOGRAM_LAYER_URL, valueCode: 'existing' }],
+        },
+      } as OdontologyResourceEntity;
+      mockResourceRepository.find.mockResolvedValue([existingResource]);
+      mockEncounterRepository.findOne.mockResolvedValue({ id: 'enc-finished', status: 'finished' });
+
+      const newPayload = {
+        bodySite: { coding: [{ code: '18' }, { code: 'O' }] },
+        extension: [{ url: ODONTOGRAM_LAYER_URL, valueCode: 'existing' }],
+        note: 'intento de edición',
+      };
+
+      await expect(
+        service.saveResource('patient-123', 'Condition', newPayload, 'tenant-abc'),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockResourceRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('saveResource con encounterId de una visita FIRMADA lanza ForbiddenException', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(mockPatient);
+      mockEncounterRepository.findOne.mockResolvedValue({
+        id: 'enc-finished', patientId: 'patient-123', tenantId: 'tenant-abc', status: 'finished',
+      });
+
+      await expect(
+        service.saveResource('patient-123', 'Procedure', {}, 'tenant-abc', 'enc-finished'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('saveResource con encounterId de visita CANCELADA lanza BadRequestException', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(mockPatient);
+      mockEncounterRepository.findOne.mockResolvedValue({
+        id: 'enc-cancelled', patientId: 'patient-123', tenantId: 'tenant-abc', status: 'cancelled',
+      });
+
+      await expect(
+        service.saveResource('patient-123', 'Procedure', {}, 'tenant-abc', 'enc-cancelled'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('saveResource con encounterId inexistente/otro tenant lanza BadRequestException', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(mockPatient);
+      mockEncounterRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.saveResource('patient-123', 'Procedure', {}, 'tenant-abc', 'enc-x'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('saveResource con encounterId de visita ACTIVA setea encounter_id, payload.encounter y performedDateTime (Procedure)', async () => {
+      mockPatientRepository.findOne.mockResolvedValue(mockPatient);
+      mockEncounterRepository.findOne.mockResolvedValue({
+        id: 'enc-active', patientId: 'patient-123', tenantId: 'tenant-abc', status: 'in-progress',
+      });
+      mockResourceRepository.find.mockResolvedValue([]); // sin upsert previo
+      let savedEntity: any = null;
+      mockResourceRepository.save.mockImplementation((entity: any) => {
+        entity.id = 'new-proc';
+        savedEntity = entity;
+        return Promise.resolve(entity);
+      });
+      mockResourceRepository.update.mockResolvedValue({});
+
+      const result = await service.saveResource(
+        'patient-123', 'Procedure', { status: 'completed' }, 'tenant-abc', 'enc-active',
+      );
+
+      expect(savedEntity.encounterId).toBe('enc-active');
+      expect(result.encounter.reference).toBe('Encounter/enc-active');
+      expect(result.performedDateTime).toBeDefined();
+    });
+
+    it('completeResource lanza ForbiddenException si la prestación es de una visita finished', async () => {
+      const existingResource = {
+        id: 'resource-uuid',
+        tenantId: 'tenant-abc',
+        encounterId: 'enc-finished',
+        payload: {
+          resourceType: 'Procedure',
+          status: 'preparation',
+          extension: [{ url: ODONTOGRAM_LAYER_URL, valueCode: 'planned' }],
+        },
+      } as OdontologyResourceEntity;
+      mockResourceRepository.findOne.mockResolvedValue(existingResource);
+      mockEncounterRepository.findOne.mockResolvedValue({ id: 'enc-finished', status: 'finished' });
+
+      await expect(service.completeResource('resource-uuid', 'tenant-abc')).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockResourceRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('deleteResource lanza ForbiddenException si la prestación es de una visita finished', async () => {
+      const existingResource = {
+        id: 'resource-uuid',
+        tenantId: 'tenant-abc',
+        encounterId: 'enc-finished',
+        payload: {},
+      } as OdontologyResourceEntity;
+      mockResourceRepository.findOne.mockResolvedValue(existingResource);
+      mockEncounterRepository.findOne.mockResolvedValue({ id: 'enc-finished', status: 'finished' });
+
+      await expect(service.deleteResource('resource-uuid', 'tenant-abc')).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockResourceRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

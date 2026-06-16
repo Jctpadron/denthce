@@ -6,6 +6,7 @@ import {
   ODONTOGRAM_CATALOG, GRUPOS, byGrupo, getById, getBySnomed,
   type OdontoState, type OdontogramLayer, type Grupo,
 } from './odontogram-catalog';
+import { useOdontoVisit } from './OdontoVisitContext';
 
 interface OdontogramProps {
   patientId: string;
@@ -50,6 +51,7 @@ const GRUPO_COLORS: Record<Grupo, { solid: string; light: string; border: string
 };
 
 export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate }) => {
+  const { activeEncounterId } = useOdontoVisit();
   const [activeTool, setActiveTool] = useState<string>('caries'); // id del catálogo o 'limpiar'
   const [activeToolTab, setActiveToolTab] = useState<Grupo>('Diagnóstico');
   const [activeLayer, setActiveLayer] = useState<OdontogramLayer>('existing');
@@ -188,7 +190,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
         payload.status = layer === 'planned' ? 'preparation' : 'completed';
       }
 
-      await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: state.resourceType, payload }, authHeader);
+      await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: state.resourceType, payload, encounterId: activeEncounterId }, authHeader);
       setMessage({ type: 'success', text: 'Estado dental guardado.' });
       loadResources();
     } catch (err: any) {
@@ -207,9 +209,9 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
     }
   };
 
-  const handleAddManualPiece = () => {
-    if (!manuallyAddedPieces.includes(selectedNewPiece)) setManuallyAddedPieces([...manuallyAddedPieces, selectedNewPiece]);
-  };
+  // const handleAddManualPiece = () => {
+  //   if (!manuallyAddedPieces.includes(selectedNewPiece)) setManuallyAddedPieces([...manuallyAddedPieces, selectedNewPiece]);
+  // };
 
   const getToothSummaryState = (piece: string) => {
     const pieceKey = `${piece}_all`;
@@ -393,6 +395,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
     return (
       <div
         key={piece}
+        title={`Pieza FDI ${piece}`}
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -427,7 +430,6 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
             e.currentTarget.style.transform = 'none';
             e.currentTarget.style.zIndex = '1';
           }}
-          title={`Pieza FDI ${piece}`}
         >
           {isAusente ? (
             <g onClick={() => handleFaceClick('all')} style={{ cursor: 'pointer' }}>
@@ -832,7 +834,6 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
                 onClick={() => setShowLegend(false)}
                 style={{
                   background: 'transparent',
-                  border: 'none',
                   cursor: 'pointer',
                   color: 'var(--color-muted)',
                   display: 'flex',
@@ -860,7 +861,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
               gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
               gap: '1rem'
             }}>
-              {ODONTOGRAM_CATALOG.map((s) => {
+              {ODONTOGRAM_CATALOG.filter((s) => !s.hidden).map((s) => {
                 const renderLegendGlyph = () => {
                   const color = GRUPO_COLORS[s.grupo].solid;
                   if (s.alcance === 'pieza') {
@@ -1301,7 +1302,6 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
                 onClick={() => setShowDrawer(false)}
                 style={{
                   background: 'transparent',
-                  border: 'none',
                   cursor: 'pointer',
                   color: 'var(--color-muted)',
                   display: 'flex',

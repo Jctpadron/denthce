@@ -975,5 +975,88 @@
     ],
     "entregables": [],
     "historial_auditoria": []
+  },
+  {
+    "id": "REQ-010-PRO-10.1",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Modelado de datos en NestJS compatible con FHIR R4: DeviceRequest (órdenes) y Communication (chat y mensajería clínica) con doble tenencia.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-010-PRO-10.2",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Backend APIs: Controladores y servicios para gestión de trabajos de prótesis y chat en NestJS.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-010-PRO-10.3",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Frontend React: Pestaña 'Prótesis' en la HCE del odontólogo (OdontologyHC) para prescripciones y chat del caso.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-010-PRO-10.4",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Frontend React: Portal del Protesista (DentaLabPortal) que se activa dinámimante si el tenant es tipo 'laboratorio', con bandeja de órdenes y chat responsivo.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "product"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-010-PRO-10.5",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Visor 3D STL básico en el chat y drag & drop de archivos CAD/exocad.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "integrations"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
+  },
+  {
+    "id": "REQ-010-PRO-10.6",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Pruebas e2e, auditoría responsiva y despliegue del módulo.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "orchestrator",
+      "qa"
+    ],
+    "entregables": [],
+    "historial_auditoria": []
   }
 ]

@@ -58,6 +58,7 @@ describe('OdontologyController', () => {
         body.resourceType,
         body.payload,
         'tenant-abc',
+        null,
       );
       expect(result.id).toBe('r-1');
     });

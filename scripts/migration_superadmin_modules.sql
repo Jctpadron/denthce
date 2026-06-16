@@ -39,7 +39,8 @@ INSERT INTO platform_modules (key, name, description, price, available, is_base)
     ('hc-base',          'Historia Clínica',             'Núcleo asistencial: pacientes, odontograma, alergias, signos vitales, documentos.', NULL, true, true),
     ('agenda',           'Agenda de Turnos',             'Calendario de turnos por día/semana, sala de espera y estado del box.',             NULL, true, false),
     ('whatsapp',         'WhatsApp / CliniChat',         'Recordatorios y sincronización de turnos por WhatsApp (bot CliniChat).',            NULL, true, false),
-    ('odontologia-pami', 'Historia Clínica Odontológica', 'Ficha odontológica completa modelo PAMI con exportación oficial.',                  NULL, true, false)
+    ('odontologia-pami', 'Historia Clínica Odontológica', 'Ficha odontológica completa modelo PAMI con exportación oficial.',                  NULL, true, false),
+    ('protesis-lab',     'Portal Protesistas Dentales',   'Bandeja de órdenes de prótesis, chat clínico y descarga de archivos STL/CAD.',      NULL, true, false)
 ON CONFLICT (key) DO NOTHING;
 
 -- 5. Backfill: las clínicas existentes reciben los módulos base habilitados.

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, CheckCircle, ShieldAlert, ListChecks, Trash2 } from 'lucide-react';
+import { useOdontoVisit } from './OdontoVisitContext';
+import { Plus, CheckCircle, ShieldAlert, ListChecks, Trash2, CalendarClock, Lock } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 
 interface Props {
@@ -10,7 +11,10 @@ interface Props {
 const EVOLUTION_SYSTEM = 'http://denthce.local/evolution';
 
 export const EvolutionPAMI: React.FC<Props> = ({ patientId }) => {
+  const { activeEncounterId } = useOdontoVisit();
   const [entries, setEntries] = useState<any[]>([]);
+  const [visits, setVisits] = useState<any[]>([]);
+  const [legacyCount, setLegacyCount] = useState(0);
   const [tratamiento, setTratamiento] = useState('');
   const [conformidad, setConformidad] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -33,9 +37,17 @@ export const EvolutionPAMI: React.FC<Props> = ({ patientId }) => {
     } finally {
       setLoading(false);
     }
+    // Visitas (episodios) del paciente — independiente del log de evolución.
+    try {
+      const v = await axios.get(`${apiBase}/patient/${patientId}/encounter`, authHeader);
+      setVisits(v.data?.visitas || []);
+      setLegacyCount(v.data?.legacy?.count || 0);
+    } catch (err) {
+      console.error('Error cargando visitas:', err);
+    }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [patientId]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [patientId, activeEncounterId]);
 
   const handleAdd = async () => {
     if (!tratamiento.trim()) return;
@@ -47,7 +59,7 @@ export const EvolutionPAMI: React.FC<Props> = ({ patientId }) => {
         performedDateTime: new Date().toISOString(),
         conformidad,
       };
-      await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'Procedure', payload }, authHeader);
+      await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'Procedure', payload, encounterId: activeEncounterId }, authHeader);
       setTratamiento(''); setConformidad(true);
       setMessage({ type: 'success', text: 'Entrada de evolución registrada.' });
       load();
@@ -75,11 +87,59 @@ export const EvolutionPAMI: React.FC<Props> = ({ patientId }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1rem', borderRadius: '10px',
           background: message.type === 'success' ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)',
           border: `1px solid ${message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)'}`,
-          color: message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)', fontSize: '0.85rem' }}>
+          color: message.type === 'success' ? 'var(--color-emerald-text)' : 'var(--color-rose)', fontSize: '0.85rem' }}>
           {message.type === 'success' ? <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} /> : <ShieldAlert style={{ width: '1.1rem', height: '1.1rem' }} />}
           {message.text}
         </div>
       )}
+
+      {/* Visitas (episodios) del paciente */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.25rem' }}>
+        <h3 style={{ margin: '0 0 0.85rem', fontSize: '1rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <CalendarClock style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-primary)' }} /> Visitas del paciente
+        </h3>
+        {visits.length === 0 && legacyCount === 0 ? (
+          <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)', margin: 0 }}>Sin visitas registradas. Iniciá una visita desde la barra superior para agrupar las prestaciones de la sesión.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {visits.map((v) => {
+              const finished = v.status === 'finished';
+              const cancelled = v.status === 'cancelled';
+              const fecha = v.start ? new Date(v.start).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+              const hora = v.start ? new Date(v.start).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '';
+              return (
+                <div key={v.id} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem',
+                  padding: '0.7rem 0.9rem', borderRadius: '10px', border: '1px solid var(--border-color)',
+                  background: finished ? 'rgba(4,120,87,0.04)' : cancelled ? 'var(--bg-card)' : 'rgba(4,120,87,0.07)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text)', whiteSpace: 'nowrap' }}>{fecha} · {hora}</span>
+                    {v.reasonText && <span style={{ fontSize: '0.82rem', color: 'var(--color-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>· {v.reasonText}</span>}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--color-muted)' }}>{v.prestaciones} prestación{v.prestaciones === 1 ? '' : 'es'}</span>
+                    {finished ? (
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--color-emerald-text)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }} title={v.signedBy ? `Firmada por ${v.signedBy}` : 'Firmada'}>
+                        <Lock style={{ width: '0.8rem', height: '0.8rem' }} /> Firmada{v.hasAddenda ? ' (con addenda)' : ''}
+                      </span>
+                    ) : cancelled ? (
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--color-muted)' }}>Cancelada</span>
+                    ) : (
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--color-emerald-text)' }}>En curso</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {legacyCount > 0 && (
+              <div style={{ padding: '0.6rem 0.9rem', borderRadius: '10px', border: '1px dashed var(--border-color)', background: 'var(--bg-card)', fontSize: '0.82rem', color: 'var(--color-muted)' }}>
+                Registros previos (sin visita): <strong style={{ color: 'var(--color-text)' }}>{legacyCount}</strong> — prestaciones anteriores al registro por visitas.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Alta de evolución */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -123,7 +183,7 @@ export const EvolutionPAMI: React.FC<Props> = ({ patientId }) => {
                     <td style={{ padding: '0.6rem', color: 'var(--color-text)' }}>{e.code?.text || '—'}</td>
                     <td style={{ padding: '0.6rem' }}>
                       {e.conformidad
-                        ? <span style={{ color: 'var(--color-emerald)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><CheckCircle style={{ width: '0.9rem', height: '0.9rem' }} /> Sí</span>
+                        ? <span style={{ color: 'var(--color-emerald-text)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><CheckCircle style={{ width: '0.9rem', height: '0.9rem' }} /> Sí</span>
                         : <span style={{ color: 'var(--color-muted)' }}>No</span>}
                     </td>
                     <td style={{ padding: '0.6rem', textAlign: 'right' }}>

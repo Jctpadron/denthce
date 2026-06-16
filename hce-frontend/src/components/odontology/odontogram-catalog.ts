@@ -45,6 +45,7 @@ export interface OdontoState {
   snomed: { code: string; display: string };
   text: string;              // FHIR code.text
   capaFija?: OdontogramLayer; // hallazgo inherente a una capa (caries/ausente = existente)
+  hidden?: boolean;          // legacy: se interpreta para registros viejos pero NO se ofrece en el selector
 }
 
 export const ODONTOGRAM_CATALOG: OdontoState[] = [
@@ -77,8 +78,14 @@ export const ODONTOGRAM_CATALOG: OdontoState[] = [
     resourceType: 'Procedure', snomed: { code: '56433008', display: 'Pulpotomía con formocresol' }, text: 'Formocresol' },
 
   // --- Cirugía ---
-  { id: 'extraccion', label: 'Extracción', grupo: 'Cirugía', alcance: 'pieza', glifo: 'X',
-    resourceType: 'Procedure', snomed: { code: '65546002', display: 'Extracción dental' }, text: 'Extracción (indicada/realizada según capa)' },
+  // Legacy: la "Extracción" genérica se reemplazó por las dos específicas. Se mantiene OCULTA
+  // (hidden) solo para interpretar/dibujar registros antiguos guardados con SNOMED 65546002.
+  { id: 'extraccion', label: 'Extracción', grupo: 'Cirugía', alcance: 'pieza', glifo: 'X', hidden: true,
+    resourceType: 'Procedure', snomed: { code: '65546002', display: 'Extracción dental' }, text: 'Extracción' },
+  { id: 'extraccionSimple', label: 'Extracción simple', grupo: 'Cirugía', alcance: 'pieza', glifo: 'X',
+    resourceType: 'Procedure', snomed: { code: '30097004', display: 'Extracción simple de pieza dental' }, text: 'Extracción simple' },
+  { id: 'extraccionRetenido', label: 'Extracción tercer molar retenido', grupo: 'Cirugía', alcance: 'pieza', glifo: 'X',
+    resourceType: 'Procedure', snomed: { code: '75394008', display: 'Extracción quirúrgica de pieza retenida' }, text: 'Extracción de tercer molar retenido' },
   { id: 'implante', label: 'Implante', grupo: 'Cirugía', alcance: 'pieza', glifo: 'tornillo',
     resourceType: 'Procedure', snomed: { code: '36653000', display: 'Implante dental' }, text: 'Implante dental' },
 
@@ -96,4 +103,4 @@ export const getById = (id: string): OdontoState | undefined => ODONTOGRAM_CATAL
 export const getBySnomed = (code: string, resourceType: string): OdontoState | undefined =>
   ODONTOGRAM_CATALOG.find((s) => s.snomed.code === code && s.resourceType === resourceType);
 
-export const byGrupo = (g: Grupo): OdontoState[] => ODONTOGRAM_CATALOG.filter((s) => s.grupo === g);
+export const byGrupo = (g: Grupo): OdontoState[] => ODONTOGRAM_CATALOG.filter((s) => s.grupo === g && !s.hidden);

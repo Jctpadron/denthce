@@ -137,17 +137,17 @@ export interface StatusMeta {
 export function statusMeta(status: string): StatusMeta {
   switch (status) {
     case 'booked':
-      return { label: 'Confirmado', color: '#2962ff', bg: 'rgba(41,98,255,0.08)', border: 'rgba(41,98,255,0.25)' };
+      return { label: 'Confirmado', color: '#1d4ed8', bg: 'rgba(41,98,255,0.08)', border: 'rgba(41,98,255,0.25)' };
     case 'arrived':
-      return { label: 'En sala de espera', color: '#d97706', bg: 'rgba(217,119,6,0.10)', border: 'rgba(217,119,6,0.28)' };
+      return { label: 'En sala de espera', color: '#b45309', bg: 'rgba(217,119,6,0.10)', border: 'rgba(217,119,6,0.28)' };
     case 'fulfilled':
-      return { label: 'Atendido', color: '#059669', bg: 'rgba(5,150,105,0.10)', border: 'rgba(5,150,105,0.28)' };
+      return { label: 'Atendido', color: '#047857', bg: 'rgba(5,150,105,0.10)', border: 'rgba(5,150,105,0.28)' };
     case 'noshow':
       return { label: 'Ausente', color: '#6b7280', bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.25)' };
     case 'cancelled':
-      return { label: 'Cancelado', color: '#dc2626', bg: 'rgba(220,38,38,0.07)', border: 'rgba(220,38,38,0.2)' };
+      return { label: 'Cancelado', color: '#b91c1c', bg: 'rgba(220,38,38,0.07)', border: 'rgba(220,38,38,0.2)' };
     case 'proposed':
-      return { label: 'Sugerido', color: '#7c3aed', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.25)' };
+      return { label: 'Sugerido', color: '#6d28d9', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.25)' };
     default:
       return { label: status || '—', color: '#64748b', bg: 'rgba(100,116,139,0.08)', border: 'var(--border-color)' };
   }
@@ -162,11 +162,11 @@ export interface PriorityMeta {
 }
 
 export const PRIORITY_LEVELS: PriorityMeta[] = [
-  { level: 1, label: 'Emergencia', color: '#dc2626', bg: 'rgba(220,38,38,0.12)' },
-  { level: 2, label: 'Urgente', color: '#ea580c', bg: 'rgba(234,88,12,0.12)' },
-  { level: 3, label: 'Prioritario', color: '#d97706', bg: 'rgba(217,119,6,0.12)' },
-  { level: 4, label: 'Estándar', color: '#2962ff', bg: 'rgba(41,98,255,0.10)' },
-  { level: 5, label: 'No urgente', color: '#059669', bg: 'rgba(5,150,105,0.10)' },
+  { level: 1, label: 'Emergencia', color: '#b91c1c', bg: 'rgba(220,38,38,0.12)' },
+  { level: 2, label: 'Urgente', color: '#c2410c', bg: 'rgba(234,88,12,0.12)' },
+  { level: 3, label: 'Prioritario', color: '#b45309', bg: 'rgba(217,119,6,0.12)' },
+  { level: 4, label: 'Estándar', color: '#1d4ed8', bg: 'rgba(41,98,255,0.10)' },
+  { level: 5, label: 'No urgente', color: '#047857', bg: 'rgba(5,150,105,0.10)' },
 ];
 
 export function priorityMeta(level?: number): PriorityMeta {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useOdontoVisit } from './OdontoVisitContext';
 import { Save, CheckCircle, ShieldAlert, Eraser, FileSignature } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 
@@ -39,6 +40,7 @@ const SignaturePad: React.FC<{ label: string; saved: string | null; onChange: (d
 };
 
 export const ConsentForm: React.FC<Props> = ({ patientId }) => {
+  const { activeEncounterId } = useOdontoVisit();
   const [texto] = useState(DEFAULT_TEXT);
   const [acepta, setAcepta] = useState(false);
   const [firmaPaciente, setFirmaPaciente] = useState<string | null>(null);
@@ -97,7 +99,7 @@ export const ConsentForm: React.FC<Props> = ({ patientId }) => {
         firmaProfesional: profesionalSig,
       };
       if (existingId) await axios.delete(`${apiBase}/resource/${existingId}`, authHeader);
-      const created = await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'Consent', payload }, authHeader);
+      const created = await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'Consent', payload, encounterId: activeEncounterId }, authHeader);
       setExistingId(created.data.id);
       setSavedPaciente(pacienteSig); setSavedProfesional(profesionalSig); setFirmadoEl(now);
       setMessage({ type: 'success', text: 'Consentimiento firmado y registrado correctamente.' });
@@ -116,14 +118,14 @@ export const ConsentForm: React.FC<Props> = ({ patientId }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1rem', borderRadius: '10px',
           background: message.type === 'success' ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)',
           border: `1px solid ${message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)'}`,
-          color: message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)', fontSize: '0.85rem' }}>
+          color: message.type === 'success' ? 'var(--color-emerald-text)' : 'var(--color-rose)', fontSize: '0.85rem' }}>
           {message.type === 'success' ? <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} /> : <ShieldAlert style={{ width: '1.1rem', height: '1.1rem' }} />}
           {message.text}
         </div>
       )}
 
       {firmadoEl && (
-        <div style={{ fontSize: '0.8rem', color: 'var(--color-emerald)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <div style={{ fontSize: '0.8rem', color: 'var(--color-emerald-text)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <CheckCircle style={{ width: '1rem', height: '1rem' }} /> Consentimiento firmado el {new Date(firmadoEl).toLocaleString('es-AR')}
         </div>
       )}

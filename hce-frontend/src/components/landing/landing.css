@@ -5,9 +5,10 @@
    ============================================================ */
 
 .landing-root {
-  /* Paleta de marca Denta Cloud (landing pública, sin tenant): azul + menta del logo. */
-  --brand-blue: #1e6fd9;
-  --brand-mint: #2aa57c;
+  /* Paleta de marca Denta Cloud (landing pública, sin tenant): azul + menta del logo.
+     Tonos ajustados para cumplir contraste WCAG AA al usarse como texto (kicker, wordmark). */
+  --brand-blue: #1b63c9;
+  --brand-mint: #1f8f64;
   --accent: var(--brand-blue);
   background: var(--bg-surface);
   color: var(--color-text);
@@ -90,7 +91,7 @@
   position: absolute; top: 0.9rem; right: 0.9rem;
   font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
   padding: 0.2rem 0.55rem; border-radius: 14px;
-  background: color-mix(in srgb, var(--color-violet) 12%, transparent); color: var(--color-violet);
+  background: color-mix(in srgb, var(--color-violet) 12%, transparent); color: var(--color-violet-text);
 }
 @media (hover: hover) {
   .info-card--interactive:hover {

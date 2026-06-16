@@ -16,6 +16,8 @@ import { MedicationRequestModule } from './medication-request/medication-request
 import { MedicationRequestEntity } from './medication-request/medication-request.entity';
 import { OdontologyModule } from './odontology/odontology.module';
 import { OdontologyResourceEntity } from './odontology/odontology-resource.entity';
+import { OdontologyEncounterEntity } from './odontology/odontology-encounter.entity';
+import { OdontologyEncounterAuditEntity } from './odontology/odontology-encounter-audit.entity';
 import { AppointmentModule } from './appointment/appointment.module';
 import { AppointmentEntity } from './appointment/appointment.entity';
 import { AppointmentAuditEntity } from './appointment/appointment-audit.entity';
@@ -27,6 +29,10 @@ import { SuperAdminModule } from './superadmin/superadmin.module';
 import { InsuranceModule } from './insurance/insurance.module';
 import { InsuranceCompanyEntity } from './insurance/insurance-company.entity';
 import { PatientCoverageEntity } from './insurance/patient-coverage.entity';
+import { ProtesisModule } from './protesis/protesis.module';
+import { ProtesisOrder } from './protesis/protesis-order.entity';
+import { ProtesisChat } from './protesis/protesis-chat.entity';
+import { ProtesisInsumo } from './protesis/protesis-insumo.entity';
 
 @Module({
   imports: [
@@ -46,12 +52,17 @@ import { PatientCoverageEntity } from './insurance/patient-coverage.entity';
         EncounterEntity, 
         MedicationRequestEntity, 
         OdontologyResourceEntity,
+        OdontologyEncounterEntity,
+        OdontologyEncounterAuditEntity,
         AppointmentEntity,
         AppointmentAuditEntity,
         PlatformModuleEntity,
         TenantModuleEntity,
         InsuranceCompanyEntity,
-        PatientCoverageEntity
+        PatientCoverageEntity,
+        ProtesisOrder,
+        ProtesisChat,
+        ProtesisInsumo
       ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: true,
@@ -68,6 +79,7 @@ import { PatientCoverageEntity } from './insurance/patient-coverage.entity';
     PlatformModule,
     SuperAdminModule,
     InsuranceModule,
+    ProtesisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

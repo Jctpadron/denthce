@@ -147,6 +147,7 @@ export const OdontologyDocuments: React.FC<Props> = ({ patientId }) => {
             <input
               ref={inputRef}
               type="file"
+              aria-label="Adjuntar archivo (JPG, PNG, WebP, PDF, DOC; máximo 25MB)"
               accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx"
               onChange={(e) => onPick(e.target.files?.[0] || null)}
               className="search-input"
@@ -155,13 +156,13 @@ export const OdontologyDocuments: React.FC<Props> = ({ patientId }) => {
           </div>
           <div style={{ flex: 1, minWidth: '160px' }}>
             <label style={labelStyle}>Categoría</label>
-            <select className="search-input" value={category} onChange={(e) => setCategory(e.target.value)} style={{ width: '100%' }} disabled={!!file && !file.type.startsWith('image/')}>
+            <select className="search-input" aria-label="Categoría del documento" value={category} onChange={(e) => setCategory(e.target.value)} style={{ width: '100%' }} disabled={!!file && !file.type.startsWith('image/')}>
               {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </div>
           <div style={{ flex: 2, minWidth: '220px' }}>
             <label style={labelStyle}>Descripción (opcional)</label>
-            <input className="search-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej: panorámica inicial" style={{ width: '100%' }} />
+            <input className="search-input" aria-label="Descripción del documento" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej: panorámica inicial" style={{ width: '100%' }} />
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

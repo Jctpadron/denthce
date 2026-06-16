@@ -278,7 +278,8 @@ INSERT INTO platform_modules (key, name, description, available, is_base) VALUES
     ('hc-base',          'Historia Clínica',             'Núcleo asistencial: pacientes, odontograma, alergias, signos vitales, documentos.', true, true),
     ('agenda',           'Agenda de Turnos',             'Calendario de turnos por día/semana, sala de espera y estado del box.',             true, false),
     ('whatsapp',         'WhatsApp / CliniChat',         'Recordatorios y sincronización de turnos por WhatsApp (bot CliniChat).',            true, false),
-    ('odontologia-pami', 'Historia Clínica Odontológica', 'Ficha odontológica completa modelo PAMI con exportación oficial.',                  true, false)
+    ('odontologia-pami', 'Historia Clínica Odontológica', 'Ficha odontológica completa modelo PAMI con exportación oficial.',                  true, false),
+    ('protesis-lab',     'Portal Protesistas Dentales',   'Bandeja de órdenes de prótesis, chat clínico y descarga de archivos STL/CAD.',      true, false)
 ON CONFLICT (key) DO NOTHING;
 
 \echo 'Tablas platform_modules y tenant_modules creadas con éxito.'

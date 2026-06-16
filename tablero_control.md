@@ -177,6 +177,18 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
+### Módulo Protesistas Dentales (DentaLab / ProtesisChat)
+*Módulo para laboratorios dentales y protesistas, integrable con la HCE mediante entitlements y aislado lógicamente. Responsable: Gemini.*
+
+- [x] **PRO.1:** Modelado de datos en NestJS compatible con FHIR R4: `DeviceRequest` (órdenes) y `Communication` (chat y mensajería clínica). *(Prioridad: Alta)*
+- [x] **PRO.2:** Backend APIs: Controladores y servicios para gestión de trabajos de prótesis y chat. *(Prioridad: Alta)*
+- [x] **PRO.3:** Frontend React: Pestaña "Prótesis" en la HCE del odontólogo (`OdontologyHC`) para prescripciones y chat del caso (Formulario optimizado: mini-odontograma, fechas seguras, acoplamiento de materiales y dropzone de STL integrada). *(Prioridad: Alta)*
+- [x] **PRO.4:** Frontend React: Portal del Protesista (`DentaLabPortal`) que se activa dinámicamente si el tenant es tipo "laboratorio" (Dashboard de producción y panel de almacén/inventario con alertas de stock bajo y trazabilidad integrados). *(Prioridad: Alta)*
+- [x] **PRO.5:** Visor 3D STL básico en el chat y drag & drop de archivos CAD/exocad. (Desarrollado visor interactivo 3D con Three.js en chats de odontólogo y protesista). *(Prioridad: Media)*
+- [x] **PRO.6:** Pruebas e2e, auditoría responsiva y despliegue del módulo. (Verificación y build exitoso con soporte responsivo y tipado TypeScript). *(Prioridad: Alta)*
+
+---
+
 ### Iniciativa transversal: Auditoría de Responsividad/Accesibilidad Móvil (QA)
 *Auditoría E2E móvil (Android) de la HCE. **Documento CANÓNICO:** `docs/qa/auditoria_responsividad_movil.md` (v2, realineada al sistema actual). El doc `docs/specs/auditoria_general_hce.md` quedó **SUPERSEDIDO** (duplicado desalineado, con "65 años" y componentes ocultos) — no usar. Responsable: Claude. (Fuera del conteo de los 70 del plan.)*
 

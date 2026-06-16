@@ -42,6 +42,14 @@
       {
         "name": "servicio-turnos",
         "description": "Service-account de CliniChat (bot WhatsApp). Mínimo privilegio: solo turnos, pacientes y slots de su tenant. NO accede a la historia clínica completa."
+      },
+      {
+        "name": "laboratorio-operador",
+        "description": "Protesista / Operador de laboratorio dental. Acceso a órdenes de trabajo y chat de prótesis."
+      },
+      {
+        "name": "laboratorio-admin",
+        "description": "Administrador de laboratorio dental. Gestión de usuarios, precios y órdenes de trabajo."
       }
     ]
   },
@@ -139,6 +147,24 @@
       "realmRoles": ["administrador"],
       "attributes": {
         "tenant_id": ["mi_consultorio_dent_hce"]
+      }
+    },
+    {
+      "username": "protesista_juan",
+      "enabled": true,
+      "email": "juan.protesista@hce-hospital.com",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "protesista_pass_2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["laboratorio-operador"],
+      "attributes": {
+        "tenant_id": ["lab_valle"]
       }
     }
   ]

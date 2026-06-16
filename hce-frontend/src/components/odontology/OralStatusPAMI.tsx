@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useOdontoVisit } from './OdontoVisitContext';
 import { Save, CheckCircle, ShieldAlert } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 
@@ -10,6 +11,7 @@ interface Props {
 const ORAL_STATUS_CODE = 'oral-status';
 
 export const OralStatusPAMI: React.FC<Props> = ({ patientId }) => {
+  const { activeEncounterId } = useOdontoVisit();
   const [placa, setPlaca] = useState<boolean | null>(null);
   const [periodontal, setPeriodontal] = useState<boolean | null>(null);
   const [lesiones, setLesiones] = useState<boolean | null>(null);
@@ -78,7 +80,7 @@ export const OralStatusPAMI: React.FC<Props> = ({ patientId }) => {
         component,
       };
       if (existingId) await axios.delete(`${apiBase}/resource/${existingId}`, authHeader);
-      const created = await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'Observation', payload }, authHeader);
+      const created = await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'Observation', payload, encounterId: activeEncounterId }, authHeader);
       setExistingId(created.data.id);
       setMessage({ type: 'success', text: 'Estado bucal y plan guardados correctamente.' });
     } catch (err: any) {
@@ -97,7 +99,7 @@ export const OralStatusPAMI: React.FC<Props> = ({ patientId }) => {
           padding: '0.3rem 0.8rem', fontSize: '0.8rem', borderRadius: '8px', fontWeight: 700,
           background: value === v ? (v ? 'rgba(16,185,129,0.08)' : 'rgba(100,116,139,0.08)') : 'var(--bg-surface)',
           borderColor: value === v ? (v ? 'var(--color-emerald)' : 'var(--color-muted)') : 'var(--border-color)',
-          color: value === v && v ? 'var(--color-emerald)' : 'var(--color-text)',
+          color: value === v && v ? 'var(--color-emerald-text)' : 'var(--color-text)',
         }}>{v ? 'Sí' : 'No'}</button>
       ))}
     </div>
@@ -114,7 +116,7 @@ export const OralStatusPAMI: React.FC<Props> = ({ patientId }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1rem', borderRadius: '10px',
           background: message.type === 'success' ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)',
           border: `1px solid ${message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)'}`,
-          color: message.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)', fontSize: '0.85rem' }}>
+          color: message.type === 'success' ? 'var(--color-emerald-text)' : 'var(--color-rose)', fontSize: '0.85rem' }}>
           {message.type === 'success' ? <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} /> : <ShieldAlert style={{ width: '1.1rem', height: '1.1rem' }} />}
           {message.text}
         </div>
@@ -129,11 +131,11 @@ export const OralStatusPAMI: React.FC<Props> = ({ patientId }) => {
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
             <div style={{ flex: 1, minWidth: '180px' }}>
               <label style={labelStyle}>Zona</label>
-              <input className="search-input" value={lesionZona} onChange={(e) => setLesionZona(e.target.value)} style={{ width: '100%' }} placeholder="Ej: borde lateral de lengua" />
+              <input className="search-input" aria-label="Zona de la lesión" value={lesionZona} onChange={(e) => setLesionZona(e.target.value)} style={{ width: '100%' }} placeholder="Ej: borde lateral de lengua" />
             </div>
             <div style={{ flex: 1, minWidth: '180px' }}>
               <label style={labelStyle}>Tipo</label>
-              <input className="search-input" value={lesionTipo} onChange={(e) => setLesionTipo(e.target.value)} style={{ width: '100%' }} placeholder="Ej: úlcera aftosa" />
+              <input className="search-input" aria-label="Tipo de lesión" value={lesionTipo} onChange={(e) => setLesionTipo(e.target.value)} style={{ width: '100%' }} placeholder="Ej: úlcera aftosa" />
             </div>
           </div>
         )}
@@ -143,21 +145,21 @@ export const OralStatusPAMI: React.FC<Props> = ({ patientId }) => {
         <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>Diagnóstico y plan</h3>
         <div style={{ marginBottom: '0.85rem' }}>
           <label style={labelStyle}>Diagnóstico presuntivo</label>
-          <textarea value={diagnostico} onChange={(e) => setDiagnostico(e.target.value)} style={taStyle} />
+          <textarea aria-label="Diagnóstico presuntivo" value={diagnostico} onChange={(e) => setDiagnostico(e.target.value)} style={taStyle} />
         </div>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
           <div style={{ flex: 3, minWidth: '220px' }}>
             <label style={labelStyle}>Plan de tratamiento</label>
-            <textarea value={plan} onChange={(e) => setPlan(e.target.value)} style={taStyle} />
+            <textarea aria-label="Plan de tratamiento" value={plan} onChange={(e) => setPlan(e.target.value)} style={taStyle} />
           </div>
           <div style={{ flex: 1, minWidth: '140px' }}>
             <label style={labelStyle}>Fecha</label>
-            <input type="date" className="search-input" value={planFecha} onChange={(e) => setPlanFecha(e.target.value)} style={{ width: '100%' }} />
+            <input type="date" aria-label="Fecha del plan de tratamiento" className="search-input" value={planFecha} onChange={(e) => setPlanFecha(e.target.value)} style={{ width: '100%' }} />
           </div>
         </div>
         <div>
           <label style={labelStyle}>Observaciones</label>
-          <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} style={taStyle} />
+          <textarea aria-label="Observaciones" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} style={taStyle} />
         </div>
       </div>
 

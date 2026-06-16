@@ -37,7 +37,7 @@ export class OdontologyController {
   @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
   async createResource(
     @Param('patientId') patientId: string,
-    @Body() body: { resourceType: string; payload: any },
+    @Body() body: { resourceType: string; payload: any; encounterId?: string | null },
     @Request() req: any,
   ) {
     return this.odontologyService.saveResource(
@@ -45,6 +45,7 @@ export class OdontologyController {
       body.resourceType,
       body.payload,
       req.user.tenantId,
+      body.encounterId ?? null,
     );
   }
 

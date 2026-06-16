@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useOdontoVisit } from './OdontoVisitContext';
 import { Save, CheckCircle, ShieldAlert, Eraser, AlertTriangle } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 
@@ -36,6 +37,7 @@ type BoolMap = Record<string, boolean | null>;
 type TextMap = Record<string, string>;
 
 export const AnamnesisPAMI: React.FC<Props> = ({ patientId }) => {
+  const { activeEncounterId } = useOdontoVisit();
   const [bools, setBools] = useState<BoolMap>({});
   const [details, setDetails] = useState<TextMap>({});
   const [fuma, setFuma] = useState<boolean | null>(null);
@@ -139,7 +141,7 @@ export const AnamnesisPAMI: React.FC<Props> = ({ patientId }) => {
       if (existingId) {
         await axios.delete(`${apiBase}/resource/${existingId}`, authHeader);
       }
-      const created = await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'QuestionnaireResponse', payload }, authHeader);
+      const created = await axios.post(`${apiBase}/patient/${patientId}/resource`, { resourceType: 'QuestionnaireResponse', payload, encounterId: activeEncounterId }, authHeader);
       setExistingId(created.data.id);
       if (signature) setSavedSignature(signature);
       setMessage({ type: 'success', text: 'Anamnesis guardada correctamente.' });
@@ -195,7 +197,7 @@ export const AnamnesisPAMI: React.FC<Props> = ({ patientId }) => {
             </span>
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
               {q.detail && bools[q.id] === true && (
-                <input className="search-input" placeholder={q.detail} value={details[q.id] || ''} onChange={(e) => setDetails((s) => ({ ...s, [q.id]: e.target.value }))}
+                <input className="search-input" aria-label={q.detail} placeholder={q.detail} value={details[q.id] || ''} onChange={(e) => setDetails((s) => ({ ...s, [q.id]: e.target.value }))}
                   style={{ height: '32px', fontSize: '0.8rem', width: '180px' }} />
               )}
               <YesNo value={bools[q.id] ?? null} onYes={() => setBool(q.id, true)} onNo={() => setBool(q.id, false)} alert={(q as any).alert} />
@@ -205,7 +207,7 @@ export const AnamnesisPAMI: React.FC<Props> = ({ patientId }) => {
         <div style={{ ...rowStyle, borderBottom: 'none' }}>
           <span style={{ fontSize: '0.88rem', color: 'var(--color-text)' }}>Fuma</span>
           <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-            {fuma === true && <input className="search-input" placeholder="¿Cuántos por día?" value={cigarrillos} onChange={(e) => setCigarrillos(e.target.value.replace(/\D/g, ''))} style={{ height: '32px', fontSize: '0.8rem', width: '140px' }} />}
+            {fuma === true && <input className="search-input" aria-label="Cigarrillos por día" placeholder="¿Cuántos por día?" value={cigarrillos} onChange={(e) => setCigarrillos(e.target.value.replace(/\D/g, ''))} style={{ height: '32px', fontSize: '0.8rem', width: '140px' }} />}
             <YesNo value={fuma} onYes={() => setFuma(true)} onNo={() => setFuma(false)} />
           </div>
         </div>
@@ -216,7 +218,7 @@ export const AnamnesisPAMI: React.FC<Props> = ({ patientId }) => {
         <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>Historia clínica odontológica</h3>
         <div style={{ marginBottom: '0.75rem' }}>
           <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-muted)', display: 'block', marginBottom: '0.3rem' }}>Motivo de consulta</label>
-          <input className="search-input" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ej: dolor en molar inferior derecho" style={{ width: '100%' }} />
+          <input className="search-input" aria-label="Motivo de consulta" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ej: dolor en molar inferior derecho" style={{ width: '100%' }} />
         </div>
         {ODONTO.map((q) => (
           <div key={q.id} style={rowStyle}>
@@ -227,11 +229,11 @@ export const AnamnesisPAMI: React.FC<Props> = ({ patientId }) => {
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.85rem' }}>
           <div>
             <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-muted)', display: 'block', marginBottom: '0.3rem' }}>Cepillados por día</label>
-            <input className="search-input" value={cepillados} onChange={(e) => setCepillados(e.target.value.replace(/\D/g, ''))} style={{ width: '110px' }} />
+            <input className="search-input" aria-label="Cepillados por día" inputMode="numeric" value={cepillados} onChange={(e) => setCepillados(e.target.value.replace(/\D/g, ''))} style={{ width: '110px' }} />
           </div>
           <div>
             <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-muted)', display: 'block', marginBottom: '0.3rem' }}>Momentos de azúcar</label>
-            <input className="search-input" value={azucar} onChange={(e) => setAzucar(e.target.value.replace(/\D/g, ''))} style={{ width: '110px' }} />
+            <input className="search-input" aria-label="Momentos de azúcar" inputMode="numeric" value={azucar} onChange={(e) => setAzucar(e.target.value.replace(/\D/g, ''))} style={{ width: '110px' }} />
           </div>
         </div>
       </div>

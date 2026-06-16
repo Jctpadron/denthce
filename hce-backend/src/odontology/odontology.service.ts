@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { join } from 'path';
 import * as fs from 'fs';
 import { OdontologyResourceEntity } from './odontology-resource.entity';
+import { OdontologyEncounterEntity } from './odontology-encounter.entity';
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentEntity } from '../appointment/appointment.entity';
 
@@ -43,7 +44,23 @@ export class OdontologyService {
     // Lectura de turnos SOLO para derivar la "última visita" de la grilla.
     @InjectRepository(AppointmentEntity)
     private readonly appointmentRepository: Repository<AppointmentEntity>,
+    // Visitas: validar visita activa y bloquear mutación de prestaciones firmadas.
+    @InjectRepository(OdontologyEncounterEntity)
+    private readonly encounterRepository: Repository<OdontologyEncounterEntity>,
   ) {}
+
+  /**
+   * Guarda de inmutabilidad: una prestación asociada a una visita FIRMADA (finished)
+   * no puede modificarse ni borrarse (solo addenda a nivel visita). Recursos sin
+   * encuentro o de visita activa: editables.
+   */
+  private async assertResourceMutable(encounterId: string | null | undefined, tenantId: string): Promise<void> {
+    if (!encounterId) return;
+    const enc = await this.encounterRepository.findOne({ where: { id: encounterId, tenantId } });
+    if (enc && enc.status === 'finished') {
+      throw new ForbiddenException('Una visita firmada no puede modificarse. Usá una addenda.');
+    }
+  }
 
   /**
    * Enriquece la grilla de pacientes con datos derivados que NO viven en el
@@ -133,6 +150,7 @@ export class OdontologyService {
     resourceType: string,
     payload: any,
     tenantId: string,
+    encounterId?: string | null,
   ): Promise<any> {
     const allowedTypes = [
       'Condition',
@@ -151,8 +169,22 @@ export class OdontologyService {
 
     await this.assertPatient(patientId, tenantId);
 
+    // Si se asocia a una visita, debe existir, ser del paciente/tenant y estar activa.
+    if (encounterId) {
+      const enc = await this.encounterRepository.findOne({ where: { id: encounterId, patientId, tenantId } });
+      if (!enc) throw new BadRequestException('La visita indicada no existe en tu consultorio.');
+      if (enc.status === 'finished') throw new ForbiddenException('Una visita firmada no puede modificarse. Usá una addenda.');
+      if (enc.status === 'cancelled') throw new BadRequestException('La visita fue cancelada.');
+    }
+
     payload.resourceType = resourceType;
     payload.subject = { reference: `Patient/${patientId}` };
+    if (encounterId) {
+      payload.encounter = { reference: `Encounter/${encounterId}` };
+      if (resourceType === 'Procedure' && !payload.performedDateTime && !payload.performedPeriod) {
+        payload.performedDateTime = new Date().toISOString();
+      }
+    }
 
     // Upsert por (pieza, cara, tipo, CAPA): una pieza puede tener simultáneamente
     // un hallazgo existente (rojo) y uno planificado (azul); marcar un "a realizar"
@@ -175,6 +207,9 @@ export class OdontologyService {
         }) || null;
     }
 
+    // Inmutabilidad: si se va a sobrescribir una prestación de una visita firmada, bloquear.
+    if (entity) await this.assertResourceMutable(entity.encounterId, tenantId);
+
     if (!entity) {
       entity = new OdontologyResourceEntity();
       entity.patientId = patientId;
@@ -182,6 +217,7 @@ export class OdontologyService {
       entity.tenantId = tenantId;
     }
 
+    if (encounterId) entity.encounterId = encounterId;
     entity.payload = payload;
     const saved = await this.resourceRepository.save(entity);
 
@@ -268,6 +304,7 @@ export class OdontologyService {
     if (!resource) {
       throw new NotFoundException('Recurso clínico no encontrado en tu consultorio.');
     }
+    await this.assertResourceMutable(resource.encounterId, tenantId);
 
     const payload = resource.payload || {};
     if (getLayer(payload) !== 'planned') {
@@ -297,6 +334,7 @@ export class OdontologyService {
     if (!resource) {
       throw new NotFoundException('Recurso clínico no encontrado.');
     }
+    await this.assertResourceMutable(resource.encounterId, tenantId);
 
     // Si es un archivo subido (radiografía/foto/documento), borrar también el binario local.
     const fileName: string | undefined = resource.payload?._fileName;

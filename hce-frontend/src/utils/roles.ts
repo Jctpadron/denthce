@@ -13,6 +13,8 @@ export const ROLES = {
   PACIENTE: 'paciente',
   /** Rol de plataforma, cross-tenant. Accede al panel de Super Admin (gestión de clínicas y módulos). */
   SUPERADMIN: 'superadmin',
+  LAB_OPERADOR: 'laboratorio-operador',
+  LAB_ADMIN: 'laboratorio-admin',
 } as const;
 
 export type AppRole = (typeof ROLES)[keyof typeof ROLES];
@@ -45,6 +47,8 @@ export function roleDisplayName(role: string): string {
     case ROLES.ADMINISTRADOR: return 'Administrador';
     case ROLES.PACIENTE: return 'Paciente';
     case ROLES.SUPERADMIN: return 'Super Admin';
+    case ROLES.LAB_OPERADOR: return 'Protesista / Operador';
+    case ROLES.LAB_ADMIN: return 'Administrador de Lab';
     default: return role;
   }
 }

@@ -4,6 +4,7 @@ import {
   Search,
   ArrowLeft,
   ChevronRight,
+  ChevronLeft,
   Grid,
   ClipboardList,
   Stethoscope,
@@ -20,7 +21,11 @@ import {
   XCircle,
   Clock,
   Images,
+  Wrench,
+  PlayCircle,
+  CheckCircle2,
 } from 'lucide-react';
+import { OdontoVisitContext } from './OdontoVisitContext';
 import keycloak from '../../utils/keycloak-config';
 import { OdontogramPAMI } from './OdontogramPAMI';
 import { AnamnesisPAMI } from './AnamnesisPAMI';
@@ -29,6 +34,7 @@ import { CoverageForm } from './CoverageForm';
 import { ConsentForm } from './ConsentForm';
 import { EvolutionPAMI } from './EvolutionPAMI';
 import { OdontologyDocuments } from './OdontologyDocuments';
+import { ProtesisTab } from './ProtesisTab';
 
 /**
  * HISTORIA CLÍNICA ODONTOLÓGICA (módulo aislado).
@@ -43,7 +49,7 @@ import { OdontologyDocuments } from './OdontologyDocuments';
  * - Cabecera premium con badge «Paciente Activo»
  */
 
-type OdontoTab = 'odontogram' | 'anamnesis' | 'oral-status' | 'coverage' | 'consent' | 'evolution' | 'documents';
+type OdontoTab = 'odontogram' | 'anamnesis' | 'oral-status' | 'coverage' | 'consent' | 'evolution' | 'documents' | 'protesis';
 
 const TABS: { key: OdontoTab; label: string; icon: React.ReactNode }[] = [
   { key: 'odontogram', label: 'Odontograma', icon: <Grid style={{ width: '1rem', height: '1rem' }} /> },
@@ -53,6 +59,7 @@ const TABS: { key: OdontoTab; label: string; icon: React.ReactNode }[] = [
   { key: 'consent', label: 'Consentimiento', icon: <FileSignature style={{ width: '1rem', height: '1rem' }} /> },
   { key: 'evolution', label: 'Evolución', icon: <ListChecks style={{ width: '1rem', height: '1rem' }} /> },
   { key: 'documents', label: 'Imágenes y documentos', icon: <Images style={{ width: '1rem', height: '1rem' }} /> },
+  { key: 'protesis', label: 'Prótesis / Laboratorio', icon: <Wrench style={{ width: '1rem', height: '1rem' }} /> },
 ];
 
 export const OdontologyHC: React.FC = () => {
@@ -74,6 +81,79 @@ export const OdontologyHC: React.FC = () => {
   // Paginación de render (la grilla no pinta miles de tarjetas de una sola vez).
   const PAGE = 20;
   const [visibleCount, setVisibleCount] = useState(PAGE);
+
+  // Navegación de la barra de pestañas (flechas ‹ › que aparecen solo si hay
+  // contenido oculto hacia ese lado). Resuelve la falta de affordance del scroll horizontal.
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [tabNav, setTabNav] = useState({ left: false, right: false });
+  const updateTabNav = () => {
+    const el = tabsRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setTabNav({ left: el.scrollLeft > 4, right: el.scrollLeft < max - 4 });
+  };
+  const scrollTabs = (dir: number) => {
+    const el = tabsRef.current;
+    if (el) el.scrollBy({ left: dir * Math.max(160, el.clientWidth * 0.6), behavior: 'smooth' });
+  };
+  useEffect(() => {
+    const el = tabsRef.current;
+    if (!el) return;
+    updateTabNav();
+    const ro = new ResizeObserver(updateTabNav);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [selectedPatient]);
+
+  // ---- Visita / Encuentro activo ----
+  const [activeVisit, setActiveVisit] = useState<any | null>(null);
+  const [visitBusy, setVisitBusy] = useState(false);
+  const authHeader = () => ({ headers: { Authorization: `Bearer ${keycloak.token}` } });
+  const encUrl = (pid: string) => `${import.meta.env.VITE_API_URL}/odontology/patient/${pid}/encounter`;
+
+  // Al seleccionar paciente, resolver si tiene una visita en curso.
+  useEffect(() => {
+    if (!selectedPatient) { setActiveVisit(null); return; }
+    let cancel = false;
+    (async () => {
+      try {
+        const res = await axios.get(`${encUrl(selectedPatient.id)}/active`, authHeader());
+        if (!cancel) setActiveVisit(res.data?.active || null);
+      } catch { if (!cancel) setActiveVisit(null); }
+    })();
+    return () => { cancel = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPatient]);
+
+  const handleOpenVisit = async () => {
+    if (!selectedPatient || visitBusy) return;
+    setVisitBusy(true);
+    try {
+      const res = await axios.post(encUrl(selectedPatient.id), { classCode: 'AMB' }, authHeader());
+      setActiveVisit(res.data);
+    } catch (err) {
+      console.error('Error al iniciar la visita:', err);
+      alert('No se pudo iniciar la visita. Intentá nuevamente.');
+    } finally {
+      setVisitBusy(false);
+    }
+  };
+
+  const handleFinalizeVisit = async () => {
+    if (!selectedPatient || !activeVisit || visitBusy) return;
+    if (!window.confirm('Vas a FINALIZAR Y FIRMAR la visita. Las prestaciones registradas quedarán inmutables (solo se podrán corregir por addenda). ¿Confirmás?')) return;
+    setVisitBusy(true);
+    try {
+      await axios.post(`${encUrl(selectedPatient.id)}/${activeVisit.id}/sign`, {}, authHeader());
+      setActiveVisit(null);
+      alert('Visita finalizada y firmada correctamente.');
+    } catch (err: any) {
+      console.error('Error al finalizar la visita:', err);
+      alert(err?.response?.data?.message || 'No se pudo finalizar la visita.');
+    } finally {
+      setVisitBusy(false);
+    }
+  };
 
   // ---- Helpers ----
 
@@ -122,9 +202,9 @@ export const OdontologyHC: React.FC = () => {
 
   const genderInfo = (g?: string): { label: string; symbol: string; color: string } => {
     switch ((g || '').toLowerCase()) {
-      case 'male': return { label: 'Masculino', symbol: '♂', color: '#2962ff' };
-      case 'female': return { label: 'Femenino', symbol: '♀', color: '#ec4899' };
-      case 'other': return { label: 'Otro', symbol: '⚧', color: '#8b5cf6' };
+      case 'male': return { label: 'Masculino', symbol: '♂', color: '#1d4ed8' };
+      case 'female': return { label: 'Femenino', symbol: '♀', color: '#be185d' };
+      case 'other': return { label: 'Otro', symbol: '⚧', color: '#6d28d9' };
       default: return { label: 'No especificado', symbol: '•', color: 'var(--color-muted)' };
     }
   };
@@ -281,6 +361,7 @@ export const OdontologyHC: React.FC = () => {
     const age = calcAge(selectedPatient.birthDate);
 
     return (
+      <OdontoVisitContext.Provider value={{ activeEncounterId: activeVisit?.id ?? null }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'slideIn 0.25s ease' }}>
 
         {/* Barra superior de retorno (réplica de PatientSearch) */}
@@ -325,6 +406,48 @@ export const OdontologyHC: React.FC = () => {
               {downloadingPdf ? 'Generando PDF...' : 'Exportar Ficha PDF'}
             </button>
           </div>
+        </div>
+
+        {/* Barra de VISITA: estado del encuentro activo + iniciar / finalizar (firmar) */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem',
+          padding: '0.75rem 1rem', borderRadius: '14px',
+          background: activeVisit ? 'rgba(4, 120, 87, 0.06)' : 'var(--bg-card)',
+          border: `1px solid ${activeVisit ? 'rgba(4, 120, 87, 0.25)' : 'var(--border-color)'}`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.88rem', color: 'var(--color-text)' }}>
+            <span style={{
+              width: '9px', height: '9px', borderRadius: '50%',
+              background: activeVisit ? 'var(--color-emerald-text)' : 'var(--color-muted)',
+              boxShadow: activeVisit ? '0 0 8px var(--color-emerald-text)' : 'none', flexShrink: 0,
+            }} />
+            {activeVisit ? (
+              <span><strong>Visita en curso</strong>{activeVisit.start ? ` · iniciada ${new Date(activeVisit.start).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : ''}. Lo que registres se asocia a esta visita.</span>
+            ) : (
+              <span style={{ color: 'var(--color-muted)' }}>Sin visita activa. Iniciá una visita para agrupar y firmar las prestaciones de hoy.</span>
+            )}
+          </div>
+          {activeVisit ? (
+            <button
+              onClick={handleFinalizeVisit}
+              disabled={visitBusy}
+              className="btn"
+              style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.45rem', background: 'var(--color-emerald-text)', color: '#fff', border: 'none', cursor: visitBusy ? 'wait' : 'pointer' }}
+            >
+              <CheckCircle2 style={{ width: '1rem', height: '1rem' }} />
+              {visitBusy ? 'Finalizando…' : 'Finalizar y firmar visita'}
+            </button>
+          ) : (
+            <button
+              onClick={handleOpenVisit}
+              disabled={visitBusy}
+              className="btn btn-primary"
+              style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.45rem', cursor: visitBusy ? 'wait' : 'pointer' }}
+            >
+              <PlayCircle style={{ width: '1rem', height: '1rem' }} />
+              {visitBusy ? 'Iniciando…' : 'Iniciar visita'}
+            </button>
+          )}
         </div>
 
         {/* Layout: columna izquierda (datos demográficos) + área principal (tabs) */}
@@ -459,7 +582,7 @@ export const OdontologyHC: React.FC = () => {
                 display: 'inline-block',
                 boxShadow: '0 0 8px var(--color-emerald)'
               }} />
-              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-emerald)', letterSpacing: '0.03em' }}>HL7 FHIR R4 Standard</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-emerald-text)', letterSpacing: '0.03em' }}>HL7 FHIR R4 Standard</span>
             </div>
 
           </div>
@@ -467,25 +590,49 @@ export const OdontologyHC: React.FC = () => {
           {/* Área principal: barra de pestañas + panel de contenido */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
 
-            {/* Control Segmentado (Pills) */}
-            <div
-              className="segmented-control"
-              style={{ overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}
-            >
-              {TABS.map((tab) => {
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`segmented-button ${isActive ? 'active' : ''}`}
-                    style={{ flexShrink: 0 }}
-                  >
-                    {tab.icon}
-                    {tab.label}
-                  </button>
-                );
-              })}
+            {/* Control Segmentado (Pills) con flechas de desplazamiento en los bordes */}
+            <div className="segmented-tabs-wrap">
+              <button
+                type="button"
+                className="seg-arrow seg-arrow--left"
+                aria-label="Ver pestañas anteriores"
+                data-show={tabNav.left}
+                onClick={() => scrollTabs(-1)}
+              >
+                <ChevronLeft style={{ width: '1.15rem', height: '1.15rem' }} />
+              </button>
+
+              <div
+                ref={tabsRef}
+                onScroll={updateTabNav}
+                className="segmented-control"
+                style={{ overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}
+              >
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`segmented-button ${isActive ? 'active' : ''}`}
+                      style={{ flexShrink: 0 }}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                className="seg-arrow seg-arrow--right"
+                aria-label="Ver más pestañas"
+                data-show={tabNav.right}
+                onClick={() => scrollTabs(1)}
+              >
+                <ChevronRight style={{ width: '1.15rem', height: '1.15rem' }} />
+              </button>
             </div>
 
             {/* Panel de Contenido del Tab Activo */}
@@ -497,11 +644,13 @@ export const OdontologyHC: React.FC = () => {
               {activeTab === 'consent' && <ConsentForm patientId={selectedPatient.id} />}
               {activeTab === 'evolution' && <EvolutionPAMI patientId={selectedPatient.id} />}
               {activeTab === 'documents' && <OdontologyDocuments patientId={selectedPatient.id} />}
+              {activeTab === 'protesis' && <ProtesisTab patientId={selectedPatient.id} />}
             </div>
 
           </div>
         </div>
       </div>
+      </OdontoVisitContext.Provider>
     );
   }
 
@@ -724,7 +873,7 @@ export const OdontologyHC: React.FC = () => {
                         {family}, {given}
                       </h4>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem 0.65rem', fontSize: '0.8rem', color: 'var(--color-muted)', marginTop: '0.25rem' }}>
-                        <span>DNI: <strong style={{ color: '#2962ff' }}>{patientDni(p) || 'N/D'}</strong></span>
+                        <span>DNI: <strong style={{ color: '#1d4ed8' }}>{patientDni(p) || 'N/D'}</strong></span>
                         <span style={{ opacity: 0.5 }}>|</span>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }} title={genderInfo(p.gender).label}>
                           <span style={{ color: genderInfo(p.gender).color, fontWeight: 800, fontSize: '1.05rem', lineHeight: 1 }}>{genderInfo(p.gender).symbol}</span>
@@ -743,7 +892,7 @@ export const OdontologyHC: React.FC = () => {
                         {enr?.obraSocial && (
                           <>
                             <span style={{ opacity: 0.5 }}>|</span>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.05rem 0.5rem', borderRadius: '999px', background: 'rgba(41,98,255,0.07)', color: '#2962ff', fontWeight: 600 }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.05rem 0.5rem', borderRadius: '999px', background: 'rgba(41,98,255,0.07)', color: '#1d4ed8', fontWeight: 600 }}>
                               <IdCard style={{ width: '0.8rem', height: '0.8rem' }} />
                               {enr.obraSocial}
                             </span>

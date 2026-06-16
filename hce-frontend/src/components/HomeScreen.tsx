@@ -51,6 +51,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const canSeeAgenda = has('agenda');
 
   const accent = config.primaryColor || 'var(--color-cyan)';
+  // Variante con contraste AA para usar el acento como TEXTO chico sobre blanco (white-label).
+  const accentText = 'var(--accent-text)';
+  // Mapea el color de acento del módulo a su variante "texto seguro" (AA). El color puro
+  // se sigue usando para bordes/hover; el texto chico usa el derivado oscurecido.
+  const moduleTextColor: Record<string, string> = {
+    'var(--color-primary)': 'var(--accent-text)',
+    'var(--color-cyan)': 'var(--accent-text)',
+    'var(--color-amber)': 'var(--color-amber-text)',
+    'var(--color-violet)': 'var(--color-violet-text)',
+  };
 
   // --- Recetas pendientes de firma (médico) ---
   const [pending, setPending] = useState<PendingPrescription[] | null>(null);
@@ -135,7 +145,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             {greeting}, {config.doctorTitle || 'Dr.'} {config.doctorName?.split(' ')[0] || 'Profesional'} 👋
           </h2>
           <p style={{ margin: '0.35rem 0 0', fontSize: '0.9rem', color: 'var(--color-muted)', fontWeight: 500 }}>
-            {config.clinicName} · <span style={{ color: accent }}>{config.specialty}</span>
+            {config.clinicName} · <span style={{ color: accentText }}>{config.specialty}</span>
           </p>
         </div>
         {quickActions.length > 0 && (
@@ -150,7 +160,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                     display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
                     padding: '0.6rem 1.1rem', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700,
                     cursor: 'pointer', transition: 'var(--transition-smooth)',
-                    background: a.primary ? accent : 'var(--bg-surface)',
+                    background: a.primary ? accentText : 'var(--bg-surface)',
                     color: a.primary ? '#fff' : 'var(--color-text)',
                     border: a.primary ? 'none' : '1px solid var(--border-color)',
                   }}
@@ -186,7 +196,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <SectionTitle id="agenda-hoy-title">Agenda de hoy</SectionTitle>
             <button onClick={() => onNavigate('agenda')} style={{
-              background: 'none', border: 'none', cursor: 'pointer', color: accent, fontWeight: 700,
+              background: 'none', border: 'none', cursor: 'pointer', color: accentText, fontWeight: 700,
               fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
             }}>
               Ver agenda completa <ArrowRight style={{ width: '0.9rem', height: '0.9rem' }} />
@@ -207,7 +217,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                 <button onClick={() => onNavigate('agenda')} style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem',
                   borderRadius: '10px', fontSize: '0.83rem', fontWeight: 700, cursor: 'pointer',
-                  background: accent, color: '#fff', border: 'none',
+                  background: accentText, color: '#fff', border: 'none',
                 }}>
                   <CalendarPlus style={{ width: '1rem', height: '1rem' }} /> Agendar un turno
                 </button>
@@ -251,7 +261,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                   <li>
                     <button onClick={() => onNavigate('agenda')} style={{
                       width: '100%', padding: '0.7rem', background: 'transparent', border: 'none',
-                      borderTop: '1px solid var(--border-color)', cursor: 'pointer', color: accent, fontWeight: 700, fontSize: '0.82rem',
+                      borderTop: '1px solid var(--border-color)', cursor: 'pointer', color: accentText, fontWeight: 700, fontSize: '0.82rem',
                     }}>
                       Ver los {agendaHoy.length} turnos de hoy →
                     </button>
@@ -360,7 +370,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                   {card.description}
                 </p>
               </div>
-              <div style={{ marginTop: 'auto', fontSize: '0.8rem', fontWeight: 700, color: card.color, display: 'flex', alignItems: 'center', gap: '0.25rem', paddingTop: '0.5rem' }}>
+              <div style={{ marginTop: 'auto', fontSize: '0.8rem', fontWeight: 700, color: moduleTextColor[card.color] || card.color, display: 'flex', alignItems: 'center', gap: '0.25rem', paddingTop: '0.5rem' }}>
                 Acceder al módulo →
               </div>
             </button>
@@ -371,7 +381,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
       {/* Footer */}
       <div style={{ textAlign: 'center', padding: '1.5rem 0 0', borderTop: '1px solid var(--border-color)', marginTop: '1rem' }}>
         <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>
-          Powered by <strong style={{ color: accent }}>Denta Cloud</strong> · Historia Clínica Electrónica Odontológica · HL7 FHIR R4
+          Powered by <strong style={{ color: accentText }}>Denta Cloud</strong> · Historia Clínica Electrónica Odontológica · HL7 FHIR R4
         </span>
       </div>
 

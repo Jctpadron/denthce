@@ -13,6 +13,7 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
  */
 @Entity('odontology_clinical_resources')
 @Index(['tenantId', 'patientId', 'resourceType'])
+@Index('idx_odo_res_encounter', ['tenantId', 'encounterId'])
 export class OdontologyResourceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -22,6 +23,13 @@ export class OdontologyResourceEntity {
 
   @Column({ name: 'patient_id' })
   patientId: string;
+
+  /**
+   * Visita/Encuentro al que pertenece esta prestación (FK lógica a odontology_encounters.id).
+   * Null = registro "pre-visita"/legacy (anterior al ciclo de vida de visitas) o suelto.
+   */
+  @Column({ name: 'encounter_id', type: 'uuid', nullable: true })
+  encounterId: string | null;
 
   @Column({ name: 'resource_type' })
   resourceType: string;

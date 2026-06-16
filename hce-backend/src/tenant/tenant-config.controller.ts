@@ -33,7 +33,7 @@ export class TenantConfigController {
    * (necesario para cargar el branding al iniciar la app)
    */
   @Get('config')
-  @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'paciente')
+  @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'paciente', 'laboratorio-operador', 'laboratorio-admin')
   async getConfig(@Request() req: any) {
     return this.tenantService.getConfig(req.user.tenantId);
   }
