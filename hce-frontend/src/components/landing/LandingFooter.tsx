@@ -4,10 +4,12 @@ import { DentaCloudLogoImage, NAV_LINKS } from './content';
 interface FooterProps {
   onDemo: () => void;
   onLogin: () => void;
+  onPrivacy: () => void;
+  onTerms: () => void;
 }
 
 /** Pie oscuro — único bloque oscuro intencional, como cierre de página. */
-export const LandingFooter: React.FC<FooterProps> = ({ onDemo, onLogin }) => {
+export const LandingFooter: React.FC<FooterProps> = ({ onDemo, onLogin, onPrivacy, onTerms }) => {
   const goAnchor = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
@@ -42,7 +44,7 @@ export const LandingFooter: React.FC<FooterProps> = ({ onDemo, onLogin }) => {
         </div>
 
         <div className="landing-footer__bottom">
-          <span>© 2026 Denta Cloud — systia.ar · Términos · Privacidad</span>
+          <span>© 2026 Denta Cloud — systia.ar · <a href="#terms" onClick={(e) => { e.preventDefault(); onTerms(); }} style={{ color: 'inherit', textDecoration: 'underline' }}>Términos</a> · <a href="#privacy" onClick={(e) => { e.preventDefault(); onPrivacy(); }} style={{ color: 'inherit', textDecoration: 'underline' }}>Privacidad</a></span>
           <span>Powered by Denta Cloud · HL7 FHIR R4</span>
         </div>
       </div>

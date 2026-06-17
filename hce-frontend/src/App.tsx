@@ -1,21 +1,23 @@
-import { useState } from 'react';
-import { PatientForm } from './components/PatientForm';
-import { PatientSearch } from './components/PatientSearch';
-import { OdontologyHC } from './components/odontology/OdontologyHC';
-import { AgendaView } from './components/agenda/AgendaView';
-import { SuperAdminPanel } from './components/superadmin/SuperAdminPanel';
-import { HomeScreen } from './components/HomeScreen';
-import { BrandingSettings } from './components/BrandingSettings';
-import { UserManagement } from './components/UserManagement';
+import { useState, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useRoles } from './hooks/useRoles';
 import { roleDisplayName } from './utils/roles';
 import keycloak from './utils/keycloak-config';
-import { LogOut, User, Shield, Menu, X, Home, CalendarDays, PlusCircle, Users, Palette, ChevronDown, Wrench } from 'lucide-react';
-import { LandingDentaCloud } from './components/landing/LandingDentaCloud';
-import { DentaLabPortal } from './components/protesis/DentaLabPortal';
+import { LogOut, User, Shield, Menu, X, Home, CalendarDays, PlusCircle, Users, Palette, ChevronDown, Wrench, DollarSign } from 'lucide-react';
 
-type AppView = 'home' | 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'settings' | 'users' | 'lab-portal';
+const PatientForm = lazy(() => import('./components/PatientForm').then(m => ({ default: m.PatientForm })));
+const PatientSearch = lazy(() => import('./components/PatientSearch').then(m => ({ default: m.PatientSearch })));
+const OdontologyHC = lazy(() => import('./components/odontology/OdontologyHC').then(m => ({ default: m.OdontologyHC })));
+const AgendaView = lazy(() => import('./components/agenda/AgendaView').then(m => ({ default: m.AgendaView })));
+const SuperAdminPanel = lazy(() => import('./components/superadmin/SuperAdminPanel').then(m => ({ default: m.SuperAdminPanel })));
+const HomeScreen = lazy(() => import('./components/HomeScreen').then(m => ({ default: m.HomeScreen })));
+const BrandingSettings = lazy(() => import('./components/BrandingSettings').then(m => ({ default: m.BrandingSettings })));
+const UserManagement = lazy(() => import('./components/UserManagement').then(m => ({ default: m.UserManagement })));
+const LandingDentaCloud = lazy(() => import('./components/landing/LandingDentaCloud').then(m => ({ default: m.LandingDentaCloud })));
+const DentaLabPortal = lazy(() => import('./components/protesis/DentaLabPortal').then(m => ({ default: m.DentaLabPortal })));
+const FinanzasClinicas = lazy(() => import('./components/finanzas/FinanzasClinicas').then(m => ({ default: m.FinanzasClinicas })));
+
+type AppView = 'home' | 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'settings' | 'users' | 'lab-portal' | 'finanzas';
 
 /** Ícono de diente (lucide no lo trae) para HC Odontológica. Hereda el color del botón. */
 const ToothIcon = ({ size = 18 }: { size?: number }) => (
@@ -40,13 +42,13 @@ function AppContent() {
   const { config, loading } = useTheme();
 
   if (!keycloak.authenticated) {
-    return <LandingDentaCloud />;
+    return <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)' }}><p style={{ color: 'var(--color-muted)' }}>Cargando...</p></div>}><LandingDentaCloud /></Suspense>;
   }
 
   // El Super Admin opera cross-tenant: tiene su propia experiencia (gestión de clínicas y módulos),
   // separada del shell clínico scoped por tenant.
   if (isSuperAdmin) {
-    return <SuperAdminPanel />;
+    return <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)' }}><p style={{ color: 'var(--color-muted)' }}>Cargando panel...</p></div>}><SuperAdminPanel /></Suspense>;
   }
 
   const username = keycloak.tokenParsed?.preferred_username || 'Profesional Clínico';
@@ -62,6 +64,7 @@ function AppContent() {
     { key: 'odonto-hc' as AppView, label: 'HC Odontológica', Icon: ToothIcon },
     { key: 'agenda' as AppView, label: 'Agenda', Icon: CalendarDays },
     { key: 'form' as AppView, label: 'Admisión', Icon: PlusCircle },
+    { key: 'finanzas' as AppView, label: 'Finanzas', Icon: DollarSign },
   ];
   // Ítems de administración: van al menú del usuario (avatar), no al nav principal.
   const ADMIN_ITEMS = canConfigure && !isLaboratorio ? [
@@ -272,37 +275,41 @@ function AppContent() {
 
       {/* Contenedor Principal */}
       <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
-        {activeView === 'lab-portal' && isLaboratorio && <DentaLabPortal />}
-        {activeView === 'home' && !isLaboratorio && (
-          <HomeScreen onNavigate={(to) => {
-            const views: Record<string, AppView> = {
-              home: 'home',
-              patients: 'patients',
-              'odonto-hc': 'odonto-hc',
-              agenda: 'agenda',
-              form: 'form',
-              settings: 'settings',
-              users: 'users'
-            };
-            setActiveView(to === 'dashboard' ? 'home' : (views[to] || 'home'));
-          }} />
-        )}
-        {activeView === 'patients' && !isLaboratorio && <PatientSearch />}
-        {activeView === 'odonto-hc' && !isLaboratorio && <OdontologyHC />}
-        {activeView === 'agenda' && !isLaboratorio && <AgendaView />}
-        {activeView === 'form' && !isLaboratorio && <PatientForm onSuccess={() => setActiveView('patients')} />}
-        {activeView === 'users' && canConfigure && !isLaboratorio && <UserManagement />}
-        {activeView === 'users' && !canConfigure && !isLaboratorio && (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
-            🔒 Solo el Administrador o los Médicos pueden acceder a la Gestión de Personal.
-          </div>
-        )}
-        {activeView === 'settings' && canConfigure && !isLaboratorio && <BrandingSettings onClose={() => setActiveView('home')} />}
-        {activeView === 'settings' && !canConfigure && !isLaboratorio && (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
-            🔒 Solo el Administrador o los Médicos pueden acceder a la Personalización.
-          </div>
-        )}
+        <Suspense fallback={<p style={{ color: 'var(--color-muted)', textAlign: 'center', padding: '3rem' }}>Cargando...</p>}>
+          {activeView === 'lab-portal' && isLaboratorio && <DentaLabPortal />}
+          {activeView === 'home' && !isLaboratorio && (
+            <HomeScreen onNavigate={(to) => {
+              const views: Record<string, AppView> = {
+                home: 'home',
+                patients: 'patients',
+                'odonto-hc': 'odonto-hc',
+                agenda: 'agenda',
+                form: 'form',
+                settings: 'settings',
+                users: 'users',
+                finanzas: 'finanzas'
+              };
+              setActiveView(to === 'dashboard' ? 'home' : (views[to] || 'home'));
+            }} />
+          )}
+          {activeView === 'patients' && !isLaboratorio && <PatientSearch />}
+          {activeView === 'odonto-hc' && !isLaboratorio && <OdontologyHC />}
+          {activeView === 'finanzas' && !isLaboratorio && <FinanzasClinicas />}
+          {activeView === 'agenda' && !isLaboratorio && <AgendaView />}
+          {activeView === 'form' && !isLaboratorio && <PatientForm onSuccess={() => setActiveView('patients')} />}
+          {activeView === 'users' && canConfigure && !isLaboratorio && <UserManagement />}
+          {activeView === 'users' && !canConfigure && !isLaboratorio && (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
+              Solo el Administrador o los Médicos pueden acceder a la Gestión de Personal.
+            </div>
+          )}
+          {activeView === 'settings' && canConfigure && !isLaboratorio && <BrandingSettings onClose={() => setActiveView('home')} />}
+          {activeView === 'settings' && !canConfigure && !isLaboratorio && (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
+              Solo el Administrador o los Médicos pueden acceder a la Personalización.
+            </div>
+          )}
+        </Suspense>
       </div>
     </div>
   );

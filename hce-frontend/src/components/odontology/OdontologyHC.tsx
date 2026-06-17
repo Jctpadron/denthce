@@ -24,6 +24,7 @@ import {
   Wrench,
   PlayCircle,
   CheckCircle2,
+  DollarSign,
 } from 'lucide-react';
 import { OdontoVisitContext } from './OdontoVisitContext';
 import keycloak from '../../utils/keycloak-config';
@@ -35,6 +36,7 @@ import { ConsentForm } from './ConsentForm';
 import { EvolutionPAMI } from './EvolutionPAMI';
 import { OdontologyDocuments } from './OdontologyDocuments';
 import { ProtesisTab } from './ProtesisTab';
+import { FinanzasTab } from '../tabs/FinanzasTab';
 
 /**
  * HISTORIA CLÍNICA ODONTOLÓGICA (módulo aislado).
@@ -49,7 +51,7 @@ import { ProtesisTab } from './ProtesisTab';
  * - Cabecera premium con badge «Paciente Activo»
  */
 
-type OdontoTab = 'odontogram' | 'anamnesis' | 'oral-status' | 'coverage' | 'consent' | 'evolution' | 'documents' | 'protesis';
+type OdontoTab = 'odontogram' | 'anamnesis' | 'oral-status' | 'coverage' | 'consent' | 'evolution' | 'documents' | 'protesis' | 'finanzas';
 
 const TABS: { key: OdontoTab; label: string; icon: React.ReactNode }[] = [
   { key: 'odontogram', label: 'Odontograma', icon: <Grid style={{ width: '1rem', height: '1rem' }} /> },
@@ -60,6 +62,7 @@ const TABS: { key: OdontoTab; label: string; icon: React.ReactNode }[] = [
   { key: 'evolution', label: 'Evolución', icon: <ListChecks style={{ width: '1rem', height: '1rem' }} /> },
   { key: 'documents', label: 'Imágenes y documentos', icon: <Images style={{ width: '1rem', height: '1rem' }} /> },
   { key: 'protesis', label: 'Prótesis / Laboratorio', icon: <Wrench style={{ width: '1rem', height: '1rem' }} /> },
+  { key: 'finanzas', label: 'Finanzas', icon: <DollarSign style={{ width: '1rem', height: '1rem' }} /> },
 ];
 
 export const OdontologyHC: React.FC = () => {
@@ -645,6 +648,7 @@ export const OdontologyHC: React.FC = () => {
               {activeTab === 'evolution' && <EvolutionPAMI patientId={selectedPatient.id} />}
               {activeTab === 'documents' && <OdontologyDocuments patientId={selectedPatient.id} />}
               {activeTab === 'protesis' && <ProtesisTab patientId={selectedPatient.id} />}
+              {activeTab === 'finanzas' && <FinanzasTab patientId={selectedPatient.id} />}
             </div>
 
           </div>

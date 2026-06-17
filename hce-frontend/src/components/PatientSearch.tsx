@@ -29,7 +29,8 @@ import { PatientForm } from './PatientForm';
 import { EncountersTab } from './tabs/EncountersTab';
 import { AntecedentsTab } from './tabs/AntecedentsTab';
 import { PrescriptionsTab } from './tabs/PrescriptionsTab';
-import { Stethoscope, ClipboardList, Pill } from 'lucide-react';
+import { FinanzasTab } from './tabs/FinanzasTab';
+import { Stethoscope, ClipboardList, Pill, DollarSign } from 'lucide-react';
 
 export const PatientSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,7 +41,7 @@ export const PatientSearch: React.FC = () => {
   const [dniFilter, setDniFilter] = useState('');
   const [ageFilter, setAgeFilter] = useState('');
   const [admissionDateFilter, setAdmissionDateFilter] = useState('');
-  const [activeTab, setActiveTab] = useState<'encounter' | 'antecedents' | 'odontogram' | 'allergies' | 'vitals' | 'prescriptions' | 'documents' | 'audit'>('encounter');
+  const [activeTab, setActiveTab] = useState<'encounter' | 'antecedents' | 'odontogram' | 'allergies' | 'vitals' | 'prescriptions' | 'documents' | 'audit' | 'finanzas'>('encounter');
   const [isEditingPatient, setIsEditingPatient] = useState(false);
   const [coverages, setCoverages] = useState<any[]>([]);
 
@@ -180,6 +181,7 @@ export const PatientSearch: React.FC = () => {
       { key: 'prescriptions', label: 'Recetas', icon: <Pill style={{ width: '1rem', height: '1rem' }} /> },
       { key: 'documents', label: 'Documentos', icon: <FileText style={{ width: '1rem', height: '1rem' }} /> },
       { key: 'audit', label: 'Historial', icon: <Shield style={{ width: '1rem', height: '1rem' }} /> },
+      { key: 'finanzas', label: 'Finanzas', icon: <DollarSign style={{ width: '1rem', height: '1rem' }} /> },
     ] as const;
 
     return (
@@ -436,6 +438,7 @@ export const PatientSearch: React.FC = () => {
                   {activeTab === 'prescriptions' && <PrescriptionsTab patientId={selectedPatient.id} />}
                   {activeTab === 'documents' && <DocumentsTab patientId={selectedPatient.id} />}
                   {activeTab === 'audit' && <AuditTab patientId={selectedPatient.id} />}
+                  {activeTab === 'finanzas' && <FinanzasTab patientId={selectedPatient.id} />}
                 </div>
               </>
             )}

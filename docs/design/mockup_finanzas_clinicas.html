@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup Financiero — Finanzas Clínicas</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 2rem; color: #0f172a; }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  h1 { font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem; }
+  h1 small { font-weight: 400; font-size: 0.75rem; color: #64748b; background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 6px; }
+  h2 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 2rem; }
+  h3 { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.6rem; }
+  h4 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+
+  .grid { display: grid; gap: 1.5rem; margin-bottom: 2rem; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .grid-5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+
+  .card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+
+  .badge {
+    display: inline-flex; align-items: center; padding: 0.2rem 0.55rem; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700;
+  }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-gray { background: #f1f5f9; color: #475569; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-amber { background: #fffbeb; color: #92400e; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.9rem;
+    border-radius: 10px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer;
+    transition: all 0.15s; text-decoration: none; font-family: inherit;
+  }
+  .btn-primary { background: #2962ff; color: #fff; }
+  .btn-primary:hover { background: #1a4fd0; }
+  .btn-outline { background: transparent; border: 1.5px solid #e2e8f0; color: #475569; }
+  .btn-outline:hover { border-color: #2962ff; color: #2962ff; }
+  .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
+  .btn-emerald { background: #10b981; color: #fff; }
+  .btn-rose { background: #f43f5e; color: #fff; }
+  .btn-amber { background: #f59e0b; color: #fff; }
+
+  .divider { border: none; border-top: 1px solid #e2e8f0; margin: 1rem 0; }
+
+  .flex { display: flex; }
+  .flex-between { justify-content: space-between; align-items: center; }
+  .flex-col { flex-direction: column; }
+  .gap-1 { gap: 0.5rem; }
+  .gap-2 { gap: 1rem; }
+  .mt-1 { margin-top: 0.5rem; }
+  .mt-2 { margin-top: 1rem; }
+  .mb-1 { margin-bottom: 0.5rem; }
+
+  .text-muted { color: #64748b; }
+  .text-sm { font-size: 0.78rem; }
+  .text-xs { font-size: 0.7rem; }
+  .text-lg { font-size: 1.2rem; }
+  .font-bold { font-weight: 700; }
+  .font-800 { font-weight: 800; }
+
+  .value-up { color: #059669; }
+  .value-down { color: #dc2626; }
+
+  .tabs {
+    display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.25rem;
+  }
+  .tab {
+    padding: 0.6rem 1.2rem; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    border-bottom: 3px solid transparent; color: #94a3b8; transition: all 0.15s;
+  }
+  .tab.active { color: #2962ff; border-bottom-color: #2962ff; }
+
+  .table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .table th { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 2px solid #e2e8f0; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px; }
+  .table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #f1f5f9; }
+  .table tr:hover td { background: #f8fafc; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex;
+    align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal {
+    background: #fff; border-radius: 20px; padding: 1.5rem; width: 480px;
+    max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  }
+  .modal h3 { margin-bottom: 1rem; font-size: 1rem; }
+  .modal .field { margin-bottom: 0.8rem; }
+  .modal label { display: block; font-size: 0.72rem; font-weight: 700; color: #475569; margin-bottom: 0.25rem; }
+  .modal input, .modal select, .modal textarea {
+    width: 100%; padding: 0.55rem 0.7rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: 0.82rem; outline: none; font-family: inherit;
+  }
+  .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: #2962ff; }
+  .modal .btn-row { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 1.2rem; }
+  .modal .field-row { display: flex; gap: 0.8rem; }
+  .modal .field-row .field { flex: 1; }
+
+  .amount { font-size: 1.6rem; font-weight: 800; line-height: 1; }
+  .amount-sm { font-size: 1.2rem; font-weight: 800; line-height: 1; }
+  .amount-label { font-size: 0.72rem; color: #64748b; margin-top: 0.2rem; }
+
+  .timeline { position: relative; padding-left: 1.5rem; }
+  .timeline::before { content: ''; position: absolute; left: 0.4rem; top: 0.3rem; bottom: 0.3rem; width: 2px; background: #e2e8f0; }
+  .timeline-item { position: relative; padding-bottom: 1rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.1rem; top: 0.4rem; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #2962ff; border: 2px solid #fff; box-shadow: 0 0 0 2px #2962ff; }
+  .timeline-item.green::before { background: #10b981; box-shadow: 0 0 0 2px #10b981; }
+  .timeline-item.amber::before { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
+  .timeline-item.red::before { background: #f43f5e; box-shadow: 0 0 0 2px #f43f5e; }
+  .timeline-item .t-title { font-weight: 700; font-size: 0.8rem; }
+  .timeline-item .t-sub { font-size: 0.7rem; color: #64748b; }
+
+  .progress-bar {
+    height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin: 0.4rem 0;
+  }
+  .progress-bar .fill { height: 100%; border-radius: 999px; transition: width 0.3s; }
+  .fill-green { background: #10b981; }
+  .fill-blue { background: #2962ff; }
+  .fill-amber { background: #f59e0b; }
+  .fill-red { background: #f43f5e; }
+
+  .section-desc { font-size: 0.78rem; color: #64748b; margin-bottom: 1rem; }
+
+  .state-machine { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; flex-wrap: wrap; }
+  .state { padding: 0.25rem 0.6rem; border-radius: 999px; font-weight: 700; font-size: 0.7rem; }
+  .state-active { background: #dbeafe; color: #1e40af; }
+  .state-done { background: #d1fae5; color: #065f46; }
+  .state-pending { background: #fef3c7; color: #92400e; }
+  .state-cancel { background: #fee2e2; color: #991b1b; }
+  .state-draft { background: #f1f5f9; color: #475569; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="flex flex-between" style="margin-bottom:1.5rem">
+    <h1>
+      Finanzas Clínicas — Mockup Funcional
+      <small>Módulo B2C: Paciente → Consultorio</small>
+    </h1>
+    <div class="flex gap-1">
+      <span class="badge badge-blue">Cobrado hoy: $12,450</span>
+      <span class="badge badge-yellow">Deuda total: $8,200</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Dashboard Widgets -->
+  <h2>Widgets del Dashboard</h2>
+  <div class="grid grid-5">
+    <div class="card">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:0.5px">Cobrado Hoy</div>
+      <div class="amount" style="color:#059669">$12,450</div>
+      <div class="amount-label">3 pacientes · 5 pagos</div>
+    </div>
+    <div class="card">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:0.5px">Cobrado Este Mes</div>
+      <div class="amount" style="color:#2962ff">$84,200</div>
+      <div class="amount-label"><span class="badge badge-green">+12% vs mes ant.</span></div>
+    </div>
+    <div class="card">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:0.5px">Gastos del Mes</div>
+      <div class="amount" style="color:#dc2626">$41,300</div>
+      <div class="amount-label">Insumos + alquiler + servicios</div>
+    </div>
+    <div class="card">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:0.5px">Rentabilidad Neta</div>
+      <div class="amount" style="color:#0f172a">$42,900</div>
+      <div class="amount-label"><span class="badge badge-green">Margen 51%</span></div>
+    </div>
+    <div class="card">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:0.5px">Deuda Total Pacientes</div>
+      <div class="amount" style="color:#f59e0b">$28,400</div>
+      <div class="amount-label"><span class="badge badge-red">4 vencidos</span></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Presupuesto Detail -->
+  <h2>Presupuesto — Plan de Tratamiento</h2>
+  <p class="section-desc">Cada presupuesto tiene items (prestaciones con precio), senia, cuotas y estado automatico.</p>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="tabs" style="padding:0 1.25rem;margin-bottom:0">
+      <div class="tab active">Presupuestos</div>
+      <div class="tab">Pagos</div>
+      <div class="tab">Gastos</div>
+      <div class="tab">Cuenta Corriente</div>
+    </div>
+    <div style="padding:1.25rem">
+      <div class="flex flex-between" style="margin-bottom:1rem">
+        <div class="flex gap-2" style="align-items:center">
+          <h3 style="margin:0">Presupuesto PRES-0012 — Gómez, María</h3>
+          <span class="badge badge-amber" style="font-size:0.8rem;padding:0.3rem 0.8rem">En Curso</span>
+        </div>
+        <div class="flex gap-1">
+          <button class="btn btn-outline btn-sm">Historial</button>
+          <button class="btn btn-primary btn-sm">+ Registrar Pago</button>
+        </div>
+      </div>
+
+      <!-- State machine -->
+      <div class="state-machine" style="margin-bottom:1rem;padding:0.6rem 0.8rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0">
+        <span class="state state-done">Borrador</span>
+        <span style="color:#94a3b8">→</span>
+        <span class="state state-done">Presentado</span>
+        <span style="color:#94a3b8">→</span>
+        <span class="state state-done">Aceptado</span>
+        <span style="color:#94a3b8">→</span>
+        <span class="state state-active">En Curso</span>
+        <span style="color:#94a3b8">→</span>
+        <span class="state state-pending">Pagado</span>
+        <span style="color:#94a3b8">|</span>
+        <span class="state state-cancel">Cancelado</span>
+        <span style="color:#94a3b8">|</span>
+        <span class="state state-draft">Vencido</span>
+      </div>
+
+      <div class="grid grid-2" style="gap:1.5rem">
+        <!-- Left: Items -->
+        <div>
+          <h4>Items del Presupuesto</h4>
+          <table class="table">
+            <thead>
+              <tr><th>Prestacion</th><th>Pieza</th><th>Cant.</th><th>P.Unit.</th><th>Subtotal</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Restauracion resina</td><td>16 O</td><td>1</td><td>$8,500</td><td>$8,500</td></tr>
+              <tr><td>Corona metal-ceramica</td><td>26</td><td>1</td><td>$22,000</td><td>$22,000</td></tr>
+              <tr><td>Endodoncia uniradicular</td><td>36</td><td>1</td><td>$15,000</td><td>$15,000</td></tr>
+              <tr><td>Tartrectomia completa</td><td>—</td><td>1</td><td>$6,000</td><td>$6,000</td></tr>
+            </tbody>
+            <tfoot style="background:#f1f5f9;font-weight:700">
+              <tr><td colspan="3"></td><td>Subtotal</td><td>$51,500</td></tr>
+              <tr><td colspan="3"></td><td>Descuento</td><td style="color:#dc2626">-$1,500</td></tr>
+              <tr style="font-size:0.85rem"><td colspan="3"></td><td>Total</td><td style="color:#2962ff">$50,000</td></tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Right: Payment state -->
+        <div>
+          <h4>Estado de Pago</h4>
+          <div style="padding:1rem;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0">
+            <div class="flex flex-between">
+              <span class="text-sm">Total Presupuesto:</span>
+              <span class="font-bold">$50,000</span>
+            </div>
+            <div class="flex flex-between mt-1">
+              <span class="text-sm">Senia (30%):</span>
+              <span class="font-bold value-up">-$15,000</span>
+            </div>
+            <div class="flex flex-between">
+              <span class="text-sm">Cuotas pagadas (2):</span>
+              <span class="font-bold value-up">-$14,000</span>
+            </div>
+            <div class="divider" style="margin:0.6rem 0"></div>
+            <div class="flex flex-between">
+              <span class="font-bold">Saldo Pendiente:</span>
+              <span class="font-bold" style="color:#f59e0b;font-size:1.1rem">$21,000</span>
+            </div>
+
+            <div class="progress-bar" style="margin-top:0.8rem">
+              <div class="fill-amber" style="width:58%"></div>
+            </div>
+            <div class="flex flex-between text-xs text-muted">
+              <span>58% pagado</span>
+              <span>3 cuotas restantes</span>
+            </div>
+
+            <div class="divider" style="margin:0.6rem 0"></div>
+
+            <h4>Pagos registrados</h4>
+            <div class="timeline" style="padding-left:1.2rem">
+              <div class="timeline-item green">
+                <div class="t-title">$15,000 — Senia (Efectivo)</div>
+                <div class="t-sub">01/06/2026 · Recibo #0012</div>
+              </div>
+              <div class="timeline-item green">
+                <div class="t-title">$7,000 — 1ra Cuota (Transferencia)</div>
+                <div class="t-sub">08/06/2026 · Visita: Restauracion P16</div>
+              </div>
+              <div class="timeline-item green">
+                <div class="t-title">$7,000 — 2da Cuota (Mercado Pago)</div>
+                <div class="t-sub">12/06/2026 · Visita: Endodoncia P36</div>
+              </div>
+              <div class="timeline-item amber">
+                <div class="t-title">Saldo: $21,000</div>
+                <div class="t-sub">Proxima cuota estimada: visita de corona P26</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-1" style="margin-top:0.8rem">
+            <button class="btn btn-primary">+ Registrar Cuota</button>
+            <button class="btn btn-outline">Ver Paciente</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Nomenclador -->
+  <h2>Nomenclador — Precios por Prestacion</h2>
+  <p class="section-desc">Catalogo de precios del consultorio vinculado a codigos SNOMED. Los presupuestos toman el precio actual al momento de crearse.</p>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:0.8rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#f8fafc;display:flex;justify-content:space-between;align-items:center">
+      <div class="flex gap-2" style="align-items:center">
+        <span class="font-bold text-sm">20 prestaciones activas</span>
+      </div>
+      <div class="flex gap-1">
+        <button class="btn btn-primary btn-sm">+ Agregar Prestacion</button>
+      </div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr><th>Codigo SNOMED</th><th>Prestacion</th><th>Precio</th><th>Ultima Actualizacion</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>397277009</code></td><td>Consulta odontologica inicial</td><td class="font-bold">$8,000</td><td class="text-xs text-muted">01/01/2026</td><td><button class="btn btn-outline btn-sm">Editar</button></td></tr>
+        <tr><td><code>278124008</code></td><td>Restauracion con resina (1 cara)</td><td class="font-bold">$8,500</td><td class="text-xs text-muted">01/01/2026</td><td><button class="btn btn-outline btn-sm">Editar</button></td></tr>
+        <tr><td><code>278125009</code></td><td>Restauracion con resina (2 caras)</td><td class="font-bold">$12,000</td><td class="text-xs text-muted">15/02/2026</td><td><button class="btn btn-outline btn-sm">Editar</button></td></tr>
+        <tr><td><code>468736000</code></td><td>Corona metal-ceramica</td><td class="font-bold">$22,000</td><td class="text-xs text-muted">01/03/2026</td><td><button class="btn btn-outline btn-sm">Editar</button></td></tr>
+        <tr><td><code>469130000</code></td><td>Endodoncia uniradicular</td><td class="font-bold">$15,000</td><td class="text-xs text-muted">01/01/2026</td><td><button class="btn btn-outline btn-sm">Editar</button></td></tr>
+        <tr><td><code>469131001</code></td><td>Endodoncia multiradicular</td><td class="font-bold">$20,000</td><td class="text-xs text-muted">01/01/2026</td><td><button class="btn btn-outline btn-sm">Editar</button></td></tr>
+        <tr><td><code>278214008</code></td><td>Tartrectomia completa</td><td class="font-bold">$6,000</td><td class="text-xs text-muted">01/02/2026</td><td><button class="btn btn-outline btn-sm">Editar</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 4: Modals -->
+  <h2>Modales del Sistema</h2>
+  <div class="grid grid-2" style="gap:1.5rem">
+
+    <!-- Modal: Nuevo Presupuesto -->
+    <div class="modal" style="position:static;box-shadow:none;border:2px solid #e2e8f0;width:auto">
+      <h3>Nuevo Presupuesto</h3>
+      <div class="field">
+        <label>Paciente</label>
+        <select>
+          <option>Gomez, Maria — DNI 17.222.333</option>
+          <option>Perez, Juan — DNI 23.456.789</option>
+          <option selected>Lopez, Ana — DNI 30.123.456</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Items del presupuesto</label>
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:0.5rem;max-height:140px;overflow-y:auto">
+          <div class="flex flex-between text-sm" style="padding:0.3rem 0;border-bottom:1px solid #f1f5f9">
+            <span>Restauracion resina · P16 O</span>
+            <span class="font-bold">$8,500</span>
+            <button class="btn btn-outline btn-sm" style="padding:0.1rem 0.4rem">x</button>
+          </div>
+          <div class="flex flex-between text-sm" style="padding:0.3rem 0;border-bottom:1px solid #f1f5f9">
+            <span>Corona metal-ceramica · P26</span>
+            <span class="font-bold">$22,000</span>
+            <button class="btn btn-outline btn-sm" style="padding:0.1rem 0.4rem">x</button>
+          </div>
+          <div class="flex flex-between text-sm" style="padding:0.3rem 0">
+            <span>Endodoncia uniradicular · P36</span>
+            <span class="font-bold">$15,000</span>
+            <button class="btn btn-outline btn-sm" style="padding:0.1rem 0.4rem">x</button>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm mt-1">+ Agregar prestacion del nomenclador</button>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Descuento ($)</label>
+          <input type="number" value="0">
+        </div>
+        <div class="field">
+          <label>Senia (%)</label>
+          <input type="number" value="30">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Subtotal</label>
+          <input type="text" value="$45,500" disabled style="background:#f8fafc">
+        </div>
+        <div class="field">
+          <label>Total</label>
+          <input type="text" value="$45,500" disabled style="background:#f8fafc;font-weight:700;color:#2962ff">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline">Cancelar</button>
+        <button class="btn btn-primary">Guardar Presupuesto</button>
+      </div>
+    </div>
+
+    <!-- Modal: Registrar Pago -->
+    <div class="modal" style="position:static;box-shadow:none;border:2px solid #e2e8f0;width:auto">
+      <h3>Registrar Pago</h3>
+      <div class="field">
+        <label>Tipo de Pago</label>
+        <select>
+          <option selected>Cuota (contra presupuesto)</option>
+          <option>Senia (adelanto)</option>
+          <option>Pago Directo (sin presupuesto)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Presupuesto (si aplica)</label>
+        <select>
+          <option selected>PRES-0012 · Lopez, Ana · Saldo: $21,000</option>
+          <option>PRES-0010 · Perez, Juan · Saldo: $8,500</option>
+          <option>Sin presupuesto (pago directo)</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Monto ($)</label>
+          <input type="number" value="7000">
+        </div>
+        <div class="field">
+          <label>Metodo de Pago</label>
+          <select>
+            <option selected>Efectivo</option>
+            <option>Transferencia Bancaria</option>
+            <option>Mercado Pago</option>
+            <option>Tarjeta Debito/Credito</option>
+            <option>Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Comprobante / Ref.</label>
+        <input type="text" placeholder="N° de transferencia o recibo">
+      </div>
+      <div class="field">
+        <label>Notas (opcional)</label>
+        <input type="text" placeholder="Ej: Pago correspondiente a 3ra cuota">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline">Cancelar</button>
+        <button class="btn btn-emerald">Confirmar Pago</button>
+      </div>
+      <div class="text-xs text-muted" style="margin-top:0.6rem;text-align:center">
+        El estado del presupuesto se actualiza automaticamente
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Cuenta Corriente del Paciente -->
+  <h2>Cuenta Corriente del Paciente</h2>
+  <p class="section-desc">Deuda detallada del paciente: presupuestos activos + historial de pagos.</p>
+  <div class="card">
+    <div class="grid grid-2" style="gap:1.5rem;margin-bottom:0">
+      <div>
+        <h3>Resumen de Deuda</h3>
+        <div style="padding:1rem;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0">
+          <div class="flex flex-between">
+            <span class="text-sm">Total presupuestado:</span>
+            <span class="font-bold">$95,000</span>
+          </div>
+          <div class="flex flex-between mt-1">
+            <span class="text-sm">Total pagado:</span>
+            <span class="font-bold value-up">-$66,600</span>
+          </div>
+          <div class="divider" style="margin:0.6rem 0"></div>
+          <div class="flex flex-between">
+            <span class="font-bold">Deuda actual:</span>
+            <span class="font-bold" style="color:#f59e0b;font-size:1.3rem">$28,400</span>
+          </div>
+          <div class="flex gap-1 mt-1">
+            <span class="badge badge-yellow">1 presupuesto en curso</span>
+            <span class="badge badge-blue">3 pagos este mes</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Presupuestos del Paciente</h3>
+        <table class="table">
+          <thead>
+            <tr><th>N°</th><th>Fecha</th><th>Total</th><th>Pagado</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PRES-0012</td>
+              <td class="text-xs text-muted">01/06/2026</td>
+              <td>$50,000</td>
+              <td>$29,000</td>
+              <td><span class="badge badge-amber">En Curso</span></td>
+            </tr>
+            <tr>
+              <td>PRES-0008</td>
+              <td class="text-xs text-muted">15/03/2026</td>
+              <td>$35,000</td>
+              <td>$35,000</td>
+              <td><span class="badge badge-green">Pagado</span></td>
+            </tr>
+            <tr>
+              <td>PRES-0005</td>
+              <td class="text-xs text-muted">10/01/2026</td>
+              <td>$10,000</td>
+              <td>$2,600</td>
+              <td><span class="badge badge-red">Vencido</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Gastos -->
+  <h2>Gastos Operativos</h2>
+  <p class="section-desc">Egresos del consultorio: insumos, alquiler, sueldos, servicios.</p>
+  <div class="grid grid-2" style="gap:1.5rem">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:0.8rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#f8fafc;display:flex;justify-content:space-between;align-items:center">
+        <span class="font-bold text-sm">Gastos del Mes — $41,300</span>
+        <button class="btn btn-primary btn-sm">+ Registrar Gasto</button>
+      </div>
+      <table class="table">
+        <thead>
+          <tr><th>Categoria</th><th>Descripcion</th><th>Monto</th><th>Fecha</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">Insumos</span></td><td>Anestesicos (x20)</td><td>$4,500</td><td class="text-xs text-muted">15/06</td></tr>
+          <tr><td><span class="badge badge-blue">Insumos</span></td><td>Resina 3M A2 (x5)</td><td>$8,200</td><td class="text-xs text-muted">12/06</td></tr>
+          <tr><td><span class="badge badge-purple">Alquiler</span></td><td>Alquiler local Junio</td><td>$15,000</td><td class="text-xs text-muted">05/06</td></tr>
+          <tr><td><span class="badge badge-gray">Servicios</span></td><td>Luz + Agua + Internet</td><td>$4,600</td><td class="text-xs text-muted">03/06</td></tr>
+          <tr><td><span class="badge badge-gray">Equipamiento</span></td><td>Mantenimiento compresor</td><td>$3,000</td><td class="text-xs text-muted">10/06</td></tr>
+          <tr><td><span class="badge badge-yellow">Otro</span></td><td>Fletes y envios</td><td>$1,500</td><td class="text-xs text-muted">08/06</td></tr>
+          <tr><td><span class="badge badge-blue">Insumos</span></td><td>Guantes descartables (caja x100)</td><td>$4,500</td><td class="text-xs text-muted">02/06</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal: Registrar Gasto (inline) -->
+    <div class="modal" style="position:static;box-shadow:none;border:2px solid #e2e8f0;width:auto">
+      <h3>Registrar Gasto</h3>
+      <div class="field">
+        <label>Categoria</label>
+        <select>
+          <option>Insumos</option>
+          <option selected>Alquiler</option>
+          <option>Sueldos</option>
+          <option>Servicios</option>
+          <option>Equipamiento</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Descripcion</label>
+        <input type="text" placeholder="Ej: Alquiler local Junio 2026">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Monto ($)</label>
+          <input type="number" value="15000">
+        </div>
+        <div class="field">
+          <label>Metodo de Pago</label>
+          <select>
+            <option selected>Transferencia</option>
+            <option>Efectivo</option>
+            <option>Tarjeta</option>
+            <option>Mercado Pago</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Comprobante (opcional)</label>
+        <input type="text" placeholder="N° de factura o recibo">
+      </div>
+      <div class="field">
+        <label>Insumo de inventario (opcional)</label>
+        <select>
+          <option>— No aplica —</option>
+          <option>Anestesico lidocaina</option>
+          <option>Resina 3M A2</option>
+          <option>Guantes descartables</option>
+        </select>
+        <div class="text-xs text-muted mt-1">Si seleccionas un insumo, se descuenta del stock</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline">Cancelar</button>
+        <button class="btn btn-rose">Registrar Gasto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="margin-top:2rem;padding:1rem;background:#eef2ff;border-radius:12px;font-size:0.78rem;border:1px solid #c7d2fe">
+    <strong>Resumen de pantallas mockeadas:</strong><br>
+    1 Widgets del Dashboard (cobrado hoy/mes, gastos, rentabilidad, deuda total) .
+    2 Presupuesto con items, maquina de estados, timeline de pagos y saldo automatico .
+    3 Nomenclador (catalogo de precios por prestacion SNOMED) .
+    4 Modal Nuevo Presupuesto (seleccion de paciente, items del nomenclador, descuento, senia) .
+    5 Modal Registrar Pago (tipo, presupuesto vinculado, monto, metodo, comprobante) .
+    6 Cuenta Corriente del Paciente (deuda agregada, presupuestos historicos) .
+    7 Gastos Operativos + Modal Registrar Gasto (categoria, monto, insumo opcional)
+  </div>
+
+</div>
+</body>
+</html>

@@ -1051,12 +1051,94 @@
     "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
     "descripcion": "Pruebas e2e, auditoría responsiva y despliegue del módulo.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "orchestrator",
       "qa"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-06-16T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Despliegue a producción completado: build → S3 → CloudFront invalidation E1UKXKQOWMVBOM.",
+        "entregables": []
+      }
+    ]
+  },
+  {
+    "id": "REQ-010-PRO-10.7",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Máquina de estados formal y tabla protesis_status_history con auditoría de transiciones (from_status, to_status, changed_by, actor_type, reason).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator",
+      "architect"
+    ],
+    "entregables": [
+      "hce-backend/src/protesis/protesis-status-history.entity.ts",
+      "scripts/create_protesis_tables.sql"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-06-16T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Creada entidad ProtesisStatusHistory, máquina de estados en updateStatus con validación de transiciones y auditoría automática.",
+        "entregables": [
+          "hce-backend/src/protesis/protesis-status-history.entity.ts",
+          "hce-backend/src/protesis/protesis.service.ts",
+          "hce-backend/src/protesis/protesis.controller.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-010-PRO-10.8",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Endpoints GET /protesis/history y GET /:id/history para consultar trabajos completados y línea de tiempo de estados.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [
+      "hce-backend/src/protesis/protesis.service.ts",
+      "hce-backend/src/protesis/protesis.controller.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-06-16T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Implementados endpoints GET /protesis/history (lista órdenes terminales) y GET /:id/history (timeline de estados).",
+        "entregables": []
+      }
+    ]
+  },
+  {
+    "id": "REQ-010-PRO-10.9",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Frontend: Pestaña 'Históricos' en DentaLabPortal con timeline visual + separación activos/históricos en ProtesisTab del odontólogo.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator",
+      "ux"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/protesis/DentaLabPortal.tsx",
+      "hce-frontend/src/components/odontology/ProtesisTab.tsx"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-06-16T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Agregada pestaña Históricos con timeline de estados en DentaLabPortal. Separación activos/históricos en ProtesisTab del odontólogo.",
+        "entregables": []
+      }
+    ]
   }
 ]

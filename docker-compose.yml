@@ -7,9 +7,9 @@ services:
     container_name: hce-database
     restart: always
     environment:
-      POSTGRES_USER: hce_admin
-      POSTGRES_PASSWORD: hce_secure_password_2026
-      POSTGRES_DB: keycloak_db # Base de datos inicial
+      POSTGRES_USER: ${DB_USER:-hce_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hce_dev_password}
+      POSTGRES_DB: keycloak_db
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
     ports:
       - "5432:5432"
@@ -18,63 +18,72 @@ services:
       - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - hce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hce_admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # 2. Servidor de Identidad Keycloak (OIDC / OAuth 2.0 / SMART on FHIR)
   hce-identity:
-    image: quay.io/keycloak/keycloak:24.0.2
+    image: quay.io/keycloak/keycloak:24.0.4
     container_name: hce-keycloak
     restart: always
     command: start-dev --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin_secure_password_2026
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin_dev_password}
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://hce-db:5432/keycloak_db
-      KC_DB_USERNAME: hce_admin
-      KC_DB_PASSWORD: hce_secure_password_2026
+      KC_DB_USERNAME: ${DB_USER:-hce_admin}
+      KC_DB_PASSWORD: ${DB_PASSWORD:-hce_dev_password}
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
       KC_PROXY: "edge"
-      KC_HOSTNAME: "auth.systia.ar"
+      KC_HOSTNAME: ${KC_HOSTNAME:-auth.systia.ar}
     ports:
       - "8080:8080"
     volumes:
       - ./configs/keycloak/hce-realm.json:/opt/keycloak/data/import/hce-realm.json:ro
       - ./configs/keycloak/themes:/opt/keycloak/themes
     depends_on:
-      - hce-db
+      hce-db:
+        condition: service_healthy
     networks:
       - hce-network
 
   # 3. Backend REST API (NestJS)
   hce-api:
-    image: node:20-alpine
+    build:
+      context: ./hce-backend
+      dockerfile: Dockerfile
     container_name: hce-backend-api
-    working_dir: /usr/src/app
     restart: always
-    volumes:
-      - ./hce-backend:/usr/src/app
-      - /usr/src/app/node_modules
-    ports:
-      - "3000:3000"
     environment:
+      NODE_ENV: ${NODE_ENV:-development}
       DB_HOST: hce-db
       DB_PORT: 5432
-      DB_USER: hce_admin
-      DB_PASSWORD: hce_secure_password_2026
+      DB_USER: ${DB_USER:-hce_admin}
+      DB_PASSWORD: ${DB_PASSWORD:-hce_dev_password}
       DB_NAME: hce_fhir
       PORT: 3000
-      KEYCLOAK_ISSUER_URL: https://auth.systia.ar/realms/hce-realm
-      KEYCLOAK_JWKS_URI: https://auth.systia.ar/realms/hce-realm/protocol/openid-connect/certs
       DB_SYNCHRONIZE: "false"
+      DB_LOGGING: ${DB_LOGGING:-false}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL:-http://localhost:8080}/realms/hce-realm
+      KEYCLOAK_JWKS_URI: ${KEYCLOAK_ISSUER_URL:-http://localhost:8080}/realms/hce-realm/protocol/openid-connect/certs
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000,https://app.systia.ar}
       CLINICHAT_WEBHOOK_URL: https://hooks.systia.ar/api/public/hooks/sync-appointment
-    command: sh -c "npm install && npm run start:dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
-      - hce-db
+      hce-db:
+        condition: service_healthy
     networks:
       - hce-network
 
-  # 4. Frontend Web App (React / Vite)
+  # 4. Frontend Web App (React / Vite - dev mode)
   hce-client:
     image: node:20-alpine
     container_name: hce-frontend-client
@@ -85,7 +94,10 @@ services:
       - /usr/src/app/node_modules
     ports:
       - "5173:5173"
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+      VITE_KEYCLOAK_URL: ${VITE_KEYCLOAK_URL:-http://localhost:8080}
+    command: sh -c "npm install && cp -n .env.example .env.local 2>/dev/null; npm run dev -- --host 0.0.0.0"
     depends_on:
       - hce-api
     networks:
@@ -93,6 +105,8 @@ services:
 
 volumes:
   hce_postgres_data:
+    driver: local
+  uploads_data:
     driver: local
 
 networks:

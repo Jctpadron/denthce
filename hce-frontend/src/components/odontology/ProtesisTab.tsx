@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, FileText, Plus, MessageSquare, Wrench, Download, Upload, Clock, User, Eye, CheckCircle } from 'lucide-react';
+import { Send, FileText, Plus, MessageSquare, Wrench, Download, Upload, Clock, User, Eye, CheckCircle, History } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 import { StlViewer3D } from '../protesis/StlViewer3D';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface ProtesisTabProps {
   patientId: string;
@@ -75,6 +76,7 @@ const MOCK_CLINICAS: Record<string, string> = {
 };
 
 export const ProtesisTab: React.FC<ProtesisTabProps> = ({ patientId }) => {
+  const isMobile = useIsMobile();
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -357,7 +359,7 @@ export const ProtesisTab: React.FC<ProtesisTabProps> = ({ patientId }) => {
   };
 
   return (
-    <div className="protesis-tab-container" style={{ display: 'grid', gridTemplateColumns: selectedOrder ? '1fr 1fr' : '1fr', gap: '1.5rem' }}>
+    <div className="protesis-tab-container" style={{ display: 'grid', gridTemplateColumns: selectedOrder ? (isMobile ? '1fr' : '1fr 1fr') : '1fr', gap: '1.5rem' }}>
       
       {/* Columna de Órdenes */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -384,60 +386,84 @@ export const ProtesisTab: React.FC<ProtesisTabProps> = ({ patientId }) => {
             No hay órdenes de prótesis emitidas para este paciente.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', maxHeight: '480px', overflowY: 'auto', paddingRight: '0.2rem' }}>
-            {orders.map((order) => {
-              const statusStyle = getStatusBadgeStyle(order.status);
-              const isSelected = selectedOrder?.id === order.id;
-              const labName = MOCK_LABORATORIOS.find(l => l.id === order.performerTenantId)?.name || 'Laboratorio Dental';
-
+          <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '600px', overflowY: 'auto', paddingRight: '0.2rem' }}>
+            {/* Sección de trabajos activos */}
+            {(() => {
+              const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
+              if (activeOrders.length === 0) return null;
               return (
-                <div
-                  key={order.id}
-                  onClick={() => fetchChat(order.id)}
-                  style={{
-                    padding: '1.1rem',
-                    borderRadius: '16px',
-                    border: `2px solid ${isSelected ? 'var(--color-accent)' : 'var(--border-color)'}`,
-                    background: '#ffffff',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: isSelected ? '0 4px 20px rgba(41, 98, 255, 0.08)' : 'var(--shadow-premium)',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-                    <div>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
-                        {order.dentalWork.workType}
-                      </span>
-                      <h5 style={{ margin: '0.1rem 0 0 0', fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)' }}>
-                        Pieza(s): {order.dentalWork.teeth.length > 0 ? order.dentalWork.teeth.join(', ') : 'Ninguna'}
-                      </h5>
-                    </div>
-                    <span style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: '999px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      backgroundColor: statusStyle.bg,
-                      color: statusStyle.text
-                    }}>
-                      {statusStyle.label}
-                    </span>
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Clock style={{ width: '0.75rem', height: '0.75rem' }} />
+                    Trabajos en Curso ({activeOrders.length})
                   </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-                    <div>Material: <strong style={{ color: 'var(--color-text)' }}>{order.dentalWork.material}</strong> | Color: <strong style={{ color: 'var(--color-text)' }}>{order.dentalWork.color}</strong></div>
-                    <div>Lab: <strong>{labName}</strong></div>
-                    {order.requestedDelivery && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem', color: 'var(--color-rose)', fontWeight: 600 }}>
-                        <Clock style={{ width: '0.75rem', height: '0.75rem' }} />
-                        Entrega: {new Date(order.requestedDelivery).toLocaleDateString('es-AR')}
-                      </div>
-                    )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {activeOrders.map((order) => {
+                      const statusStyle = getStatusBadgeStyle(order.status);
+                      const isSelected = selectedOrder?.id === order.id;
+                      const labName = MOCK_LABORATORIOS.find(l => l.id === order.performerTenantId)?.name || 'Laboratorio Dental';
+                      return (
+                        <div key={order.id} onClick={() => fetchChat(order.id)}
+                          style={{ padding: '0.85rem 1rem', borderRadius: '14px', border: `2px solid ${isSelected ? 'var(--color-accent)' : 'var(--border-color)'}`, background: '#ffffff', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: isSelected ? '0 4px 20px rgba(41, 98, 255, 0.08)' : 'var(--shadow-premium)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
+                            <div>
+                              <span style={{ fontSize: '0.68rem', color: 'var(--color-muted)', fontWeight: 600, textTransform: 'uppercase' }}>{order.dentalWork?.workType ?? ''}</span>
+                              <h5 style={{ margin: '0.1rem 0 0 0', fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text)' }}>Pieza(s): {order.dentalWork?.teeth?.join(', ') || 'Ninguna'}</h5>
+                            </div>
+                            <span style={{ padding: '0.2rem 0.55rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, backgroundColor: statusStyle.bg, color: statusStyle.text }}>{statusStyle.label}</span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>
+                            {order.dentalWork.material} | {order.dentalWork.color} · Lab: {labName}
+                            {order.requestedDelivery && <span style={{ marginLeft: '0.5rem', color: 'var(--color-rose)', fontWeight: 600 }}>Entrega: {new Date(order.requestedDelivery).toLocaleDateString('es-AR')}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
-            })}
+            })()}
+
+            {/* Separador */}
+            {orders.some(o => o.status === 'delivered' || o.status === 'cancelled') && (
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '0.25rem 0' }} />
+            )}
+
+            {/* Sección de trabajos históricos */}
+            {(() => {
+              const historyOrders = orders.filter(o => o.status === 'delivered' || o.status === 'cancelled');
+              if (historyOrders.length === 0) return null;
+              return (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <History style={{ width: '0.75rem', height: '0.75rem' }} />
+                    Histórico ({historyOrders.length})
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {historyOrders.map((order) => {
+                      const statusStyle = getStatusBadgeStyle(order.status);
+                      const isSelected = selectedOrder?.id === order.id;
+                      const labName = MOCK_LABORATORIOS.find(l => l.id === order.performerTenantId)?.name || 'Laboratorio Dental';
+                      return (
+                        <div key={order.id} onClick={() => fetchChat(order.id)}
+                          style={{ padding: '0.75rem 1rem', borderRadius: '14px', border: `2px solid ${isSelected ? 'var(--color-accent)' : 'var(--border-color)'}`, background: '#f8fafc', cursor: 'pointer', opacity: 0.8, transition: 'all 0.2s ease' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.3rem' }}>
+                            <div>
+                              <span style={{ fontSize: '0.65rem', color: 'var(--color-muted)', fontWeight: 600, textTransform: 'uppercase' }}>{order.dentalWork?.workType ?? ''}</span>
+                              <h5 style={{ margin: '0.1rem 0 0 0', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text)' }}>Pieza(s): {order.dentalWork?.teeth?.join(', ') || 'Ninguna'}</h5>
+                            </div>
+                            <span style={{ padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: statusStyle.bg, color: statusStyle.text }}>{statusStyle.label}</span>
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>
+                            {order.dentalWork.material} | {order.dentalWork.color} · {labName}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
@@ -450,7 +476,8 @@ export const ProtesisTab: React.FC<ProtesisTabProps> = ({ patientId }) => {
           background: '#f8fafc',
           display: 'flex',
           flexDirection: 'column',
-          height: '520px',
+          height: isMobile ? 'auto' : '520px',
+          minHeight: isMobile ? '400px' : undefined,
           overflow: 'hidden',
         }}>
           {/* Header del Caso */}
@@ -464,7 +491,7 @@ export const ProtesisTab: React.FC<ProtesisTabProps> = ({ patientId }) => {
           }}>
             <div>
               <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)' }}>
-                🛠️ {selectedOrder.dentalWork.workType.toUpperCase()} (Pzs: {selectedOrder.dentalWork.teeth.join(', ')})
+                🛠️ {(selectedOrder.dentalWork?.workType ?? '').toUpperCase()} (Pzs: {selectedOrder.dentalWork?.teeth?.join(', ') ?? 'Ninguna'})
               </h5>
               <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>
                 Orden ID: #{selectedOrder.id.slice(0, 8)}
@@ -1228,10 +1255,10 @@ export const ProtesisTab: React.FC<ProtesisTabProps> = ({ patientId }) => {
               </div>
 
               {/* Grid de Datos Generales */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', fontSize: '0.8rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1.25rem', fontSize: '0.8rem' }}>
                 <div>
                   <span style={{ display: 'block', fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>PRODUCTO PRESCRIPTO</span>
-                  <strong>{selectedOrder.dentalWork.workType.toUpperCase()}</strong>
+                  <strong>{(selectedOrder.dentalWork?.workType ?? '').toUpperCase()}</strong>
                 </div>
                 <div>
                   <span style={{ display: 'block', fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>PACIENTE ID / REF</span>
@@ -1254,7 +1281,7 @@ export const ProtesisTab: React.FC<ProtesisTabProps> = ({ patientId }) => {
                 <h5 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-accent)' }}>
                   Trazabilidad de Insumos Clínicos
                 </h5>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.8rem', background: '#f8fafc', padding: '0.85rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', fontSize: '0.8rem', background: '#f8fafc', padding: '0.85rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.65rem', color: '#64748b' }}>Técnico Dental</span>
                     <strong>{selectedOrder.trazabilidad?.technicianName || 'No especificado'}</strong>

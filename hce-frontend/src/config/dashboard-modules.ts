@@ -1,7 +1,7 @@
 import { ROLES, hasAnyRole, type AppRole } from '../utils/roles';
 
 /** Destinos de navegación del shell (coinciden con AppView en App.tsx). */
-export type ModuleKey = 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'users' | 'settings';
+export type ModuleKey = 'patients' | 'odonto-hc' | 'agenda' | 'form' | 'users' | 'settings' | 'finanzas';
 
 export interface DashboardModule {
   key: ModuleKey;
@@ -39,6 +39,15 @@ export const DASHBOARD_MODULES: DashboardModule[] = [
     badge: 'Nuevo',
     // Coherente con el backend: endpoints de Appointment permiten médico, recepción y administrador.
     allowedRoles: [ROLES.MEDICO, ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
+  },
+  {
+    key: 'finanzas',
+    icon: '💰',
+    title: 'Finanzas Clínicas',
+    description: 'Presupuestos, pagos, gastos del consultorio y dashboard de rentabilidad. Gestioná señas, cuotas y saldos de pacientes.',
+    color: 'var(--color-emerald)',
+    badge: 'Nuevo',
+    allowedRoles: [ROLES.MEDICO, ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA],
   },
   {
     key: 'form',

@@ -29,6 +29,9 @@ interface CellState {
 }
 
 const FACES = ['V', 'D', 'L', 'M', 'O'] as const;
+const FACES_LABELS: Record<string, string> = {
+  V: 'Vestibular', D: 'Distal', L: 'Lingual', M: 'Mesial', O: 'Oclusal'
+};
 // Centroides aproximados de cada cara dentro del viewBox 0 0 100 110.
 const FACE_CENTROID: Record<string, { x: number; y: number }> = {
   V: { x: 50, y: 16 }, D: { x: 70, y: 32 }, L: { x: 50, y: 46 }, M: { x: 30, y: 32 }, O: { x: 50, y: 32 },
@@ -56,23 +59,18 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
   const [activeToolTab, setActiveToolTab] = useState<Grupo>('Diagnóstico');
   const [activeLayer, setActiveLayer] = useState<OdontogramLayer>('existing');
 
-  // Calcular modo de visualización inicial en base a la edad (menor a 13 años = mixto)
+  // Calcular modo de visualización inicial en base a la edad
+  // < 5 años: solo dientes temporales (child)
+  // 5-11 años: dentición mixta (mixed)
+  // >= 12 años: solo dientes permanentes (adult)
   const getInitialViewMode = (): 'adult' | 'child' | 'mixed' => {
-    console.log("OdontogramPAMI - getInitialViewMode called with birthDate:", birthDate);
-    if (!birthDate) {
-      console.log("OdontogramPAMI - No birthDate provided, default to 'adult'");
-      return 'adult';
-    }
+    if (!birthDate) return 'adult';
     const b = new Date(birthDate);
-    if (isNaN(b.getTime())) {
-      console.log("OdontogramPAMI - Invalid birthDate, default to 'adult'");
-      return 'adult';
-    }
+    if (isNaN(b.getTime())) return 'adult';
     const age = Math.abs(new Date(Date.now() - b.getTime()).getUTCFullYear() - 1970);
-    console.log("OdontogramPAMI - Calculated age:", age);
-    const mode = age < 13 ? 'mixed' : 'adult';
-    console.log("OdontogramPAMI - Calculated viewMode:", mode);
-    return mode;
+    if (age < 5) return 'child';
+    if (age < 12) return 'mixed';
+    return 'adult';
   };
 
   const [viewMode, setViewMode] = useState<'adult' | 'child' | 'mixed'>(getInitialViewMode());
@@ -84,12 +82,12 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [showArcada, setShowArcada] = useState(true);
   const [showDrawer, setShowDrawer] = useState(false);
+  const [toothFacePicker, setToothFacePicker] = useState<string | null>(null); // mobile: pieza seleccionada para marcar caras
+  const [modalCleanMode, setModalCleanMode] = useState(false); // toggle marcar/limpiar dentro del modal
 
   // Sincronizar viewMode si cambia el birthDate del paciente
   useEffect(() => {
-    const mode = getInitialViewMode();
-    console.log("OdontogramPAMI - useEffect triggered, setting viewMode to:", mode);
-    setViewMode(mode);
+    setViewMode(getInitialViewMode());
   }, [birthDate]);
 
   useEffect(() => {
@@ -396,11 +394,13 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
       <div
         key={piece}
         title={`Pieza FDI ${piece}`}
+        onClick={isMobile ? () => { setToothFacePicker(piece); setModalCleanMode(false); } : undefined}
         style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.15rem'
+          gap: '0.15rem',
+          cursor: isMobile ? 'pointer' : 'default',
         }}
       >
         {/* Número de pieza (arriba si es superior) */}
@@ -415,18 +415,19 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
           height="36"
           viewBox="0 0 30 30"
           style={{
-            cursor: 'pointer',
+            cursor: isMobile ? 'inherit' : 'pointer',
             border: isAusente ? 'none' : '1px solid #475569',
             boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-            transition: 'transform 0.15s ease',
+            transition: isMobile ? 'none' : 'transform 0.15s ease',
             background: isAusente ? '#f1f5f9' : '#ffffff',
-            borderRadius: '3px'
+            borderRadius: '3px',
+            pointerEvents: isMobile ? 'none' : 'auto',
           }}
-          onMouseOver={(e) => {
+          onMouseOver={isMobile ? undefined : (e) => {
             e.currentTarget.style.transform = 'scale(1.15)';
             e.currentTarget.style.zIndex = '10';
           }}
-          onMouseLeave={(e) => {
+          onMouseLeave={isMobile ? undefined : (e) => {
             e.currentTarget.style.transform = 'none';
             e.currentTarget.style.zIndex = '1';
           }}
@@ -1037,7 +1038,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.9rem' }}>🦷</span>
             <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>
-              Vista Rápida de Arcada Dental Completa (FDI)
+                            {isMobile ? 'Odontograma FDI' : 'Arcada Dental Completa (FDI)'}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -1085,21 +1086,18 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
 
         {showArcada && (
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.5rem',
             overflowX: 'auto',
             padding: '0.5rem 0',
             borderTop: '1px solid var(--border-color)',
             paddingTop: '1rem',
             animation: 'fadeIn 0.2s ease',
-            alignItems: 'center'
+            WebkitOverflowScrolling: 'touch',
           }}>
 
             {/* 1. Arcada de Adultos (Cuadrantes 1, 2, 4, 3) */}
             {(viewMode === 'adult' || viewMode === 'mixed') && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Dientes Permanentes (Adultos)</div>
+              <div style={{ minWidth: 'fit-content', margin: '0 auto 1.5rem auto' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem', textAlign: 'center' }}>Dientes Permanentes (Adultos)</div>
 
                 {/* Grid de 2x2 para cruz FDI */}
                 <div style={{
@@ -1175,8 +1173,8 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
 
             {/* 2. Arcada Temporal / Infantil (Cuadrantes 5, 6, 8, 7) */}
             {(viewMode === 'child' || viewMode === 'mixed') && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Dientes Temporales (Niños)</div>
+              <div style={{ minWidth: 'fit-content', margin: '0 auto' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem', textAlign: 'center' }}>Dientes Temporales (Niños)</div>
 
                 {/* Grid de 2x2 para cruz FDI Infantil */}
                 <div style={{
@@ -1361,6 +1359,179 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal táctil: selector de caras para mobile */}
+      {toothFacePicker && (
+        <div onClick={() => { setToothFacePicker(null); setModalCleanMode(false); }} style={{
+          position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1100, backdropFilter: 'blur(4px)', animation: 'fadeIn 0.2s ease',
+          padding: '1rem',
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: 'var(--bg-surface)', borderRadius: '20px', padding: '1.5rem',
+            width: '320px', maxWidth: '100%', boxShadow: 'var(--shadow-card)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+              <div>
+                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-text)' }}>
+                  Pieza {toothFacePicker}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--color-muted)', marginLeft: '0.6rem', fontWeight: 600 }}>
+                  {parseInt(toothFacePicker) > 50 ? 'Temporal' : 'Permanente'}
+                </span>
+              </div>
+              <button onClick={() => { setToothFacePicker(null); setModalCleanMode(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', padding: '4px' }}>
+                <XIcon size={22} />
+              </button>
+            </div>
+
+            {/* SVG grande del diente (mismas caras que desktop, tap targets grandes) */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.8rem' }}>
+              {(() => {
+                const piece = toothFacePicker!;
+                const pieceAllKey = `${piece}_all`;
+                const pieceAllCell = toothMap[pieceAllKey];
+                const isAusente = pieceAllCell?.state.id === 'ausente';
+                const pieceGlyphCell = pieceAllCell && pieceAllCell.state.id !== 'ausente' ? pieceAllCell : null;
+
+                const getFaceFillColor = (face: string) => {
+                  if (isAusente) return 'transparent';
+                  const faceCell = toothMap[`${piece}_${face}`];
+                  if (faceCell && (faceCell.state.glifo === 'rellenoCara' || faceCell.state.glifo === 'lineasHorizontales')) return faceCell.color;
+                  const allCell = toothMap[`${piece}_all`];
+                  if (allCell && (allCell.state.glifo === 'rellenoCara' || allCell.state.glifo === 'lineasHorizontales')) return allCell.color;
+                  return '#ffffff';
+                };
+
+                const onFaceTap = (face: string) => {
+                  if (modalCleanMode) {
+                    // Modo limpiar: buscar y eliminar el recurso de esa cara
+                    let existing = clinicalResources.find((res) => {
+                      const rPiece = res.bodySite?.coding?.[0]?.code;
+                      const rFace = res.bodySite?.coding?.[1]?.code || 'all';
+                      return rPiece === piece && rFace === face && readLayer(res) === activeLayer;
+                    });
+                    if (!existing) {
+                      existing = clinicalResources.find((res) => {
+                        const rPiece = res.bodySite?.coding?.[0]?.code;
+                        const rFace = res.bodySite?.coding?.[1]?.code || 'all';
+                        return rPiece === piece && rFace === 'all' && readLayer(res) === activeLayer;
+                      });
+                    }
+                    if (existing?.id) {
+                      axios.delete(`${apiBase}/resource/${existing.id}`, authHeader)
+                        .then(() => { setMessage({ type: 'success', text: 'Cara limpiada.' }); loadResources(); })
+                        .catch((err: any) => setMessage({ type: 'error', text: err.response?.data?.message || 'Error al limpiar.' }));
+                    }
+                    return;
+                  }
+                  if (activeTool === 'limpiar') { handleCellClick(piece, face); return; }
+                  const toolState = getById(activeTool);
+                  if (toolState && toolState.alcance === 'pieza') { handleCellClick(piece, 'all'); }
+                  else { handleCellClick(piece, face); }
+                };
+
+                // Glifos grandes (escala x8 del mini)
+                const renderLargeGlyph = (state: any, color: string) => {
+                  switch (state.glifo) {
+                    case 'circulo': return <circle cx="120" cy="120" r="72" fill="none" stroke={color} strokeWidth="5" pointerEvents="none" />;
+                    case 'pernoCorona': return (<g pointerEvents="none"><circle cx="120" cy="96" r="44" fill="none" stroke={color} strokeWidth="4" /><line x1="120" y1="140" x2="120" y2="200" stroke={color} strokeWidth="6" strokeLinecap="round" /></g>);
+                    case 'poste': return <line x1="120" y1="56" x2="120" y2="184" stroke={color} strokeWidth="7" strokeLinecap="round" pointerEvents="none" />;
+                    case 'lineasVerticales': { const n = state.variante === 3 ? 3 : 1; return (<g pointerEvents="none">{n === 3 ? <><line x1="88" y1="64" x2="88" y2="176" stroke={color} strokeWidth="3" /><line x1="120" y1="64" x2="120" y2="176" stroke={color} strokeWidth="3" /><line x1="152" y1="64" x2="152" y2="176" stroke={color} strokeWidth="3" /></> : <line x1="120" y1="64" x2="120" y2="176" stroke={color} strokeWidth="4.5" />}</g>); }
+                    case 'letra': return <text x="120" y="148" textAnchor="middle" fontSize="72" fontWeight="900" fill={color} pointerEvents="none" style={{ fontFamily: 'sans-serif' }}>{state.letra}</text>;
+                    case 'X': return (<g pointerEvents="none"><line x1="32" y1="32" x2="208" y2="208" stroke={color} strokeWidth="7" strokeLinecap="round" /><line x1="208" y1="32" x2="32" y2="208" stroke={color} strokeWidth="7" strokeLinecap="round" /></g>);
+                    case 'tornillo': return (<g pointerEvents="none"><rect x="104" y="56" width="32" height="104" fill="#64748b" rx="4" stroke={color} strokeWidth="2" /><line x1="88" y1="72" x2="152" y2="72" stroke={color} strokeWidth="2.5" /><line x1="88" y1="96" x2="152" y2="96" stroke={color} strokeWidth="2.5" /><line x1="88" y1="120" x2="152" y2="120" stroke={color} strokeWidth="2.5" /><polygon points="104,160 136,160 120,192" fill={color} /></g>);
+                    default: return null;
+                  }
+                };
+
+                // Glifos por cara (escala x8)
+                const centroids: Record<string, {x:number;y:number}> = { V:{x:120,y:40}, D:{x:200,y:120}, L:{x:120,y:200}, M:{x:40,y:120}, O:{x:120,y:120} };
+                const renderLargeFaceGlyph = (face: string, state: any, color: string) => {
+                  const c = centroids[face]; if (!c) return null;
+                  if (state.glifo === 'lineasHorizontales') return (<g pointerEvents="none"><line x1={c.x-24} y1={c.y-10} x2={c.x+24} y2={c.y-10} stroke={color} strokeWidth="2.5" /><line x1={c.x-24} y1={c.y} x2={c.x+24} y2={c.y} stroke={color} strokeWidth="2.5" /><line x1={c.x-24} y1={c.y+10} x2={c.x+24} y2={c.y+10} stroke={color} strokeWidth="2.5" /></g>);
+                  if (state.glifo === 'letra') return <text x={c.x} y={c.y+16} textAnchor="middle" fontSize="48" fontWeight="900" fill={color} pointerEvents="none" style={{ fontFamily: 'sans-serif' }}>{state.letra}</text>;
+                  return null;
+                };
+
+                return (
+                  <svg width="240" height="240" viewBox="0 0 240 240" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.12))' }}>
+                    {isAusente ? (
+                      <g onClick={() => onFaceTap('all')} style={{ cursor: 'pointer' }}>
+                        <rect x="0" y="0" width="240" height="240" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" rx="8" />
+                        <line x1="16" y1="16" x2="224" y2="224" stroke="var(--color-rose)" strokeWidth="8" strokeLinecap="round" />
+                        <line x1="224" y1="16" x2="16" y2="224" stroke="var(--color-rose)" strokeWidth="8" strokeLinecap="round" />
+                      </g>
+                    ) : (
+                      <g>
+                        <polygon points="0,0 240,0 160,80 80,80" fill={getFaceFillColor('V')} stroke="#475569" strokeWidth="2.5" onClick={() => onFaceTap('V')} style={{ cursor: 'pointer' }} />
+                        <polygon points="240,0 240,240 160,160 160,80" fill={getFaceFillColor('D')} stroke="#475569" strokeWidth="2.5" onClick={() => onFaceTap('D')} style={{ cursor: 'pointer' }} />
+                        <polygon points="240,240 0,240 80,160 160,160" fill={getFaceFillColor('L')} stroke="#475569" strokeWidth="2.5" onClick={() => onFaceTap('L')} style={{ cursor: 'pointer' }} />
+                        <polygon points="0,240 0,0 80,80 80,160" fill={getFaceFillColor('M')} stroke="#475569" strokeWidth="2.5" onClick={() => onFaceTap('M')} style={{ cursor: 'pointer' }} />
+                        <polygon points="80,80 160,80 160,160 80,160" fill={getFaceFillColor('O')} stroke="#475569" strokeWidth="2.5" onClick={() => onFaceTap('O')} style={{ cursor: 'pointer' }} />
+                        {FACES.map((f) => { const cell = toothMap[`${piece}_${f}`]; return cell ? renderLargeFaceGlyph(f, cell.state, cell.color) : null; })}
+                        {pieceGlyphCell && renderLargeGlyph(pieceGlyphCell.state, pieceGlyphCell.color)}
+                      </g>
+                    )}
+                    {/* Etiquetas de cara (letras grandes) */}
+                    {!isAusente && <>
+                      <text x="120" y="28" textAnchor="middle" fontSize="14" fontWeight="800" fill="#475569" pointerEvents="none">V</text>
+                      <text x="208" y="124" textAnchor="start" fontSize="14" fontWeight="800" fill="#475569" pointerEvents="none">D</text>
+                      <text x="120" y="236" textAnchor="middle" fontSize="14" fontWeight="800" fill="#475569" pointerEvents="none">L</text>
+                      <text x="28" y="124" textAnchor="end" fontSize="14" fontWeight="800" fill="#475569" pointerEvents="none">M</text>
+                    </>}
+                  </svg>
+                );
+              })()}
+            </div>
+
+            {/* Indicador de herramienta + capa + toggle Marcar/Limpiar */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+              marginBottom: '1rem', fontSize: '0.76rem', color: 'var(--color-muted)',
+              background: 'var(--bg-card)', borderRadius: '10px', padding: '0.45rem 0.6rem',
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flex: 1, justifyContent: 'center' }}>
+                {modalCleanMode ? '🧹' : GRUPO_ICONS[activeToolTab]}
+                <span style={{ fontWeight: 600, color: modalCleanMode ? 'var(--color-rose)' : 'var(--color-muted)' }}>
+                  {modalCleanMode ? 'Limpiar' : getById(activeTool)?.text || 'Sin selección'}
+                </span>
+              </span>
+              <span style={{ opacity: 0.4 }}>|</span>
+              <span style={{
+                color: activeLayer === 'existing' ? LAYER_EXISTING_COLOR : LAYER_PLANNED_COLOR,
+                fontWeight: 700, fontSize: '0.78rem',
+              }}>
+                {activeLayer === 'existing' ? 'Existente' : 'Plan'}
+              </span>
+              <span style={{ opacity: 0.4, marginLeft: '0.2rem' }}>|</span>
+              <button
+                type="button"
+                onClick={() => setModalCleanMode(!modalCleanMode)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.25rem',
+                  background: modalCleanMode ? 'color-mix(in srgb, var(--color-rose) 12%, transparent)' : 'transparent',
+                  border: modalCleanMode ? '1.5px solid var(--color-rose)' : '1.5px solid var(--border-color)',
+                  borderRadius: '8px', padding: '0.3rem 0.55rem', cursor: 'pointer',
+                  fontSize: '0.7rem', fontWeight: 700, color: modalCleanMode ? 'var(--color-rose)' : 'var(--color-muted)',
+                  transition: 'all 0.15s ease', whiteSpace: 'nowrap',
+                }}
+              >
+                {modalCleanMode ? '🧹 Limpiar ON' : '🧹 Limpiar'}
+              </button>
+            </div>
+
+            <button
+              onClick={() => { setToothFacePicker(null); setModalCleanMode(false); }}
+              className="btn btn-primary"
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              Listo ✓
+            </button>
           </div>
         </div>
       )}

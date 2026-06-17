@@ -1,0 +1,21 @@
+# Override LOCAL (gitignored) — entorno 100% local para verificación.
+# Apunta Keycloak y el backend a localhost (sin dominios cruzados ni cookies de terceros).
+# NO afecta producción: prod usa env vars de Elastic Beanstalk, no este compose.
+# Para revertir: borrar este archivo y recrear los contenedores.
+services:
+  hce-identity:
+    environment:
+      # hostname + port (compatibles entre sí): issuer queda http://localhost:8080/realms/hce-realm
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: "8080"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: passthrough
+
+  hce-api:
+    environment:
+      # El backend valida el claim iss del token (emitido como localhost por Keycloak)
+      KEYCLOAK_ISSUER_URL: http://localhost:8080/realms/hce-realm
+      # Las llaves (JWKS) se obtienen del Keycloak por su hostname de red Docker
+      KEYCLOAK_JWKS_URI: http://hce-identity:8080/realms/hce-realm/protocol/openid-connect/certs

@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hce_admin
+          POSTGRES_PASSWORD: hce_test
+          POSTGRES_DB: hce_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    defaults:
+      run:
+        working-directory: hce-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: hce-backend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+
+  test-backend:
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hce_admin
+          POSTGRES_PASSWORD: hce_test
+          POSTGRES_DB: hce_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    defaults:
+      run:
+        working-directory: hce-backend
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: hce_admin
+      DB_PASSWORD: hce_test
+      DB_NAME: hce_test
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: hce-backend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test -- --passWithNoTests
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hce-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: hce-frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build

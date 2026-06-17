@@ -186,6 +186,12 @@ Este es un **documento bidireccional y vivo**:
 - [x] **PRO.4:** Frontend React: Portal del Protesista (`DentaLabPortal`) que se activa dinámicamente si el tenant es tipo "laboratorio" (Dashboard de producción y panel de almacén/inventario con alertas de stock bajo y trazabilidad integrados). *(Prioridad: Alta)*
 - [x] **PRO.5:** Visor 3D STL básico en el chat y drag & drop de archivos CAD/exocad. (Desarrollado visor interactivo 3D con Three.js en chats de odontólogo y protesista). *(Prioridad: Media)*
 - [x] **PRO.6:** Pruebas e2e, auditoría responsiva y despliegue del módulo. (Verificación y build exitoso con soporte responsivo y tipado TypeScript). *(Prioridad: Alta)*
+- [x] **PRO.7:** Máquina de estados formal con tabla `protesis_status_history`: validación de transiciones, auditoría automática (quién, cuándo, desde/hacia qué estado, motivo). *(Prioridad: Alta)*
+- [x] **PRO.8:** Endpoints `GET /protesis/history` (trabajos completados) y `GET /:id/history` (línea de tiempo de estados). *(Prioridad: Alta)*
+- [x] **PRO.9:** Frontend — Pestaña "Históricos" en DentaLabPortal con timeline visual + separación activos/históricos en ProtesisTab del odontólogo. *(Prioridad: Alta)*
+- [x] **PRO.10:** Módulo Financiero de Prótesis — Entidades Pago/ConsumoInsumo + campos presupuesto/estadoPago en orden + precioUnitario en insumo. *(Prioridad: Alta)*
+- [x] **PRO.11:** Backend endpoints financieros: presupuesto estimado/final, registrar pago, registrar consumo, finanzas por orden, cuenta corriente. *(Prioridad: Alta)*
+- [x] **PRO.12:** Frontend Financiero: pestaña Finanzas, Dashboard widgets, sub-tab Finanzas en detalle, modales Pago/Consumo. *(Prioridad: Alta)*
 
 ---
 

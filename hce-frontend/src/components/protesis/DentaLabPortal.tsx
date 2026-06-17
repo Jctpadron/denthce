@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Search, Send, User, Clock, FileText, Download, Wrench, CheckCircle, AlertCircle, Eye, Upload, Plus, Boxes, ShieldAlert } from 'lucide-react';
+import { Search, Send, User, Clock, FileText, Download, Wrench, CheckCircle, AlertCircle, Eye, Upload, Plus, Boxes, ShieldAlert, History, Calendar, DollarSign, TrendingUp, ShoppingCart, CreditCard, PiggyBank } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 import { StlViewer3D } from './StlViewer3D';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface Order {
   id: string;
@@ -79,7 +80,8 @@ const MOCK_CLINICAS: Record<string, string> = {
 };
 
 export const DentaLabPortal: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'inventory'>('dashboard');
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'inventory' | 'history' | 'finanzas'>('dashboard');
   
   // Estados de Órdenes y Chat
   const [orders, setOrders] = useState<Order[]>([]);
@@ -93,7 +95,7 @@ export const DentaLabPortal: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Estados de la Trazabilidad y la Conformidad Sanitaria (Fase 2)
-  const [caseSubTab, setCaseSubTab] = useState<'chat' | 'trazabilidad'>('chat');
+  const [caseSubTab, setCaseSubTab] = useState<'chat' | 'trazabilidad' | 'finanzas'>('chat');
   const [techName, setTechName] = useState('');
   const [matLot, setMatLot] = useState('');
   const [matBrand, setMatBrand] = useState('');
@@ -152,6 +154,29 @@ export const DentaLabPortal: React.FC = () => {
     criticalOrdersCount: 0,
     lowStockCount: 0,
   });
+
+  // Estados de la pestaña Históricos
+  const [historyOrders, setHistoryOrders] = useState<Order[]>([]);
+  const [selectedHistoryOrder, setSelectedHistoryOrder] = useState<Order | null>(null);
+  const [statusTimeline, setStatusTimeline] = useState<{ fromStatus: string | null; toStatus: string; changedByName: string | null; createdAt: string; actorType: string }[]>([]);
+  const [historyMonthFilter, setHistoryMonthFilter] = useState<string>('all');
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Estados Financieros
+  const [orderFinanzas, setOrderFinanzas] = useState<any>(null);
+  const [loadingFinanzas, setLoadingFinanzas] = useState(false);
+  const [showPagoModal, setShowPagoModal] = useState(false);
+  const [showConsumoModal, setShowConsumoModal] = useState(false);
+  const [pagoMonto, setPagoMonto] = useState(0);
+  const [pagoMetodo, setPagoMetodo] = useState('transferencia');
+  const [pagoComprobante, setPagoComprobante] = useState('');
+  const [pagoNotas, setPagoNotas] = useState('');
+  const [consumoInsumoId, setConsumoInsumoId] = useState('');
+  const [consumoCantidad, setConsumoCantidad] = useState(1);
+  const [consumoCostoUnitario, setConsumoCostoUnitario] = useState(0);
+  const [consumoLote, setConsumoLote] = useState('');
+  const [cuentaCorriente, setCuentaCorriente] = useState<any>(null);
+  const [loadingCC, setLoadingCC] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -255,6 +280,108 @@ export const DentaLabPortal: React.FC = () => {
     }
   };
 
+  // Fetch de históricos (entregadas/canceladas)
+  const fetchHistoryOrders = async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/protesis/history`, {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
+      });
+      setHistoryOrders(response.data);
+    } catch (err) {
+      console.error('Error fetching history orders:', err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  // Fetch timeline de estados de una orden histórica
+  const fetchOrderTimeline = async (orderId: string) => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/protesis/${orderId}/history`, {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
+      });
+      setStatusTimeline(response.data);
+    } catch (err) {
+      console.error('Error fetching status timeline:', err);
+    }
+  };
+
+  // Fetch datos financieros de una orden
+  const fetchOrderFinanzas = async (orderId: string) => {
+    setLoadingFinanzas(true);
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/protesis/${orderId}/finanzas`, {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
+      });
+      setOrderFinanzas(response.data);
+    } catch (err) {
+      console.error('Error fetching finanzas:', err);
+    } finally {
+      setLoadingFinanzas(false);
+    }
+  };
+
+  // Registrar pago
+  const handleRegistrarPago = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedOrder) return;
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/protesis/${selectedOrder.id}/pagos`,
+        { monto: pagoMonto, metodoPago: pagoMetodo, comprobanteRef: pagoComprobante || undefined, notas: pagoNotas || undefined },
+        { headers: { Authorization: `Bearer ${keycloak.token}` } }
+      );
+      setShowPagoModal(false);
+      setPagoMonto(0);
+      setPagoMetodo('transferencia');
+      setPagoComprobante('');
+      setPagoNotas('');
+      fetchOrderFinanzas(selectedOrder.id);
+    } catch (err) {
+      console.error('Error registrando pago:', err);
+      alert('Error al registrar el pago');
+    }
+  };
+
+  // Registrar consumo
+  const handleRegistrarConsumo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedOrder) return;
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/protesis/${selectedOrder.id}/consumos`,
+        { insumoId: consumoInsumoId, cantidad: consumoCantidad, costoUnitario: consumoCostoUnitario || undefined, lote: consumoLote || undefined },
+        { headers: { Authorization: `Bearer ${keycloak.token}` } }
+      );
+      setShowConsumoModal(false);
+      setConsumoInsumoId('');
+      setConsumoCantidad(1);
+      setConsumoCostoUnitario(0);
+      setConsumoLote('');
+      fetchOrderFinanzas(selectedOrder.id);
+      fetchInsumos();
+    } catch (err) {
+      console.error('Error registrando consumo:', err);
+      alert('Error al registrar el consumo');
+    }
+  };
+
+  // Fetch cuenta corriente
+  const fetchCuentaCorriente = async () => {
+    setLoadingCC(true);
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/protesis/finanzas/cuenta-corriente`, {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
+      });
+      setCuentaCorriente(response.data);
+    } catch (err) {
+      console.error('Error fetching cuenta corriente:', err);
+    } finally {
+      setLoadingCC(false);
+    }
+  };
+
   // Carga inicial y listeners de pestaña activa
   useEffect(() => {
     fetchOrders();
@@ -268,6 +395,10 @@ export const DentaLabPortal: React.FC = () => {
       fetchOrders();
     } else if (activeTab === 'inventory') {
       fetchInsumos();
+    } else if (activeTab === 'history') {
+      fetchHistoryOrders();
+    } else if (activeTab === 'finanzas') {
+      fetchCuentaCorriente();
     }
   }, [activeTab]);
 
@@ -515,7 +646,7 @@ export const DentaLabPortal: React.FC = () => {
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     const clinicaName = (MOCK_CLINICAS[order.tenantId] || order.tenantId).toLowerCase();
     const matchesSearch = clinicaName.includes(searchTerm.toLowerCase()) || 
-                          order.dentalWork.workType.toLowerCase().includes(searchTerm.toLowerCase());
+                          (order.dentalWork?.workType ?? '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -600,6 +731,38 @@ export const DentaLabPortal: React.FC = () => {
         >
           📦 Inventario de Insumos
         </button>
+        <button
+          onClick={() => setActiveTab('history')}
+          style={{
+            padding: '0.6rem 1.2rem',
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTab === 'history' ? '3px solid var(--color-accent)' : '3px solid transparent',
+            color: activeTab === 'history' ? 'var(--color-accent)' : 'var(--color-muted)',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontSize: '0.88rem',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          📜 Históricos
+        </button>
+        <button
+          onClick={() => setActiveTab('finanzas')}
+          style={{
+            padding: '0.6rem 1.2rem',
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTab === 'finanzas' ? '3px solid var(--color-accent)' : '3px solid transparent',
+            color: activeTab === 'finanzas' ? 'var(--color-accent)' : 'var(--color-muted)',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontSize: '0.88rem',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          💰 Finanzas
+        </button>
       </div>
 
       {/* CONTENIDO DE PESTAÑAS */}
@@ -640,8 +803,48 @@ export const DentaLabPortal: React.FC = () => {
             </div>
           </div>
 
+          {/* Widgets Financieros del Dashboard */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div className="panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ padding: '0.6rem', borderRadius: '10px', background: 'rgba(41, 98, 255, 0.1)', color: 'var(--color-accent)' }}>
+                <DollarSign style={{ width: '1.3rem', height: '1.3rem' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--color-muted)', fontWeight: 700, textTransform: 'uppercase' }}>PRESUPUESTADO</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>$--</div>
+              </div>
+            </div>
+            <div className="panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ padding: '0.6rem', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#059669' }}>
+                <TrendingUp style={{ width: '1.3rem', height: '1.3rem' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--color-muted)', fontWeight: 700, textTransform: 'uppercase' }}>COBRADO</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>$--</div>
+              </div>
+            </div>
+            <div className="panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ padding: '0.6rem', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#dc2626' }}>
+                <ShoppingCart style={{ width: '1.3rem', height: '1.3rem' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--color-muted)', fontWeight: 700, textTransform: 'uppercase' }}>COSTO INSUMOS</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>$--</div>
+              </div>
+            </div>
+            <div className="panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ padding: '0.6rem', borderRadius: '10px', background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1' }}>
+                <PiggyBank style={{ width: '1.3rem', height: '1.3rem' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--color-muted)', fontWeight: 700, textTransform: 'uppercase' }}>GANANCIA NETA</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>$--</div>
+              </div>
+            </div>
+          </div>
+
           {/* Gráficos y Listas de Producción */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1.25rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr', gap: '1.25rem' }}>
             
             {/* Columna Izquierda: Cargas de Taller */}
             <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -722,7 +925,7 @@ export const DentaLabPortal: React.FC = () => {
                       >
                         <div>
                           <strong style={{ fontSize: '0.82rem', color: 'var(--color-text)' }}>
-                            {order.dentalWork.workType.toUpperCase()} (Pzs: {order.dentalWork.teeth.join(', ')})
+                            {(order.dentalWork?.workType ?? '').toUpperCase()} (Pzs: {order.dentalWork?.teeth?.join(', ') ?? ''})
                           </strong>
                           <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--color-muted)' }}>
                             {clinica}
@@ -743,7 +946,7 @@ export const DentaLabPortal: React.FC = () => {
 
       {/* 2. PESTAÑA ÓRDENES DE TRABAJO */}
       {activeTab === 'orders' && (
-        <div style={{ display: 'grid', gridTemplateColumns: selectedOrder ? '1.2fr 1.8fr' : '1fr', gap: '1.5rem', flex: 1 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: selectedOrder ? (isMobile ? '1fr' : '1.2fr 1.8fr') : '1fr', gap: '1.5rem', flex: 1 }}>
           
           {/* Bandeja de Órdenes */}
           <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '680px', overflowY: 'auto' }}>
@@ -840,7 +1043,7 @@ export const DentaLabPortal: React.FC = () => {
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-accent)', textTransform: 'uppercase' }}>
-                          {order.dentalWork.workType}
+                          {order.dentalWork?.workType ?? ''}
                         </span>
                         <span style={{
                           padding: '0.2rem 0.55rem',
@@ -855,7 +1058,7 @@ export const DentaLabPortal: React.FC = () => {
                       </div>
 
                       <h5 style={{ margin: '0 0 0.4rem 0', fontSize: '0.92rem', fontWeight: 700, color: 'var(--color-text)' }}>
-                        Piezas: {order.dentalWork.teeth.join(', ')}
+                        Piezas: {order.dentalWork?.teeth?.join(', ') ?? 'Ninguna'}
                       </h5>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
@@ -880,7 +1083,7 @@ export const DentaLabPortal: React.FC = () => {
 
           {/* Detalle y Chat de la Orden (Derecha) */}
           {selectedOrder ? (
-            <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', gap: '1.25rem', height: '680px' }}>
+            <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', gap: '1.25rem', height: isMobile ? 'auto' : '680px' }}>
               {/* Panel de Detalles */}
               <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -889,7 +1092,7 @@ export const DentaLabPortal: React.FC = () => {
                       Ficha de Pedido Médico
                     </span>
                     <h3 style={{ margin: '0.1rem 0 0 0', fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text)' }}>
-                      {selectedOrder.dentalWork.workType.toUpperCase()} (Piezas: {selectedOrder.dentalWork.teeth.join(', ')})
+                      {(selectedOrder.dentalWork?.workType ?? '').toUpperCase()} (Piezas: {selectedOrder.dentalWork?.teeth?.join(', ') ?? 'Ninguna'})
                     </h3>
                     <span style={{ fontSize: '0.78rem', color: 'var(--color-muted)' }}>
                       Emitido por: {selectedOrder.isManual 
@@ -933,7 +1136,7 @@ export const DentaLabPortal: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', background: '#f8fafc', padding: '0.85rem 1.1rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr', gap: '1rem', background: '#f8fafc', padding: '0.85rem 1.1rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                   <div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', fontWeight: 600 }}>MATERIAL</div>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--color-text)' }}>{selectedOrder.dentalWork.material}</strong>
@@ -965,7 +1168,7 @@ export const DentaLabPortal: React.FC = () => {
                   <button
                     className="btn btn-primary"
                     style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.9rem', fontSize: '0.78rem' }}
-                    onClick={() => setViewingStl({ name: `${selectedOrder.dentalWork.workType.toUpperCase()}_Escaneo.stl` })}
+                    onClick={() => setViewingStl({ name: `${(selectedOrder.dentalWork?.workType ?? '').toUpperCase()}_Escaneo.stl` })}
                   >
                     <Eye style={{ width: '0.9rem', height: '0.9rem' }} />
                     Visualizar Escaneo 3D
@@ -1021,6 +1224,26 @@ export const DentaLabPortal: React.FC = () => {
                     }}
                   >
                     🛡️ Trazabilidad y Conformidad
+                  </button>
+                  <button
+                    onClick={() => { setCaseSubTab('finanzas'); if (selectedOrder) fetchOrderFinanzas(selectedOrder.id); }}
+                    style={{
+                      flex: 1,
+                      padding: '0.8rem',
+                      background: 'none',
+                      border: 'none',
+                      borderBottom: caseSubTab === 'finanzas' ? '3px solid var(--color-accent)' : '3px solid transparent',
+                      color: caseSubTab === 'finanzas' ? 'var(--color-accent)' : 'var(--color-muted)',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.3rem'
+                    }}
+                  >
+                    💰 Finanzas
                   </button>
                 </div>
 
@@ -1239,7 +1462,7 @@ export const DentaLabPortal: React.FC = () => {
                         />
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                           <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>Marca / Fabricante del Bloque</label>
                           <input
@@ -1275,7 +1498,7 @@ export const DentaLabPortal: React.FC = () => {
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {aditamentosList.map((ad, idx) => (
-                              <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr auto', gap: '0.5rem', alignItems: 'center' }}>
+                              <div key={idx} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr 1fr auto', gap: '0.5rem', alignItems: 'center' }}>
                                 <input
                                   type="text"
                                   placeholder="Tipo (ej: Ti-Base)"
@@ -1389,7 +1612,7 @@ export const DentaLabPortal: React.FC = () => {
                             "Por la presente, declaro que el dispositivo médico a medida detallado en esta orden ha sido fabricado siguiendo las prescripciones del odontólogo emisor y cumple con los requisitos esenciales de seguridad y funcionamiento establecidos por las normativas de salud pública vigentes."
                           </div>
 
-                          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr', gap: '1rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                               <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>Nombre Completo del Protesista</label>
                               <input
@@ -1447,12 +1670,303 @@ export const DentaLabPortal: React.FC = () => {
                     </div>
                   </div>
                 )}
+                {caseSubTab === 'finanzas' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem', overflowY: 'auto' }}>
+                    {loadingFinanzas ? (
+                      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-muted)' }}>Cargando datos financieros...</div>
+                    ) : !orderFinanzas ? (
+                      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-muted)' }}>No hay datos financieros disponibles.</div>
+                    ) : (
+                      <>
+                        {/* Presupuesto */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>Presupuesto Estimado</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>${Number(orderFinanzas.presupuestoEstimado || 0).toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>Presupuesto Final</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-accent)' }}>${Number(orderFinanzas.presupuestoFinal || orderFinanzas.presupuestoEstimado || 0).toLocaleString()}</div>
+                          </div>
+                        </div>
+
+                        {/* Estado de Pago */}
+                        <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>Estado de Pago</span>
+                            <span style={{
+                              padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700,
+                              background: orderFinanzas.estadoPago === 'paid' ? 'rgba(16,185,129,0.1)' : orderFinanzas.estadoPago === 'overdue' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+                              color: orderFinanzas.estadoPago === 'paid' ? '#065f46' : orderFinanzas.estadoPago === 'overdue' ? '#991b1b' : '#92400e',
+                            }}>
+                              {orderFinanzas.estadoPago === 'paid' ? 'Pagado' : orderFinanzas.estadoPago === 'partial' ? 'Pago Parcial' : orderFinanzas.estadoPago === 'overdue' ? 'Vencido' : 'Pendiente'}
+                            </span>
+                          </div>
+                          <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', margin: '0.6rem 0', overflow: 'hidden' }}>
+                            <div style={{
+                              width: `${Math.min(100, (orderFinanzas.totalPagado / Math.max(1, orderFinanzas.presupuestoFinal || orderFinanzas.presupuestoEstimado || 1)) * 100)}%`,
+                              height: '100%', borderRadius: '4px',
+                              background: orderFinanzas.estadoPago === 'paid' ? '#10b981' : orderFinanzas.estadoPago === 'overdue' ? '#ef4444' : '#f59e0b'
+                            }} />
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ fontWeight: 700 }}>$${Number(orderFinanzas.totalPagado || 0).toLocaleString()} cobrado</span>
+                            <span style={{ color: 'var(--color-muted)' }}>${Number(orderFinanzas.saldoPendiente || 0).toLocaleString()} pendiente</span>
+                          </div>
+                        </div>
+
+                        {/* Acciones */}
+                        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                          <button onClick={() => setShowPagoModal(true)} className="btn btn-primary" style={{ fontSize: '0.78rem', padding: '0.45rem 0.9rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            <DollarSign style={{ width: '0.85rem', height: '0.85rem' }} />
+                            Registrar Pago
+                          </button>
+                          <button onClick={() => {
+                            setConsumoInsumoId('');
+                            setConsumoCantidad(1);
+                            setConsumoCostoUnitario(0);
+                            setConsumoLote('');
+                            setShowConsumoModal(true);
+                          }} className="btn btn-outline" style={{ fontSize: '0.78rem', padding: '0.45rem 0.9rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            <ShoppingCart style={{ width: '0.85rem', height: '0.85rem' }} />
+                            Registrar Consumo
+                          </button>
+                        </div>
+
+                        {/* Timeline de Pagos */}
+                        {orderFinanzas.pagos && orderFinanzas.pagos.length > 0 && (
+                          <div>
+                            <h5 style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', fontWeight: 700 }}>Historial de Pagos</h5>
+                            <div style={{ position: 'relative', paddingLeft: '1.2rem' }}>
+                              <div style={{ position: 'absolute', left: '0.35rem', top: '0.3rem', bottom: '0.3rem', width: '2px', background: '#e2e8f0' }} />
+                              {orderFinanzas.pagos.map((p: any) => (
+                                <div key={p.id} style={{ position: 'relative', paddingBottom: '0.8rem' }}>
+                                  <div style={{ position: 'absolute', left: '-1rem', top: '0.4rem', width: '0.5rem', height: '0.5rem', borderRadius: '50%', background: '#10b981', border: '2px solid #fff', boxShadow: '0 0 0 2px #10b981' }} />
+                                  <div style={{ fontWeight: 700, fontSize: '0.8rem' }}>${Number(p.monto).toLocaleString()} — {p.metodoPago}</div>
+                                  <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{new Date(p.fechaPago).toLocaleString('es-AR')} · {p.registradoPor}{p.comprobanteRef ? ` · Ref: ${p.comprobanteRef}` : ''}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Consumos */}
+                        {orderFinanzas.consumos && orderFinanzas.consumos.length > 0 && (
+                          <div>
+                            <h5 style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', fontWeight: 700 }}>Insumos Consumidos</h5>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+                              <thead>
+                                <tr style={{ borderBottom: '1px solid #e2e8f0', color: 'var(--color-muted)' }}>
+                                  <th style={{ padding: '0.4rem 0.25rem', textAlign: 'left' }}>Insumo</th>
+                                  <th style={{ padding: '0.4rem 0.25rem', textAlign: 'right' }}>Cant.</th>
+                                  <th style={{ padding: '0.4rem 0.25rem', textAlign: 'right' }}>Costo</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {orderFinanzas.consumos.map((c: any) => (
+                                  <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '0.4rem 0.25rem', fontWeight: 600 }}>{c.insumo?.name || 'Insumo'}{c.lote ? ` (${c.lote})` : ''}</td>
+                                    <td style={{ padding: '0.4rem 0.25rem', textAlign: 'right' }}>{c.cantidad}</td>
+                                    <td style={{ padding: '0.4rem 0.25rem', textAlign: 'right' }}>${Number(c.costoTotal).toLocaleString()}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            <div style={{ textAlign: 'right', fontSize: '0.82rem', fontWeight: 700, marginTop: '0.4rem' }}>
+                              Total Insumos: ${Number(orderFinanzas.totalConsumos || 0).toLocaleString()}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
             <div className="panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)', gap: '0.75rem' }}>
               <AlertCircle style={{ width: '2rem', height: '2rem', color: 'var(--color-muted)' }} />
               <span>Selecciona una orden de la bandeja de entrada para ver su detalle y chat</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 4. PESTAÑA HISTÓRICOS */}
+      {activeTab === 'history' && (
+        <div style={{ display: 'grid', gridTemplateColumns: selectedHistoryOrder ? (isMobile ? '1fr' : '1.2fr 1.8fr') : '1fr', gap: '1.5rem', flex: 1 }}>
+          
+          {/* Lista de órdenes históricas */}
+          <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '680px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <History style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-accent)' }} />
+                Histórico de Trabajos Completados
+              </h4>
+              <select
+                value={historyMonthFilter}
+                onChange={(e) => setHistoryMonthFilter(e.target.value)}
+                style={{ padding: '0.4rem 0.6rem', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.78rem', outline: 'none' }}
+              >
+                <option value="all">Todos los meses</option>
+                {Array.from(new Set(historyOrders.map(o => {
+                  const d = new Date(o.createdAt);
+                  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                }))).sort().reverse().map(ym => (
+                  <option key={ym} value={ym}>{ym}</option>
+                ))}
+              </select>
+            </div>
+
+            {loadingHistory ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-muted)' }}>Cargando historial...</div>
+            ) : historyOrders.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem', border: '1px dashed var(--border-color)', borderRadius: '16px', color: 'var(--color-muted)', fontSize: '0.85rem' }}>
+                No hay trabajos históricos (entregados o cancelados).
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {historyOrders
+                  .filter(o => historyMonthFilter === 'all' || `${new Date(o.createdAt).getFullYear()}-${String(new Date(o.createdAt).getMonth() + 1).padStart(2, '0')}` === historyMonthFilter)
+                  .map((order) => {
+                    const isSelected = selectedHistoryOrder?.id === order.id;
+                    const clinicaName = order.isManual
+                      ? `Dr. ${order.doctorName || 'Externo'}`
+                      : (MOCK_CLINICAS[order.tenantId] || order.tenantId);
+                    const finalStatus = getStatusBadgeStyle(order.status);
+
+                    return (
+                      <div
+                        key={order.id}
+                        onClick={() => {
+                          setSelectedHistoryOrder(order);
+                          fetchOrderTimeline(order.id);
+                        }}
+                        style={{
+                          padding: '1rem',
+                          borderRadius: '16px',
+                          border: `2px solid ${isSelected ? 'var(--color-accent)' : 'var(--border-color)'}`,
+                          background: '#ffffff',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          opacity: order.status === 'delivered' ? 1 : 0.75,
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                          <div>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-accent)', textTransform: 'uppercase' }}>
+                          {order.dentalWork?.workType ?? ''}
+                            </span>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', marginTop: '0.1rem' }}>
+                              <Calendar style={{ width: '0.65rem', height: '0.65rem', display: 'inline', marginRight: '0.2rem' }} />
+                              {new Date(order.createdAt).toLocaleDateString('es-AR')}
+                            </div>
+                          </div>
+                          <span style={{
+                            padding: '0.2rem 0.55rem',
+                            borderRadius: '999px',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            backgroundColor: finalStatus.bg,
+                            color: finalStatus.text
+                          }}>
+                            {finalStatus.label}
+                          </span>
+                        </div>
+
+                        <div style={{ fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+                          <div>Piezas: <strong style={{ color: 'var(--color-text)' }}>{order.dentalWork?.teeth?.join(', ') ?? 'Ninguna'}</strong></div>
+                          <div>{order.dentalWork.material} | {order.dentalWork.color}</div>
+                          <div>Clínica: <strong>{clinicaName}</strong></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+
+          {/* Timeline de estados de la orden seleccionada */}
+          {selectedHistoryOrder ? (
+            <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxHeight: '680px', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
+                    {(selectedHistoryOrder.dentalWork?.workType ?? '').toUpperCase()} (Pzs: {selectedHistoryOrder.dentalWork?.teeth?.join(', ') ?? 'Ninguna'})
+                  </h4>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>
+                    Creado: {new Date(selectedHistoryOrder.createdAt).toLocaleDateString('es-AR')}
+                    {selectedHistoryOrder.requestedDelivery && ` · Entrega: ${new Date(selectedHistoryOrder.requestedDelivery).toLocaleDateString('es-AR')}`}
+                  </span>
+                </div>
+                <span style={{
+                  padding: '0.25rem 0.65rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700,
+                  backgroundColor: getStatusBadgeStyle(selectedHistoryOrder.status).bg,
+                  color: getStatusBadgeStyle(selectedHistoryOrder.status).text
+                }}>
+                  {getStatusBadgeStyle(selectedHistoryOrder.status).label}
+                </span>
+              </div>
+
+              {/* Línea de tiempo de estados */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Clock style={{ width: '0.9rem', height: '0.9rem', color: 'var(--color-accent)' }} />
+                  Línea de Tiempo de Estados
+                </h5>
+                {statusTimeline.length === 0 ? (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-muted)', fontSize: '0.8rem', border: '1px dashed var(--border-color)', borderRadius: '12px' }}>
+                    Sin registro de cambios de estado.
+                  </div>
+                ) : (
+                  <div style={{ position: 'relative', paddingLeft: '1.5rem' }}>
+                    {/* Línea vertical */}
+                    <div style={{ position: 'absolute', left: '0.6rem', top: '0.4rem', bottom: '0.4rem', width: '2px', background: 'var(--border-color)' }} />
+                    {statusTimeline.map((entry, idx) => {
+                      const fromLabel = entry.fromStatus ? getStatusBadgeStyle(entry.fromStatus).label : 'Inicio';
+                      const toLabel = getStatusBadgeStyle(entry.toStatus).label;
+                      const isLast = idx === statusTimeline.length - 1;
+                      return (
+                        <div key={idx} style={{ position: 'relative', paddingBottom: isLast ? '0' : '1rem', paddingLeft: '0.5rem' }}>
+                          {/* Burbuja */}
+                          <div style={{
+                            position: 'absolute', left: '-1.15rem', top: '0.3rem',
+                            width: '0.75rem', height: '0.75rem', borderRadius: '50%',
+                            background: getStatusBadgeStyle(entry.toStatus).text,
+                            border: '2px solid #ffffff',
+                            boxShadow: '0 0 0 2px ' + getStatusBadgeStyle(entry.toStatus).text,
+                          }} />
+                          <div style={{
+                            background: idx % 2 === 0 ? '#f8fafc' : '#ffffff',
+                            padding: '0.55rem 0.75rem',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-color)',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{fromLabel}</span>
+                              <span style={{ color: 'var(--color-muted)', fontSize: '0.7rem' }}>→</span>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: getStatusBadgeStyle(entry.toStatus).text }}>{toLabel}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.15rem' }}>
+                              <span style={{ fontSize: '0.65rem', color: 'var(--color-muted)' }}>
+                                Por: {entry.changedByName || 'Sistema'} ({entry.actorType})
+                              </span>
+                              <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>
+                                {new Date(entry.createdAt).toLocaleString('es-AR')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)', gap: '0.75rem' }}>
+              <History style={{ width: '2rem', height: '2rem' }} />
+              <span>Selecciona un trabajo histórico para ver su línea de tiempo</span>
             </div>
           )}
         </div>
@@ -1564,6 +2078,105 @@ export const DentaLabPortal: React.FC = () => {
               </table>
             )}
           </div>
+        </div>
+      )}
+
+      {/* 5. PESTAÑA FINANZAS (CUENTA CORRIENTE) */}
+      {activeTab === 'finanzas' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <DollarSign style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-accent)' }} />
+              Cuenta Corriente
+            </h4>
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>Resumen de deuda por clínica</span>
+          </div>
+
+          {loadingCC ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-muted)' }}>Cargando cuenta corriente...</div>
+          ) : !cuentaCorriente ? (
+            <div className="panel" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)' }}>
+              No hay datos financieros disponibles. Solo visible para administradores del laboratorio.
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div className="panel" style={{ padding: '1.25rem' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>Deuda Total</div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-rose)' }}>${Number(cuentaCorriente.totalDeuda || 0).toLocaleString()}</div>
+                </div>
+                <div className="panel" style={{ padding: '1.25rem' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>Órdenes</div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800 }}>{cuentaCorriente.ordenes?.length || 0}</div>
+                </div>
+              </div>
+
+              <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ overflowX: 'auto' }}>
+                  {(!cuentaCorriente.ordenes || cuentaCorriente.ordenes.length === 0) ? (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-muted)' }}>No hay órdenes registradas.</div>
+                  ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', minWidth: '600px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
+                          <th style={{ padding: '0.6rem 0.8rem', textAlign: 'left', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px' }}>Clínica / Paciente</th>
+                          <th style={{ padding: '0.6rem 0.8rem', textAlign: 'right', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px' }}>Presupuesto</th>
+                          <th style={{ padding: '0.6rem 0.8rem', textAlign: 'right', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px' }}>Cobrado</th>
+                          <th style={{ padding: '0.6rem 0.8rem', textAlign: 'right', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px' }}>Saldo</th>
+                          <th style={{ padding: '0.6rem 0.8rem', textAlign: 'center', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px' }}>Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cuentaCorriente.ordenes.map((o: any) => {
+                          const estadoColor = o.estadoPago === 'paid' ? '#059669' : o.estadoPago === 'overdue' ? '#dc2626' : '#d97706';
+                          const estadoLabel = o.estadoPago === 'paid' ? 'Al día' : o.estadoPago === 'partial' ? 'Pendiente' : o.estadoPago === 'overdue' ? 'Vencido' : 'Pendiente';
+                          return (
+                            <tr key={o.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                              <td style={{ padding: '0.6rem 0.8rem' }}>
+                                <strong>{o.paciente || o.tenantId}</strong>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{o.medico || ''}</div>
+                              </td>
+                              <td style={{ padding: '0.6rem 0.8rem', textAlign: 'right' }}>${Number(o.presupuesto).toLocaleString()}</td>
+                              <td style={{ padding: '0.6rem 0.8rem', textAlign: 'right' }}>${Number(o.pagado).toLocaleString()}</td>
+                              <td style={{ padding: '0.6rem 0.8rem', textAlign: 'right', fontWeight: 700, color: o.saldo > 0 ? '#dc2626' : '#059669' }}>
+                                ${Number(o.saldo).toLocaleString()}
+                              </td>
+                              <td style={{ padding: '0.6rem 0.8rem', textAlign: 'center' }}>
+                                <span style={{
+                                  padding: '0.2rem 0.55rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700,
+                                  background: o.estadoPago === 'paid' ? 'rgba(16,185,129,0.1)' : o.estadoPago === 'overdue' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+                                  color: estadoColor
+                                }}>{estadoLabel}</span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot style={{ background: '#f8fafc', fontWeight: 700 }}>
+                        <tr>
+                          <td style={{ padding: '0.6rem 0.8rem' }}>TOTALES</td>
+                          <td style={{ padding: '0.6rem 0.8rem', textAlign: 'right' }}>
+                            ${Number(cuentaCorriente.ordenes.reduce((s: number, o: any) => s + Number(o.presupuesto), 0)).toLocaleString()}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.8rem', textAlign: 'right' }}>
+                            ${Number(cuentaCorriente.ordenes.reduce((s: number, o: any) => s + Number(o.pagado), 0)).toLocaleString()}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.8rem', textAlign: 'right', color: '#dc2626' }}>
+                            ${Number(cuentaCorriente.totalDeuda || 0).toLocaleString()}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.8rem', textAlign: 'center' }}>
+                            <span style={{ padding: '0.2rem 0.55rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, background: 'rgba(245,158,11,0.1)', color: '#92400e' }}>
+                              ${Number(cuentaCorriente.totalDeuda || 0).toLocaleString()} pendiente
+                            </span>
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -1983,10 +2596,10 @@ export const DentaLabPortal: React.FC = () => {
               </div>
 
               {/* Grid de Datos Generales */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', fontSize: '0.8rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1.25rem', fontSize: '0.8rem' }}>
                 <div>
                   <span style={{ display: 'block', fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>PRODUCTO PRESCRIPTO</span>
-                  <strong>{selectedOrder.dentalWork.workType.toUpperCase()}</strong>
+                  <strong>{(selectedOrder.dentalWork?.workType ?? '').toUpperCase()}</strong>
                 </div>
                 <div>
                   <span style={{ display: 'block', fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>PACIENTE</span>
@@ -2009,7 +2622,7 @@ export const DentaLabPortal: React.FC = () => {
                 <h5 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-accent)' }}>
                   Trazabilidad de Insumos Clínicos
                 </h5>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.8rem', background: '#f8fafc', padding: '0.85rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', fontSize: '0.8rem', background: '#f8fafc', padding: '0.85rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.65rem', color: '#64748b' }}>Técnico Dental</span>
                     <strong>{selectedOrder.trazabilidad?.technicianName || 'No especificado'}</strong>
@@ -2130,6 +2743,107 @@ export const DentaLabPortal: React.FC = () => {
                 Imprimir Documento
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* D. Modal Registrar Pago */}
+      {showPagoModal && selectedOrder && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+          <div style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: '420px', padding: '1.5rem', boxShadow: '0 20px 60px rgba(0,0,0,0.12)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <DollarSign style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-emerald)' }} />
+                Registrar Pago
+              </h3>
+              <button onClick={() => setShowPagoModal(false)} style={{ border: 'none', background: 'transparent', fontSize: '1.4rem', cursor: 'pointer', color: 'var(--color-muted)' }}>&times;</button>
+            </div>
+            <form onSubmit={handleRegistrarPago} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Monto ($)</label>
+                <input type="number" step="0.01" min="0" placeholder="0.00" value={pagoMonto || ''} onChange={(e) => setPagoMonto(parseFloat(e.target.value) || 0)} required style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Método de Pago</label>
+                <select value={pagoMetodo} onChange={(e) => setPagoMetodo(e.target.value)} style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}>
+                  <option value="efectivo">Efectivo</option>
+                  <option value="transferencia">Transferencia Bancaria</option>
+                  <option value="tarjeta">Tarjeta de Débito/Crédito</option>
+                  <option value="mercadopago">Mercado Pago</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Comprobante / Ref.</label>
+                <input type="text" placeholder="N° de transferencia o recibo" value={pagoComprobante} onChange={(e) => setPagoComprobante(e.target.value)} style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Notas (opcional)</label>
+                <input type="text" placeholder="Ej: Pago correspondiente a..." value={pagoNotas} onChange={(e) => setPagoNotas(e.target.value)} style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', marginTop: '0.4rem' }}>
+                <button type="button" onClick={() => setShowPagoModal(false)} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', background: 'var(--color-emerald)', borderColor: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <CheckCircle style={{ width: '0.85rem', height: '0.85rem' }} />
+                  Confirmar Pago
+                </button>
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textAlign: 'center' }}>El pago quedará registrado en la auditoría del sistema</div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* E. Modal Registrar Consumo */}
+      {showConsumoModal && selectedOrder && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+          <div style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: '420px', padding: '1.5rem', boxShadow: '0 20px 60px rgba(0,0,0,0.12)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <ShoppingCart style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-accent)' }} />
+                Registrar Consumo de Insumo
+              </h3>
+              <button onClick={() => setShowConsumoModal(false)} style={{ border: 'none', background: 'transparent', fontSize: '1.4rem', cursor: 'pointer', color: 'var(--color-muted)' }}>&times;</button>
+            </div>
+            <form onSubmit={handleRegistrarConsumo} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Insumo</label>
+                <select value={consumoInsumoId} onChange={(e) => {
+                  const ins = insumos.find(i => i.id === e.target.value);
+                  setConsumoInsumoId(e.target.value);
+                  setConsumoCostoUnitario(ins ? (ins as any).precioUnitario || 0 : 0);
+                }} required style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}>
+                  <option value="">Seleccionar insumo...</option>
+                  {insumos.map((ins) => (
+                    <option key={ins.id} value={ins.id}>{ins.name} — Stock: {ins.stock} {ins.unit}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Cantidad</label>
+                <input type="number" step="0.1" min="0.1" value={consumoCantidad} onChange={(e) => setConsumoCantidad(parseFloat(e.target.value) || 0)} required style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Costo Unitario ($)</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input type="number" step="0.01" min="0" value={consumoCostoUnitario} onChange={(e) => setConsumoCostoUnitario(parseFloat(e.target.value) || 0)} style={{ flex: 1, padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  <span style={{ padding: '0.2rem 0.55rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, background: '#dbeafe', color: '#1e40af' }}>del inventario</span>
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', marginTop: '0.2rem' }}>Se precarga del precio del insumo. Podés ajustarlo manualmente.</div>
+              </div>
+              <div className="field">
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>Lote / Trazabilidad</label>
+                <input type="text" placeholder="N° de lote del fabricante" value={consumoLote} onChange={(e) => setConsumoLote(e.target.value)} style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', marginTop: '0.4rem' }}>
+                <button type="button" onClick={() => setShowConsumoModal(false)} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <CheckCircle style={{ width: '0.85rem', height: '0.85rem' }} />
+                  Registrar Consumo
+                </button>
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textAlign: 'center' }}>El consumo descuenta automáticamente del stock del inventario</div>
+            </form>
           </div>
         </div>
       )}

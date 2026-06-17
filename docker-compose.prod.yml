@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  hce-db:
+    image: postgres:16-alpine
+    container_name: hce-database
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-hce_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: keycloak_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - hce_postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - hce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hce_admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hce-identity:
+    image: quay.io/keycloak/keycloak:24.0.4
+    container_name: hce-keycloak
+    restart: always
+    command: start --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://hce-db:5432/keycloak_db
+      KC_DB_USERNAME: ${DB_USER:-hce_admin}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_HOSTNAME: ${KC_HOSTNAME:-auth.systia.ar}
+      KC_HOSTNAME_STRICT_HTTPS: "true"
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      JAVA_OPTS_APPEND: "-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./configs/keycloak/hce-realm.json:/opt/keycloak/data/import/hce-realm.json:ro
+      - ./configs/keycloak/themes:/opt/keycloak/themes
+    depends_on:
+      hce-db:
+        condition: service_healthy
+    networks:
+      - hce-network
+
+  hce-api:
+    build:
+      context: ./hce-backend
+      dockerfile: Dockerfile
+    container_name: hce-backend-api
+    restart: always
+    environment:
+      NODE_ENV: production
+      DB_HOST: hce-db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-hce_admin}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: hce_fhir
+      DB_LOGGING: ${DB_LOGGING:-false}
+      DB_SYNCHRONIZE: "false"
+      KEYCLOAK_ISSUER_URL: ${KC_HOSTNAME:-https://auth.systia.ar}/realms/hce-realm
+      KEYCLOAK_JWKS_URI: ${KC_HOSTNAME:-https://auth.systia.ar}/realms/hce-realm/protocol/openid-connect/certs
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://app.systia.ar}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      hce-db:
+        condition: service_healthy
+    networks:
+      - hce-network
+
+  hce-client:
+    build:
+      context: ./hce-frontend
+      dockerfile: Dockerfile
+    container_name: hce-frontend-client
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - hce-api
+    networks:
+      - hce-network
+
+volumes:
+  hce_postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  hce-network:
+    driver: bridge

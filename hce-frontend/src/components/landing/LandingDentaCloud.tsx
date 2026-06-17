@@ -4,6 +4,8 @@ import { LandingNav } from './LandingNav';
 import { Hero } from './Hero';
 import { DemoModal } from './DemoModal';
 import { LandingFooter } from './LandingFooter';
+import { PrivacyPolicy } from './PrivacyPolicy';
+import { TermsAndConditions } from './TermsAndConditions';
 import {
   TrustBar, Beneficios, Transformacion, Modulos, Odontograma, WhatsAppIA,
   ComoFunciona, Confianza, ParaQuien, FinalCTA,
@@ -22,11 +24,27 @@ type Variant = 'modern' | 'pro';
  */
 export const LandingDentaCloud: React.FC = () => {
   const [demoOpen, setDemoOpen] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('page') === 'privacidad';
+  });
+  const [showTerms, setShowTerms] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('page') === 'terminos';
+  });
   // Variante por URL (?v=pro) para comparar; el skin por defecto es el híbrido.
   const variant: Variant =
     new URLSearchParams(window.location.search).get('v') === 'pro' ? 'pro' : 'modern';
   const openDemo = () => setDemoOpen(true);
   const login = () => keycloak.login();
+
+  if (showPrivacy) {
+    return <PrivacyPolicy onBack={() => setShowPrivacy(false)} />;
+  }
+
+  if (showTerms) {
+    return <TermsAndConditions onBack={() => setShowTerms(false)} />;
+  }
 
   return (
     <div className={`landing-root${variant === 'pro' ? ' landing--pro' : ''}`}>
@@ -44,7 +62,7 @@ export const LandingDentaCloud: React.FC = () => {
         <Beneficios />
         <Confianza />
       </main>
-      <LandingFooter onDemo={openDemo} onLogin={login} />
+      <LandingFooter onDemo={openDemo} onLogin={login} onPrivacy={() => setShowPrivacy(true)} onTerms={() => setShowTerms(true)} />
       <DemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </div>
   );
