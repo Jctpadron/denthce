@@ -1,8 +1,13 @@
 name: Deploy
 
+# Deploy a PROD desacoplado del merge (gobernanza Solución 1): el push a `main`
+# ya NO despliega automáticamente. El despliegue lo dispara el Super Admin a mano
+# desde Actions → Deploy → "Run workflow", solo cuando el rollout es seguro
+# (p. ej. tenant_id de protesista_juan seteado y migraciones aplicadas en RDS).
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+  # push:
+  #   branches: [main]   # DESACTIVADO a propósito — ver nota arriba.
 
 jobs:
   deploy-backend:
