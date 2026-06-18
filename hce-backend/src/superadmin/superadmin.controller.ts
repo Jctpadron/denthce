@@ -44,6 +44,20 @@ export class SuperAdminController {
     });
   }
 
+  /** Alta de un laboratorio de prótesis independiente (tenant + módulo protesis-lab + admin Keycloak) en 1 acción. */
+  @Post('labs')
+  async createLab(@Body() body: any) {
+    return this.superAdminService.createLab({
+      tenantId: body?.tenantId,
+      name: body?.name,
+      plan: body?.plan,
+      adminUsername: body?.adminUsername,
+      adminEmail: body?.adminEmail,
+      adminFirstName: body?.adminFirstName,
+      adminLastName: body?.adminLastName,
+    });
+  }
+
   /** Fase 4A — genera el service-account de Keycloak para la clínica (llave para CliniChat). */
   @Post('clinics/:tenantId/service-account')
   async generateServiceAccount(@Param('tenantId') tenantId: string) {

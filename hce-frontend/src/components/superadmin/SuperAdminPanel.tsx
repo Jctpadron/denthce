@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Shield, LayoutDashboard, Building2, Users, CalendarClock, Plus, X,
   CheckCircle2, XCircle, Settings2, Loader2, LogOut, AlertTriangle,
-  FileText, CalendarDays, MessageCircle, Stethoscope, Boxes,
+  FileText, CalendarDays, MessageCircle, Stethoscope, Boxes, Wrench,
 } from 'lucide-react';
 
 /** Ícono representativo de cada módulo del catálogo (para el modal de gestión). */
@@ -18,7 +18,7 @@ function moduleIcon(key: string): React.ReactNode {
 }
 import keycloak from '../../utils/keycloak-config';
 import {
-  saGetMetrics, saGetClinics, saGetCatalog, saCreateClinic, saSetModule,
+  saGetMetrics, saGetClinics, saGetCatalog, saCreateClinic, saCreateLab, saSetModule,
   type SaMetrics, type SaClinic, type SaModule,
 } from './superadmin-api';
 
@@ -34,6 +34,7 @@ export const SuperAdminPanel: React.FC = () => {
 
   const [modulesFor, setModulesFor] = useState<SaClinic | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [labOpen, setLabOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -104,6 +105,7 @@ export const SuperAdminPanel: React.FC = () => {
             clinics={clinics}
             onManageModules={(c) => setModulesFor(c)}
             onNew={() => setCreateOpen(true)}
+            onNewLab={() => setLabOpen(true)}
           />
         )}
       </div>
@@ -118,6 +120,9 @@ export const SuperAdminPanel: React.FC = () => {
       )}
       {createOpen && (
         <CreateClinicModal onClose={() => setCreateOpen(false)} onCreated={load} />
+      )}
+      {labOpen && (
+        <CreateLabModal onClose={() => setLabOpen(false)} onCreated={load} />
       )}
     </div>
   );
@@ -158,13 +163,18 @@ function planStats(clinics: SaClinic[]): { label: string; pct: string } {
 }
 
 // ---------------- Clínicas ----------------
-const ClinicsTab: React.FC<{ clinics: SaClinic[]; onManageModules: (c: SaClinic) => void; onNew: () => void }> = ({ clinics, onManageModules, onNew }) => (
+const ClinicsTab: React.FC<{ clinics: SaClinic[]; onManageModules: (c: SaClinic) => void; onNew: () => void; onNewLab: () => void }> = ({ clinics, onManageModules, onNew, onNewLab }) => (
   <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-      <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>Clínicas ({clinics.length})</h3>
-      <button onClick={onNew} className="btn btn-primary" style={{ padding: '0.55rem 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700 }}>
-        <Plus style={{ width: '1rem', height: '1rem' }} /> Nueva clínica
-      </button>
+      <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>Clínicas y laboratorios ({clinics.length})</h3>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <button onClick={onNewLab} className="btn btn-secondary" style={{ padding: '0.55rem 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700 }}>
+          <Wrench style={{ width: '1rem', height: '1rem' }} /> Nuevo laboratorio
+        </button>
+        <button onClick={onNew} className="btn btn-primary" style={{ padding: '0.55rem 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700 }}>
+          <Plus style={{ width: '1rem', height: '1rem' }} /> Nueva clínica
+        </button>
+      </div>
     </div>
     {clinics.length === 0 ? (
       <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', border: '1px dashed var(--border-color)', borderRadius: '16px' }}>
@@ -367,6 +377,55 @@ const CreateClinicModal: React.FC<{ onClose: () => void; onCreated: () => void }
       <button onClick={submit} disabled={busy || !f.name || !f.tenantId || !f.adminUsername || !f.adminEmail} className="btn btn-primary" style={{ padding: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.3rem' }}>
         {busy ? <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} /> : <Plus style={{ width: '1rem', height: '1rem' }} />}
         Crear clínica
+      </button>
+    </Overlay>
+  );
+};
+
+// ---------------- Modal: alta de laboratorio (producto independiente) ----------------
+const CreateLabModal: React.FC<{ onClose: () => void; onCreated: () => void }> = ({ onClose, onCreated }) => {
+  const [f, setF] = useState({ tenantId: '', name: '', plan: 'lab', adminUsername: '', adminEmail: '', adminFirstName: '', adminLastName: '' });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+
+  const set = (k: string, v: string) => setF((prev) => ({ ...prev, [k]: v }));
+
+  const submit = async () => {
+    setBusy(true); setErr(null); setOk(null);
+    try {
+      const res = await saCreateLab(f);
+      setOk(res.adminCreated
+        ? `Laboratorio creado. Usuario: ${res.admin?.username} · Contraseña inicial: ${res.admin?.defaultPassword}`
+        : `Laboratorio creado, pero el usuario admin falló: ${res.adminError}`);
+      onCreated();
+    } catch (e: any) {
+      setErr(e?.response?.data?.message || 'No se pudo crear el laboratorio.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Overlay onClose={onClose}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Wrench style={{ width: '1.1rem', height: '1.1rem' }} /> Nuevo laboratorio</h3>
+        <button onClick={onClose} className="btn btn-secondary" style={{ padding: '0.4rem', borderRadius: '10px' }}><X style={{ width: '1.1rem', height: '1.1rem' }} /></button>
+      </div>
+      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-muted)' }}>Crea el laboratorio como producto independiente: tenant + módulo Prótesis + usuario admin del laboratorio, en una sola acción.</p>
+      {err && <div style={{ fontSize: '0.8rem', color: '#dc2626', fontWeight: 600 }}>{err}</div>}
+      {ok && <div style={{ fontSize: '0.8rem', color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}><CheckCircle2 style={{ width: '0.9rem', height: '0.9rem' }} /> {ok}</div>}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+        <Field label="Nombre del laboratorio" value={f.name} onChange={(v) => set('name', v)} placeholder="DentaLab Valle" full />
+        <Field label="Tenant ID (identificador)" value={f.tenantId} onChange={(v) => set('tenantId', v)} placeholder="lab_valle" />
+        <Field label="Usuario admin del lab" value={f.adminUsername} onChange={(v) => set('adminUsername', v)} placeholder="admin_dentalab" />
+        <Field label="Email admin" value={f.adminEmail} onChange={(v) => set('adminEmail', v)} placeholder="admin@dentalab.com" />
+        <Field label="Nombre" value={f.adminFirstName} onChange={(v) => set('adminFirstName', v)} placeholder="Juan" />
+        <Field label="Apellido" value={f.adminLastName} onChange={(v) => set('adminLastName', v)} placeholder="Pérez" />
+      </div>
+      <button onClick={submit} disabled={busy || !f.name || !f.tenantId || !f.adminUsername || !f.adminEmail} className="btn btn-primary" style={{ padding: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.3rem' }}>
+        {busy ? <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} /> : <Wrench style={{ width: '1rem', height: '1rem' }} />}
+        Crear laboratorio
       </button>
     </Overlay>
   );

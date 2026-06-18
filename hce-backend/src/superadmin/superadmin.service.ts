@@ -141,6 +141,72 @@ export class SuperAdminService {
   }
 
   /**
+   * Alta de un LABORATORIO de prótesis independiente, en UNA sola acción:
+   * crea su tenant, le habilita el módulo `protesis-lab` y crea el usuario admin del lab
+   * en Keycloak (rol `laboratorio-admin` + tenant_id). Es el alta del producto vendido como
+   * servicio independiente del HCE. Idempotencia: rechaza si el tenant ya existe.
+   */
+  async createLab(dto: {
+    tenantId: string;
+    name: string;
+    plan?: string;
+    adminUsername: string;
+    adminEmail: string;
+    adminFirstName: string;
+    adminLastName: string;
+  }): Promise<any> {
+    const tenantId = (dto.tenantId || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+    if (!tenantId || !dto.name || !dto.adminUsername || !dto.adminEmail) {
+      throw new BadRequestException('tenantId, name, adminUsername y adminEmail son obligatorios.');
+    }
+
+    const existing = await this.tenantConfigRepo.findOne({ where: { tenantId } });
+    if (existing) {
+      throw new ConflictException(`Ya existe un tenant "${tenantId}".`);
+    }
+
+    // 1. tenant_config (el lab es un tenant más, marcado por su especialidad).
+    const config = this.tenantConfigRepo.create({
+      tenantId,
+      clinicName: dto.name,
+      specialty: 'Laboratorio Dental',
+      plan: dto.plan || 'lab',
+      isActive: true,
+    });
+    await this.tenantConfigRepo.save(config);
+
+    // 2. Entitlement: el laboratorio solo necesita el módulo del portal de prótesis.
+    const protesisModule = await this.platformModuleRepo.findOne({ where: { key: 'protesis-lab' } });
+    if (!protesisModule) {
+      throw new BadRequestException('El módulo "protesis-lab" no está en el catálogo. Registralo antes de dar de alta laboratorios.');
+    }
+    await this.tenantModuleRepo.save(
+      this.tenantModuleRepo.create({ tenantId, moduleKey: 'protesis-lab', enabled: true, activatedAt: new Date() }),
+    );
+
+    // 3. Usuario admin del laboratorio en Keycloak (rol laboratorio-admin + tenant_id del lab).
+    try {
+      const admin = await this.keycloakAdmin.createUser({
+        username: dto.adminUsername.toLowerCase().trim(),
+        email: dto.adminEmail.toLowerCase().trim(),
+        firstName: dto.adminFirstName?.trim() || dto.adminUsername,
+        lastName: dto.adminLastName?.trim() || '',
+        role: 'laboratorio-admin',
+        tenantId,
+      });
+      return { tenantId, labName: dto.name, modules: ['protesis-lab'], adminCreated: true, admin };
+    } catch (e: any) {
+      return {
+        tenantId,
+        labName: dto.name,
+        modules: ['protesis-lab'],
+        adminCreated: false,
+        adminError: e?.message || 'No se pudo crear el usuario administrador del laboratorio.',
+      };
+    }
+  }
+
+  /**
    * Anexa o da de baja un módulo de una clínica (upsert en tenant_modules).
    * enabled=true → anexar; enabled=false → dar de baja. expiresAt opcional.
    */

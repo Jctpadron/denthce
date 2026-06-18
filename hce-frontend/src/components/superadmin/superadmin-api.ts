@@ -48,6 +48,16 @@ export const saCreateClinic = (body: {
   adminLastName: string;
 }): Promise<any> => axios.post(`${API}/api/superadmin/clinics`, body, auth()).then((r) => r.data);
 
+export const saCreateLab = (body: {
+  tenantId: string;
+  name: string;
+  plan: string;
+  adminUsername: string;
+  adminEmail: string;
+  adminFirstName: string;
+  adminLastName: string;
+}): Promise<any> => axios.post(`${API}/api/superadmin/labs`, body, auth()).then((r) => r.data);
+
 export const saSetModule = (
   tenantId: string,
   moduleKey: string,
