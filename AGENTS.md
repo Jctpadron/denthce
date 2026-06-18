@@ -41,6 +41,22 @@ Este repositorio contiene el blueprint operativo de una HCE gobernada por agente
 - Toda propuesta "para llevar adelante" se **registra en el tablero**.
 - Los vendor files (`CLAUDE.md`, `GEMINI.md`) son **finos** y apuntan a esta fuente; no duplican estado.
 
+## Contrato de loop (model-agnostic) — OBLIGATORIO para todo agente
+> Con varios modelos (Claude, Gemini, DeepSeek, Qwen, Kimi…) sin memoria compartida, la coordinación está **en el repo y forzada por máquina** (CI + branch protection + PR template + CODEOWNERS). La memoria privada de un modelo NO es estado compartido: si no está en el repo, no existe para los demás.
+
+Todo cambio de código o configuración sigue este loop, sin excepciones:
+1. **Leer el tablero** (`tablero_control.md` + `docs/backlog.json`) → tomar/declarar una tarea con `Responsable:`.
+2. **Reclamar** la tarea (issue/entrada de tablero) para evitar trabajo duplicado.
+3. **Branch o worktree** propio (nunca trabajar directo sobre `main`).
+4. **Implementar** + **tests** + **verificación real** (runtime/endpoint, no solo build).
+5. **Abrir PR** completando `pull_request_template.md` (Definition of Done).
+6. **CI verde** obligatorio: `lint` + `build` + `jest` (back) y `lint` + `build` (front).
+7. **Review** según `CODEOWNERS` (Super Admin) → aprobación.
+8. **Merge** a `main` (squash/PR; `main` está protegida: prohibido push directo).
+9. **Actualizar docs**: walkthrough en `docs/walkthroughs/`, tablero/backlog, y ADR si hubo decisión.
+
+**Definition of Done** (resumen; la lista completa vive en `pull_request_template.md`): español · CI verde · tests · verificación real · responsive (si toca UI) · multi-inquilino · sin secretos en el diff · migraciones documentadas · handoff actualizado.
+
 ## Flujo de trabajo de Orquestación y Desarrollo
 El Orquestador liderará el desarrollo de cada módulo o requerimiento invocando a los agentes especializados de forma secuencial y estructurada. Ningún cambio de código o configuración se dará por completado sin cumplir con los siguientes pasos y controles de calidad:
 

@@ -1,0 +1,17 @@
+# CODEOWNERS — DentHCE
+# El Super Admin es dueño por defecto de todo el repo: su revisión es obligatoria
+# para fusionar a `main` (junto con CI verde + branch protection).
+# Ajustá los handles si se suman revisores humanos por dominio.
+
+# Dueño global (Super Admin)
+*                       @Jctpadron
+
+# Gobernanza y contrato multi-agente (cambios de alto impacto)
+/AGENTS.md              @Jctpadron
+/CLAUDE.md              @Jctpadron
+/.github/               @Jctpadron
+/docs/adr/              @Jctpadron
+/docs/product/VISION.md @Jctpadron
+
+# Seguridad / auth (ePHI) — revisión obligatoria del Super Admin
+/hce-backend/src/auth/  @Jctpadron
