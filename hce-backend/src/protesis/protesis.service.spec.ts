@@ -5,6 +5,9 @@ import { ProtesisService, CreateOrderDto, SendMessageDto, CreateInsumoDto } from
 import { ProtesisOrder } from './protesis-order.entity';
 import { ProtesisChat } from './protesis-chat.entity';
 import { ProtesisInsumo } from './protesis-insumo.entity';
+import { ProtesisStatusHistory } from './protesis-status-history.entity';
+import { ProtesisPago } from './protesis-pago.entity';
+import { ProtesisConsumoInsumo } from './protesis-consumo-insumo.entity';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('ProtesisService', () => {
@@ -32,6 +35,11 @@ describe('ProtesisService', () => {
     save: jest.fn(),
   };
 
+  // Repos agregados por el módulo financiero / máquina de estados (PRO.7-PRO.12).
+  const mockStatusHistoryRepository = { find: jest.fn(), create: jest.fn(), save: jest.fn() };
+  const mockPagoRepository = { find: jest.fn(), findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
+  const mockConsumoRepository = { find: jest.fn(), findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,6 +55,18 @@ describe('ProtesisService', () => {
         {
           provide: getRepositoryToken(ProtesisInsumo),
           useValue: mockInsumoRepository,
+        },
+        {
+          provide: getRepositoryToken(ProtesisStatusHistory),
+          useValue: mockStatusHistoryRepository,
+        },
+        {
+          provide: getRepositoryToken(ProtesisPago),
+          useValue: mockPagoRepository,
+        },
+        {
+          provide: getRepositoryToken(ProtesisConsumoInsumo),
+          useValue: mockConsumoRepository,
         },
       ],
     }).compile();

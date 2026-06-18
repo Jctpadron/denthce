@@ -296,6 +296,10 @@ export class ProtesisService {
 
   // Actualizar la cantidad de stock de un insumo
   async updateStock(tenantId: string, insumoId: string, stock: number): Promise<ProtesisInsumo> {
+    if (!Number.isFinite(stock) || stock < 0) {
+      throw new BadRequestException('El stock debe ser un número mayor o igual a 0.');
+    }
+
     const insumo = await this.insumoRepository.findOne({ where: { id: insumoId } });
     if (!insumo) {
       throw new NotFoundException('Insumo no encontrado en el almacén');
