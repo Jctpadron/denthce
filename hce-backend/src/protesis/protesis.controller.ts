@@ -2,10 +2,13 @@ import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { ModulesGuard } from '../auth/modules.guard';
+import { RequiresModule } from '../auth/requires-module.decorator';
 import { ProtesisService, CreateOrderDto, SendMessageDto, CreateInsumoDto, UpdateInsumoDto, UpdateTrazabilidadDto, SignConformidadDto, SetPresupuestoDto, SetPresupuestoEstimadoDto, RegistrarPagoDto, RegistrarConsumoDto } from './protesis.service';
 
 @Controller('protesis')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard, ModulesGuard)
+@RequiresModule('protesis-lab')
 export class ProtesisController {
   constructor(private readonly protesisService: ProtesisService) {}
 

@@ -8,9 +8,10 @@ import { ProtesisPago } from './protesis-pago.entity';
 import { ProtesisConsumoInsumo } from './protesis-consumo-insumo.entity';
 import { ProtesisService } from './protesis.service';
 import { ProtesisController } from './protesis.controller';
+import { PlatformModule } from '../platform/platform.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProtesisOrder, ProtesisChat, ProtesisInsumo, ProtesisStatusHistory, ProtesisPago, ProtesisConsumoInsumo])],
+  imports: [TypeOrmModule.forFeature([ProtesisOrder, ProtesisChat, ProtesisInsumo, ProtesisStatusHistory, ProtesisPago, ProtesisConsumoInsumo]), PlatformModule],
   providers: [ProtesisService],
   controllers: [ProtesisController],
   exports: [ProtesisService],

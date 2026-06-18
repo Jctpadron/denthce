@@ -1,7 +1,8 @@
 import { useState, lazy, Suspense } from 'react';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider, useTheme, useModules } from './context/ThemeContext';
 import { useRoles } from './hooks/useRoles';
 import { roleDisplayName } from './utils/roles';
+import { ModuleUpsell } from './components/ModuleUpsell';
 import keycloak from './utils/keycloak-config';
 import { LogOut, User, Shield, Menu, X, Home, CalendarDays, PlusCircle, Users, Palette, ChevronDown, Wrench, DollarSign } from 'lucide-react';
 
@@ -29,6 +30,7 @@ const ToothIcon = ({ size = 18 }: { size?: number }) => (
 
 function AppContent() {
   const { roles: clinicalRoles, canConfigure, isSuperAdmin, isLaboratorio } = useRoles();
+  const { isModuleEnabled } = useModules();
   const [activeView, setActiveView] = useState<AppView>(() => {
     // Si es laboratorio, forzar que inicie en el portal de laboratorios
     const roles = keycloak.tokenParsed?.realm_access?.roles ?? [];
@@ -276,7 +278,9 @@ function AppContent() {
       {/* Contenedor Principal */}
       <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
         <Suspense fallback={<p style={{ color: 'var(--color-muted)', textAlign: 'center', padding: '3rem' }}>Cargando...</p>}>
-          {activeView === 'lab-portal' && isLaboratorio && <DentaLabPortal />}
+          {activeView === 'lab-portal' && isLaboratorio && (isModuleEnabled('protesis-lab')
+            ? <DentaLabPortal />
+            : <ModuleUpsell variant="suspended" title="Portal Prótesis" description="Portal de laboratorio dental." />)}
           {activeView === 'home' && !isLaboratorio && (
             <HomeScreen onNavigate={(to) => {
               const views: Record<string, AppView> = {
@@ -294,7 +298,9 @@ function AppContent() {
           )}
           {activeView === 'patients' && !isLaboratorio && <PatientSearch />}
           {activeView === 'odonto-hc' && !isLaboratorio && <OdontologyHC />}
-          {activeView === 'finanzas' && !isLaboratorio && <FinanzasClinicas />}
+          {activeView === 'finanzas' && !isLaboratorio && (isModuleEnabled('finanzas-clinicas')
+            ? <FinanzasClinicas />
+            : <ModuleUpsell title="Finanzas de la Clínica" priceMonthly={25} description="Nomenclador de precios, presupuestos, registro de pagos y gastos, y cuenta corriente por paciente." />)}
           {activeView === 'agenda' && !isLaboratorio && <AgendaView />}
           {activeView === 'form' && !isLaboratorio && <PatientForm onSuccess={() => setActiveView('patients')} />}
           {activeView === 'users' && canConfigure && !isLaboratorio && <UserManagement />}

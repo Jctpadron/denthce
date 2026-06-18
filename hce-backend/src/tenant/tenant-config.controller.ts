@@ -17,6 +17,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { TenantConfigService } from './tenant-config.service';
+import { ModulesService } from '../platform/modules.service';
 import * as fs from 'fs';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'];
@@ -25,7 +26,10 @@ const MAX_LOGO_SIZE = 1 * 1024 * 1024; // 1 MB
 @Controller('api/tenant')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class TenantConfigController {
-  constructor(private readonly tenantService: TenantConfigService) {}
+  constructor(
+    private readonly tenantService: TenantConfigService,
+    private readonly modulesService: ModulesService,
+  ) {}
 
   /**
    * GET /api/tenant/config
@@ -35,7 +39,10 @@ export class TenantConfigController {
   @Get('config')
   @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'paciente', 'laboratorio-operador', 'laboratorio-admin')
   async getConfig(@Request() req: any) {
-    return this.tenantService.getConfig(req.user.tenantId);
+    const config = await this.tenantService.getConfig(req.user.tenantId);
+    // Módulos contratados y vigentes del tenant → el front muestra/oculta features y upsell.
+    const enabledModules = await this.modulesService.enabledModules(req.user.tenantId);
+    return { ...config, enabledModules };
   }
 
   /**

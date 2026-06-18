@@ -60,15 +60,28 @@ interface ThemeContextValue {
   config: TenantConfig;
   loading: boolean;
   reload: () => Promise<void>;
+  /** Keys de módulos contratados y vigentes del tenant (entitlements). */
+  enabledModules: string[];
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   config: DEFAULT_CONFIG,
   loading: true,
   reload: async () => {},
+  enabledModules: [],
 });
 
 export const useTheme = () => useContext(ThemeContext);
+
+/** Hook de entitlements: ¿el tenant tiene contratado (y vigente) este módulo? */
+export const useModules = () => {
+  const { enabledModules, loading } = useContext(ThemeContext);
+  return {
+    enabledModules,
+    loadingModules: loading,
+    isModuleEnabled: (key: string) => enabledModules.includes(key),
+  };
+};
 
 // Convierte un color hex en componentes RGB para efectos de opacidad en CSS
 function hexToRgb(hex: string): string {
@@ -136,6 +149,7 @@ function applyTheme(config: TenantConfig) {
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<TenantConfig>(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
+  const [enabledModules, setEnabledModules] = useState<string[]>([]);
 
   const reload = useCallback(async () => {
     if (!keycloak.token) return;
@@ -143,8 +157,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const res = await axios.get(import.meta.env.VITE_API_URL + '/api/tenant/config', {
         headers: { Authorization: `Bearer ${keycloak.token}` },
       });
-      const data: TenantConfig = res.data;
+      const data: TenantConfig & { enabledModules?: string[] } = res.data;
       setConfig(data);
+      setEnabledModules(Array.isArray(data.enabledModules) ? data.enabledModules : []);
       applyTheme(data);
     } catch (e) {
       console.warn('No se pudo cargar la configuración del tenant, usando valores por defecto.', e);
@@ -159,7 +174,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [reload]);
 
   return (
-    <ThemeContext.Provider value={{ config, loading, reload }}>
+    <ThemeContext.Provider value={{ config, loading, reload, enabledModules }}>
       {children}
     </ThemeContext.Provider>
   );

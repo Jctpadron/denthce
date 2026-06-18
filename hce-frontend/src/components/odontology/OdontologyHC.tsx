@@ -27,6 +27,8 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { OdontoVisitContext } from './OdontoVisitContext';
+import { useModules } from '../../context/ThemeContext';
+import { ModuleUpsell } from '../ModuleUpsell';
 import keycloak from '../../utils/keycloak-config';
 import { OdontogramPAMI } from './OdontogramPAMI';
 import { AnamnesisPAMI } from './AnamnesisPAMI';
@@ -66,6 +68,7 @@ const TABS: { key: OdontoTab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export const OdontologyHC: React.FC = () => {
+  const { isModuleEnabled } = useModules();
   const [searchTerm, setSearchTerm] = useState('');
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -647,8 +650,12 @@ export const OdontologyHC: React.FC = () => {
               {activeTab === 'consent' && <ConsentForm patientId={selectedPatient.id} />}
               {activeTab === 'evolution' && <EvolutionPAMI patientId={selectedPatient.id} />}
               {activeTab === 'documents' && <OdontologyDocuments patientId={selectedPatient.id} />}
-              {activeTab === 'protesis' && <ProtesisTab patientId={selectedPatient.id} />}
-              {activeTab === 'finanzas' && <FinanzasTab patientId={selectedPatient.id} />}
+              {activeTab === 'protesis' && (isModuleEnabled('protesis-lab')
+                ? <ProtesisTab patientId={selectedPatient.id} />
+                : <ModuleUpsell title="Prótesis / Laboratorio" priceMonthly={35} description="Enviá trabajos al laboratorio, seguí el estado de cada caso, chateá con el protesista y adjuntá archivos STL — todo desde la ficha del paciente." />)}
+              {activeTab === 'finanzas' && (isModuleEnabled('finanzas-clinicas')
+                ? <FinanzasTab patientId={selectedPatient.id} />
+                : <ModuleUpsell title="Finanzas de la Clínica" priceMonthly={25} description="Nomenclador de precios, presupuestos, registro de pagos y gastos, y cuenta corriente por paciente." />)}
             </div>
 
           </div>

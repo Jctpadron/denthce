@@ -2,6 +2,8 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Re
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { ModulesGuard } from '../auth/modules.guard';
+import { RequiresModule } from '../auth/requires-module.decorator';
 import {
   ClinicaFinanzasService,
   CreatePrecioDto,
@@ -12,7 +14,8 @@ import {
 } from './clinica-finanzas.service';
 
 @Controller('clinica/finanzas')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard, ModulesGuard)
+@RequiresModule('finanzas-clinicas')
 export class ClinicaFinanzasController {
   constructor(private readonly finanzasService: ClinicaFinanzasService) {}
 
