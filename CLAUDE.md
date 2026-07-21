@@ -37,6 +37,9 @@ Los convoco con la herramienta **Agent** (`subagent_type`):
 - `code-generator` — andamiaje NestJS/React siguiendo los patrones del repo.
 - `backlog-sync` — sincroniza `tablero_control.md` ↔ `docs/backlog.json` y recalcula progreso.
 - `fhir-validator` — valida recursos contra esquemas HL7 FHIR R4.
+- `optimizador-prompts` — convierte ideas desordenadas en prompts claros y usables (para IA de texto/código/imagen/automatización). Complementa a `entrevistador-procesos`.
+- `verificador-clinico` — verifica exactitud de datos clínicos/regulatorios antes de persistir (rangos vitales/LOINC, vademécum/dosis, CDS Hooks, CIE-10/SNOMED, nomenclador PAMI, coberturas). Apoya a `qa`/`product`.
+- `qa-smoke-e2e` — regresión funcional E2E del ciclo clínico (login → paciente → ficha/HC odonto → firma inmutable → receta/CDS → aislamiento multi-inquilino). Úsala tras cada deploy o cambio grande.
 
 ## Skills built-in que reutilizo (no reinventar)
 - `/security-review` → auditoría de seguridad del diff (apoya al agente `security`).
