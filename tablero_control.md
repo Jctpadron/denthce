@@ -204,6 +204,16 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
+### Iniciativa transversal: Port de gobernanza LabFlow→HCE
+*Portar la gobernanza multi-agente más madura del proyecto gemelo LabFlow LIS, para que ambos sean "idénticos en conceptos", sin degradar lo que la HCE ya tiene mejor. Análisis punto por punto en 3 tiers. Walkthrough: `docs/walkthroughs/2026-07-21_port_gobernanza_labflow_tier1.md`. Responsable: Claude. (Fuera del conteo de los 70.)*
+
+- [x] **GOV.1:** Skill `entrevistador-procesos` como **Fase 0** de la orquestación (regla de proporción + CHECKPOINT). Justificada y aprobada por Super Admin. *(Prioridad: Media)*
+- [x] **GOV.2:** Agente `revisor` (Quality Gate técnico del diff, reutiliza `/code-review`) en `.claude/agents/` + `docs/agents/`; cableado corregido en CLAUDE.md. *(Prioridad: Media)*
+- [ ] **GOV.3:** Fix dato desactualizado en `CLAUDE.md` ("Documentos clave" dice 61% global; el real es 76%). *(Prioridad: Baja)*
+- [ ] **GOV.4 (Tier 2/3):** Portar/adaptar skills `verificador-clinico`, `security-audit`, `testing-and-validation`, `qa-carga-admision`, `optimizador-prompts`; autorear `docs/REGLAS-ESTABILIDAD.md` y `docs/PROTOCOLO-CAMBIOS-DB.md`; llevar el principio CHECKPOINT + espejos `.agents/`/`.codex/` a `AGENTS.md`. *(Prioridad: Media)*
+
+---
+
 > 🤝 **Coordinación entre agentes (Claude + Gemini):** la **fuente única de verdad del estado** es este `tablero_control.md` + `docs/backlog.json`. Todo trabajo/propuesta se registra acá con **responsable**. Regla de artefactos: **uno canónico**; los duplicados se marcan **SUPERSEDIDO** apuntando al vigente. Las memorias privadas de cada agente **no** son estado compartido. Editar el tablero **solo si está libre** (no pisar al otro agente).
 
 ---
