@@ -28,26 +28,32 @@ Los convoco con la herramienta **Agent** (`subagent_type`):
 | `ux` | Diseño de interfaz responsiva, accesible, atajos de teclado |
 | `integrations` | Conectores externos (HL7 v2, DICOM/PACS, SISA, aseguradoras) |
 | `qa` | Tests (Jest) + validación FHIR + Quality Gate de calidad |
+| `revisor` | Code review del diff (correctitud, simplicidad, alcance quirúrgico, root-cause) + Quality Gate técnico. Reutiliza `/code-review` |
 | `devops` | Docker, AWS, Keycloak, CI/CD, despliegue |
 
 ## Skills disponibles (`.claude/skills/`)
+- `entrevistador-procesos` — **Fase 0 de la orquestación**: entrevista al Super Admin para relevar un módulo/feature nuevo o ambiguo ANTES de construir (regla de proporción: se saltea en tareas ya especificadas o triviales). Su salida alimenta el backlog + una spec en `docs/specs/`.
 - `design-system` — fuente única de verdad de diseño e identidad (tokens, componentes, white-label, marca, accesibilidad). La consultan `ux` y `code-generator`.
 - `code-generator` — andamiaje NestJS/React siguiendo los patrones del repo.
 - `backlog-sync` — sincroniza `tablero_control.md` ↔ `docs/backlog.json` y recalcula progreso.
 - `fhir-validator` — valida recursos contra esquemas HL7 FHIR R4.
+- `optimizador-prompts` — convierte ideas desordenadas en prompts claros y usables (para IA de texto/código/imagen/automatización). Complementa a `entrevistador-procesos`.
+- `verificador-clinico` — verifica exactitud de datos clínicos/regulatorios antes de persistir (rangos vitales/LOINC, vademécum/dosis, CDS Hooks, CIE-10/SNOMED, nomenclador PAMI, coberturas). Apoya a `qa`/`product`.
+- `qa-smoke-e2e` — regresión funcional E2E del ciclo clínico (login → paciente → ficha/HC odonto → firma inmutable → receta/CDS → aislamiento multi-inquilino). Úsala tras cada deploy o cambio grande.
 
 ## Skills built-in que reutilizo (no reinventar)
 - `/security-review` → auditoría de seguridad del diff (apoya al agente `security`).
-- `/code-review` → bugs y calidad del diff (apoya a `qa`).
+- `/code-review` → bugs y calidad del diff (apoya al `revisor`).
 - `/verify` y `/run` → ejecutar la app y validar comportamiento real (apoya a `qa`/`devops`).
 - `/review` → revisión de PR.
 
 ## Flujo de orquestación (por tarea)
+0. **Elicitación (Fase 0):** ante un módulo/feature **nuevo o ambiguo**, correr `entrevistador-procesos` para relevar el contexto (flujo clínico, FHIR, roles, multi-inquilino, responsive) ANTES de tocar nada. Cerrar con un **CHECKPOINT**: devolver al Super Admin (a) qué entendí, (b) qué archivos/subagentes voy a tocar, (c) riesgos → y esperar su OK antes de codear. *Regla de proporción:* saltear (o mini-versión) si la tarea ya está especificada en el tablero/backlog o es trivial.
 1. **Ingesta:** leer el requerimiento y actualizar estado con `backlog-sync`.
 2. **Diseño técnico base:** `architect` → `fhir-mcp` → `security`.
 3. **Definición funcional:** `product` → `ux` (y `integrations` si toca sistemas externos).
 4. **Codificación:** consolidar diseños en `docs/design/` y specs en `docs/specs/`, ejecutar `code-generator`.
-5. **Quality Gates (obligatorios):** `security` (auditoría) + `qa` (tests + `fhir-validator`) + `product`/`ux` (certificación funcional/UX).
+5. **Quality Gates (obligatorios):** `security` (auditoría + `/security-review`) + `qa` (tests + `fhir-validator`) + `revisor` (calidad del diff + `/code-review`) + `product`/`ux` (certificación funcional/UX).
 6. **Consolidación:** actualizar `backlog.json` y tablero, documentar walkthrough en `docs/walkthroughs/` (`YYYY-MM-DD_titulo_descriptivo.md`), y presentar al Super Admin para aprobación antes de fusionar/desplegar.
 
 ## Stack del proyecto
