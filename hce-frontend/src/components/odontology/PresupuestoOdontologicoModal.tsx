@@ -38,7 +38,12 @@ interface Linea {
   cantidad: number;
   precioUnitario: number;
   detalle: string;
+  diente?: string;
+  cara?: string;
 }
+
+// Límites de columna en la BD (evita 500 "value too long")
+const MAX = { codigo: 50, prestacion: 255, detalle: 255, obraSocial: 255 };
 
 interface Props {
   patientId: string;
@@ -57,6 +62,25 @@ const detalleDe = (r: PlannedResource): string => {
   return `Pieza ${pieza}${cara && cara !== 'all' ? ` · cara ${cara}` : ''}`;
 };
 
+// Mapea un tratamiento planificado del odontograma a una línea de presupuesto,
+// preservando pieza/cara ESTRUCTURADAS (columnas diente/cara), no solo como texto.
+const lineaFromPlanned = (r: PlannedResource): Linea => {
+  const pieza = r.bodySite?.coding?.[0]?.code;
+  const cara = r.bodySite?.coding?.[1]?.code;
+  return {
+    uid: uid(),
+    sourceResourceId: r.id,
+    codigoNomenclador: '',
+    snomedCode: r.code?.coding?.[0]?.code || 'GENERAL',
+    snomedDisplay: r.code?.text || 'Intervención',
+    cantidad: 1,
+    precioUnitario: 0,
+    detalle: detalleDe(r),
+    diente: pieza || undefined,
+    cara: cara && cara !== 'all' ? cara : undefined,
+  };
+};
+
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '0.5rem 0.6rem', borderRadius: '8px',
   border: '1px solid var(--border-color)', background: 'var(--bg-surface)',
@@ -67,18 +91,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   patientId, plannedResources, realizadoResources = [], onClose, onSaved,
 }) => {
   const [tab, setTab] = useState<Tab>('presupuesto');
-  const [lineas, setLineas] = useState<Linea[]>(() =>
-    plannedResources.map((r) => ({
-      uid: uid(),
-      sourceResourceId: r.id,
-      codigoNomenclador: '',
-      snomedCode: r.code?.coding?.[0]?.code || 'GENERAL',
-      snomedDisplay: r.code?.text || 'Intervención',
-      cantidad: 1,
-      precioUnitario: 0,
-      detalle: detalleDe(r),
-    })),
-  );
+  const [lineas, setLineas] = useState<Linea[]>(() => plannedResources.map(lineaFromPlanned));
   const [rxPresentadas, setRxPresentadas] = useState('');
   const [obraSocial, setObraSocial] = useState('');
   const [cantidadCuotas, setCantidadCuotas] = useState('');
@@ -103,18 +116,22 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
             (b.fechaEmision || b.createdAt || '').localeCompare(a.fechaEmision || a.createdAt || ''))[0];
           const full = (await axios.get(`${API_URL}/clinica/finanzas/presupuesto/${reciente.id}`, { headers: authHeaders() })).data;
           setPresupuestoId(full.id);
-          if (Array.isArray(full.items) && full.items.length) {
-            setLineas(full.items.map((it: Record<string, unknown>) => ({
-              uid: uid(),
-              sourceResourceId: (it.sourceResourceId as string) || undefined,
-              codigoNomenclador: (it.codigoNomenclador as string) || '',
-              snomedCode: (it.snomedCode as string) || 'GENERAL',
-              snomedDisplay: (it.snomedDisplay as string) || '',
-              cantidad: Number(it.cantidad) || 1,
-              precioUnitario: Number(it.precioUnitario) || 0,
-              detalle: (it.detalle as string) || '',
-            })));
-          }
+          const existentes: Linea[] = Array.isArray(full.items) ? full.items.map((it: Record<string, unknown>) => ({
+            uid: uid(),
+            sourceResourceId: (it.sourceResourceId as string) || undefined,
+            codigoNomenclador: (it.codigoNomenclador as string) || '',
+            snomedCode: (it.snomedCode as string) || 'GENERAL',
+            snomedDisplay: (it.snomedDisplay as string) || '',
+            cantidad: Number(it.cantidad) || 1,
+            precioUnitario: Number(it.precioUnitario) || 0,
+            detalle: (it.detalle as string) || '',
+            diente: (it.diente as string) || undefined,
+            cara: (it.cara as string) || undefined,
+          })) : [];
+          // #5: incorporar los tratamientos planificados que aún NO están en el presupuesto (por sourceResourceId).
+          const yaPresupuestados = new Set(existentes.map((l) => l.sourceResourceId).filter(Boolean));
+          const nuevosDelPlan = plannedResources.filter((r) => !yaPresupuestados.has(r.id)).map(lineaFromPlanned);
+          if (existentes.length || nuevosDelPlan.length) setLineas([...existentes, ...nuevosDelPlan]);
           setRxPresentadas(full.rxPresentadas != null ? String(full.rxPresentadas) : '');
           setObraSocial(full.obraSocial || '');
           setCantidadCuotas(full.cantidadCuotas != null ? String(full.cantidadCuotas) : '');
@@ -139,8 +156,10 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const delLinea = (i: number) => setLineas((ls) => ls.filter((_, idx) => idx !== i));
 
   const guardar = async () => {
-    const items = lineas.filter((l) => (l.snomedDisplay || '').trim() || l.precioUnitario > 0);
-    if (items.length === 0) { setError('Agregá al menos una prestación con importe.'); return; }
+    const items = lineas.filter((l) => (l.snomedDisplay || '').trim());
+    if (items.length === 0) { setError('Agregá al menos una prestación.'); return; }
+    const invalida = items.find((l) => !(Number(l.precioUnitario) > 0) || !(Number(l.cantidad) >= 1));
+    if (invalida) { setError('Cada línea necesita importe mayor a 0 y cantidad ≥ 1.'); return; }
     setSaving(true); setError(''); setOkMsg('');
     try {
       const dto = {
@@ -155,6 +174,8 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
           snomedDisplay: l.snomedDisplay || 'Prestación',
           codigoNomenclador: l.codigoNomenclador || undefined,
           detalle: l.detalle || undefined,
+          diente: l.diente || undefined,
+          cara: l.cara || undefined,
           sourceResourceId: l.sourceResourceId || undefined,
           cantidad: Number(l.cantidad) || 1,
           precioUnitario: Number(l.precioUnitario) || 0,
@@ -233,23 +254,27 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                 <div key={l.uid} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.6rem', alignItems: 'end', background: 'var(--bg-card)' }}>
                   <div>
                     <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Cód. Nomenclador</label>
-                    <input value={l.codigoNomenclador} onChange={(e) => setLinea(i, { codigoNomenclador: e.target.value })} placeholder="p.ej. 0218" style={inputStyle} />
+                    <input value={l.codigoNomenclador} maxLength={MAX.codigo} onChange={(e) => setLinea(i, { codigoNomenclador: e.target.value })} placeholder="p.ej. 0218" style={inputStyle} />
                   </div>
                   <div style={{ minWidth: '180px' }}>
-                    <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Prestación</label>
-                    <input value={l.snomedDisplay} onChange={(e) => setLinea(i, { snomedDisplay: e.target.value })} placeholder="Descripción" style={inputStyle} />
+                    <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Prestación{l.diente ? ` · pieza ${l.diente}${l.cara ? `/${l.cara}` : ''}` : ''}</label>
+                    <input value={l.snomedDisplay} maxLength={MAX.prestacion} onChange={(e) => setLinea(i, { snomedDisplay: e.target.value })} placeholder="Descripción" style={inputStyle} />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Cant.</label>
                     <input type="number" min={1} value={l.cantidad} onChange={(e) => setLinea(i, { cantidad: Number(e.target.value) })} style={inputStyle} />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Importe</label>
+                    <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Importe unit.</label>
                     <input type="number" min={0} step="0.01" value={l.precioUnitario} onChange={(e) => setLinea(i, { precioUnitario: Number(e.target.value) })} style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Subtotal</label>
+                    <div style={{ ...inputStyle, background: 'var(--bg-card)', fontWeight: 700, whiteSpace: 'nowrap' }}>{MONEY((Number(l.precioUnitario) || 0) * (Number(l.cantidad) || 1))}</div>
                   </div>
                   <div style={{ minWidth: '160px' }}>
                     <label style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)' }}>Detalle (diente/cara)</label>
-                    <input value={l.detalle} onChange={(e) => setLinea(i, { detalle: e.target.value })} style={inputStyle} />
+                    <input value={l.detalle} maxLength={MAX.detalle} onChange={(e) => setLinea(i, { detalle: e.target.value })} style={inputStyle} />
                   </div>
                   <button type="button" onClick={() => delLinea(i)} aria-label="Quitar línea" style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', cursor: 'pointer', color: 'var(--color-rose)', justifySelf: 'start' }}><Trash2 size={16} /></button>
                 </div>
@@ -278,7 +303,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
               </div>
               <div>
                 <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Obra social</label>
-                <input value={obraSocial} onChange={(e) => setObraSocial(e.target.value)} placeholder="OSDE, PAMI…" style={inputStyle} />
+                <input value={obraSocial} maxLength={MAX.obraSocial} onChange={(e) => setObraSocial(e.target.value)} placeholder="OSDE, PAMI…" style={inputStyle} />
               </div>
               <div>
                 <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Fecha de presentación</label>
