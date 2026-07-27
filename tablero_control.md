@@ -222,7 +222,7 @@ Este es un **documento bidireccional y vivo**:
 *Handoff: `docs/walkthroughs/2026-07-21_deploy_gating_gobernanza_y_presupuesto.md`. Responsable: Claude.*
 
 - [x] **DEPLOY.1:** Deploy a prod de `main` — **activó gating enforcement + alta de laboratorio** (backend `prod-20260721-1542`, front alineado). Smoke OK. Prep del gating (finanzas-clinicas + tenant_ids Keycloak) aplicada para no romper a nadie. *(Prioridad: Alta)*
-- [ ] **PRES.1:** **Modal de presupuesto odontológico** — al armar el Plan del odontograma, modal que digitaliza el formulario PAMI reusando `clinica_presupuestos`. Diseño (ux+architect) + backend + frontend HECHOS en rama `feature/presupuesto-odontologico` (revisor APROBADO). **Falta:** aplicar migración `20260721_1500_*.sql`, gates security/qa/ux, push+PR, deploy. *(Prioridad: Media)*
+- [x] **PRES.1:** **Modal de presupuesto odontológico** — al armar el Plan del odontograma, modal que digitaliza el formulario PAMI reusando `clinica_presupuestos`. Diseño (ux+architect) + backend + frontend + migración. Mergeado a `main` y **DESPLEGADO a prod** (`prod-20260727-1244`), migración aplicada (8 columnas), smoke funcional OK (POST presupuesto con campos nuevos → 201, luego borrado). **Fix incluido:** bug pre-existente del módulo finanzas (DTOs clase sin decoradores rompían el ValidationPipe `forbidNonWhitelisted`) → DTOs a interface + `import type`. Pendiente: gates security/qa/ux formales. *(Prioridad: Media)*
 
 ---
 
