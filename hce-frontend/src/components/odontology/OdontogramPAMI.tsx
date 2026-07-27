@@ -7,6 +7,7 @@ import {
   type OdontoState, type OdontogramLayer, type Grupo,
 } from './odontogram-catalog';
 import { useOdontoVisit } from './OdontoVisitContext';
+import { PresupuestoOdontologicoModal } from './PresupuestoOdontologicoModal';
 
 interface OdontogramProps {
   patientId: string;
@@ -58,6 +59,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
   const [activeTool, setActiveTool] = useState<string>('caries'); // id del catálogo o 'limpiar'
   const [activeToolTab, setActiveToolTab] = useState<Grupo>('Diagnóstico');
   const [activeLayer, setActiveLayer] = useState<OdontogramLayer>('existing');
+  const [showPresupuesto, setShowPresupuesto] = useState(false);
 
   // Calcular modo de visualización inicial en base a la edad
   // < 5 años: solo dientes temporales (child)
@@ -552,6 +554,21 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
               </div>
             </div>
           </div>
+
+          {/* Disparador del presupuesto: solo en modo Plan (no interrumpe el pintado) */}
+          {activeLayer === 'planned' && (
+            <button
+              type="button"
+              onClick={() => setShowPresupuesto(true)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                padding: '0.5rem 0.85rem', borderRadius: '10px', border: '1px solid #2563eb',
+                background: '#2563eb', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+              }}
+            >
+              💰 Ver / armar presupuesto ({planned.length})
+            </button>
+          )}
 
           {/* Alternador de Capa Integrado */}
           <div className="segmented-control" style={{ background: 'rgba(0, 0, 0, 0.05)', padding: '0.15rem' }}>
@@ -1361,6 +1378,16 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de presupuesto odontológico (se abre desde el modo Plan) */}
+      {showPresupuesto && (
+        <PresupuestoOdontologicoModal
+          patientId={patientId}
+          plannedResources={planned}
+          realizadoResources={existing}
+          onClose={() => setShowPresupuesto(false)}
+        />
       )}
 
       {/* Modal táctil: selector de caras para mobile */}
