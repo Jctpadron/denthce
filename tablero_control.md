@@ -204,6 +204,20 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
+### Iniciativa transversal: Port de gobernanza LabFlow→HCE
+*Portar la gobernanza multi-agente más madura del proyecto gemelo LabFlow LIS, para que ambos sean "idénticos en conceptos", sin degradar lo que la HCE ya tiene mejor. Análisis punto por punto en 3 tiers. Walkthrough: `docs/walkthroughs/2026-07-21_port_gobernanza_labflow_tier1.md`. Responsable: Claude. (Fuera del conteo de los 70.)*
+
+- [x] **GOV.1:** Skill `entrevistador-procesos` como **Fase 0** de la orquestación (regla de proporción + CHECKPOINT). Justificada y aprobada por Super Admin. *(Prioridad: Media)*
+- [x] **GOV.2:** Agente `revisor` (Quality Gate técnico del diff, reutiliza `/code-review`) en `.claude/agents/` + `docs/agents/`; cableado corregido en CLAUDE.md. *(Prioridad: Media)*
+- [ ] **GOV.3:** Fix dato desactualizado en `CLAUDE.md` ("Documentos clave" dice 61% global; el real es 76%). *(Prioridad: Baja)*
+- [ ] **GOV.4 (Tier 2/3):** Portar/adaptar skills `verificador-clinico`, `security-audit`, `testing-and-validation`, `qa-carga-admision`, `optimizador-prompts`; autorear `docs/REGLAS-ESTABILIDAD.md` y `docs/PROTOCOLO-CAMBIOS-DB.md`; llevar el principio CHECKPOINT + espejos `.agents/`/`.codex/` a `AGENTS.md`. *(Prioridad: Media)*
+- [ ] **GOV.5:** Resolver el desalineo de `.github/workflows/deploy.yml` (`application_name: hce-backend` + `environment_name: HceBackend-env`) contra el prod REAL (app EB `odontocloud` + env `Odontocloud-env`, verificado en AWS). El deploy real hoy es manual vía `aws/scripts/deploy-aws.ps1` (correcto); `deploy.yml` (CI) nunca se usó. Decidir: alinear `deploy.yml` a la infra real **o** retirarlo si el deploy se mantiene por PowerShell. Conocido desde handoff 2026-06-18. *(Prioridad: Baja)*
+- [ ] **GOV.6:** Remediación de **secretos hardcodeados** + mecanismo de salvaguarda de claves/apikeys. Se hallaron secretos REALES en archivos trackeados y en el historial de git (DB password, admin Keycloak, client_secret). Detalle ejecutable por cualquier agente en `docs/security/remediacion-secretos-hardcodeados.md` (inventario por archivo:línea, mecanismo env-only + Secrets Manager + gitleaks en CI, remediación y ROTACIÓN). *(Prioridad: Alta)*
+- [ ] **GOV.8:** **Provisioning Keycloak sin `tenant_id` (rotura silenciosa).** El alta por admin API (SA.4A `createUser`) NO seteaba `tenant_id` porque `unmanagedAttributePolicy` estaba `DISABLED` (default KC24+) → PUT 204 sin guardar. **RESUELTO (2026-07-21):** realm `hce-realm` seteado a **`ADMIN_EDIT`** (mínimo privilegio; NO `ENABLED`, que permitiría a un usuario auto-setearse `tenant_id` → acceso cross-tenant). Pendiente: (a) verificar que SA.4A ahora setea `tenant_id` en altas nuevas; (b) declarar `tenant_id` como atributo **gestionado** con validación (patrón slug) para robustez; (c) reflejar el estado del realm en `REGLAS-ESTABILIDAD.md`. *(Prioridad: Alta)*
+- [ ] **GOV.7:** **Runner de migraciones automático** para la HCE (hoy el esquema se aplica por SQL manual, SIN tabla de tracking → todo a ojo). Implementar: carpeta `migrations/` numerada e idempotente + tabla `schema_migrations` + runner que aplique solo lo pendiente en cada deploy (hook predeploy EB, modelo LabFlow). **`DB_SYNCHRONIZE=false` se mantiene** (red de seguridad; `synchronize=true` en prod puede DROPear datos). Runbook: `docs/deploy/RUNBOOK-DEPLOY-SEGURO.md` §A4. *(Prioridad: Media)*
+
+---
+
 > 🤝 **Coordinación entre agentes (Claude + Gemini):** la **fuente única de verdad del estado** es este `tablero_control.md` + `docs/backlog.json`. Todo trabajo/propuesta se registra acá con **responsable**. Regla de artefactos: **uno canónico**; los duplicados se marcan **SUPERSEDIDO** apuntando al vigente. Las memorias privadas de cada agente **no** son estado compartido. Editar el tablero **solo si está libre** (no pisar al otro agente).
 
 ---
