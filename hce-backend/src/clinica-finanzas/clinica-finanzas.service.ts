@@ -26,17 +26,26 @@ export class CreatePresupuestoDto {
   descuento?: number;
   senhaPorcentaje?: number;
   notas?: string;
+  // --- Campos odontológicos PAMI / OS (aditivos, opcionales) ---
+  rxPresentadas?: number;
+  obraSocial?: string;
+  cantidadCuotas?: number;
+  fechaPresentacion?: string; // ISO date (YYYY-MM-DD)
+  fechaLiquidacion?: string;  // ISO date (YYYY-MM-DD)
   items: CreatePresupuestoItemDto[];
 }
 
 export class CreatePresupuestoItemDto {
   snomedCode: string;
   snomedDisplay: string;
+  codigoNomenclador?: string; // código de facturación a la OS (distinto del SNOMED clínico)
   diente?: string;
   cara?: string;
+  detalle?: string;           // texto libre (puentes multi-pieza, notas)
   cantidad?: number;
   precioUnitario: number;
   orden?: number;
+  sourceResourceId?: string;  // recurso FHIR planificado que originó la línea
 }
 
 export class RegistrarPagoDto {
@@ -156,6 +165,11 @@ export class ClinicaFinanzasService {
       senhaPorcentaje,
       senhaMonto,
       notas: dto.notas,
+      rxPresentadas: dto.rxPresentadas ?? null,
+      obraSocial: dto.obraSocial ?? null,
+      cantidadCuotas: dto.cantidadCuotas ?? null,
+      fechaPresentacion: dto.fechaPresentacion ? new Date(dto.fechaPresentacion) : null,
+      fechaLiquidacion: dto.fechaLiquidacion ? new Date(dto.fechaLiquidacion) : null,
       createdBy: userId,
     });
 
@@ -167,8 +181,11 @@ export class ClinicaFinanzasService {
         tenantId,
         snomedCode: item.snomedCode,
         snomedDisplay: item.snomedDisplay,
+        codigoNomenclador: item.codigoNomenclador ?? null,
         diente: item.diente,
         cara: item.cara,
+        detalle: item.detalle ?? null,
+        sourceResourceId: item.sourceResourceId ?? null,
         cantidad: item.cantidad || 1,
         precioUnitario: item.precioUnitario,
         subtotal: item.precioUnitario * (item.cantidad || 1),
@@ -196,8 +213,11 @@ export class ClinicaFinanzasService {
           tenantId,
           snomedCode: item.snomedCode,
           snomedDisplay: item.snomedDisplay,
+          codigoNomenclador: item.codigoNomenclador ?? null,
           diente: item.diente,
           cara: item.cara,
+          detalle: item.detalle ?? null,
+          sourceResourceId: item.sourceResourceId ?? null,
           cantidad: item.cantidad || 1,
           precioUnitario: item.precioUnitario,
           subtotal: item.precioUnitario * (item.cantidad || 1),
@@ -218,6 +238,14 @@ export class ClinicaFinanzasService {
     if (dto.senhaPorcentaje !== undefined) {
       presupuesto.senhaPorcentaje = dto.senhaPorcentaje;
     }
+    // Cabecera contable odontológica (aditiva, opcional)
+    if (dto.rxPresentadas !== undefined) presupuesto.rxPresentadas = dto.rxPresentadas;
+    if (dto.obraSocial !== undefined) presupuesto.obraSocial = dto.obraSocial;
+    if (dto.cantidadCuotas !== undefined) presupuesto.cantidadCuotas = dto.cantidadCuotas;
+    if (dto.fechaPresentacion !== undefined)
+      presupuesto.fechaPresentacion = dto.fechaPresentacion ? new Date(dto.fechaPresentacion) : null;
+    if (dto.fechaLiquidacion !== undefined)
+      presupuesto.fechaLiquidacion = dto.fechaLiquidacion ? new Date(dto.fechaLiquidacion) : null;
     presupuesto.senhaMonto = presupuesto.total * (presupuesto.senhaPorcentaje / 100);
 
     await this.presupuestoRepo.save(presupuesto);

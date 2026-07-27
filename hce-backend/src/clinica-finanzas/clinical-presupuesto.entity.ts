@@ -46,6 +46,28 @@ export class ClinicalPresupuesto {
   @Column({ type: 'varchar', nullable: true })
   notas?: string | null;
 
+  // --- Campos del presupuesto odontológico PAMI / OS (aditivos, nullable) ---
+
+  // Cantidad de radiografías (RX) presentadas a la Obra Social. En el papel es un conteo.
+  @Column({ name: 'rx_presentadas', type: 'int', nullable: true })
+  rxPresentadas?: number | null;
+
+  // Obra Social a la que se presenta el presupuesto. v1: texto libre (futuro: FK catálogo OS).
+  @Column({ name: 'obra_social', type: 'varchar', length: 255, nullable: true })
+  obraSocial?: string | null;
+
+  // Cantidad de cuotas pactadas. Informativo: sugiere valor de cuota = total / cantidadCuotas.
+  @Column({ name: 'cantidad_cuotas', type: 'int', nullable: true })
+  cantidadCuotas?: number | null;
+
+  // Fecha de presentación del presupuesto a la Obra Social.
+  @Column({ name: 'fecha_presentacion', type: 'date', nullable: true })
+  fechaPresentacion?: Date | null;
+
+  // Fecha de liquidación / pago por parte de la Obra Social.
+  @Column({ name: 'fecha_liquidacion', type: 'date', nullable: true })
+  fechaLiquidacion?: Date | null;
+
   @Column({ name: 'created_by', length: 100 })
   createdBy: string;
 
