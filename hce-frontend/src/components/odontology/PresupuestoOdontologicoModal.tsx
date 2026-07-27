@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
 import { X, Plus, Trash2, FileText, Wallet, ClipboardList, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
@@ -87,6 +87,45 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [okMsg, setOkMsg] = useState('');
+  const [presupuestoId, setPresupuestoId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Al abrir: si el paciente YA tiene un presupuesto en borrador, lo cargamos para editar
+  // (evita duplicados y muestra lo guardado). Si no, se queda con el auto-cargado del plan.
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await axios.get(`${API_URL}/clinica/finanzas/presupuesto`, { headers: authHeaders() });
+        const arr = Array.isArray(r.data) ? r.data : (r.data?.data || []);
+        const borradores = arr.filter((p: { patientId?: string; estado?: string }) => p.patientId === patientId && p.estado === 'borrador');
+        if (borradores.length > 0) {
+          const reciente = borradores.sort((a: { fechaEmision?: string; createdAt?: string }, b: { fechaEmision?: string; createdAt?: string }) =>
+            (b.fechaEmision || b.createdAt || '').localeCompare(a.fechaEmision || a.createdAt || ''))[0];
+          const full = (await axios.get(`${API_URL}/clinica/finanzas/presupuesto/${reciente.id}`, { headers: authHeaders() })).data;
+          setPresupuestoId(full.id);
+          if (Array.isArray(full.items) && full.items.length) {
+            setLineas(full.items.map((it: Record<string, unknown>) => ({
+              uid: uid(),
+              sourceResourceId: (it.sourceResourceId as string) || undefined,
+              codigoNomenclador: (it.codigoNomenclador as string) || '',
+              snomedCode: (it.snomedCode as string) || 'GENERAL',
+              snomedDisplay: (it.snomedDisplay as string) || '',
+              cantidad: Number(it.cantidad) || 1,
+              precioUnitario: Number(it.precioUnitario) || 0,
+              detalle: (it.detalle as string) || '',
+            })));
+          }
+          setRxPresentadas(full.rxPresentadas != null ? String(full.rxPresentadas) : '');
+          setObraSocial(full.obraSocial || '');
+          setCantidadCuotas(full.cantidadCuotas != null ? String(full.cantidadCuotas) : '');
+          setFechaPresentacion((full.fechaPresentacion || '').slice(0, 10));
+          setFechaLiquidacion((full.fechaLiquidacion || '').slice(0, 10));
+        }
+      } catch { /* si falla la carga, se queda con el auto-cargado del plan (POST nuevo) */ }
+      finally { setLoading(false); }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const total = useMemo(
     () => lineas.reduce((s, l) => s + (Number(l.precioUnitario) || 0) * (Number(l.cantidad) || 1), 0),
@@ -121,8 +160,13 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
           precioUnitario: Number(l.precioUnitario) || 0,
         })),
       };
-      await axios.post(`${API_URL}/clinica/finanzas/presupuesto`, dto, { headers: authHeaders() });
-      setOkMsg('Presupuesto guardado en Finanzas.');
+      if (presupuestoId) {
+        await axios.patch(`${API_URL}/clinica/finanzas/presupuesto/${presupuestoId}`, dto, { headers: authHeaders() });
+        setOkMsg('Presupuesto actualizado.');
+      } else {
+        await axios.post(`${API_URL}/clinica/finanzas/presupuesto`, dto, { headers: authHeaders() });
+        setOkMsg('Presupuesto guardado en Finanzas.');
+      }
       onSaved?.();
       setTimeout(onClose, 1000);
     } catch (e) {
@@ -155,7 +199,11 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
         <div style={{ padding: '1.1rem 1.4rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>Plan de Tratamiento — Presupuesto</h3>
-            <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: 'var(--color-muted)' }}>{plannedResources.length} tratamiento(s) planificado(s) auto-cargados</p>
+            <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+              {loading ? 'Cargando presupuesto del paciente…'
+                : presupuestoId ? '✏️ Editando el presupuesto en borrador del paciente'
+                : `${plannedResources.length} tratamiento(s) planificado(s) auto-cargados`}
+            </p>
           </div>
           <button onClick={onClose} aria-label="Cerrar" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}><X size={22} /></button>
         </div>
