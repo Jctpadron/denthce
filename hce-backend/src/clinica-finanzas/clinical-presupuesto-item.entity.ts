@@ -18,11 +18,26 @@ export class ClinicalPresupuestoItem {
   @Column({ name: 'snomed_display', length: 255 })
   snomedDisplay: string;
 
+  // Código del nomenclador de facturación (nacional / PAMI / OS). Eje distinto del snomedCode
+  // (terminología clínica): éste es el código con el que se factura a la Obra Social.
+  @Column({ name: 'codigo_nomenclador', type: 'varchar', length: 50, nullable: true })
+  codigoNomenclador?: string | null;
+
   @Column({ type: 'varchar', length: 10, nullable: true })
   diente?: string | null;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
   cara?: string | null;
+
+  // Texto libre del "Detalle de tratamiento" (dientes, cara, puente 15-17, etc.) para casos
+  // que no encajan en diente/cara estructurados.
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  detalle?: string | null;
+
+  // Trazabilidad al recurso FHIR planificado del odontograma que originó esta línea.
+  // Evita re-importar la misma línea y permite marcar el plan como "presupuestado".
+  @Column({ name: 'source_resource_id', type: 'varchar', length: 255, nullable: true })
+  sourceResourceId?: string | null;
 
   @Column({ default: 1 })
   cantidad: number;
