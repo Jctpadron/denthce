@@ -218,6 +218,14 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
+### Deploy a prod + Feature Presupuesto odontológico (2026-07-21)
+*Handoff: `docs/walkthroughs/2026-07-21_deploy_gating_gobernanza_y_presupuesto.md`. Responsable: Claude.*
+
+- [x] **DEPLOY.1:** Deploy a prod de `main` — **activó gating enforcement + alta de laboratorio** (backend `prod-20260721-1542`, front alineado). Smoke OK. Prep del gating (finanzas-clinicas + tenant_ids Keycloak) aplicada para no romper a nadie. *(Prioridad: Alta)*
+- [ ] **PRES.1:** **Modal de presupuesto odontológico** — al armar el Plan del odontograma, modal que digitaliza el formulario PAMI reusando `clinica_presupuestos`. Diseño (ux+architect) + backend + frontend HECHOS en rama `feature/presupuesto-odontologico` (revisor APROBADO). **Falta:** aplicar migración `20260721_1500_*.sql`, gates security/qa/ux, push+PR, deploy. *(Prioridad: Media)*
+
+---
+
 > 🤝 **Coordinación entre agentes (Claude + Gemini):** la **fuente única de verdad del estado** es este `tablero_control.md` + `docs/backlog.json`. Todo trabajo/propuesta se registra acá con **responsable**. Regla de artefactos: **uno canónico**; los duplicados se marcan **SUPERSEDIDO** apuntando al vigente. Las memorias privadas de cada agente **no** son estado compartido. Editar el tablero **solo si está libre** (no pisar al otro agente).
 
 ---
