@@ -4,8 +4,8 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { ModulesGuard } from '../auth/modules.guard';
 import { RequiresModule } from '../auth/requires-module.decorator';
-import {
-  ClinicaFinanzasService,
+import { ClinicaFinanzasService } from './clinica-finanzas.service';
+import type {
   CreatePrecioDto,
   UpdatePrecioDto,
   CreatePresupuestoDto,

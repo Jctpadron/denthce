@@ -9,19 +9,19 @@ import { ClinicalGasto } from './clinical-gasto.entity';
 
 // --- DTOs ---
 
-export class CreatePrecioDto {
+export interface CreatePrecioDto {
   snomedCode: string;
   snomedDisplay: string;
   precio: number;
 }
 
-export class UpdatePrecioDto {
+export interface UpdatePrecioDto {
   snomedDisplay?: string;
   precio?: number;
   active?: boolean;
 }
 
-export class CreatePresupuestoDto {
+export interface CreatePresupuestoDto {
   patientId: string;
   descuento?: number;
   senhaPorcentaje?: number;
@@ -35,7 +35,7 @@ export class CreatePresupuestoDto {
   items: CreatePresupuestoItemDto[];
 }
 
-export class CreatePresupuestoItemDto {
+export interface CreatePresupuestoItemDto {
   snomedCode: string;
   snomedDisplay: string;
   codigoNomenclador?: string; // código de facturación a la OS (distinto del SNOMED clínico)
@@ -48,7 +48,7 @@ export class CreatePresupuestoItemDto {
   sourceResourceId?: string;  // recurso FHIR planificado que originó la línea
 }
 
-export class RegistrarPagoDto {
+export interface RegistrarPagoDto {
   patientId: string;
   presupuestoId?: string;
   tipo: string; // senha | cuota | pago_directo
@@ -59,7 +59,7 @@ export class RegistrarPagoDto {
   notas?: string;
 }
 
-export class CreateGastoDto {
+export interface CreateGastoDto {
   categoria: string;
   descripcion: string;
   monto: number;
