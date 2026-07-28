@@ -478,6 +478,11 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
 
   const existing = clinicalResources.filter((r) => readLayer(r) === 'existing');
   const planned = clinicalResources.filter((r) => readLayer(r) === 'planned');
+  // Ficha de Atención: SOLO tratamientos realizados (Procedure completado), NO patologías
+  // previas (que son Condition en la misma capa "Existente"). Fix de la fuente de la ficha.
+  const realizados = existing.filter(
+    (r) => r.resourceType === 'Procedure' && r.status === 'completed',
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', minWidth: 0, position: 'relative' }}>
@@ -1385,7 +1390,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
         <PresupuestoOdontologicoModal
           patientId={patientId}
           plannedResources={planned}
-          realizadoResources={existing}
+          realizadoResources={realizados}
           onClose={() => setShowPresupuesto(false)}
         />
       )}

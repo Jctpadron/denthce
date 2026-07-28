@@ -1140,5 +1140,338 @@
         "entregables": []
       }
     ]
+  },
+  {
+    "id": "REQ-009-FIN-9.1",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Modal presupuesto — pestaña Estado Contable: resumen Total/Pagado/Saldo vivo, valor de cuota, grilla de pagos (Fecha·Importe·Saldo decreciente), registrar pago y transiciones de estado (presentar/aceptar/cancelar). Front-only reusando endpoints de Finanzas (cuenta-corriente, pago).",
+    "prioridad": "alta",
+    "estado": "en_progreso",
+    "agentes_asignados": [
+      "orchestrator",
+      "architect"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Implementada la pestaña Estado Contable (A). Compila (tsc) y lintea limpio. En verificación runtime por qa.",
+        "entregables": [
+          "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.2",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Ficha de Atención real: filtrar tratamientos realizados (Procedure con status completed) excluyendo patologías previas (Condition) que se colaban desde la capa Existente. Columnas Fecha·Código·Nº diente·Cara·Firma (pendiente).",
+    "prioridad": "alta",
+    "estado": "en_progreso",
+    "agentes_asignados": [
+      "orchestrator"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/odontology/OdontogramPAMI.tsx",
+      "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Corregida la fuente de la Ficha (B). En verificación runtime por qa.",
+        "entregables": [
+          "hce-frontend/src/components/odontology/OdontogramPAMI.tsx",
+          "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.3",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Firma de conformidad del paciente POR cada tratamiento realizado: captura manuscrita en canvas → PNG, tabla append-only odontology_patient_signatures (puntero de almacenamiento agnóstico local→S3 + hash SHA-256). Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. BLOQUEANTES de esquema: signed_content_snapshot inmutable, +5 columnas FHIR (Provenance/Signature, código 1.2.840.10065.1.12.1.7), hash_algo, descarga por endpoint autenticado, auditoría PATIENT_SIGN/VIEW. Trigger append-only + GRANT.",
+    "prioridad": "alta",
+    "estado": "en_progreso",
+    "agentes_asignados": [
+      "orchestrator",
+      "architect",
+      "security",
+      "fhir-mcp",
+      "ux"
+    ],
+    "entregables": [
+      "docs/design/firma-conformidad-paciente-modelo-datos.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Diseño + gates cerrados. Pendiente codear con los bloqueantes.",
+        "entregables": [
+          "docs/design/firma-conformidad-paciente-modelo-datos.md"
+        ]
+      },
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Firma implementada y verificada en backend: tabla append-only con trigger de inmutabilidad, snapshot inmutable, hash SHA-256, descarga autenticada (401 sin token), 409 una vigente por prestación, auditoría PATIENT_SIGN/VIEW. Frontend: canvas de firma en la Ficha. Falta: gates security/revisor + confirmación visual.",
+        "entregables": [
+          "hce-backend/src/odontology/odontology-patient-signature.entity.ts",
+          "hce-backend/src/odontology/odontology-patient-signature.service.ts",
+          "hce-backend/src/odontology/odontology-patient-signature.controller.ts",
+          "hce-backend/src/migrations/20260727_1600_firma_conformidad_paciente.sql",
+          "hce-frontend/src/components/odontology/SignaturePadModal.tsx"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.4",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Adjuntos RX/PDF (imágenes+PDF) al presupuesto y a cada prestación: tabla polimórfica clinical_attachments, soft-delete, validación magic-bytes, descarga por endpoint autenticado con filtro tenant. Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. Mapeo DocumentReference (no Media). BLOQUEANTES: magic-bytes, validación cross-tenant de owner_id polimórfico, +6 columnas FHIR (hash_algo bloqueante), auditoría ATTACH_UPLOAD/DOWNLOAD/DELETE.",
+    "prioridad": "alta",
+    "estado": "en_progreso",
+    "agentes_asignados": [
+      "orchestrator",
+      "architect",
+      "security",
+      "fhir-mcp",
+      "ux"
+    ],
+    "entregables": [
+      "docs/design/adjuntos-presupuesto-ficha-modelo-datos.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Diseño + gates cerrados. Pendiente codear con los bloqueantes.",
+        "entregables": [
+          "docs/design/adjuntos-presupuesto-ficha-modelo-datos.md"
+        ]
+      },
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Adjuntos implementados y verificados en backend: tabla polimórfica clinical_attachments, magic-bytes (400 en mismatch), validación cross-tenant del owner + patientId derivado, descarga autenticada (401 sin token, Content-Disposition), soft-delete, auditoría UPLOAD/DOWNLOAD/DELETE. Frontend: panel de adjuntos en Presupuesto y por prestación en la Ficha. Falta: gates security/revisor + confirmación visual.",
+        "entregables": [
+          "hce-backend/src/odontology/clinical-attachment.entity.ts",
+          "hce-backend/src/odontology/clinical-attachment.service.ts",
+          "hce-backend/src/odontology/clinical-attachment.controller.ts",
+          "hce-backend/src/migrations/20260727_1700_clinical_attachments.sql",
+          "hce-frontend/src/components/odontology/ClinicalAttachments.tsx"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-001-INF-1.11",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Exposición de ePHI: /uploads se sirve estático SIN autenticación (main.ts). Cualquier archivo subido (incl. adjuntos de pacientes) es descargable por URL sin token ni filtro de tenant. Severidad Alta. Migrar los adjuntos ya subidos fuera de la estática pública y reemplazar express.static(/uploads) por un endpoint autenticado con rol + filtro tenant + auditoría de descarga.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "orchestrator",
+      "security",
+      "devops"
+    ],
+    "entregables": [
+      "hce-backend/src/main.ts",
+      "hce-backend/src/patient/file-upload.controller.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Hallazgo del gate de seguridad (firma/adjuntos). Registrado como tarea rastreable separada.",
+        "entregables": [
+          "hce-backend/src/main.ts",
+          "hce-backend/src/patient/file-upload.controller.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.5",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Tests unitarios de clinica-finanzas.service (TDD ausente en lógica financiera crítica): pago sobre cada estado no-pagable (400), aislamiento cross-tenant (404), borrado con pagos (bloqueado), recálculo de estado en_curso/pagado, getCuentaCorriente (saldo, max(0,...)).",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "qa"
+    ],
+    "entregables": [
+      "hce-backend/src/clinica-finanzas/clinica-finanzas.service.spec.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "revisor",
+        "accion": "Hallazgo del gate del revisor (media): fix BUG-2 tocó dinero/tenant sin cobertura de tests. Verificado en runtime, pero falta red→green formal.",
+        "entregables": [
+          "hce-backend/src/clinica-finanzas/clinica-finanzas.service.spec.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.6",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Robustez de API: validar precioUnitario>0 y cantidad>=1 en el backend (createPresupuesto/updatePresupuesto). Hoy el front lo valida pero el backend usa cantidad||1 y no valida precio → un cliente directo puede crear items con precio 0.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "qa"
+    ],
+    "entregables": [
+      "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "revisor",
+        "accion": "Hallazgo del gate del revisor (media): asimetría de validación front/back confirmada.",
+        "entregables": [
+          "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-001-INF-1.12",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Cifrado en reposo del volumen que aloja ePHI (private-uploads: firmas PNG + adjuntos RX/PDF). En AWS EB/EC2: EBS encryption (KMS). Migración futura a S3 con SSE-KMS + bucket privado + presigned GET de corta vida (el diseño ya es storage-agnóstico: storage_backend/storage_key).",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "devops",
+      "security"
+    ],
+    "entregables": [
+      "infra"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "security",
+        "accion": "Diferible del gate de diseño de firma/adjuntos: el blob local no está cifrado en reposo. No bloquea el merge; sí el manejo de ePHI a escala.",
+        "entregables": [
+          "infra"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-001-INF-1.13",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Configurar trust proxy en main.ts (app.set(\"trust proxy\", <cadena>)) para que req.ip capture la IP real del cliente detrás de Cloudflare Tunnel + reverse proxy. Hoy source_ip de la firma de conformidad guarda la IP del proxy → degrada el valor probatorio (no-repudio). Media.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "devops",
+      "security"
+    ],
+    "entregables": [
+      "hce-backend/src/main.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "revisor",
+        "accion": "Hallazgo del gate técnico de C+D: req.ip sin trust proxy degrada source_ip en prod.",
+        "entregables": [
+          "hce-backend/src/main.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.7",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Recaptura/supersede de firma de conformidad (si el paciente firmó mal). El andamiaje existe (columna superseded_by, trigger que permite marcarlo una vez, acción de auditoría PATIENT_SIGN_SUPERSEDE), pero falta el método de servicio que ejecute el supersede; hoy la 2da firma sobre una prestación lanza 409. Baja.",
+    "prioridad": "baja",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "product"
+    ],
+    "entregables": [
+      "hce-backend/src/odontology/odontology-patient-signature.service.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "revisor",
+        "accion": "Andamiaje intencional sin path muerto; convertir en tarea si producto requiere recaptura.",
+        "entregables": [
+          "hce-backend/src/odontology/odontology-patient-signature.service.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-001-INF-1.14",
+    "modulo_id": 1,
+    "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
+    "descripcion": "Rate limit poco realista: express-rate-limit 100 req/15min POR IP (main.ts:30). Sin trust proxy, detrás de Cloudflare/reverse proxy la clave puede ser la IP del proxy → TODA una clínica (o varias) comparte un mismo bucket de 100/15min. Un SPA dispara varias requests por pantalla → 429 en uso normal. Además el 429 se emite ANTES del middleware CORS → el navegador no puede leer el cuerpo y muestra error genérico. Acciones: subir el límite (o excluir GETs autenticados), keyear por usuario/tenant en vez de IP, y asegurar headers CORS en la respuesta 429.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "devops",
+      "security"
+    ],
+    "entregables": [
+      "hce-backend/src/main.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Detectado al probar adjuntos: mis tests agotaron el cupo y las subidas dieron 429 mostrado como error genérico.",
+        "entregables": [
+          "hce-backend/src/main.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.8",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Fan-out de requests en la Ficha del modal: al abrir la pestaña Ficha se dispara 1 GET de firma por prestación + 1 GET de adjuntos por prestación (N+N). Para un paciente con muchas prestaciones completadas puede acercarse al límite de rate. Batchear: endpoint que devuelva firmas vigentes por lista de resourceIds (o por paciente) y adjuntos por lista de owners, para pasar los datos hacia abajo en 1-2 requests en vez de 2N.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx",
+      "hce-backend/src/odontology/odontology-patient-signature.controller.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Detectado junto al rate limit: la Ficha hace N+N GETs; conviene batchear.",
+        "entregables": [
+          "frontend"
+        ]
+      }
+    ]
   }
 ]
