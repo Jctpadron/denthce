@@ -1,8 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { X, Plus, Trash2, FileText, Wallet, ClipboardList, Loader2, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
+import { X, Plus, Trash2, FileText, Wallet, ClipboardList, Loader2, CheckCircle, AlertCircle, HelpCircle, PenLine, Eye, Paperclip } from 'lucide-react';
 import keycloak from '../../utils/keycloak-config';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { SignaturePadModal } from './SignaturePadModal';
+import { ClinicalAttachments } from './ClinicalAttachments';
 
 /**
  * Modal de Plan de Tratamiento / Presupuesto odontológico.
@@ -24,6 +26,7 @@ interface PlannedResource {
 }
 
 interface RealizadoResource extends PlannedResource {
+  status?: string;
   performedDateTime?: string;
   meta?: { lastUpdated?: string };
 }
@@ -47,6 +50,30 @@ interface Linea {
 
 // Límites de columna en la BD (evita 500 "value too long")
 const MAX = { codigo: 50, prestacion: 255, detalle: 255, obraSocial: 255 };
+
+interface PagoRow {
+  id: string;
+  monto: number | string;
+  fechaPago?: string;
+  tipo?: string;
+  metodoPago?: string;
+  comprobante?: string;
+}
+
+interface Firma {
+  id: string;
+  resourceId: string;
+  encounterId: string | null;
+  signedAt: string;
+  contentHash: string;
+  capturedByName: string | null;
+  imageUrl: string;
+  snapshot?: unknown;
+}
+
+// El presupuesto acepta pagos solo si ya fue aceptado (o está en curso). Registrar un pago
+// sobre un borrador dejaría el estado incoherente (regla del gate de architect).
+const PUEDE_PAGAR = (estado: string) => estado === 'aceptado' || estado === 'en_curso';
 
 interface Props {
   patientId: string;
@@ -90,6 +117,11 @@ const inputStyle: React.CSSProperties = {
   color: 'var(--color-text)', fontSize: '0.85rem', minWidth: 0, boxSizing: 'border-box',
 };
 
+const btnGhost: React.CSSProperties = {
+  padding: '0.35rem 0.75rem', borderRadius: '8px', border: '1px solid var(--color-primary)',
+  background: 'none', color: 'var(--color-primary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.78rem',
+};
+
 // Layout de la tabla responsive de líneas (desktop ≥768px):
 // Cód. Nomenclador | Prestación | Cant. | Importe unit. | Subtotal | Detalle | (borrar)
 const GRID_COLS = '0.9fr 1.6fr 0.5fr 0.9fr 0.9fr 1.2fr auto';
@@ -115,6 +147,97 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const [okMsg, setOkMsg] = useState('');
   const [presupuestoId, setPresupuestoId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // ── Estado contable (A): resumen persistido + pagos + registrar pago ──
+  const [estado, setEstado] = useState<string>('borrador');
+  const [pagos, setPagos] = useState<PagoRow[]>([]);
+  const [ccResumen, setCcResumen] = useState<{ total: number; pagado: number; saldo: number } | null>(null);
+  const [pagoMonto, setPagoMonto] = useState('');
+  const [pagoTipo, setPagoTipo] = useState('cuota');
+  const [pagoMetodo, setPagoMetodo] = useState('efectivo');
+  const [pagoFecha, setPagoFecha] = useState('');
+  const [pagoSaving, setPagoSaving] = useState(false);
+  const [contableMsg, setContableMsg] = useState('');
+
+  // ── Firma de conformidad del paciente por prestación (C) ──
+  const [firmas, setFirmas] = useState<Record<string, Firma>>({});
+  const [firmandoResourceId, setFirmandoResourceId] = useState<string | null>(null);
+  const [firmaSaving, setFirmaSaving] = useState(false);
+  const firmasLoaded = useRef(false);
+
+  // Al abrir la pestaña Ficha, carga las firmas vigentes de cada prestación realizada (una vez).
+  useEffect(() => {
+    if (tab !== 'ficha' || firmasLoaded.current || realizadoResources.length === 0) return;
+    firmasLoaded.current = true;
+    (async () => {
+      const map: Record<string, Firma> = {};
+      await Promise.all(realizadoResources.map(async (r) => {
+        try {
+          const resp = await axios.get(`${API_URL}/odontology/patient/${patientId}/resource/${r.id}/signature`, { headers: authHeaders() });
+          if (resp.data) map[r.id] = resp.data;
+        } catch { /* sin firma */ }
+      }));
+      setFirmas(map);
+    })();
+  }, [tab, realizadoResources, patientId]);
+
+  const capturarFirma = async (png: Blob) => {
+    if (!firmandoResourceId) return;
+    setFirmaSaving(true); setError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', png, 'firma.png');
+      fd.append('deviceInfo', navigator.userAgent.slice(0, 120));
+      const resp = await axios.post(`${API_URL}/odontology/patient/${patientId}/resource/${firmandoResourceId}/signature`, fd, { headers: authHeaders() });
+      setFirmas((f) => ({ ...f, [firmandoResourceId]: resp.data }));
+      setFirmandoResourceId(null);
+    } catch (e) {
+      const msg = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+      setError(msg || 'No se pudo registrar la firma.');
+    } finally {
+      setFirmaSaving(false);
+    }
+  };
+
+  // Abre el PNG de la firma (endpoint autenticado) en una pestaña nueva.
+  const verFirma = async (sig: Firma) => {
+    try {
+      const resp = await axios.get(`${API_URL}${sig.imageUrl}`, { headers: authHeaders(), responseType: 'blob' });
+      window.open(URL.createObjectURL(resp.data), '_blank');
+    } catch { /* noop */ }
+  };
+
+  // Celda "Firma de conformidad" de la Ficha: firmado (con Ver) o botón para capturar.
+  const firmaCell = (resourceId: string) => {
+    const sig = firmas[resourceId];
+    if (sig) {
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: 'var(--color-emerald)', fontWeight: 700 }}>
+          <CheckCircle size={13} /> Firmado
+          <button type="button" onClick={() => verFirma(sig)} title="Ver firma del paciente" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', display: 'inline-flex', padding: 0 }}><Eye size={14} /></button>
+        </span>
+      );
+    }
+    return (
+      <button type="button" onClick={() => setFirmandoResourceId(resourceId)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.3rem 0.55rem', borderRadius: '7px', border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.7rem' }}>
+        <PenLine size={13} /> Capturar firma
+      </button>
+    );
+  };
+
+  // Trae el resumen persistido (cuenta corriente) y los pagos del presupuesto abierto.
+  const refreshContable = async (pid: string) => {
+    try {
+      const [cc, pg] = await Promise.all([
+        axios.get(`${API_URL}/clinica/finanzas/cuenta-corriente/${patientId}`, { headers: authHeaders() }),
+        axios.get(`${API_URL}/clinica/finanzas/pago?presupuestoId=${pid}`, { headers: authHeaders() }),
+      ]);
+      const dets = cc.data?.presupuestos || [];
+      const det = dets.find((p: { id?: string }) => p.id === pid);
+      if (det) setCcResumen({ total: Number(det.total) || 0, pagado: Number(det.pagado) || 0, saldo: Number(det.saldo) || 0 });
+      setPagos(Array.isArray(pg.data) ? pg.data : (pg.data?.data || []));
+    } catch { /* si falla, la pestaña muestra el total local sin pagos */ }
+  };
 
   // Al abrir: si el paciente YA tiene un presupuesto en borrador, lo cargamos para editar
   // (evita duplicados y muestra lo guardado). Si no, se queda con el auto-cargado del plan.
@@ -167,6 +290,8 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
           setCantidadCuotas(full.cantidadCuotas != null ? String(full.cantidadCuotas) : '');
           setFechaPresentacion((full.fechaPresentacion || '').slice(0, 10));
           setFechaLiquidacion((full.fechaLiquidacion || '').slice(0, 10));
+          setEstado(full.estado || 'borrador');
+          await refreshContable(full.id);
         } else {
           // Sin borrador: aplicamos los precios sugeridos al plan auto-cargado.
           setLineas((ls) => ls.map(conPrecio));
@@ -231,6 +356,42 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
     }
   };
 
+  const registrarPago = async () => {
+    if (!presupuestoId) return;
+    const monto = Number(pagoMonto);
+    if (!(monto > 0)) { setContableMsg('Ingresá un importe mayor a 0.'); return; }
+    setPagoSaving(true); setContableMsg('');
+    try {
+      await axios.post(`${API_URL}/clinica/finanzas/pago`, {
+        patientId, presupuestoId, tipo: pagoTipo, monto, metodoPago: pagoMetodo,
+        fechaPago: pagoFecha || undefined,
+      }, { headers: authHeaders() });
+      setPagoMonto(''); setPagoFecha('');
+      // registrar un pago puede pasar el presupuesto a "pagado" → releer estado + saldo.
+      const full = (await axios.get(`${API_URL}/clinica/finanzas/presupuesto/${presupuestoId}`, { headers: authHeaders() })).data;
+      setEstado(full.estado || estado);
+      await refreshContable(presupuestoId);
+    } catch (e) {
+      const msg = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+      setContableMsg(msg || 'No se pudo registrar el pago.');
+    } finally {
+      setPagoSaving(false);
+    }
+  };
+
+  const transicionar = async (accion: 'presentar' | 'aceptar' | 'cancelar') => {
+    if (!presupuestoId) return;
+    setContableMsg('');
+    try {
+      const r = await axios.post(`${API_URL}/clinica/finanzas/presupuesto/${presupuestoId}/${accion}`, {}, { headers: authHeaders() });
+      setEstado(r.data?.estado || estado);
+      await refreshContable(presupuestoId);
+    } catch (e) {
+      const msg = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+      setContableMsg(msg || 'No se pudo cambiar el estado del presupuesto.');
+    }
+  };
+
   const TABS: { key: Tab; label: string; Icon: typeof FileText }[] = [
     { key: 'presupuesto', label: 'Presupuesto', Icon: FileText },
     { key: 'contable', label: 'Estado contable', Icon: Wallet },
@@ -238,6 +399,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   ];
 
   return (
+    <>
     <div
       onClick={onClose}
       role="dialog"
@@ -375,49 +537,218 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                 </div>
                 <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-text)' }}>Total: {MONEY(total)}</div>
               </div>
+
+              {/* Adjuntos del presupuesto (RX presentadas a la OS, autorizaciones, etc.) */}
+              <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
+                {presupuestoId ? (
+                  <ClinicalAttachments ownerType="presupuesto" ownerId={presupuestoId} label="RX / archivos del presupuesto" />
+                ) : (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>
+                    <Paperclip size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                    Guardá el presupuesto para adjuntar RX o archivos.
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
-          {tab === 'contable' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-              <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Importe total</label>
-                <div style={{ ...inputStyle, background: 'var(--bg-card)', fontWeight: 800 }}>{MONEY(total)}</div>
+          {tab === 'contable' && (() => {
+            // Resumen: prioriza los valores PERSISTIDOS (cuenta corriente) sobre el total local.
+            const totalC = ccResumen?.total ?? total;
+            const pagado = ccResumen?.pagado ?? 0;
+            const saldo = ccResumen ? ccResumen.saldo : totalC;
+            const nCuotas = Number(cantidadCuotas) || 0;
+            const valorCuota = nCuotas > 0 ? totalC / nCuotas : null;
+            const puedePagar = !!presupuestoId && PUEDE_PAGAR(estado);
+            // Saldo decreciente fila por fila (cronológico), como en el papel.
+            const pagosAsc = [...pagos].sort((a, b) => (a.fechaPago || '').localeCompare(b.fechaPago || ''));
+            let acum = 0;
+            const filas = pagosAsc.map((p) => { acum += Number(p.monto) || 0; return { ...p, saldoTras: totalC - acum }; });
+            const ESTADO_LABEL: Record<string, string> = { borrador: 'Borrador', presentado: 'Presentado', aceptado: 'Aceptado', en_curso: 'En curso', pagado: 'Pagado', cancelado: 'Cancelado', vencido: 'Vencido' };
+            const saldoColor = saldo <= 0 ? 'var(--color-emerald)' : 'var(--color-rose)';
+            return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {/* Cabecera del presupuesto (cuotas, obra social, fechas) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Cantidad de cuotas</label>
+                  <input type="number" min={1} value={cantidadCuotas} onChange={(e) => setCantidadCuotas(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Obra social</label>
+                  <input value={obraSocial} maxLength={MAX.obraSocial} onChange={(e) => setObraSocial(e.target.value)} placeholder="OSDE, PAMI…" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Fecha de presentación</label>
+                  <input type="date" value={fechaPresentacion} onChange={(e) => setFechaPresentacion(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Fecha de liquidación</label>
+                  <input type="date" value={fechaLiquidacion} onChange={(e) => setFechaLiquidacion(e.target.value)} style={inputStyle} />
+                </div>
               </div>
-              <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Cantidad de cuotas</label>
-                <input type="number" min={1} value={cantidadCuotas} onChange={(e) => setCantidadCuotas(e.target.value)} style={inputStyle} />
+
+              {/* Resumen económico: cuánto debe el paciente (la visión del dinero) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
+                {[
+                  { l: 'Total presupuesto', v: MONEY(totalC), c: 'var(--color-text)' },
+                  { l: 'Pagado', v: MONEY(pagado), c: 'var(--color-emerald)' },
+                  { l: 'Saldo', v: MONEY(saldo), c: saldoColor, big: true },
+                  ...(valorCuota != null ? [{ l: `Valor cuota (${nCuotas})`, v: MONEY(valorCuota), c: 'var(--color-text)' }] : []),
+                ].map((card) => (
+                  <div key={card.l} style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.7rem 0.85rem', background: 'var(--bg-card)' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{card.l}</div>
+                    <div style={{ fontSize: card.big ? '1.25rem' : '1rem', fontWeight: 800, color: card.c, marginTop: '0.15rem' }}>{card.v}</div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Obra social</label>
-                <input value={obraSocial} maxLength={MAX.obraSocial} onChange={(e) => setObraSocial(e.target.value)} placeholder="OSDE, PAMI…" style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Fecha de presentación</label>
-                <input type="date" value={fechaPresentacion} onChange={(e) => setFechaPresentacion(e.target.value)} style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Fecha de liquidación</label>
-                <input type="date" value={fechaLiquidacion} onChange={(e) => setFechaLiquidacion(e.target.value)} style={inputStyle} />
-              </div>
-              <p style={{ gridColumn: '1 / -1', fontSize: '0.78rem', color: 'var(--color-muted)', margin: 0 }}>
-                Los <strong>pagos</strong> (tabla Fecha/Pago/Saldo) se registran desde <strong>Finanzas → Pagos</strong> una vez guardado el presupuesto. El saldo se calcula: total − Σ pagos.
-              </p>
+
+              {!presupuestoId ? (
+                <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', margin: 0, padding: '0.6rem 0.8rem', border: '1px dashed var(--border-color)', borderRadius: '10px' }}>
+                  Guardá el presupuesto (pestaña <strong>Presupuesto</strong>) para registrar pagos y ver el saldo actualizado.
+                </p>
+              ) : (
+                <>
+                  {/* Estado + transiciones (habilitan el registro de pagos) */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Estado:</span>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 800, padding: '0.2rem 0.6rem', borderRadius: '999px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--color-text)' }}>{ESTADO_LABEL[estado] || estado}</span>
+                    {estado === 'borrador' && (
+                      <button type="button" onClick={() => transicionar('presentar')} style={btnGhost}>Presentar</button>
+                    )}
+                    {estado === 'presentado' && (
+                      <>
+                        <button type="button" onClick={() => transicionar('aceptar')} style={btnGhost}>Aceptar</button>
+                        <button type="button" onClick={() => transicionar('cancelar')} style={{ ...btnGhost, color: 'var(--color-rose)' }}>Cancelar</button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Grilla de pagos: Fecha · Importe · Saldo */}
+                  <div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-text)', marginBottom: '0.4rem' }}>Pagos registrados</div>
+                    {filas.length === 0 ? (
+                      <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', margin: 0 }}>Sin pagos registrados aún.</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: '0.6rem', padding: '0 0.6rem 0.3rem', borderBottom: '1px solid var(--border-color)' }}>
+                          <div style={headerCellStyle}>Fecha</div>
+                          <div style={{ ...headerCellStyle, textAlign: 'right' }}>Importe</div>
+                          <div style={{ ...headerCellStyle, textAlign: 'right' }}>Saldo</div>
+                          <div style={headerCellStyle}>Medio</div>
+                        </div>
+                        {filas.map((p, i) => (
+                          <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: '0.6rem', padding: '0.4rem 0.6rem', alignItems: 'center', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px', fontSize: '0.82rem' }}>
+                            <span style={{ color: 'var(--color-text)' }}>{(p.fechaPago || '').slice(0, 10)}</span>
+                            <span style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-text)' }}>{MONEY(Number(p.monto) || 0)}</span>
+                            <span style={{ textAlign: 'right', color: p.saldoTras <= 0 ? 'var(--color-emerald)' : 'var(--color-muted)' }}>{MONEY(p.saldoTras)}</span>
+                            <span style={{ color: 'var(--color-muted)' }}>{p.metodoPago || '—'}{p.tipo ? ` · ${p.tipo}` : ''}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Registrar pago (solo si el presupuesto fue aceptado / en curso) */}
+                  {puedePagar ? (
+                    <div style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.85rem', background: 'var(--bg-card)' }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-text)', marginBottom: '0.6rem' }}>Registrar pago</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.6rem', alignItems: 'end' }}>
+                        <div>
+                          <label htmlFor="pago-monto" style={labelStyle}>Importe</label>
+                          <input id="pago-monto" type="number" min={0} step="0.01" value={pagoMonto} onChange={(e) => setPagoMonto(e.target.value)} style={inputStyle} />
+                        </div>
+                        <div>
+                          <label htmlFor="pago-fecha" style={labelStyle}>Fecha</label>
+                          <input id="pago-fecha" type="date" value={pagoFecha} onChange={(e) => setPagoFecha(e.target.value)} style={inputStyle} />
+                        </div>
+                        <div>
+                          <label htmlFor="pago-tipo" style={labelStyle}>Tipo</label>
+                          <select id="pago-tipo" value={pagoTipo} onChange={(e) => setPagoTipo(e.target.value)} style={inputStyle}>
+                            <option value="senha">Seña</option>
+                            <option value="cuota">Cuota</option>
+                            <option value="pago_directo">Pago directo</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="pago-metodo" style={labelStyle}>Medio</label>
+                          <select id="pago-metodo" value={pagoMetodo} onChange={(e) => setPagoMetodo(e.target.value)} style={inputStyle}>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="debito">Débito</option>
+                            <option value="credito">Crédito</option>
+                            <option value="mercadopago">MercadoPago</option>
+                          </select>
+                        </div>
+                        <button type="button" onClick={registrarPago} disabled={pagoSaving} style={{ padding: '0.55rem 1rem', borderRadius: '9px', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: pagoSaving ? 'wait' : 'pointer', fontWeight: 800, height: '38px' }}>
+                          {pagoSaving ? 'Registrando…' : 'Registrar'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--color-muted)', margin: 0 }}>
+                      Para registrar pagos, el presupuesto debe estar <strong>aceptado</strong>. Usá los botones de estado de arriba.
+                    </p>
+                  )}
+                  {contableMsg && <span style={{ color: 'var(--color-rose)', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><AlertCircle size={14} /> {contableMsg}</span>}
+                </>
+              )}
             </div>
-          )}
+            );
+          })()}
 
           {tab === 'ficha' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', margin: 0 }}>Tratamientos <strong>realizados</strong> (derivados del odontograma en capa "Existente"):</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', margin: 0 }}>
+                Tratamientos <strong>realizados</strong> sobre el paciente (prestaciones completadas del odontograma).
+              </p>
               {realizadoResources.length === 0 ? (
                 <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Sin tratamientos realizados registrados aún.</p>
               ) : (
-                realizadoResources.map((r) => (
-                  <div key={r.id} style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem 0.8rem', display: 'flex', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap', background: 'var(--bg-card)' }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 600 }}>{r.code?.text || 'Intervención'} · {detalleDe(r) || 's/pieza'}</span>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--color-muted)' }}>{(r.performedDateTime || r.meta?.lastUpdated || '').slice(0, 10)}</span>
-                  </div>
-                ))
+                <>
+                  {/* Encabezado (desktop): Fecha · Código · Diente · Cara · Firma */}
+                  {!isMobile && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', padding: '0 0.7rem 0.3rem', borderBottom: '1px solid var(--border-color)' }}>
+                      <div style={headerCellStyle}>Fecha</div>
+                      <div style={headerCellStyle}>Prestación / Código</div>
+                      <div style={headerCellStyle}>Nº diente</div>
+                      <div style={headerCellStyle}>Cara</div>
+                      <div style={headerCellStyle}>Firma conformidad</div>
+                    </div>
+                  )}
+                  {realizadoResources.map((r, i) => {
+                    const codigo = r.code?.coding?.[0]?.code || '';
+                    const diente = r.bodySite?.coding?.[0]?.code || '—';
+                    const cara = r.bodySite?.coding?.[1]?.code;
+                    const fecha = (r.performedDateTime || r.meta?.lastUpdated || '').slice(0, 10);
+                    if (isMobile) {
+                      return (
+                        <div key={r.id} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.7rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.3rem', background: 'var(--bg-card)' }}>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text)' }}>{r.code?.text || 'Intervención'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{fecha} · Pieza {diente}{cara && cara !== 'all' ? `/${cara}` : ''}{codigo ? ` · ${codigo}` : ''}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--color-muted)' }}><span>Firma de conformidad:</span> {firmaCell(r.id)}</div>
+                          <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.45rem 0.7rem', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', alignItems: 'center', fontSize: '0.82rem' }}>
+                          <span style={{ color: 'var(--color-muted)' }}>{fecha}</span>
+                          <span style={{ color: 'var(--color-text)', fontWeight: 600 }}>{r.code?.text || 'Intervención'}{codigo ? ` · ${codigo}` : ''}</span>
+                          <span style={{ color: 'var(--color-text)' }}>{diente}</span>
+                          <span style={{ color: 'var(--color-text)' }}>{cara && cara !== 'all' ? cara : '—'}</span>
+                          <span>{firmaCell(r.id)}</span>
+                        </div>
+                        <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact />
+                      </div>
+                    );
+                  })}
+                  <p style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--color-muted)', margin: '0.35rem 0 0', lineHeight: 1.4 }}>
+                    <HelpCircle size={14} style={{ flexShrink: 0, marginTop: '0.1rem' }} aria-hidden="true" />
+                    <span>Tocá <strong>“Capturar firma”</strong> para que el paciente firme su conformidad con cada tratamiento realizado (canvas táctil). La firma queda como evidencia <strong>inmutable y auditada</strong>.</span>
+                  </p>
+                </>
               )}
             </div>
           )}
@@ -438,5 +769,15 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
         </div>
       </div>
     </div>
+
+    {firmandoResourceId && (
+      <SignaturePadModal
+        subtitle="El paciente firma su conformidad con el tratamiento realizado."
+        saving={firmaSaving}
+        onCancel={() => setFirmandoResourceId(null)}
+        onSave={capturarFirma}
+      />
+    )}
+    </>
   );
 };

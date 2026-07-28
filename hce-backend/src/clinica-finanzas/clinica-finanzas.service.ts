@@ -276,6 +276,12 @@ export class ClinicaFinanzasService {
     if (presupuesto.estado !== 'borrador') {
       throw new ForbiddenException('Solo se puede eliminar un presupuesto en estado borrador');
     }
+    // Defensa en profundidad: un borrador no debería tener pagos (registrarPago lo impide), pero
+    // si por datos legacy los tuviera, no lo borramos para no dejar pagos huérfanos.
+    const pagosVinculados = await this.pagoRepo.count({ where: { presupuestoId: id } });
+    if (pagosVinculados > 0) {
+      throw new ForbiddenException('No se puede eliminar un presupuesto con pagos registrados');
+    }
     await this.presupuestoRepo.remove(presupuesto);
   }
 
@@ -289,6 +295,18 @@ export class ClinicaFinanzasService {
   }
 
   async registrarPago(tenantId: string, dto: RegistrarPagoDto, userId: string): Promise<ClinicalPago> {
+    // Si el pago se vincula a un presupuesto, validar que exista en el tenant y que su estado
+    // admita pagos. Evita pagos sobre borradores/cancelados (dejaría el estado incoherente) y
+    // cierra un gap cross-tenant (no se puede pagar contra un presupuesto de otro inquilino).
+    if (dto.presupuestoId) {
+      const presupuesto = await this.presupuestoRepo.findOne({ where: { id: dto.presupuestoId, tenantId } });
+      if (!presupuesto) throw new NotFoundException('Presupuesto no encontrado');
+      if (presupuesto.estado !== 'aceptado' && presupuesto.estado !== 'en_curso') {
+        throw new BadRequestException(
+          `No se pueden registrar pagos sobre un presupuesto en estado '${presupuesto.estado}'. Debe estar aceptado.`,
+        );
+      }
+    }
     const pago = this.pagoRepo.create({
       tenantId,
       patientId: dto.patientId,

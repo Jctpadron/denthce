@@ -18,6 +18,9 @@ import { OdontologyModule } from './odontology/odontology.module';
 import { OdontologyResourceEntity } from './odontology/odontology-resource.entity';
 import { OdontologyEncounterEntity } from './odontology/odontology-encounter.entity';
 import { OdontologyEncounterAuditEntity } from './odontology/odontology-encounter-audit.entity';
+import { OdontologyPatientSignatureEntity } from './odontology/odontology-patient-signature.entity';
+import { ClinicalEvidenceAuditEntity } from './odontology/clinical-evidence-audit.entity';
+import { ClinicalAttachmentEntity } from './odontology/clinical-attachment.entity';
 import { AppointmentModule } from './appointment/appointment.module';
 import { AppointmentEntity } from './appointment/appointment.entity';
 import { AppointmentAuditEntity } from './appointment/appointment-audit.entity';
@@ -64,6 +67,9 @@ import { HealthModule } from './health/health.module';
         OdontologyResourceEntity,
         OdontologyEncounterEntity,
         OdontologyEncounterAuditEntity,
+        OdontologyPatientSignatureEntity,
+        ClinicalEvidenceAuditEntity,
+        ClinicalAttachmentEntity,
         AppointmentEntity,
         AppointmentAuditEntity,
         PlatformModuleEntity,
