@@ -4,7 +4,7 @@ import { X, Plus, Trash2, FileText, Wallet, ClipboardList, Loader2, CheckCircle,
 import keycloak from '../../utils/keycloak-config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { SignaturePadModal } from './SignaturePadModal';
-import { ClinicalAttachments, type Attachment } from './ClinicalAttachments';
+import { ClinicalAttachments } from './ClinicalAttachments';
 
 /**
  * Modal de Plan de Tratamiento / Presupuesto odontológico.
@@ -161,31 +161,21 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
 
   // ── Firma de conformidad del paciente por prestación (C) ──
   const [firmas, setFirmas] = useState<Record<string, Firma>>({});
-  const [adjuntosByProc, setAdjuntosByProc] = useState<Record<string, Attachment[]>>({});
   const [firmandoResourceId, setFirmandoResourceId] = useState<string | null>(null);
   const [firmaSaving, setFirmaSaving] = useState(false);
   const firmasLoaded = useRef(false);
 
-  // Al abrir la Ficha, trae en 2 requests (no 2×N) TODAS las firmas y adjuntos del paciente.
-  // Evita el fan-out que agotaba el rate limit al abrir fichas con muchas prestaciones.
+  // Al abrir la Ficha, trae en 1 request TODAS las firmas vigentes del paciente (batch, no N).
   useEffect(() => {
     if (tab !== 'ficha' || firmasLoaded.current || realizadoResources.length === 0) return;
     firmasLoaded.current = true;
     (async () => {
       try {
-        const [sigResp, attResp] = await Promise.all([
-          axios.get(`${API_URL}/odontology/patient/${patientId}/signatures`, { headers: authHeaders() }),
-          axios.get(`${API_URL}/odontology/patient/${patientId}/attachments`, { headers: authHeaders(), params: { ownerType: 'procedure' } }),
-        ]);
+        const sigResp = await axios.get(`${API_URL}/odontology/patient/${patientId}/signatures`, { headers: authHeaders() });
         const fmap: Record<string, Firma> = {};
         (Array.isArray(sigResp.data) ? sigResp.data : []).forEach((s: Firma) => { if (s.resourceId) fmap[s.resourceId] = s; });
         setFirmas(fmap);
-        const amap: Record<string, Attachment[]> = {};
-        (Array.isArray(attResp.data) ? attResp.data : []).forEach((a: Attachment) => {
-          if (a.ownerId) (amap[a.ownerId] = amap[a.ownerId] || []).push(a);
-        });
-        setAdjuntosByProc(amap);
-      } catch { /* si falla, la Ficha se muestra sin precarga (cada control carga on-demand) */ }
+      } catch { /* si falla, la Ficha se muestra sin firmas precargadas */ }
     })();
   }, [tab, realizadoResources, patientId]);
 
@@ -735,20 +725,16 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                           <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text)' }}>{r.code?.text || 'Intervención'}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{fecha} · Pieza {diente}{cara && cara !== 'all' ? `/${cara}` : ''}{codigo ? ` · ${codigo}` : ''}</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--color-muted)' }}><span>Firma de conformidad:</span> {firmaCell(r.id)}</div>
-                          <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact initialItems={adjuntosByProc[r.id] || []} />
                         </div>
                       );
                     }
                     return (
-                      <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.45rem 0.7rem', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', alignItems: 'center', fontSize: '0.82rem' }}>
-                          <span style={{ color: 'var(--color-muted)' }}>{fecha}</span>
-                          <span style={{ color: 'var(--color-text)', fontWeight: 600 }}>{r.code?.text || 'Intervención'}{codigo ? ` · ${codigo}` : ''}</span>
-                          <span style={{ color: 'var(--color-text)' }}>{diente}</span>
-                          <span style={{ color: 'var(--color-text)' }}>{cara && cara !== 'all' ? cara : '—'}</span>
-                          <span>{firmaCell(r.id)}</span>
-                        </div>
-                        <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact initialItems={adjuntosByProc[r.id] || []} />
+                      <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', padding: '0.45rem 0.7rem', alignItems: 'center', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px', fontSize: '0.82rem' }}>
+                        <span style={{ color: 'var(--color-muted)' }}>{fecha}</span>
+                        <span style={{ color: 'var(--color-text)', fontWeight: 600 }}>{r.code?.text || 'Intervención'}{codigo ? ` · ${codigo}` : ''}</span>
+                        <span style={{ color: 'var(--color-text)' }}>{diente}</span>
+                        <span style={{ color: 'var(--color-text)' }}>{cara && cara !== 'all' ? cara : '—'}</span>
+                        <span>{firmaCell(r.id)}</span>
                       </div>
                     );
                   })}
