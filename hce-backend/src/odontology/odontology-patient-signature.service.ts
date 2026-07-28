@@ -1,15 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
-import { join } from 'path';
-import * as fs from 'fs';
+import { Readable } from 'stream';
 import * as crypto from 'crypto';
 import { OdontologyResourceEntity } from './odontology-resource.entity';
 import { OdontologyPatientSignatureEntity } from './odontology-patient-signature.entity';
 import { ClinicalEvidenceAuditEntity, EvidenceAuditAction } from './clinical-evidence-audit.entity';
-
-/** Directorio PRIVADO (fuera de la estática pública /uploads) para blobs de ePHI. */
-const PRIVATE_DIR = join(process.cwd(), 'private-uploads', 'signatures');
+import { EvidenceStorageService } from './evidence-storage.service';
 
 export interface ActorCtx {
   tenantId: string;
@@ -27,6 +24,7 @@ export class OdontologyPatientSignatureService {
     private readonly resourceRepo: Repository<OdontologyResourceEntity>,
     @InjectRepository(ClinicalEvidenceAuditEntity)
     private readonly auditRepo: Repository<ClinicalEvidenceAuditEntity>,
+    private readonly storage: EvidenceStorageService,
   ) {}
 
   private async audit(
@@ -94,16 +92,15 @@ export class OdontologyPatientSignatureService {
     const contentHash = crypto.createHash('sha256').update(file.buffer).digest('hex');
     const snapshotHash = crypto.createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
 
-    if (!fs.existsSync(PRIVATE_DIR)) fs.mkdirSync(PRIVATE_DIR, { recursive: true });
     const storageKey = `sig-${Date.now()}-${crypto.randomBytes(8).toString('hex')}.png`;
-    fs.writeFileSync(join(PRIVATE_DIR, storageKey), file.buffer);
+    await this.storage.put('signatures', ctx.tenantId, storageKey, file.buffer, 'image/png');
 
     const row = this.sigRepo.create({
       tenantId: ctx.tenantId,
       patientId,
       resourceId,
       encounterId: opts?.encounterId || res.encounterId || null,
-      storageBackend: 'local',
+      storageBackend: this.storage.backend(),
       storageKey,
       mimeType: 'image/png',
       sizeBytes: file.size,
@@ -141,13 +138,12 @@ export class OdontologyPatientSignatureService {
   /**
    * Devuelve el binario de la firma (ruta + mime) tras validar el tenant, y AUDITA la descarga (ePHI).
    */
-  async getImage(ctx: ActorCtx, patientId: string, id: string): Promise<{ path: string; mimeType: string }> {
+  async getImage(ctx: ActorCtx, patientId: string, id: string): Promise<{ stream: Readable; mimeType: string }> {
     const row = await this.sigRepo.findOne({ where: { id, tenantId: ctx.tenantId, patientId } });
     if (!row) throw new NotFoundException('Firma no encontrada.');
-    const path = join(PRIVATE_DIR, row.storageKey);
-    if (!fs.existsSync(path)) throw new NotFoundException('Imagen de la firma no disponible.');
+    const stream = await this.storage.getStream(row.storageBackend, 'signatures', row.tenantId, row.storageKey);
     await this.audit('PATIENT_SIGN_VIEW', ctx, { patientId, entityId: id, payload: { resourceId: row.resourceId } });
-    return { path, mimeType: row.mimeType };
+    return { stream, mimeType: row.mimeType };
   }
 
   /** Proyección para el frontend: nunca expone el blob, solo la URL del endpoint autenticado. */

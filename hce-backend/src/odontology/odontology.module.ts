@@ -12,6 +12,7 @@ import { OdontologyEncounterService } from './odontology-encounter.service';
 import { OdontologyEncounterAuditService } from './odontology-encounter-audit.service';
 import { OdontologyPatientSignatureService } from './odontology-patient-signature.service';
 import { ClinicalAttachmentService } from './clinical-attachment.service';
+import { EvidenceStorageService } from './evidence-storage.service';
 import { OdontologyController } from './odontology.controller';
 import { OdontologyEncounterController } from './odontology-encounter.controller';
 import { OdontologyPatientSignatureController } from './odontology-patient-signature.controller';
@@ -28,7 +29,7 @@ import { OdontologyPdfService } from './odontology-pdf.service';
  */
 @Module({
   imports: [TypeOrmModule.forFeature([OdontologyResourceEntity, OdontologyEncounterEntity, OdontologyEncounterAuditEntity, OdontologyPatientSignatureEntity, ClinicalEvidenceAuditEntity, ClinicalAttachmentEntity, ClinicalPresupuesto, PatientEntity, AppointmentEntity])],
-  providers: [OdontologyService, OdontologyEncounterService, OdontologyEncounterAuditService, OdontologyPatientSignatureService, ClinicalAttachmentService, OdontologyPdfService],
+  providers: [OdontologyService, OdontologyEncounterService, OdontologyEncounterAuditService, OdontologyPatientSignatureService, ClinicalAttachmentService, EvidenceStorageService, OdontologyPdfService],
   controllers: [OdontologyController, OdontologyEncounterController, OdontologyPatientSignatureController, ClinicalAttachmentController],
   exports: [OdontologyService, OdontologyEncounterService, OdontologyPdfService],
 })

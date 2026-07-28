@@ -1,16 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
-import { join } from 'path';
-import * as fs from 'fs';
+import { Readable } from 'stream';
 import * as crypto from 'crypto';
 import { ClinicalAttachmentEntity, AttachmentOwnerType } from './clinical-attachment.entity';
 import { OdontologyResourceEntity } from './odontology-resource.entity';
 import { ClinicalPresupuesto } from '../clinica-finanzas/clinical-presupuesto.entity';
 import { ClinicalEvidenceAuditEntity, EvidenceAuditAction } from './clinical-evidence-audit.entity';
 import { ActorCtx } from './odontology-patient-signature.service';
-
-const PRIVATE_DIR = join(process.cwd(), 'private-uploads', 'attachments');
+import { EvidenceStorageService } from './evidence-storage.service';
 
 // Whitelist de tipos + magic-bytes (no confiar en el Content-Type del cliente).
 const MAGIC: Record<string, number[]> = {
@@ -31,6 +29,7 @@ export class ClinicalAttachmentService {
     private readonly presupuestoRepo: Repository<ClinicalPresupuesto>,
     @InjectRepository(ClinicalEvidenceAuditEntity)
     private readonly auditRepo: Repository<ClinicalEvidenceAuditEntity>,
+    private readonly storage: EvidenceStorageService,
   ) {}
 
   private async audit(
@@ -86,16 +85,15 @@ export class ClinicalAttachmentService {
     const patientId = await this.resolveOwner(ctx.tenantId, ownerType, ownerId);
     const contentHash = crypto.createHash('sha256').update(file.buffer).digest('hex');
 
-    if (!fs.existsSync(PRIVATE_DIR)) fs.mkdirSync(PRIVATE_DIR, { recursive: true });
     const storageKey = `att-${Date.now()}-${crypto.randomBytes(8).toString('hex')}${EXT[mime]}`;
-    fs.writeFileSync(join(PRIVATE_DIR, storageKey), file.buffer);
+    await this.storage.put('attachments', ctx.tenantId, storageKey, file.buffer, mime);
 
     const row = this.attachRepo.create({
       tenantId: ctx.tenantId,
       patientId,
       ownerType,
       ownerId,
-      storageBackend: 'local',
+      storageBackend: this.storage.backend(),
       storageKey,
       filename: (file.originalname || 'archivo').slice(0, 255),
       mimeType: mime,
@@ -120,14 +118,13 @@ export class ClinicalAttachmentService {
     return rows.map((r) => this.project(r));
   }
 
-  /** Binario del adjunto (path + mime), validando tenant y auditando la descarga (ePHI). */
-  async download(ctx: ActorCtx, id: string): Promise<{ path: string; mimeType: string; filename: string }> {
+  /** Stream del adjunto (+ mime/filename), validando tenant y auditando la descarga (ePHI). */
+  async download(ctx: ActorCtx, id: string): Promise<{ stream: Readable; mimeType: string; filename: string }> {
     const row = await this.attachRepo.findOne({ where: { id, tenantId: ctx.tenantId, deletedAt: IsNull() } });
     if (!row) throw new NotFoundException('Adjunto no encontrado.');
-    const path = join(PRIVATE_DIR, row.storageKey);
-    if (!fs.existsSync(path)) throw new NotFoundException('Archivo no disponible.');
+    const stream = await this.storage.getStream(row.storageBackend, 'attachments', row.tenantId, row.storageKey);
     await this.audit('ATTACH_DOWNLOAD', ctx, { patientId: row.patientId, entityId: id, payload: { ownerType: row.ownerType } });
-    return { path, mimeType: row.mimeType, filename: row.filename };
+    return { stream, mimeType: row.mimeType, filename: row.filename };
   }
 
   /** Soft-delete: marca deleted_at (el blob no se borra, por trazabilidad de ePHI). */

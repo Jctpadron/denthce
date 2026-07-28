@@ -5,7 +5,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import type { Response } from 'express';
-import { createReadStream } from 'fs';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -90,10 +89,10 @@ export class OdontologyPatientSignatureController {
     @Request() req: any,
     @Res() res: Response,
   ) {
-    const { path, mimeType } = await this.service.getImage(this.ctx(req), patientId, id);
+    const { stream, mimeType } = await this.service.getImage(this.ctx(req), patientId, id);
     res.setHeader('Content-Type', mimeType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');
-    createReadStream(path).pipe(res);
+    stream.pipe(res);
   }
 }

@@ -5,7 +5,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import type { Response } from 'express';
-import { createReadStream } from 'fs';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -70,14 +69,14 @@ export class ClinicalAttachmentController {
   @Get('attachment/:id/download')
   @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
   async download(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
-    const { path, mimeType, filename } = await this.service.download(this.ctx(req), id);
+    const { stream, mimeType, filename } = await this.service.download(this.ctx(req), id);
     // PDF/documentos: attachment (evita ejecución de JS embebido); imágenes: inline con tipo fijado por servidor.
     const disposition = mimeType.startsWith('image/') ? 'inline' : 'attachment';
     res.setHeader('Content-Type', mimeType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader('Content-Disposition', `${disposition}; filename="${encodeURIComponent(filename)}"`);
-    createReadStream(path).pipe(res);
+    stream.pipe(res);
   }
 
   @Delete('attachment/:id')
