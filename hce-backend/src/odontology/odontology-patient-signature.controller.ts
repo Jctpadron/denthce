@@ -69,6 +69,16 @@ export class OdontologyPatientSignatureController {
     return this.service.getByResource(req.user.tenantId, patientId, resourceId);
   }
 
+  /** Todas las firmas vigentes del paciente (batch para la Ficha, evita N+1). */
+  @Get('patient/:patientId/signatures')
+  @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
+  async getAllByPatient(
+    @Param('patientId') patientId: string,
+    @Request() req: any,
+  ) {
+    return this.service.getAllByPatient(req.user.tenantId, patientId);
+  }
+
   /** Firmas vigentes de una visita completa. */
   @Get('patient/:patientId/encounter/:encounterId/signatures')
   @Roles('medico', 'enfermero', 'recepcionista', 'administrador')

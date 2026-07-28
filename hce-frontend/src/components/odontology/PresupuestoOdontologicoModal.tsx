@@ -4,7 +4,7 @@ import { X, Plus, Trash2, FileText, Wallet, ClipboardList, Loader2, CheckCircle,
 import keycloak from '../../utils/keycloak-config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { SignaturePadModal } from './SignaturePadModal';
-import { ClinicalAttachments } from './ClinicalAttachments';
+import { ClinicalAttachments, type Attachment } from './ClinicalAttachments';
 
 /**
  * Modal de Plan de Tratamiento / Presupuesto odontológico.
@@ -161,23 +161,31 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
 
   // ── Firma de conformidad del paciente por prestación (C) ──
   const [firmas, setFirmas] = useState<Record<string, Firma>>({});
+  const [adjuntosByProc, setAdjuntosByProc] = useState<Record<string, Attachment[]>>({});
   const [firmandoResourceId, setFirmandoResourceId] = useState<string | null>(null);
   const [firmaSaving, setFirmaSaving] = useState(false);
   const firmasLoaded = useRef(false);
 
-  // Al abrir la pestaña Ficha, carga las firmas vigentes de cada prestación realizada (una vez).
+  // Al abrir la Ficha, trae en 2 requests (no 2×N) TODAS las firmas y adjuntos del paciente.
+  // Evita el fan-out que agotaba el rate limit al abrir fichas con muchas prestaciones.
   useEffect(() => {
     if (tab !== 'ficha' || firmasLoaded.current || realizadoResources.length === 0) return;
     firmasLoaded.current = true;
     (async () => {
-      const map: Record<string, Firma> = {};
-      await Promise.all(realizadoResources.map(async (r) => {
-        try {
-          const resp = await axios.get(`${API_URL}/odontology/patient/${patientId}/resource/${r.id}/signature`, { headers: authHeaders() });
-          if (resp.data) map[r.id] = resp.data;
-        } catch { /* sin firma */ }
-      }));
-      setFirmas(map);
+      try {
+        const [sigResp, attResp] = await Promise.all([
+          axios.get(`${API_URL}/odontology/patient/${patientId}/signatures`, { headers: authHeaders() }),
+          axios.get(`${API_URL}/odontology/patient/${patientId}/attachments`, { headers: authHeaders(), params: { ownerType: 'procedure' } }),
+        ]);
+        const fmap: Record<string, Firma> = {};
+        (Array.isArray(sigResp.data) ? sigResp.data : []).forEach((s: Firma) => { if (s.resourceId) fmap[s.resourceId] = s; });
+        setFirmas(fmap);
+        const amap: Record<string, Attachment[]> = {};
+        (Array.isArray(attResp.data) ? attResp.data : []).forEach((a: Attachment) => {
+          if (a.ownerId) (amap[a.ownerId] = amap[a.ownerId] || []).push(a);
+        });
+        setAdjuntosByProc(amap);
+      } catch { /* si falla, la Ficha se muestra sin precarga (cada control carga on-demand) */ }
     })();
   }, [tab, realizadoResources, patientId]);
 
@@ -727,7 +735,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                           <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text)' }}>{r.code?.text || 'Intervención'}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{fecha} · Pieza {diente}{cara && cara !== 'all' ? `/${cara}` : ''}{codigo ? ` · ${codigo}` : ''}</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--color-muted)' }}><span>Firma de conformidad:</span> {firmaCell(r.id)}</div>
-                          <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact />
+                          <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact initialItems={adjuntosByProc[r.id] || []} />
                         </div>
                       );
                     }
@@ -740,7 +748,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                           <span style={{ color: 'var(--color-text)' }}>{cara && cara !== 'all' ? cara : '—'}</span>
                           <span>{firmaCell(r.id)}</span>
                         </div>
-                        <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact />
+                        <ClinicalAttachments ownerType="procedure" ownerId={r.id} compact initialItems={adjuntosByProc[r.id] || []} />
                       </div>
                     );
                   })}

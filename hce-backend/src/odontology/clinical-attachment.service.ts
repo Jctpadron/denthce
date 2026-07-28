@@ -118,6 +118,14 @@ export class ClinicalAttachmentService {
     return rows.map((r) => this.project(r));
   }
 
+  /** Todos los adjuntos vigentes del paciente (batch para la Ficha, evita N+1). Opcional filtrar por ownerType. */
+  async listByPatient(tenantId: string, patientId: string, ownerType?: AttachmentOwnerType): Promise<any[]> {
+    const where: any = { tenantId, patientId, deletedAt: IsNull() };
+    if (ownerType) where.ownerType = ownerType;
+    const rows = await this.attachRepo.find({ where, order: { uploadedAt: 'DESC' } });
+    return rows.map((r) => this.project(r));
+  }
+
   /** Stream del adjunto (+ mime/filename), validando tenant y auditando la descarga (ePHI). */
   async download(ctx: ActorCtx, id: string): Promise<{ stream: Readable; mimeType: string; filename: string }> {
     const row = await this.attachRepo.findOne({ where: { id, tenantId: ctx.tenantId, deletedAt: IsNull() } });

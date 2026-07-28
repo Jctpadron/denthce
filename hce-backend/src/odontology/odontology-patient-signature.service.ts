@@ -135,6 +135,12 @@ export class OdontologyPatientSignatureService {
     return rows.map((r) => this.project(r, patientId));
   }
 
+  /** Todas las firmas vigentes del paciente (batch para armar la Ficha en 1 request, no N). */
+  async getAllByPatient(tenantId: string, patientId: string): Promise<any[]> {
+    const rows = await this.sigRepo.find({ where: { tenantId, patientId, supersededBy: IsNull() } });
+    return rows.map((r) => this.project(r, patientId));
+  }
+
   /**
    * Devuelve el binario de la firma (ruta + mime) tras validar el tenant, y AUDITA la descarga (ePHI).
    */

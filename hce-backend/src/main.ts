@@ -26,10 +26,13 @@ async function bootstrap() {
   // Security headers
   app.use(helmet());
 
-  // Rate limiting
+  // Rate limiting. Nota: un SPA dispara varias requests por pantalla; 100/15min era
+  // demasiado bajo (se agotaba al abrir pantallas con listas). Se sube a 1000/15min.
+  // TODO (backlog REQ-001-INF-1.13/1.14): configurar trust proxy + keyear por usuario/tenant
+  // en vez de IP (detrás de Cloudflare todas las requests comparten la IP del proxy).
   app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 1000,
     standardHeaders: true,
     legacyHeaders: false,
     message: { statusCode: 429, message: 'Demasiadas solicitudes. Intente nuevamente en 15 minutos.' },

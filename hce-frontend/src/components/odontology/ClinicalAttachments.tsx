@@ -11,8 +11,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const authHeaders = () => ({ Authorization: `Bearer ${keycloak.token}` });
 const ACCEPT = 'image/jpeg,image/png,application/pdf';
 
-interface Attachment {
+export interface Attachment {
   id: string;
+  ownerId?: string;
   filename: string;
   mimeType: string;
   sizeBytes: number | null;
@@ -27,10 +28,12 @@ interface Props {
   ownerId: string;
   label?: string;
   compact?: boolean;
+  /** Si se pasa (aunque sea []), la lista viene precargada (batch) y NO se hace el GET por owner. */
+  initialItems?: Attachment[];
 }
 
-export const ClinicalAttachments: React.FC<Props> = ({ ownerType, ownerId, label, compact }) => {
-  const [items, setItems] = useState<Attachment[]>([]);
+export const ClinicalAttachments: React.FC<Props> = ({ ownerType, ownerId, label, compact, initialItems }) => {
+  const [items, setItems] = useState<Attachment[]>(initialItems || []);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -44,8 +47,9 @@ export const ClinicalAttachments: React.FC<Props> = ({ ownerType, ownerId, label
     } catch { /* sin adjuntos */ }
   }, [ownerType, ownerId]);
 
-  // Carga inicial (IIFE async: el setState ocurre tras el await, no en el cuerpo del efecto).
+  // Carga inicial SOLO si no vino precargada (evita N+1 al abrir la Ficha con muchas prestaciones).
   useEffect(() => {
+    if (initialItems !== undefined) return;
     let alive = true;
     (async () => {
       try {
@@ -54,7 +58,7 @@ export const ClinicalAttachments: React.FC<Props> = ({ ownerType, ownerId, label
       } catch { /* sin adjuntos */ }
     })();
     return () => { alive = false; };
-  }, [ownerType, ownerId]);
+  }, [ownerType, ownerId, initialItems]);
 
   const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

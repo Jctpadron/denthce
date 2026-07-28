@@ -1430,7 +1430,7 @@
     "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
     "descripcion": "Rate limit poco realista: express-rate-limit 100 req/15min POR IP (main.ts:30). Sin trust proxy, detrás de Cloudflare/reverse proxy la clave puede ser la IP del proxy → TODA una clínica (o varias) comparte un mismo bucket de 100/15min. Un SPA dispara varias requests por pantalla → 429 en uso normal. Además el 429 se emite ANTES del middleware CORS → el navegador no puede leer el cuerpo y muestra error genérico. Acciones: subir el límite (o excluir GETs autenticados), keyear por usuario/tenant en vez de IP, y asegurar headers CORS en la respuesta 429.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "en_progreso",
     "agentes_asignados": [
       "devops",
       "security"
@@ -1446,6 +1446,14 @@
         "entregables": [
           "hce-backend/src/main.ts"
         ]
+      },
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Mitigado parcial: límite subido de 100 a 1000/15min. PENDIENTE lo de fondo: trust proxy + keyear por usuario/tenant (hoy detrás de Cloudflare todas las requests comparten la IP del proxy).",
+        "entregables": [
+          "hce-backend/src/main.ts"
+        ]
       }
     ]
   },
@@ -1455,7 +1463,7 @@
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Fan-out de requests en la Ficha del modal: al abrir la pestaña Ficha se dispara 1 GET de firma por prestación + 1 GET de adjuntos por prestación (N+N). Para un paciente con muchas prestaciones completadas puede acercarse al límite de rate. Batchear: endpoint que devuelva firmas vigentes por lista de resourceIds (o por paciente) y adjuntos por lista de owners, para pasar los datos hacia abajo en 1-2 requests en vez de 2N.",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "architect"
     ],
@@ -1470,6 +1478,15 @@
         "accion": "Detectado junto al rate limit: la Ficha hace N+N GETs; conviene batchear.",
         "entregables": [
           "frontend"
+        ]
+      },
+      {
+        "timestamp": "2026-07-27T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Resuelto: la Ficha ahora trae firmas y adjuntos en 2 requests batch (GET /patient/:id/signatures y /patient/:id/attachments) en vez de 2×N. ClinicalAttachments acepta initialItems para no re-fetchear. Deshace el fan-out que agotaba el rate limit.",
+        "entregables": [
+          "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx",
+          "hce-backend/src/odontology/odontology-patient-signature.controller.ts"
         ]
       }
     ]

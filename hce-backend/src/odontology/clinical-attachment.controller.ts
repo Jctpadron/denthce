@@ -66,6 +66,17 @@ export class ClinicalAttachmentController {
     return this.service.list(req.user.tenantId, ownerType, ownerId);
   }
 
+  /** Todos los adjuntos vigentes del paciente (batch para la Ficha, evita N+1). */
+  @Get('patient/:patientId/attachments')
+  @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
+  async listByPatient(
+    @Param('patientId') patientId: string,
+    @Query('ownerType') ownerType: AttachmentOwnerType,
+    @Request() req: any,
+  ) {
+    return this.service.listByPatient(req.user.tenantId, patientId, ownerType);
+  }
+
   @Get('attachment/:id/download')
   @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
   async download(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
