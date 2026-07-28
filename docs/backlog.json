@@ -1147,7 +1147,7 @@
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Modal presupuesto — pestaña Estado Contable: resumen Total/Pagado/Saldo vivo, valor de cuota, grilla de pagos (Fecha·Importe·Saldo decreciente), registrar pago y transiciones de estado (presentar/aceptar/cancelar). Front-only reusando endpoints de Finanzas (cuenta-corriente, pago).",
     "prioridad": "alta",
-    "estado": "en_progreso",
+    "estado": "completado",
     "agentes_asignados": [
       "orchestrator",
       "architect"
@@ -1163,6 +1163,14 @@
         "entregables": [
           "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
         ]
+      },
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "DESPLEGADO A PROD (backend-pagos-dinamicos-20260728-1354) y confirmado por el Super Admin. Rediseño final: pagos dinámicos DEC-1 (cobro desacoplado del estado), anulación soft-delete con motivo, saldo protagonista, carga rápida con Enter, documento vivo DEC-4 (editable ≠cancelado), botón guardar en el empty-state. Gates product/architect/ux/qa/revisor en verde. Migración 20260728_1200 aplicada a local y prod.",
+        "entregables": [
+          "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+        ]
       }
     ]
   },
@@ -1172,7 +1180,7 @@
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Ficha de Atención real: filtrar tratamientos realizados (Procedure con status completed) excluyendo patologías previas (Condition) que se colaban desde la capa Existente. Columnas Fecha·Código·Nº diente·Cara·Firma (pendiente).",
     "prioridad": "alta",
-    "estado": "en_progreso",
+    "estado": "completado",
     "agentes_asignados": [
       "orchestrator"
     ],
@@ -1189,6 +1197,15 @@
           "hce-frontend/src/components/odontology/OdontogramPAMI.tsx",
           "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
         ]
+      },
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Desplegado a prod y confirmado (Ficha real con firma por prestación).",
+        "entregables": [
+          "hce-frontend/src/components/odontology/OdontogramPAMI.tsx",
+          "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+        ]
       }
     ]
   },
@@ -1198,7 +1215,7 @@
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Firma de conformidad del paciente POR cada tratamiento realizado: captura manuscrita en canvas → PNG, tabla append-only odontology_patient_signatures (puntero de almacenamiento agnóstico local→S3 + hash SHA-256). Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. BLOQUEANTES de esquema: signed_content_snapshot inmutable, +5 columnas FHIR (Provenance/Signature, código 1.2.840.10065.1.12.1.7), hash_algo, descarga por endpoint autenticado, auditoría PATIENT_SIGN/VIEW. Trigger append-only + GRANT.",
     "prioridad": "alta",
-    "estado": "en_progreso",
+    "estado": "completado",
     "agentes_asignados": [
       "orchestrator",
       "architect",
@@ -1229,6 +1246,14 @@
           "hce-backend/src/migrations/20260727_1600_firma_conformidad_paciente.sql",
           "hce-frontend/src/components/odontology/SignaturePadModal.tsx"
         ]
+      },
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Desplegado a prod (canvas firma + S3 durable + batch). Verificado por gates y runtime.",
+        "entregables": [
+          "docs/design/firma-conformidad-paciente-modelo-datos.md"
+        ]
       }
     ]
   },
@@ -1238,7 +1263,7 @@
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Adjuntos RX/PDF (imágenes+PDF) al presupuesto y a cada prestación: tabla polimórfica clinical_attachments, soft-delete, validación magic-bytes, descarga por endpoint autenticado con filtro tenant. Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. Mapeo DocumentReference (no Media). BLOQUEANTES: magic-bytes, validación cross-tenant de owner_id polimórfico, +6 columnas FHIR (hash_algo bloqueante), auditoría ATTACH_UPLOAD/DOWNLOAD/DELETE.",
     "prioridad": "alta",
-    "estado": "en_progreso",
+    "estado": "completado",
     "agentes_asignados": [
       "orchestrator",
       "architect",
@@ -1268,6 +1293,14 @@
           "hce-backend/src/odontology/clinical-attachment.controller.ts",
           "hce-backend/src/migrations/20260727_1700_clinical_attachments.sql",
           "hce-frontend/src/components/odontology/ClinicalAttachments.tsx"
+        ]
+      },
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Desplegado a prod y confirmado por el Super Admin (adjuntos presupuesto, S3 durable). El adjuntar por prestación se quitó a pedido (solo nivel presupuesto).",
+        "entregables": [
+          "docs/design/adjuntos-presupuesto-ficha-modelo-datos.md"
         ]
       }
     ]

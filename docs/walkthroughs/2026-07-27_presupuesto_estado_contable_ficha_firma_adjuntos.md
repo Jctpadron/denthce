@@ -3,7 +3,7 @@
 **Fecha:** 2026-07-27
 **Rama:** `feature/presupuesto-odontologico`
 **Orquestador:** Claude Code (sesión principal)
-**Estado:** A+B+C+D implementados y verificados en backend (local). A+B con revisor APROBADO; C+D con gates security/revisor en curso. Falta confirmación visual del Super Admin. NADA commiteado ni desplegado.
+**Estado:** COMPLETO Y EN PRODUCCIÓN (2026-07-28). A+B+C+D + pagos dinámicos + documento vivo desplegados y confirmados por el Super Admin. Ver §9 (adenda final).
 
 ---
 
@@ -139,3 +139,47 @@ Decisiones del Super Admin: firma **por cada tratamiento realizado**, captura **
 - `hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts` (fix BUG-2: registrarPago, deletePresupuesto)
 - `docs/design/firma-conformidad-paciente-modelo-datos.md`, `docs/design/adjuntos-presupuesto-ficha-modelo-datos.md`
 - `hce-backend/src/migrations/20260721_1500_presupuesto_odontologico_campos.sql` (ya aplicada local + prod)
+
+---
+
+## 9. ADENDA FINAL (2026-07-28) — Pagos dinámicos + documento vivo, EN PRODUCCIÓN
+
+Tras la prueba del odontólogo (papel PAMI: anota pagos y el saldo baja, sin trámite), se rediseñó
+el Estado Contable y la editabilidad. **Todo desplegado a prod y confirmado por el Super Admin.**
+
+### Decisiones (specs)
+- **DEC-1** (`docs/specs/estado-contable-pagos-dinamicos.md`): cobro desacoplado del estado.
+  Se paga apenas el presupuesto está guardado (≠cancelado); el estado se DERIVA de los pagos
+  y BAJA al anular. Presentar/Aceptar = opcionales (eje OS, acordeón).
+- **DEC-4** (misma spec §8): documento vivo — `updatePresupuesto` editable en todo estado
+  ≠cancelado (incluso `pagado` se reabre al agregar líneas) + recalcula estado tras editar.
+- **UX** (`docs/design/estado-contable-carga-rapida-pagos.md`): saldo protagonista, carga
+  rápida (Importe autofocus + Enter agrega y re-enfoca), grilla con saldo decreciente + anular
+  (tachado), administrativo colapsable.
+
+### Backend
+- `PATCH /clinica/finanzas/pago/:id/anular` (soft-delete, motivo obligatorio, roles medico/admin).
+- Migración `20260728_1200_pago_soft_delete.sql` (anulado_at/por/motivo + 2 índices parciales)
+  — aplicada a LOCAL y PROD.
+- `registrarPago`: monto>0, bloquea solo cancelado, defaults, +recepcionista.
+- `recalcularEstadoPresupuesto`: deriva desde cualquier estado, excluye anulados; exclusión
+  de anulados en TODOS los agregadores (dashboard/reporte/cuenta-corriente).
+
+### Frontend (fixes clave del flujo, tras 3 iteraciones con el Super Admin)
+- Las líneas del plan sin importe NO bloquean el guardado (se presupuestan solo las >0, aviso).
+- El modal QUEDA ABIERTO al guardar y habilita pagos/adjuntos al instante; botón
+  "Guardar presupuesto ahora" en el empty-state del Estado Contable (era el dead-end real).
+- Confirmación antes de quitar líneas guardadas puestas en $0 (edge case qa).
+- Auto-load del presupuesto ABIERTO (≠cancelado; pagado se reabre) — no duplica.
+- Gate visual ux aplicado completo (alineación, táctiles ≥28-44px, ARIA, canvas preserva trazo).
+
+### Deploy prod (2026-07-28)
+- Migración → RDS verificada. Backend `backend-pagos-dinamicos-20260728-1354` (Ready/Green,
+  ruta anular→401 OK). Frontend S3+CloudFront invalidado. Commit `661aba1` en main.
+- Recordatorio: **main local está varios commits adelante de origin — falta push** (flujo PR
+  del Super Admin).
+
+### Pendientes del módulo 9 (backlog): 9.5 tests finanzas, 9.6 validación precio backend,
+9.7 recaptura firma, 9.9 modal anulación (reemplaza window.prompt), 9.10 log redactado,
+9.11 deudaActual global, 9.12 patientId UUID. + INF 1.11-1.14 (uploads público, cifrado,
+trust proxy, rate limit de fondo).
