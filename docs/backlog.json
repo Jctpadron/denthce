@@ -1490,5 +1490,103 @@
         ]
       }
     ]
+  },
+  {
+    "id": "REQ-009-FIN-9.9",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Reemplazar el window.prompt de anulación de pago por un modal del design-system (motivo + confirmación), estilable y mobile-safe.",
+    "prioridad": "baja",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux"
+    ],
+    "entregables": [
+      "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "revisor",
+        "accion": "Hallazgo del gate revisor (baja): window.prompt es funcional pero deuda de UX.",
+        "entregables": [
+          "hce-frontend/src/components/odontology/PresupuestoOdontologicoModal.tsx"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.10",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "Revisar con security si el logger.warn de anularPago (incluye monto y motivo del pago) debe redactar/omitir datos sensibles en el pipeline de logs.",
+    "prioridad": "baja",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security"
+    ],
+    "entregables": [
+      "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "revisor",
+        "accion": "Hallazgo del gate revisor (baja): posible dato sensible en logs.",
+        "entregables": [
+          "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.11",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "getCuentaCorriente: deudaActual global suma total de TODOS los presupuestos (incluye cancelados) y no clampa el sobrepago por-presupuesto → un sobrepago compensa deuda de otro y los cancelados inflan la deuda. El saldo por-presupuesto (lo que muestra el modal) es correcto; solo afecta el total global.",
+    "prioridad": "baja",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "qa",
+      "architect"
+    ],
+    "entregables": [
+      "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "qa",
+        "accion": "Hallazgo del gate qa (baja) sobre pago dinámico/documento vivo.",
+        "entregables": [
+          "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-FIN-9.12",
+    "modulo_id": 9,
+    "modulo_nombre": "Finanzas Clínicas y Presupuestos",
+    "descripcion": "patientId no validado como UUID en los DTOs de finanzas → un valor no-UUID da 500 genérico en vez de 400. Defensa en profundidad (el front siempre manda UUID).",
+    "prioridad": "baja",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "qa",
+      "architect"
+    ],
+    "entregables": [
+      "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-07-28T00:00:00Z",
+        "agente": "qa",
+        "accion": "Hallazgo del gate qa (baja) sobre pago dinámico/documento vivo.",
+        "entregables": [
+          "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
+        ]
+      }
+    ]
   }
 ]

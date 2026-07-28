@@ -19,9 +19,11 @@ export const SignaturePadModal: React.FC<Props> = ({ title, subtitle, saving, on
   const [hasStroke, setHasStroke] = useState(false);
 
   // Ajusta el canvas al ancho disponible (mobile-safe) manteniendo alta resolución.
+  // (ux M5) preserva el trazo al redimensionar (rotación de tablet en pleno acto de firma).
   const setup = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const prev = canvas.width > 0 && canvas.height > 0 ? canvas.toDataURL() : null;
     const ratio = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * ratio;
@@ -32,7 +34,14 @@ export const SignaturePadModal: React.FC<Props> = ({ title, subtitle, saving, on
       ctx.lineWidth = 2.2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      // Tinta oscura sobre blanco A PROPÓSITO (evidencia legal: el PNG debe ser legible
+      // independiente del tema/white-label del tenant). No migrar a tokens.
       ctx.strokeStyle = '#0f172a';
+      if (prev) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        img.src = prev;
+      }
     }
   }, []);
 

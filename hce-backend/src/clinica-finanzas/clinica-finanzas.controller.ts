@@ -10,6 +10,7 @@ import type {
   UpdatePrecioDto,
   CreatePresupuestoDto,
   RegistrarPagoDto,
+  AnularPagoDto,
   CreateGastoDto,
 } from './clinica-finanzas.service';
 
@@ -112,9 +113,15 @@ export class ClinicaFinanzasController {
   }
 
   @Post('pago')
-  @Roles('medico', 'administrador')
+  @Roles('medico', 'administrador', 'recepcionista')
   async registrarPago(@Body() dto: RegistrarPagoDto, @Request() req: any) {
     return this.finanzasService.registrarPago(req.user.tenantId, dto, req.user.preferred_username || req.user.sub);
+  }
+
+  @Patch('pago/:id/anular')
+  @Roles('medico', 'administrador')
+  async anularPago(@Param('id') id: string, @Body() dto: AnularPagoDto, @Request() req: any) {
+    return this.finanzasService.anularPago(req.user.tenantId, id, dto, req.user.preferred_username || req.user.sub);
   }
 
   // ========== GASTOS ==========

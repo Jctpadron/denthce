@@ -36,6 +36,16 @@ export class ClinicalPago {
   @Column({ type: 'varchar', name: 'registered_by', length: 100, nullable: true })
   registeredBy?: string | null;
 
+  // --- Anulación (soft-delete): un pago anulado NO cuenta en el saldo. anuladoAt != null = anulado. ---
+  @Column({ type: 'timestamptz', name: 'anulado_at', nullable: true })
+  anuladoAt?: Date | null;
+
+  @Column({ type: 'varchar', name: 'anulado_por', length: 100, nullable: true })
+  anuladoPor?: string | null;
+
+  @Column({ type: 'varchar', name: 'motivo_anulacion', length: 300, nullable: true })
+  motivoAnulacion?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

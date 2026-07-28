@@ -58,6 +58,8 @@ interface PagoRow {
   tipo?: string;
   metodoPago?: string;
   comprobante?: string;
+  notas?: string;
+  anuladoAt?: string | null;
 }
 
 interface Firma {
@@ -71,9 +73,6 @@ interface Firma {
   snapshot?: unknown;
 }
 
-// El presupuesto acepta pagos solo si ya fue aceptado (o está en curso). Registrar un pago
-// sobre un borrador dejaría el estado incoherente (regla del gate de architect).
-const PUEDE_PAGAR = (estado: string) => estado === 'aceptado' || estado === 'en_curso';
 
 interface Props {
   patientId: string;
@@ -153,11 +152,12 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const [pagos, setPagos] = useState<PagoRow[]>([]);
   const [ccResumen, setCcResumen] = useState<{ total: number; pagado: number; saldo: number } | null>(null);
   const [pagoMonto, setPagoMonto] = useState('');
-  const [pagoTipo, setPagoTipo] = useState('cuota');
-  const [pagoMetodo, setPagoMetodo] = useState('efectivo');
+  const [pagoConcepto, setPagoConcepto] = useState('');
   const [pagoFecha, setPagoFecha] = useState('');
   const [pagoSaving, setPagoSaving] = useState(false);
   const [contableMsg, setContableMsg] = useState('');
+  const [adminOpen, setAdminOpen] = useState(false);
+  const montoInputRef = useRef<HTMLInputElement | null>(null);
 
   // ── Firma de conformidad del paciente por prestación (C) ──
   const [firmas, setFirmas] = useState<Record<string, Firma>>({});
@@ -212,12 +212,12 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
       return (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: 'var(--color-emerald)', fontWeight: 700 }}>
           <CheckCircle size={13} /> Firmado
-          <button type="button" onClick={() => verFirma(sig)} title="Ver firma del paciente" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', display: 'inline-flex', padding: 0 }}><Eye size={14} /></button>
+          <button type="button" onClick={() => verFirma(sig)} title="Ver firma del paciente" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 32, minHeight: 32, padding: 0 }}><Eye size={14} /></button>
         </span>
       );
     }
     return (
-      <button type="button" onClick={() => setFirmandoResourceId(resourceId)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.3rem 0.55rem', borderRadius: '7px', border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.7rem' }}>
+      <button type="button" onClick={() => setFirmandoResourceId(resourceId)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.45rem 0.7rem', borderRadius: '7px', border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.7rem', minHeight: 36 }}>
         <PenLine size={13} /> Capturar firma
       </button>
     );
@@ -257,10 +257,11 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
           (!l.fromDraft && !(Number(l.precioUnitario) > 0) && precios[l.snomedCode] > 0)
             ? { ...l, precioUnitario: precios[l.snomedCode] } : l;
 
-        // 2) Borrador existente del paciente: editar en vez de duplicar.
+        // 2) Presupuesto ABIERTO del paciente (documento vivo, DEC-4): editar en vez de duplicar.
+        // Continúa el más reciente no cancelado (incluso 'pagado': agregar un tratamiento lo reabre).
         const r = await axios.get(`${API_URL}/clinica/finanzas/presupuesto`, { headers: authHeaders() });
         const arr = Array.isArray(r.data) ? r.data : (r.data?.data || []);
-        const borradores = arr.filter((p: { patientId?: string; estado?: string }) => p.patientId === patientId && p.estado === 'borrador');
+        const borradores = arr.filter((p: { patientId?: string; estado?: string }) => p.patientId === patientId && p.estado !== 'cancelado');
         if (borradores.length > 0) {
           const reciente = borradores.sort((a: { fechaEmision?: string; createdAt?: string }, b: { fechaEmision?: string; createdAt?: string }) =>
             (b.fechaEmision || b.createdAt || '').localeCompare(a.fechaEmision || a.createdAt || ''))[0];
@@ -312,10 +313,19 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const delLinea = (i: number) => setLineas((ls) => ls.filter((_, idx) => idx !== i));
 
   const guardar = async () => {
-    const items = lineas.filter((l) => (l.snomedDisplay || '').trim());
-    if (items.length === 0) { setError('Agregá al menos una prestación.'); return; }
-    const invalida = items.find((l) => !(Number(l.precioUnitario) > 0) || !(Number(l.cantidad) >= 1));
-    if (invalida) { setError('Cada línea necesita importe mayor a 0 y cantidad ≥ 1.'); return; }
+    // Se presupuestan SOLO las líneas con importe > 0. Las líneas del plan sin precio (importe 0)
+    // NO bloquean el guardado: quedan visibles en pantalla para completarlas después.
+    const conNombre = lineas.filter((l) => (l.snomedDisplay || '').trim());
+    const items = conNombre.filter((l) => Number(l.precioUnitario) > 0 && Number(l.cantidad) >= 1);
+    if (items.length === 0) { setError('Poné importe (mayor a 0) al menos a una prestación para guardar.'); return; }
+    const sinPrecio = conNombre.length - items.length;
+    // (qa) Una línea GUARDADA puesta en $0 se ELIMINA del presupuesto persistido al guardar
+    // (updatePresupuesto reemplaza items). Confirmación explícita para evitar pérdida silenciosa.
+    const quitadas = conNombre.filter((l) => l.fromDraft && !(Number(l.precioUnitario) > 0));
+    if (quitadas.length > 0) {
+      const nombres = quitadas.map((l) => `• ${l.snomedDisplay}`).join('\n');
+      if (!window.confirm(`Vas a QUITAR del presupuesto guardado ${quitadas.length} línea(s) que quedaron sin importe:\n${nombres}\n\n¿Continuar?`)) return;
+    }
     setSaving(true); setError(''); setOkMsg('');
     try {
       const dto = {
@@ -337,15 +347,22 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
           precioUnitario: Number(l.precioUnitario) || 0,
         })),
       };
+      const aviso = sinPrecio > 0 ? ` (${sinPrecio} línea(s) sin importe quedaron fuera)` : '';
+      let idActual = presupuestoId;
       if (presupuestoId) {
-        await axios.patch(`${API_URL}/clinica/finanzas/presupuesto/${presupuestoId}`, dto, { headers: authHeaders() });
-        setOkMsg('Presupuesto actualizado.');
+        const resp = await axios.patch(`${API_URL}/clinica/finanzas/presupuesto/${presupuestoId}`, dto, { headers: authHeaders() });
+        setEstado(resp.data?.estado || estado);
+        setOkMsg(`Presupuesto actualizado${aviso}.`);
       } else {
-        await axios.post(`${API_URL}/clinica/finanzas/presupuesto`, dto, { headers: authHeaders() });
-        setOkMsg('Presupuesto guardado en Finanzas.');
+        const resp = await axios.post(`${API_URL}/clinica/finanzas/presupuesto`, dto, { headers: authHeaders() });
+        idActual = resp.data?.id || null;
+        setPresupuestoId(idActual);
+        setEstado(resp.data?.estado || 'borrador');
+        setOkMsg(`Presupuesto guardado${aviso}. Ya podés registrar pagos en "Estado contable".`);
       }
+      // El modal QUEDA ABIERTO (documento vivo): refresca el saldo para seguir con los pagos.
+      if (idActual) await refreshContable(idActual);
       onSaved?.();
-      setTimeout(onClose, 1000);
     } catch (e) {
       const msg = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
       setError(msg || 'No se pudo guardar el presupuesto.');
@@ -360,20 +377,41 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
     if (!(monto > 0)) { setContableMsg('Ingresá un importe mayor a 0.'); return; }
     setPagoSaving(true); setContableMsg('');
     try {
+      // Método/tipo por default en backend (efectivo / pago_directo). Concepto → notas.
       await axios.post(`${API_URL}/clinica/finanzas/pago`, {
-        patientId, presupuestoId, tipo: pagoTipo, monto, metodoPago: pagoMetodo,
+        patientId, presupuestoId, monto,
         fechaPago: pagoFecha || undefined,
+        notas: pagoConcepto || undefined,
       }, { headers: authHeaders() });
-      setPagoMonto(''); setPagoFecha('');
-      // registrar un pago puede pasar el presupuesto a "pagado" → releer estado + saldo.
+      setPagoMonto(''); setPagoConcepto('');
+      // registrar un pago puede cambiar el estado (en_curso/pagado) → releer estado + saldo.
       const full = (await axios.get(`${API_URL}/clinica/finanzas/presupuesto/${presupuestoId}`, { headers: authHeaders() })).data;
       setEstado(full.estado || estado);
       await refreshContable(presupuestoId);
+      montoInputRef.current?.focus(); // re-enfoca importe para cargar el siguiente pago
     } catch (e) {
       const msg = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
       setContableMsg(msg || 'No se pudo registrar el pago.');
     } finally {
       setPagoSaving(false);
+    }
+  };
+
+  // Anula un pago (soft-delete) con motivo obligatorio; el saldo/estado se recalcula.
+  const anularPago = async (pagoId: string) => {
+    const motivo = window.prompt('Motivo de la anulación del pago:');
+    if (!motivo || !motivo.trim()) return;
+    setContableMsg('');
+    try {
+      await axios.patch(`${API_URL}/clinica/finanzas/pago/${pagoId}/anular`, { motivo: motivo.trim() }, { headers: authHeaders() });
+      if (presupuestoId) {
+        const full = (await axios.get(`${API_URL}/clinica/finanzas/presupuesto/${presupuestoId}`, { headers: authHeaders() })).data;
+        setEstado(full.estado || estado);
+        await refreshContable(presupuestoId);
+      }
+    } catch (e) {
+      const msg = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+      setContableMsg(msg || 'No se pudo anular el pago.');
     }
   };
 
@@ -415,7 +453,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
             <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>Plan de Tratamiento — Presupuesto</h3>
             <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
               {loading ? 'Cargando presupuesto del paciente…'
-                : presupuestoId ? '✏️ Editando el presupuesto en borrador del paciente'
+                : presupuestoId ? '✏️ Editando el presupuesto del paciente'
                 : `${plannedResources.length} tratamiento(s) planificado(s) auto-cargados`}
             </p>
           </div>
@@ -423,10 +461,11 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.25rem', padding: '0.6rem 1rem 0', borderBottom: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
+        <div role="tablist" style={{ display: 'flex', gap: '0.25rem', padding: '0.6rem 1rem 0', borderBottom: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
           {TABS.map(({ key, label, Icon }) => (
             <button
               key={key}
+              role="tab"
               onClick={() => setTab(key)}
               aria-selected={tab === key}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.9rem', border: 'none', borderBottom: `2px solid ${tab === key ? 'var(--color-primary)' : 'transparent'}`, background: 'none', cursor: 'pointer', color: tab === key ? 'var(--color-primary)' : 'var(--color-muted)', fontWeight: tab === key ? 800 : 600, fontSize: '0.85rem' }}
@@ -437,7 +476,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
         </div>
 
         {/* Body scrollable */}
-        <div style={{ padding: '1.2rem 1.4rem', overflowY: 'auto', flex: 1 }}>
+        <div style={{ padding: '1.2rem 1.4rem', overflowY: 'auto', flex: 1, opacity: loading ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto' }}>
           {tab === 'presupuesto' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.75rem' : '0.4rem' }}>
               {lineas.length === 0 && (
@@ -483,9 +522,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                     <div style={{ minWidth: 0 }}>
                       <label htmlFor={`prest-${l.uid}`} style={isMobile ? labelStyle : srOnly}>Prestación{l.diente ? ` · pieza ${l.diente}${l.cara ? `/${l.cara}` : ''}` : ''}</label>
                       <input id={`prest-${l.uid}`} value={l.snomedDisplay} maxLength={MAX.prestacion} onChange={(e) => setLinea(i, { snomedDisplay: e.target.value })} placeholder="Descripción" style={inputStyle} />
-                      {!isMobile && l.diente && (
-                        <span style={{ fontSize: '0.66rem', color: 'var(--color-muted)' }}>Pieza {l.diente}{l.cara ? `/${l.cara}` : ''}</span>
-                      )}
+                      {/* (ux C1) el hint "Pieza X" desalineaba la fila; el dato ya está en la columna Detalle */}
                     </div>
 
                     {/* Cantidad */}
@@ -541,8 +578,8 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                 {presupuestoId ? (
                   <ClinicalAttachments ownerType="presupuesto" ownerId={presupuestoId} label="RX / archivos del presupuesto" />
                 ) : (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>
-                    <Paperclip size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)', padding: '0.6rem 0.8rem', border: '1px dashed var(--border-color)', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Paperclip size={13} />
                     Guardá el presupuesto para adjuntar RX o archivos.
                   </span>
                 )}
@@ -555,140 +592,168 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
             const totalC = ccResumen?.total ?? total;
             const pagado = ccResumen?.pagado ?? 0;
             const saldo = ccResumen ? ccResumen.saldo : totalC;
+            const credito = pagado > totalC ? pagado - totalC : 0; // sobrepago (a cuenta)
             const nCuotas = Number(cantidadCuotas) || 0;
             const valorCuota = nCuotas > 0 ? totalC / nCuotas : null;
-            const puedePagar = !!presupuestoId && PUEDE_PAGAR(estado);
-            // Saldo decreciente fila por fila (cronológico), como en el papel.
+            const hoyStr = new Date().toISOString().slice(0, 10);
+            // Saldo decreciente fila por fila (cronológico). Los pagos ANULADOS no cuentan.
             const pagosAsc = [...pagos].sort((a, b) => (a.fechaPago || '').localeCompare(b.fechaPago || ''));
             let acum = 0;
-            const filas = pagosAsc.map((p) => { acum += Number(p.monto) || 0; return { ...p, saldoTras: totalC - acum }; });
+            const filas = pagosAsc.map((p) => {
+              const anulado = !!p.anuladoAt;
+              if (!anulado) acum += Number(p.monto) || 0;
+              return { ...p, anulado, saldoTras: anulado ? null : totalC - acum };
+            });
             const ESTADO_LABEL: Record<string, string> = { borrador: 'Borrador', presentado: 'Presentado', aceptado: 'Aceptado', en_curso: 'En curso', pagado: 'Pagado', cancelado: 'Cancelado', vencido: 'Vencido' };
             const saldoColor = saldo <= 0 ? 'var(--color-emerald)' : 'var(--color-rose)';
             return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-              {/* Cabecera del presupuesto (cuotas, obra social, fechas) */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Cantidad de cuotas</label>
-                  <input type="number" min={1} value={cantidadCuotas} onChange={(e) => setCantidadCuotas(e.target.value)} style={inputStyle} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+              {/* Resumen económico — Saldo protagonista */}
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
+                <div style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.7rem 0.85rem', background: 'var(--bg-card)' }}>
+                  <div style={headerCellStyle}>Total</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-text)', marginTop: '0.15rem' }}>{MONEY(totalC)}</div>
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Obra social</label>
-                  <input value={obraSocial} maxLength={MAX.obraSocial} onChange={(e) => setObraSocial(e.target.value)} placeholder="OSDE, PAMI…" style={inputStyle} />
+                <div style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.7rem 0.85rem', background: 'var(--bg-card)' }}>
+                  <div style={headerCellStyle}>Pagado</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-emerald)', marginTop: '0.15rem' }}>{MONEY(pagado)}</div>
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Fecha de presentación</label>
-                  <input type="date" value={fechaPresentacion} onChange={(e) => setFechaPresentacion(e.target.value)} style={inputStyle} />
+                {/* (ux M1) padding compensa el borde de 2px para que el texto quede a ras de las otras cards */}
+                <div style={{ border: `2px solid ${saldoColor}`, borderRadius: '12px', padding: 'calc(0.7rem - 1px) calc(0.85rem - 1px)', background: 'var(--bg-card)', gridColumn: isMobile ? '1 / -1' : 'auto' }}>
+                  <div style={headerCellStyle}>Saldo</div>
+                  <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 900, color: saldoColor, lineHeight: 1.1 }}>{MONEY(saldo)}</div>
+                  {saldo <= 0 && credito === 0 && <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-emerald)' }}>✓ Saldado</div>}
+                  {credito > 0 && <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-emerald)' }}>Crédito a favor: {MONEY(credito)}</div>}
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Fecha de liquidación</label>
-                  <input type="date" value={fechaLiquidacion} onChange={(e) => setFechaLiquidacion(e.target.value)} style={inputStyle} />
-                </div>
-              </div>
-
-              {/* Resumen económico: cuánto debe el paciente (la visión del dinero) */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
-                {[
-                  { l: 'Total presupuesto', v: MONEY(totalC), c: 'var(--color-text)' },
-                  { l: 'Pagado', v: MONEY(pagado), c: 'var(--color-emerald)' },
-                  { l: 'Saldo', v: MONEY(saldo), c: saldoColor, big: true },
-                  ...(valorCuota != null ? [{ l: `Valor cuota (${nCuotas})`, v: MONEY(valorCuota), c: 'var(--color-text)' }] : []),
-                ].map((card) => (
-                  <div key={card.l} style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.7rem 0.85rem', background: 'var(--bg-card)' }}>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{card.l}</div>
-                    <div style={{ fontSize: card.big ? '1.25rem' : '1rem', fontWeight: 800, color: card.c, marginTop: '0.15rem' }}>{card.v}</div>
-                  </div>
-                ))}
               </div>
 
               {!presupuestoId ? (
-                <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', margin: 0, padding: '0.6rem 0.8rem', border: '1px dashed var(--border-color)', borderRadius: '10px' }}>
-                  Guardá el presupuesto (pestaña <strong>Presupuesto</strong>) para registrar pagos y ver el saldo actualizado.
-                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', padding: '0.8rem', border: '1px dashed var(--color-primary)', borderRadius: '10px', alignItems: 'flex-start' }}>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', margin: 0 }}>
+                    Para registrar pagos y adjuntar archivos, primero hay que <strong>guardar el presupuesto</strong> (las líneas con importe de la pestaña Presupuesto).
+                  </p>
+                  <button type="button" onClick={guardar} disabled={saving} style={{ padding: '0.55rem 1.1rem', borderRadius: '9px', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: saving ? 'wait' : 'pointer', fontWeight: 800, minHeight: '44px', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {saving ? <><Loader2 size={16} className="spin" /> Guardando…</> : '💾 Guardar presupuesto ahora'}
+                  </button>
+                  {error && <span style={{ color: 'var(--color-rose)', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><AlertCircle size={14} /> {error}</span>}
+                </div>
               ) : (
                 <>
-                  {/* Estado + transiciones (habilitan el registro de pagos) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Estado:</span>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 800, padding: '0.2rem 0.6rem', borderRadius: '999px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--color-text)' }}>{ESTADO_LABEL[estado] || estado}</span>
-                    {estado === 'borrador' && (
-                      <button type="button" onClick={() => transicionar('presentar')} style={btnGhost}>Presentar</button>
-                    )}
-                    {estado === 'presentado' && (
-                      <>
-                        <button type="button" onClick={() => transicionar('aceptar')} style={btnGhost}>Aceptar</button>
-                        <button type="button" onClick={() => transicionar('cancelar')} style={{ ...btnGhost, color: 'var(--color-rose)' }}>Cancelar</button>
-                      </>
-                    )}
+                  {/* Registrar pago — carga rápida, siempre disponible */}
+                  <div style={{ border: '1px solid var(--color-primary)', borderRadius: '12px', padding: '0.85rem', background: 'var(--bg-card)' }}>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-text)', marginBottom: '0.5rem' }}>Registrar pago</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.85fr 1fr 1.3fr auto', gap: '0.5rem', alignItems: 'end' }}>
+                      <div>
+                        <label htmlFor="pago-fecha" style={labelStyle}>Fecha</label>
+                        <input id="pago-fecha" type="date" value={pagoFecha || hoyStr} onChange={(e) => setPagoFecha(e.target.value)} style={inputStyle} />
+                      </div>
+                      <div>
+                        <label htmlFor="pago-monto" style={labelStyle}>Importe</label>
+                        <input id="pago-monto" ref={montoInputRef} autoFocus type="number" min={0} step="0.01" value={pagoMonto}
+                          onChange={(e) => setPagoMonto(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); registrarPago(); } }}
+                          placeholder="0,00" style={inputStyle} />
+                      </div>
+                      <div>
+                        <label htmlFor="pago-concepto" style={labelStyle}>Concepto (opcional)</label>
+                        <input id="pago-concepto" value={pagoConcepto} maxLength={120}
+                          onChange={(e) => setPagoConcepto(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); registrarPago(); } }}
+                          placeholder="seña, cuota, implante…" style={inputStyle} />
+                      </div>
+                      <button type="button" onClick={registrarPago} disabled={pagoSaving}
+                        style={{ padding: '0.55rem 1.1rem', borderRadius: '9px', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: pagoSaving ? 'wait' : 'pointer', fontWeight: 800, minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
+                        <Plus size={16} /> {pagoSaving ? '…' : 'Agregar'}
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Grilla de pagos: Fecha · Importe · Saldo */}
+                  {/* (ux M3) mensaje de error contable en ubicación neutral: sirve a pagos, anulaciones y transiciones */}
+                  {contableMsg && <div style={{ color: 'var(--color-rose)', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><AlertCircle size={14} /> {contableMsg}</div>}
+
+                  {/* Grilla de pagos: Fecha · Importe · Concepto · Saldo (+ anular) */}
                   <div>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-text)', marginBottom: '0.4rem' }}>Pagos registrados</div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-text)', marginBottom: '0.4rem' }}>Pagos</div>
                     {filas.length === 0 ? (
                       <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', margin: 0 }}>Sin pagos registrados aún.</p>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: '0.6rem', padding: '0 0.6rem 0.3rem', borderBottom: '1px solid var(--border-color)' }}>
-                          <div style={headerCellStyle}>Fecha</div>
-                          <div style={{ ...headerCellStyle, textAlign: 'right' }}>Importe</div>
-                          <div style={{ ...headerCellStyle, textAlign: 'right' }}>Saldo</div>
-                          <div style={headerCellStyle}>Medio</div>
-                        </div>
-                        {filas.map((p, i) => (
-                          <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: '0.6rem', padding: '0.4rem 0.6rem', alignItems: 'center', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px', fontSize: '0.82rem' }}>
-                            <span style={{ color: 'var(--color-text)' }}>{(p.fechaPago || '').slice(0, 10)}</span>
-                            <span style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-text)' }}>{MONEY(Number(p.monto) || 0)}</span>
-                            <span style={{ textAlign: 'right', color: p.saldoTras <= 0 ? 'var(--color-emerald)' : 'var(--color-muted)' }}>{MONEY(p.saldoTras)}</span>
-                            <span style={{ color: 'var(--color-muted)' }}>{p.metodoPago || '—'}{p.tipo ? ` · ${p.tipo}` : ''}</span>
+                        {!isMobile && (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.4fr 1fr auto', gap: '0.6rem', padding: '0 0.75rem 0.3rem', borderBottom: '1px solid var(--border-color)' }}>
+                            <div style={headerCellStyle}>Fecha</div>
+                            <div style={{ ...headerCellStyle, textAlign: 'right' }}>Importe</div>
+                            <div style={headerCellStyle}>Concepto</div>
+                            <div style={{ ...headerCellStyle, textAlign: 'right' }}>Saldo</div>
+                            <div style={{ ...headerCellStyle, width: 34 }} aria-hidden="true"></div>
                           </div>
+                        )}
+                        {filas.map((p, i) => (
+                          isMobile ? (
+                            <div key={p.id} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.6rem 0.7rem', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '0.2rem', opacity: p.anulado ? 0.55 : 1 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 800, color: 'var(--color-text)', textDecoration: p.anulado ? 'line-through' : 'none' }}>{MONEY(Number(p.monto) || 0)}</span>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>{(p.fechaPago || '').slice(0, 10)}</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', fontSize: '0.74rem', color: 'var(--color-muted)' }}>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.notas || '—'}{p.anulado ? ' · ANULADO' : ''}</span>
+                                {!p.anulado && <span>Saldo {MONEY(p.saldoTras ?? 0)}</span>}
+                                {!p.anulado && <button type="button" onClick={() => anularPago(p.id)} title="Anular pago" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-rose)', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 40, minHeight: 40 }}><Trash2 size={14} /></button>}
+                              </div>
+                            </div>
+                          ) : (
+                            <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.4fr 1fr auto', gap: '0.6rem', padding: '0.4rem 0.75rem', alignItems: 'center', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px', fontSize: '0.82rem', opacity: p.anulado ? 0.55 : 1 }}>
+                              <span style={{ color: 'var(--color-text)' }}>{(p.fechaPago || '').slice(0, 10)}</span>
+                              <span style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-text)', textDecoration: p.anulado ? 'line-through' : 'none' }}>{MONEY(Number(p.monto) || 0)}</span>
+                              <span style={{ color: 'var(--color-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.notas || (p.anulado ? 'anulado' : '—')}</span>
+                              <span style={{ textAlign: 'right', color: p.anulado ? 'var(--color-muted)' : ((p.saldoTras ?? 0) <= 0 ? 'var(--color-emerald)' : 'var(--color-muted)') }}>{p.anulado ? '—' : MONEY(p.saldoTras ?? 0)}</span>
+                              {p.anulado
+                                ? <span style={{ width: 34 }} aria-hidden="true"></span>
+                                : <button type="button" onClick={() => anularPago(p.id)} title="Anular pago" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-rose)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 34, minHeight: 34, padding: 0, justifySelf: 'center', borderRadius: '8px' }}><Trash2 size={15} /></button>}
+                            </div>
+                          )
                         ))}
                       </div>
                     )}
                   </div>
 
-                  {/* Registrar pago (solo si el presupuesto fue aceptado / en curso) */}
-                  {puedePagar ? (
-                    <div style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.85rem', background: 'var(--bg-card)' }}>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-text)', marginBottom: '0.6rem' }}>Registrar pago</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.6rem', alignItems: 'end' }}>
-                        <div>
-                          <label htmlFor="pago-monto" style={labelStyle}>Importe</label>
-                          <input id="pago-monto" type="number" min={0} step="0.01" value={pagoMonto} onChange={(e) => setPagoMonto(e.target.value)} style={inputStyle} />
+                  {/* Datos administrativos (colapsable): cuotas, OS, fechas, estado + presentación */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.6rem' }}>
+                    <button type="button" onClick={() => setAdminOpen((o) => !o)} aria-expanded={adminOpen} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', fontWeight: 700, fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: 0, minHeight: 36 }}>
+                      <span>{adminOpen ? '▾' : '▸'}</span> Datos administrativos (cuotas, obra social, presentación a OS)
+                    </button>
+                    {adminOpen && (
+                      <div style={{ marginTop: '0.7rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
+                          <div>
+                            <label style={labelStyle}>Cantidad de cuotas</label>
+                            <input type="number" min={1} value={cantidadCuotas} onChange={(e) => setCantidadCuotas(e.target.value)} style={inputStyle} />
+                            {valorCuota != null && <span style={{ fontSize: '0.68rem', color: 'var(--color-muted)' }}>Valor cuota: {MONEY(valorCuota)}</span>}
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Obra social</label>
+                            <input value={obraSocial} maxLength={MAX.obraSocial} onChange={(e) => setObraSocial(e.target.value)} placeholder="OSDE, PAMI…" style={inputStyle} />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Fecha de presentación</label>
+                            <input type="date" value={fechaPresentacion} onChange={(e) => setFechaPresentacion(e.target.value)} style={inputStyle} />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Fecha de liquidación</label>
+                            <input type="date" value={fechaLiquidacion} onChange={(e) => setFechaLiquidacion(e.target.value)} style={inputStyle} />
+                          </div>
                         </div>
-                        <div>
-                          <label htmlFor="pago-fecha" style={labelStyle}>Fecha</label>
-                          <input id="pago-fecha" type="date" value={pagoFecha} onChange={(e) => setPagoFecha(e.target.value)} style={inputStyle} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Estado:</span>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 800, padding: '0.2rem 0.6rem', borderRadius: '999px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--color-text)' }}>{ESTADO_LABEL[estado] || estado}</span>
+                          {estado === 'borrador' && <button type="button" onClick={() => transicionar('presentar')} style={btnGhost}>Presentar a OS</button>}
+                          {estado === 'presentado' && <>
+                            <button type="button" onClick={() => transicionar('aceptar')} style={btnGhost}>Aceptar</button>
+                            <button type="button" onClick={() => transicionar('cancelar')} style={{ ...btnGhost, color: 'var(--color-rose)' }}>Cancelar</button>
+                          </>}
                         </div>
-                        <div>
-                          <label htmlFor="pago-tipo" style={labelStyle}>Tipo</label>
-                          <select id="pago-tipo" value={pagoTipo} onChange={(e) => setPagoTipo(e.target.value)} style={inputStyle}>
-                            <option value="senha">Seña</option>
-                            <option value="cuota">Cuota</option>
-                            <option value="pago_directo">Pago directo</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="pago-metodo" style={labelStyle}>Medio</label>
-                          <select id="pago-metodo" value={pagoMetodo} onChange={(e) => setPagoMetodo(e.target.value)} style={inputStyle}>
-                            <option value="efectivo">Efectivo</option>
-                            <option value="transferencia">Transferencia</option>
-                            <option value="debito">Débito</option>
-                            <option value="credito">Crédito</option>
-                            <option value="mercadopago">MercadoPago</option>
-                          </select>
-                        </div>
-                        <button type="button" onClick={registrarPago} disabled={pagoSaving} style={{ padding: '0.55rem 1rem', borderRadius: '9px', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: pagoSaving ? 'wait' : 'pointer', fontWeight: 800, height: '38px' }}>
-                          {pagoSaving ? 'Registrando…' : 'Registrar'}
-                        </button>
                       </div>
-                    </div>
-                  ) : (
-                    <p style={{ fontSize: '0.78rem', color: 'var(--color-muted)', margin: 0 }}>
-                      Para registrar pagos, el presupuesto debe estar <strong>aceptado</strong>. Usá los botones de estado de arriba.
-                    </p>
-                  )}
-                  {contableMsg && <span style={{ color: 'var(--color-rose)', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><AlertCircle size={14} /> {contableMsg}</span>}
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -706,7 +771,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                 <>
                   {/* Encabezado (desktop): Fecha · Código · Diente · Cara · Firma */}
                   {!isMobile && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', padding: '0 0.7rem 0.3rem', borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', padding: '0 0.75rem 0.3rem', borderBottom: '1px solid var(--border-color)' }}>
                       <div style={headerCellStyle}>Fecha</div>
                       <div style={headerCellStyle}>Prestación / Código</div>
                       <div style={headerCellStyle}>Nº diente</div>
@@ -729,7 +794,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                       );
                     }
                     return (
-                      <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', padding: '0.45rem 0.7rem', alignItems: 'center', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px', fontSize: '0.82rem' }}>
+                      <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.6fr 0.7fr 0.7fr 1fr', gap: '0.6rem', padding: '0.45rem 0.75rem', alignItems: 'center', background: i % 2 ? 'var(--bg-card)' : 'transparent', borderRadius: '8px', fontSize: '0.82rem' }}>
                         <span style={{ color: 'var(--color-muted)' }}>{fecha}</span>
                         <span style={{ color: 'var(--color-text)', fontWeight: 600 }}>{r.code?.text || 'Intervención'}{codigo ? ` · ${codigo}` : ''}</span>
                         <span style={{ color: 'var(--color-text)' }}>{diente}</span>

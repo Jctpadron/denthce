@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, In } from 'typeorm';
+import { Repository, Between, In, IsNull } from 'typeorm';
 import { ClinicalPrecio } from './clinical-precio.entity';
 import { ClinicalPresupuesto } from './clinical-presupuesto.entity';
 import { ClinicalPresupuestoItem } from './clinical-presupuesto-item.entity';
@@ -51,12 +51,16 @@ export interface CreatePresupuestoItemDto {
 export interface RegistrarPagoDto {
   patientId: string;
   presupuestoId?: string;
-  tipo: string; // senha | cuota | pago_directo
+  tipo?: string; // senha | cuota | pago_directo (default: pago_directo)
   monto: number;
-  metodoPago: string;
+  metodoPago?: string; // default: efectivo
   fechaPago?: Date;
   comprobante?: string;
   notas?: string;
+}
+
+export interface AnularPagoDto {
+  motivo: string;
 }
 
 export interface CreateGastoDto {
@@ -83,6 +87,8 @@ const ESTADOS_VALIDOS: Record<string, string[]> = {
 
 @Injectable()
 export class ClinicaFinanzasService {
+  private readonly logger = new Logger(ClinicaFinanzasService.name);
+
   constructor(
     @InjectRepository(ClinicalPrecio)
     private precioRepo: Repository<ClinicalPrecio>,
@@ -200,8 +206,9 @@ export class ClinicaFinanzasService {
   async updatePresupuesto(tenantId: string, id: string, dto: Partial<CreatePresupuestoDto>, userId: string): Promise<ClinicalPresupuesto> {
     const presupuesto = await this.presupuestoRepo.findOne({ where: { id, tenantId } });
     if (!presupuesto) throw new NotFoundException('Presupuesto no encontrado');
-    if (presupuesto.estado !== 'borrador') {
-      throw new ForbiddenException('Solo se puede editar un presupuesto en estado borrador');
+    // DEC-4: documento vivo → editable mientras esté abierto; solo 'cancelado' bloquea.
+    if (presupuesto.estado === 'cancelado') {
+      throw new ForbiddenException('No se puede editar un presupuesto cancelado');
     }
 
     if (dto.items) {
@@ -249,6 +256,8 @@ export class ClinicaFinanzasService {
     presupuesto.senhaMonto = presupuesto.total * (presupuesto.senhaPorcentaje / 100);
 
     await this.presupuestoRepo.save(presupuesto);
+    // DEC-4: si cambió el total, re-derivar el estado desde los pagos (ej: pagado→en_curso al agregar líneas).
+    await this.recalcularEstadoPresupuesto(tenantId, id);
     return this.getPresupuesto(tenantId, id);
   }
 
@@ -295,25 +304,26 @@ export class ClinicaFinanzasService {
   }
 
   async registrarPago(tenantId: string, dto: RegistrarPagoDto, userId: string): Promise<ClinicalPago> {
-    // Si el pago se vincula a un presupuesto, validar que exista en el tenant y que su estado
-    // admita pagos. Evita pagos sobre borradores/cancelados (dejaría el estado incoherente) y
-    // cierra un gap cross-tenant (no se puede pagar contra un presupuesto de otro inquilino).
+    // Importe válido (CA-16): el DTO es interface (por el ValidationPipe), se valida a mano.
+    if (dto.monto == null || Number(dto.monto) <= 0) {
+      throw new BadRequestException('El importe debe ser mayor a cero');
+    }
+    // DEC-1: se cobra en cualquier estado ≠ cancelado; el estado se DERIVA de los pagos.
+    // Se preserva la validación cross-tenant (where incluye tenantId) y el NotFound.
     if (dto.presupuestoId) {
       const presupuesto = await this.presupuestoRepo.findOne({ where: { id: dto.presupuestoId, tenantId } });
       if (!presupuesto) throw new NotFoundException('Presupuesto no encontrado');
-      if (presupuesto.estado !== 'aceptado' && presupuesto.estado !== 'en_curso') {
-        throw new BadRequestException(
-          `No se pueden registrar pagos sobre un presupuesto en estado '${presupuesto.estado}'. Debe estar aceptado.`,
-        );
+      if (presupuesto.estado === 'cancelado') {
+        throw new BadRequestException('No se pueden registrar pagos sobre un presupuesto cancelado.');
       }
     }
     const pago = this.pagoRepo.create({
       tenantId,
       patientId: dto.patientId,
       presupuestoId: dto.presupuestoId || null,
-      tipo: dto.tipo,
+      tipo: dto.tipo || 'pago_directo',
       monto: dto.monto,
-      metodoPago: dto.metodoPago,
+      metodoPago: dto.metodoPago || 'efectivo',
       fechaPago: dto.fechaPago || new Date(),
       comprobante: dto.comprobante,
       notas: dto.notas,
@@ -326,6 +336,36 @@ export class ClinicaFinanzasService {
       await this.recalcularEstadoPresupuesto(tenantId, dto.presupuestoId);
     }
 
+    return saved;
+  }
+
+  /**
+   * Anula un pago (soft-delete): no lo borra, lo marca con motivo + autoría para la traza contable.
+   * Un pago anulado deja de contar en el saldo → recalcula el estado del presupuesto (puede BAJAR).
+   * Roles: administrador/médico (recepcionista NO revierte su propio cobro).
+   */
+  async anularPago(tenantId: string, id: string, dto: AnularPagoDto, userId: string): Promise<ClinicalPago> {
+    if (!dto?.motivo || !dto.motivo.trim()) {
+      throw new BadRequestException('El motivo de anulación es obligatorio');
+    }
+    // El tenantId en el where cierra el cross-tenant (no se anula un pago de otra clínica).
+    const pago = await this.pagoRepo.findOne({ where: { id, tenantId } });
+    if (!pago) throw new NotFoundException('Pago no encontrado');
+    if (pago.anuladoAt) throw new BadRequestException('El pago ya fue anulado');
+
+    pago.anuladoAt = new Date();
+    pago.anuladoPor = userId;
+    pago.motivoAnulacion = dto.motivo.trim();
+    const saved = await this.pagoRepo.save(pago);
+
+    // Traza de la acción sensible en el pipeline de logs (sin nueva tabla; la fila ya es auditable).
+    this.logger.warn(
+      `ANULACION_PAGO tenant=${tenantId} pago=${id} monto=${pago.monto} por=${userId} motivo="${pago.motivoAnulacion}"`,
+    );
+
+    if (pago.presupuestoId) {
+      await this.recalcularEstadoPresupuesto(tenantId, pago.presupuestoId);
+    }
     return saved;
   }
 
@@ -357,12 +397,12 @@ export class ClinicaFinanzasService {
     hoy.setHours(0, 0, 0, 0);
     const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
 
-    // Cobrado hoy
-    const pagosHoy = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(hoy, new Date()) } });
+    // Cobrado hoy (excluye pagos anulados)
+    const pagosHoy = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(hoy, new Date()), anuladoAt: IsNull() } });
     const cobradoHoy = pagosHoy.reduce((s, p) => s + Number(p.monto), 0);
 
-    // Cobrado este mes
-    const pagosMes = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(inicioMes, new Date()) } });
+    // Cobrado este mes (excluye pagos anulados)
+    const pagosMes = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(inicioMes, new Date()), anuladoAt: IsNull() } });
     const cobradoMes = pagosMes.reduce((s, p) => s + Number(p.monto), 0);
 
     // Gastos este mes
@@ -375,7 +415,7 @@ export class ClinicaFinanzasService {
     });
     const presupuestoIds = presupuestos.map((p) => p.id);
     const pagosVinculados = presupuestoIds.length > 0
-      ? await this.pagoRepo.find({ where: { presupuestoId: In(presupuestoIds) } })
+      ? await this.pagoRepo.find({ where: { presupuestoId: In(presupuestoIds), anuladoAt: IsNull() } })
       : [];
     const pagoPorPresupuesto: Record<string, number> = {};
     for (const p of pagosVinculados) {
@@ -409,7 +449,8 @@ export class ClinicaFinanzasService {
     let totalPagado = 0;
 
     const presupuestosDetalle = presupuestos.map((p) => {
-      const pagosPresupuesto = (p.pagos || []).reduce((s, pg) => s + Number(pg.monto), 0);
+      // Los pagos vienen por relación → se excluyen los anulados en memoria (no por where).
+      const pagosPresupuesto = (p.pagos || []).filter((pg) => !pg.anuladoAt).reduce((s, pg) => s + Number(pg.monto), 0);
       totalPresupuestado += Number(p.total);
       totalPagado += pagosPresupuesto;
       return {
@@ -433,7 +474,7 @@ export class ClinicaFinanzasService {
   }
 
   async getReporte(tenantId: string, desde: Date, hasta: Date): Promise<any> {
-    const pagos = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(desde, hasta) } });
+    const pagos = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(desde, hasta), anuladoAt: IsNull() } });
     const gastos = await this.gastoRepo.find({ where: { tenantId, fechaGasto: Between(desde, hasta) } });
     const ingresos = pagos.reduce((s, p) => s + Number(p.monto), 0);
     const egresos = gastos.reduce((s, g) => s + Number(g.monto), 0);
@@ -463,28 +504,37 @@ export class ClinicaFinanzasService {
 
   // ========== UTILITY ==========
 
+  /**
+   * Deriva el estado del presupuesto a partir de sus pagos VIGENTES (DEC-1). Vía interna privilegiada
+   * (no pasa por ESTADOS_VALIDOS): permite borrador→en_curso por pago, y BAJA al anular pagos.
+   * 'cancelado' es terminal-manual y no se deriva.
+   */
   private async recalcularEstadoPresupuesto(tenantId: string, presupuestoId: string): Promise<void> {
     const presupuesto = await this.presupuestoRepo.findOne({ where: { id: presupuestoId, tenantId } });
     if (!presupuesto) return;
+    if (presupuesto.estado === 'cancelado') return;
 
-    const pagos = await this.pagoRepo.find({ where: { presupuestoId } });
+    // Σ SOLO de pagos vigentes (excluye anulados) → es lo que hace que anular baje el estado.
+    const pagos = await this.pagoRepo.find({ where: { presupuestoId, anuladoAt: IsNull() } });
     const totalPagado = pagos.reduce((s, p) => s + Number(p.monto), 0);
     const total = Number(presupuesto.total);
 
+    // Piso al quedar en 0 (DEC-3): fue aceptado → 'aceptado'; fue presentado → 'presentado'; si no → 'borrador'.
+    const estadoBase = presupuesto.fechaAceptacion
+      ? 'aceptado'
+      : (presupuesto.fechaPresentacion ? 'presentado' : 'borrador');
+
     let nuevoEstado: string;
     if (totalPagado <= 0) {
-      // Si fue aceptado pero no tiene pagos, queda aceptado
-      nuevoEstado = presupuesto.estado;
+      nuevoEstado = estadoBase;                 // BAJA: se anularon todos los pagos
     } else if (totalPagado >= total) {
       nuevoEstado = 'pagado';
-    } else if (presupuesto.estado === 'aceptado') {
-      nuevoEstado = 'en_curso';
     } else {
-      nuevoEstado = presupuesto.estado;
+      nuevoEstado = 'en_curso';                 // 0 < Σ < total (incluye borrador/presentado → en_curso)
     }
 
-    // Marcar vencido si aplica
-    if (presupuesto.fechaValidez && new Date(presupuesto.fechaValidez) < new Date() && nuevoEstado !== 'pagado' && presupuesto.estado !== 'cancelado') {
+    // Vencido: solo si no está pagado y la validez pasó (regla preservada).
+    if (presupuesto.fechaValidez && new Date(presupuesto.fechaValidez) < new Date() && nuevoEstado !== 'pagado') {
       nuevoEstado = 'vencido';
     }
 

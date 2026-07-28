@@ -93,6 +93,7 @@ export const ClinicalAttachments: React.FC<Props> = ({ ownerType, ownerId, label
   };
 
   const borrar = async (a: Attachment) => {
+    if (!window.confirm(`¿Eliminar "${a.filename}"?`)) return;
     try {
       await axios.delete(`${API_URL}/odontology/attachment/${a.id}`, { headers: authHeaders() });
       await load();
@@ -115,8 +116,8 @@ export const ClinicalAttachments: React.FC<Props> = ({ ownerType, ownerId, label
           <span key={a.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.5rem', borderRadius: '999px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', fontSize: '0.72rem', color: 'var(--color-text)', maxWidth: 220 }}>
             <IconFor mime={a.mimeType} />
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.filename}>{a.filename}</span>
-            <button type="button" onClick={() => descargar(a)} title="Descargar / ver" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', display: 'inline-flex', padding: 0 }}><Download size={13} /></button>
-            <button type="button" onClick={() => borrar(a)} title="Eliminar" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-rose)', display: 'inline-flex', padding: 0 }}><Trash2 size={13} /></button>
+            <button type="button" onClick={() => descargar(a)} title="Descargar / ver" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 28, minHeight: 28, padding: 0 }}><Download size={13} /></button>
+            <button type="button" onClick={() => borrar(a)} title="Eliminar" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-rose)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 28, minHeight: 28, padding: 0 }}><Trash2 size={13} /></button>
           </span>
         ))}
 
