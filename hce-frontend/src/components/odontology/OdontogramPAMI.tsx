@@ -8,6 +8,7 @@ import {
 } from './odontogram-catalog';
 import { useOdontoVisit } from './OdontoVisitContext';
 import { PresupuestoOdontologicoModal } from './PresupuestoOdontologicoModal';
+import { ClinicalAlerts } from '../ClinicalAlerts';
 
 interface OdontogramProps {
   patientId: string;
@@ -21,6 +22,17 @@ const LAYER_PLANNED_COLOR = 'var(--color-primary)';
 function readLayer(payload: any): OdontogramLayer {
   const ext = (payload?.extension || []).find((e: any) => e.url === ODONTOGRAM_LAYER_URL);
   return ext?.valueCode === 'planned' ? 'planned' : 'existing';
+}
+
+const DENTAL_RESOURCE_TYPES = new Set(['Condition', 'Procedure']);
+const DENTAL_FACE_CODES = new Set(['all', 'M', 'D', 'V', 'L', 'P', 'O', 'I', 'B', 'lingual', 'vestibular']);
+
+function isDentalResource(res: any) {
+  if (!DENTAL_RESOURCE_TYPES.has(res?.resourceType)) return false;
+  const pieceCode = String(res.bodySite?.coding?.[0]?.code || '');
+  const faceCode = String(res.bodySite?.coding?.[1]?.code || 'all');
+  const pieceDisplay = String(res.bodySite?.coding?.[0]?.display || '').toLowerCase();
+  return /^[1-8][1-8]$/.test(pieceCode) && DENTAL_FACE_CODES.has(faceCode) && pieceDisplay.includes('pieza dental');
 }
 
 interface CellState {
@@ -111,8 +123,9 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
   const loadResources = async () => {
     try {
       const response = await axios.get(`${apiBase}/patient/${patientId}/resource`, authHeader);
-      setClinicalResources(response.data);
-      parseResources(response.data);
+      const dentalResources = (response.data || []).filter(isDentalResource);
+      setClinicalResources(dentalResources);
+      parseResources(dentalResources);
     } catch (err) {
       console.error('Error cargando recursos clínicos:', err);
     }
@@ -486,6 +499,8 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', minWidth: 0, position: 'relative' }}>
+
+      <ClinicalAlerts patientId={patientId} compact title="Alertas antes de intervenir" />
 
       {/* TOAST flotante (no desplaza el layout) */}
       {message && (

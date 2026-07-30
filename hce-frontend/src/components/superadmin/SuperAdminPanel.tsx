@@ -64,7 +64,7 @@ export const SuperAdminPanel: React.FC = () => {
             <Shield style={{ width: '1.2rem', height: '1.2rem', color: '#fff' }} />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0 }}>Super Admin · DentHCE</h1>
+            <h1 style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0 }}>Super Admin · Denta Cloud</h1>
             <span style={{ fontSize: '0.66rem', color: '#2962ff', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Plataforma SaaS</span>
           </div>
         </div>

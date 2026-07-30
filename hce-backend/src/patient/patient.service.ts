@@ -97,7 +97,7 @@ export class PatientService {
       throw new NotFoundException(`Paciente con ID ${id} no encontrado en tu consultorio.`);
     }
 
-    const payload = patient.payload;
+    const payload = { ...patient.payload, id: patient.id };
     if (!payload.extension) payload.extension = [];
     
     const hasAdmission = payload.extension.some((ext: any) => ext.url === 'http://hospital.gov/fhir/StructureDefinition/admission-date');
@@ -254,7 +254,7 @@ export class PatientService {
       type: 'searchset',
       total: patients.length,
       entry: patients.map((p) => {
-        const payload = p.payload;
+        const payload = { ...p.payload, id: p.id };
         if (!payload.extension) payload.extension = [];
         const hasAdmission = payload.extension.some((ext: any) => ext.url === 'http://hospital.gov/fhir/StructureDefinition/admission-date');
         if (!hasAdmission) {

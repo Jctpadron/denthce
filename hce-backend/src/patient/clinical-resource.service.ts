@@ -42,7 +42,13 @@ export class ClinicalResourceService {
 
     // Mapear campos básicos FHIR
     payload.resourceType = resourceType;
-    payload.subject = { reference: `Patient/${patientId}` };
+    if (resourceType === 'AllergyIntolerance') {
+      delete payload.subject;
+      payload.patient = { reference: `Patient/${patientId}` };
+    } else {
+      delete payload.patient;
+      payload.subject = { reference: `Patient/${patientId}` };
+    }
 
     // Si ya existe un recurso para la misma pieza dental y superficie y tipo, podemos actualizarlo
     // (Por ejemplo, si se marcó caries y luego se limpia, o si se actualiza el estado)

@@ -17,6 +17,8 @@ import { ClinicalAttachments } from './ClinicalAttachments';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const authHeaders = () => ({ Authorization: `Bearer ${keycloak.token}` });
 const MONEY = (n: number) => `$${(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const isValidPatientId = (value?: string | null) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
 
 interface PlannedResource {
   id: string;
@@ -225,6 +227,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
 
   // Trae el resumen persistido (cuenta corriente) y los pagos del presupuesto abierto.
   const refreshContable = async (pid: string) => {
+    if (!isValidPatientId(patientId)) return;
     try {
       const [cc, pg] = await Promise.all([
         axios.get(`${API_URL}/clinica/finanzas/cuenta-corriente/${patientId}`, { headers: authHeaders() }),
@@ -241,6 +244,12 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   // (evita duplicados y muestra lo guardado). Si no, se queda con el auto-cargado del plan.
   useEffect(() => {
     (async () => {
+      if (!isValidPatientId(patientId)) {
+        setError('Selecciona un paciente valido para armar el presupuesto.');
+        setLoading(false);
+        return;
+      }
+
       try {
         // 1) Nomenclador de PRECIOS (snomedCode → precio) para auto-proponer importes.
         const precios: Record<string, number> = {};
@@ -313,6 +322,11 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const delLinea = (i: number) => setLineas((ls) => ls.filter((_, idx) => idx !== i));
 
   const guardar = async () => {
+    if (!isValidPatientId(patientId)) {
+      setError('Selecciona un paciente valido antes de guardar el presupuesto.');
+      return;
+    }
+
     // Se presupuestan SOLO las líneas con importe > 0. Las líneas del plan sin precio (importe 0)
     // NO bloquean el guardado: quedan visibles en pantalla para completarlas después.
     const conNombre = lineas.filter((l) => (l.snomedDisplay || '').trim());
