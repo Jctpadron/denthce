@@ -18,6 +18,7 @@ Thumbs.db
 aws/scripts/build-backend/
 
 # Registro local de procedencia de deploys (guard de deploy-aws.ps1).
+# Es por maquina: la trazabilidad compartida son los tags, no este archivo.
 aws/scripts/deploy-log.txt
 
 # Ruido de trabajo local en la raiz (PDFs de prueba, volcados de logs).
