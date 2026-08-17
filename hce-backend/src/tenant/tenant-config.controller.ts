@@ -104,7 +104,7 @@ export class TenantConfigController {
     @Request() req: any,
   ) {
     if (!file) throw new BadRequestException('No se recibió ningún archivo.');
-    const logoUrl = `http://localhost:3000/uploads/logos/${file.filename}`;
+    const logoUrl = `/uploads/logos/${file.filename}`;
     return this.tenantService.saveLogoUrl(req.user.tenantId, logoUrl);
   }
 

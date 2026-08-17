@@ -4,9 +4,14 @@
 // SALVAGUARDA: todos los pacientes de prueba => DNI 90000000-90000250 + apellido " QA-TEST".
 // ============================================================================
 
-const API = 'https://api.systia.ar';
-const TOKEN_URL = 'https://auth.systia.ar/realms/hce-realm/protocol/openid-connect/token';
+const API = process.env.QA_API_URL || 'http://localhost:3000';
+const TOKEN_URL = process.env.QA_TOKEN_URL || 'http://localhost:8080/realms/hce-realm/protocol/openid-connect/token';
 const CREDS = { grant_type: 'password', client_id: 'hce-app', username: 'doctor_julio', password: 'doctor_pass_2026' };
+
+const isProdTarget = /api\.systia\.ar/i.test(API) || /auth\.systia\.ar/i.test(TOKEN_URL);
+if (isProdTarget && process.env.ALLOW_PROD_QA_LOAD !== 'YES') {
+  throw new Error('Carga QA bloqueada: para apuntar a produccion definir ALLOW_PROD_QA_LOAD=YES de forma explicita.');
+}
 
 const QA_SUFFIX = ' QA-TEST';
 const DNI_BASE = 90000000;   // primer DNI reservado

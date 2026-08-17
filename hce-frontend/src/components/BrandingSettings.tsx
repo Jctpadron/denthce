@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import keycloak from '../utils/keycloak-config';
 import { useTheme, type TenantConfig } from '../context/ThemeContext';
+import { TenantLogoMark } from './TenantLogoMark';
 
 const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 const DIAS_LABELS: Record<string, string> = {
@@ -213,7 +214,7 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
                   }}
                 >
                   {logoPreview ? (
-                    <img src={logoPreview} alt="Logo" style={{ maxHeight: '80px', maxWidth: '200px', objectFit: 'contain' }} />
+                    <TenantLogoMark logoUrl={logoPreview} clinicName={form.clinicName} size="80px" />
                   ) : (
                     <>
                       <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>☁️</div>
@@ -612,9 +613,9 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
             )}
           </div>
 
-          {/* Powered by DentHCE */}
+          {/* Powered by Denta Cloud */}
           <div style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--color-muted)' }}>
-            Powered by <strong style={{ color: 'var(--color-cyan)' }}>DentHCE</strong>
+            Powered by <strong style={{ color: 'var(--color-cyan)' }}>Denta Cloud · Systia.ar</strong>
           </div>
         </div>
 

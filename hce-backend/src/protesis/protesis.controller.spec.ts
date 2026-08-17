@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProtesisController } from './protesis.controller';
 import { ProtesisService, CreateOrderDto, SendMessageDto, CreateInsumoDto } from './protesis.service';
+import { ModulesService } from '../platform/modules.service';
 
 describe('ProtesisController', () => {
   let controller: ProtesisController;
@@ -27,6 +28,10 @@ describe('ProtesisController', () => {
         {
           provide: ProtesisService,
           useValue: mockProtesisService,
+        },
+        {
+          provide: ModulesService,
+          useValue: { isEnabled: jest.fn().mockResolvedValue(true) },
         },
       ],
     }).compile();

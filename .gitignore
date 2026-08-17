@@ -13,6 +13,34 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Salida de build de deploy-aws.ps1 (el script la regenera en cada corrida).
+# Estuvo versionada por error y llego a divergir del backend real.
+aws/scripts/build-backend/
+
 # Registro local de procedencia de deploys (guard de deploy-aws.ps1).
 # Es por maquina: la trazabilidad compartida son los tags, no este archivo.
 aws/scripts/deploy-log.txt
+
+# Ruido de trabajo local en la raiz (PDFs de prueba, volcados de logs).
+# Acotado a la raiz: docs/ e img/ pueden versionar PDFs legitimos.
+/*.pdf
+/*_logs*.txt
+/temp_logs.txt
+
+# Config del editor (personal de cada uno).
+.vscode/
+
+# Evidencia clinica subida en runtime: NUNCA versionar (son datos de paciente).
+hce-backend/uploads/
+
+# Salidas de auditorias y capturas: se regeneran, pesan 7 MB.
+testing/audits/
+testing/logs/
+testing/branding-systia-favicon-options/
+testing/visual-audit-prod-*/
+testing/youtube-analysis/
+testing/scripts/*.pdf
+
+# Capturas sueltas de trabajo.
+hce-frontend/*.png
+img/*.jpeg

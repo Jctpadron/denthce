@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import keycloak from '../../utils/keycloak-config';
 import { AlertCircle } from 'lucide-react';
@@ -10,18 +10,18 @@ interface AllergyTabProps {
 interface Allergy {
   id?: string;
   resourceType: string;
-  code?: { coding?: { display?: string; code?: string }[]; text?: string };
-  clinicalStatus?: { coding?: { code?: string }[] };
+  code?: { coding?: { system?: string; display?: string; code?: string }[]; text?: string };
+  clinicalStatus?: { coding?: { system?: string; code?: string; display?: string }[] };
   criticality?: string;
-  reaction?: { manifestation?: { coding?: { display?: string }[] }[] }[];
+  reaction?: { manifestation?: { coding?: { system?: string; display?: string; code?: string }[]; text?: string }[] }[];
   note?: { text?: string }[];
   recordedDate?: string;
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  high: '#ef4444',
-  low: '#f59e0b',
-  'unable-to-assess': '#94a3b8',
+  high: 'var(--color-rose)',
+  low: 'var(--color-amber)',
+  'unable-to-assess': 'var(--color-muted)',
 };
 
 const SEVERITY_LABELS: Record<string, string> = {
@@ -42,15 +42,14 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
     notes: '',
   });
 
-  const fetchAllergies = async () => {
-    setLoading(true);
+  const fetchAllergies = useCallback(async () => {
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/fhir/r4/Patient/${patientId}/clinical-resource`,
         { headers: { Authorization: `Bearer ${keycloak.token}` } }
       );
-      const all: Allergy[] = res.data.filter(
-        (r: any) => r.resourceType === 'AllergyIntolerance'
+      const all = (res.data as Allergy[]).filter(
+        (r) => r.resourceType === 'AllergyIntolerance'
       );
       setAllergies(all);
     } catch (e) {
@@ -58,10 +57,28 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [patientId]);
 
   useEffect(() => {
-    fetchAllergies();
+    let mounted = true;
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/fhir/r4/Patient/${patientId}/clinical-resource`, {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
+      })
+      .then((res) => {
+        if (!mounted) return;
+        const all = (res.data as Allergy[]).filter((r) => r.resourceType === 'AllergyIntolerance');
+        setAllergies(all);
+      })
+      .catch((e) => {
+        console.error('Error cargando alergias:', e);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [patientId]);
 
   const handleSave = async () => {
@@ -71,17 +88,40 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
       const payload = {
         resourceType: 'AllergyIntolerance',
         payload: {
-          clinicalStatus: { coding: [{ code: 'active', display: 'Activa' }] },
+          clinicalStatus: {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical',
+                code: 'active',
+                display: 'Active',
+              },
+            ],
+          },
           criticality: form.criticality,
           code: {
-            coding: [{ display: form.allergen }],
+            coding: [
+              {
+                system: 'http://snomed.info/sct',
+                code: '419199007',
+                display: form.allergen.trim(),
+              },
+            ],
             text: form.allergen,
           },
           reaction: form.reaction
             ? [
                 {
                   manifestation: [
-                    { coding: [{ display: form.reaction }] },
+                    {
+                      coding: [
+                        {
+                          system: 'http://snomed.info/sct',
+                          code: '418038007',
+                          display: form.reaction.trim(),
+                        },
+                      ],
+                      text: form.reaction.trim(),
+                    },
                   ],
                 },
               ]
@@ -183,8 +223,8 @@ export const AllergyTab: React.FC<AllergyTabProps> = ({ patientId }) => {
                 value={form.criticality}
                 onChange={e => setForm({ ...form, criticality: e.target.value })}
               >
-                <option value="high">Alta (High)</option>
-                <option value="low">Baja (Low)</option>
+                <option value="high">Alta</option>
+                <option value="low">Baja</option>
                 <option value="unable-to-assess">No evaluada</option>
               </select>
             </div>

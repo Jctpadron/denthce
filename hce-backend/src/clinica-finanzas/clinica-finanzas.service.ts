@@ -6,6 +6,7 @@ import { ClinicalPresupuesto } from './clinical-presupuesto.entity';
 import { ClinicalPresupuestoItem } from './clinical-presupuesto-item.entity';
 import { ClinicalPago } from './clinical-pago.entity';
 import { ClinicalGasto } from './clinical-gasto.entity';
+import { PatientEntity } from '../patient/patient.entity';
 
 // --- DTOs ---
 
@@ -85,6 +86,8 @@ const ESTADOS_VALIDOS: Record<string, string[]> = {
   vencido: [],
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 @Injectable()
 export class ClinicaFinanzasService {
   private readonly logger = new Logger(ClinicaFinanzasService.name);
@@ -100,6 +103,8 @@ export class ClinicaFinanzasService {
     private pagoRepo: Repository<ClinicalPago>,
     @InjectRepository(ClinicalGasto)
     private gastoRepo: Repository<ClinicalGasto>,
+    @InjectRepository(PatientEntity)
+    private patientRepo: Repository<PatientEntity>,
   ) {}
 
   // ========== NOMENCLADOR ==========
@@ -134,20 +139,27 @@ export class ClinicaFinanzasService {
 
   // ========== PRESUPUESTOS ==========
 
-  async getPresupuestos(tenantId: string, filters?: { patientId?: string; estado?: string }): Promise<ClinicalPresupuesto[]> {
+  async getPresupuestos(tenantId: string, filters?: { patientId?: string; estado?: string }): Promise<any[]> {
     const where: any = { tenantId };
     if (filters?.patientId) where.patientId = filters.patientId;
     if (filters?.estado) where.estado = filters.estado;
-    return this.presupuestoRepo.find({ where, relations: { items: true, pagos: true }, order: { createdAt: 'DESC' } });
+    const presupuestos = await this.presupuestoRepo.find({ where, relations: { items: true, pagos: true }, order: { createdAt: 'DESC' } });
+    return this.enrichWithPatientIdentity(tenantId, presupuestos);
   }
 
-  async getPresupuesto(tenantId: string, id: string): Promise<ClinicalPresupuesto> {
+  async getPresupuesto(tenantId: string, id: string): Promise<any> {
     const p = await this.presupuestoRepo.findOne({ where: { id, tenantId }, relations: { items: true, pagos: true } });
     if (!p) throw new NotFoundException('Presupuesto no encontrado');
-    return p;
+    const [enriched] = await this.enrichWithPatientIdentity(tenantId, [p]);
+    return enriched;
   }
 
   async createPresupuesto(tenantId: string, dto: CreatePresupuestoDto, userId: string): Promise<ClinicalPresupuesto> {
+    if (!dto.patientId || !UUID_RE.test(dto.patientId)) {
+      throw new BadRequestException('Selecciona un paciente valido antes de guardar el presupuesto');
+    }
+    await this.assertPatientBelongsToTenant(tenantId, dto.patientId);
+
     if (!dto.items || dto.items.length === 0) {
       throw new BadRequestException('El presupuesto debe tener al menos un item');
     }
@@ -296,17 +308,33 @@ export class ClinicaFinanzasService {
 
   // ========== PAGOS ==========
 
-  async getPagos(tenantId: string, filters?: { patientId?: string; presupuestoId?: string }): Promise<ClinicalPago[]> {
+  async getPagos(tenantId: string, filters?: { patientId?: string; presupuestoId?: string }): Promise<any[]> {
     const where: any = { tenantId };
     if (filters?.patientId) where.patientId = filters.patientId;
     if (filters?.presupuestoId) where.presupuestoId = filters.presupuestoId;
-    return this.pagoRepo.find({ where, order: { fechaPago: 'DESC' } });
+    const pagos = await this.pagoRepo.find({ where, order: { fechaPago: 'DESC' } });
+    return this.enrichWithPatientIdentity(tenantId, pagos);
   }
 
   async registrarPago(tenantId: string, dto: RegistrarPagoDto, userId: string): Promise<ClinicalPago> {
+    if (!dto.patientId || !UUID_RE.test(dto.patientId)) {
+      throw new BadRequestException('Selecciona un paciente valido antes de registrar el pago');
+    }
+    await this.assertPatientBelongsToTenant(tenantId, dto.patientId);
+
     // Importe válido (CA-16): el DTO es interface (por el ValidationPipe), se valida a mano.
-    if (dto.monto == null || Number(dto.monto) <= 0) {
+    const monto = Number(dto.monto);
+    if (dto.monto == null || !Number.isFinite(monto) || monto <= 0) {
       throw new BadRequestException('El importe debe ser mayor a cero');
+    }
+    const fechaPago = dto.fechaPago ? new Date(dto.fechaPago) : new Date();
+    if (Number.isNaN(fechaPago.getTime())) {
+      throw new BadRequestException('La fecha del pago no es valida');
+    }
+    const finDeHoy = new Date();
+    finDeHoy.setHours(23, 59, 59, 999);
+    if (fechaPago > finDeHoy) {
+      throw new BadRequestException('La fecha del pago no puede ser futura');
     }
     // DEC-1: se cobra en cualquier estado ≠ cancelado; el estado se DERIVA de los pagos.
     // Se preserva la validación cross-tenant (where incluye tenantId) y el NotFound.
@@ -322,9 +350,9 @@ export class ClinicaFinanzasService {
       patientId: dto.patientId,
       presupuestoId: dto.presupuestoId || null,
       tipo: dto.tipo || 'pago_directo',
-      monto: dto.monto,
+      monto,
       metodoPago: dto.metodoPago || 'efectivo',
-      fechaPago: dto.fechaPago || new Date(),
+      fechaPago,
       comprobante: dto.comprobante,
       notas: dto.notas,
       registeredBy: userId,
@@ -439,6 +467,10 @@ export class ClinicaFinanzasService {
   }
 
   async getCuentaCorriente(tenantId: string, patientId: string): Promise<any> {
+    if (!patientId || !UUID_RE.test(patientId)) {
+      throw new BadRequestException('Selecciona un paciente valido para consultar la cuenta corriente');
+    }
+
     const presupuestos = await this.presupuestoRepo.find({
       where: { tenantId, patientId },
       relations: { items: true, pagos: true },
@@ -503,6 +535,36 @@ export class ClinicaFinanzasService {
   }
 
   // ========== UTILITY ==========
+
+  private async assertPatientBelongsToTenant(tenantId: string, patientId: string): Promise<void> {
+    const exists = await this.patientRepo.exists({ where: { id: patientId, tenantId } });
+    if (!exists) {
+      throw new NotFoundException('Paciente no encontrado en tu consultorio');
+    }
+  }
+
+  private async enrichWithPatientIdentity<T extends { patientId?: string }>(tenantId: string, rows: T[]): Promise<any[]> {
+    const patientIds = [...new Set(rows.map((row) => row.patientId).filter(Boolean))] as string[];
+    if (patientIds.length === 0) return rows;
+
+    const patients = await this.patientRepo.find({
+      where: { id: In(patientIds), tenantId },
+    });
+    const patientById = new Map(
+      patients.map((patient) => [
+        patient.id,
+        {
+          patientDisplay: `${patient.givenName} ${patient.familyName}`.trim(),
+          patientDni: patient.dni,
+        },
+      ]),
+    );
+
+    return rows.map((row) => ({
+      ...row,
+      ...(row.patientId ? patientById.get(row.patientId) : undefined),
+    }));
+  }
 
   /**
    * Deriva el estado del presupuesto a partir de sus pagos VIGENTES (DEC-1). Vía interna privilegiada

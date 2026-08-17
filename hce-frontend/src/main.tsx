@@ -53,7 +53,7 @@ keycloak
   .catch((err) => {
     // No bloquear la app si Keycloak no inicializa: igual mostramos la UI (landing/login).
     // El login real se dispara cuando el usuario lo pide (keycloak.login()).
-    console.error('Error al inicializar Keycloak:', err);
+    console.warn('No se pudo inicializar Keycloak antes del render inicial:', err);
     renderApp();
   });
 

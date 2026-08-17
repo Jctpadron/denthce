@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ShieldAlert, CheckCircle, Trash2, RotateCcw, AlertCircle, Sparkles, Search, Plus } from 'lucide-react';
 import keycloak from '../utils/keycloak-config';
+import { ClinicalAlerts } from './ClinicalAlerts';
 
 interface OdontogramProps {
   patientId: string;
@@ -16,6 +17,17 @@ interface ToothState {
   code: string; // 'caries', 'restoration', 'endodontics', 'missing', 'corona', 'implant', 'sealant'
   color: string;
   label: string;
+}
+
+const DENTAL_RESOURCE_TYPES = new Set(['Condition', 'Procedure']);
+const DENTAL_FACE_CODES = new Set(['all', 'M', 'D', 'V', 'L', 'P', 'O', 'I', 'B', 'lingual', 'vestibular']);
+
+function isDentalResource(res: any) {
+  if (!DENTAL_RESOURCE_TYPES.has(res?.resourceType)) return false;
+  const pieceCode = String(res.bodySite?.coding?.[0]?.code || '');
+  const faceCode = String(res.bodySite?.coding?.[1]?.code || 'all');
+  const pieceDisplay = String(res.bodySite?.coding?.[0]?.display || '').toLowerCase();
+  return /^[1-8][1-8]$/.test(pieceCode) && DENTAL_FACE_CODES.has(faceCode) && pieceDisplay.includes('pieza dental');
 }
 
 export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
@@ -51,8 +63,9 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
           },
         }
       );
-      setClinicalResources(response.data);
-      parseResources(response.data);
+      const dentalResources = (response.data || []).filter(isDentalResource);
+      setClinicalResources(dentalResources);
+      parseResources(dentalResources);
     } catch (err) {
       console.error('Error cargando recursos clínicos:', err);
     }
@@ -98,7 +111,7 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
         const procCode = res.code?.coding?.[0]?.code;
         if (procCode === '23450005') {
           code = 'restoration';
-          color = '#2962ff';
+          color = 'var(--color-primary)';
           label = 'Restauración dental';
         } else if (procCode === '42425007') {
           code = 'endodontics';
@@ -106,11 +119,11 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
           label = 'Tratamiento de conducto';
         } else if (procCode === '172922005') {
           code = 'corona';
-          color = '#eab308'; // Dorado
+          color = 'var(--color-amber)';
           label = 'Corona protésica';
         } else if (procCode === '36653000') {
           code = 'implant';
-          color = '#64748b'; // Acero/Plata
+          color = 'var(--color-muted)';
           label = 'Implante dental';
         } else if (procCode === '418705001') {
           code = 'sealant';
@@ -299,7 +312,7 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
       <div 
         key={piece} 
         style={{
-          border: isCorona ? '2px solid #eab308' : '1px solid var(--border-color)',
+          border: isCorona ? '2px solid var(--color-amber)' : '1px solid var(--border-color)',
           borderRadius: '12px',
           padding: '0.85rem',
           background: 'var(--bg-surface)',
@@ -346,7 +359,7 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
               <path
                 d="M 22,50 C 22,75 28,95 32,100 C 35,102 38,98 40,82 C 43,68 47,62 50,62 C 53,62 57,68 60,82 C 62,98 65,102 68,100 C 72,95 78,75 78,50 Z"
                 fill="url(#toothRootGrad)"
-                stroke={isCorona ? '#eab308' : '#94a3b8'}
+                stroke={isCorona ? 'var(--color-amber)' : 'var(--color-muted)'}
                 strokeWidth={isCorona ? '2' : '1.5'}
                 strokeLinejoin="round"
                 opacity={isMissing ? 0.3 : 1}
@@ -370,7 +383,7 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
               <path
                 d="M 20,50 C 16,50 14,24 24,14 C 34,4 66,4 76,14 C 86,24 84,50 80,50 Z"
                 fill="none"
-                stroke={isCorona ? '#eab308' : '#475569'}
+                stroke={isCorona ? 'var(--color-amber)' : 'var(--color-text)'}
                 strokeWidth={isCorona ? '3' : '2'}
                 strokeLinejoin="round"
               />
@@ -465,7 +478,7 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
               cursor: 'pointer',
               transition: 'var(--transition-smooth)'
             }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = '#2962ff'}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
           >
             Toda la Pieza
@@ -554,14 +567,14 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
               className="btn"
               style={{
                 background: activeTool === 'restauracion' ? 'rgba(41, 98, 255, 0.06)' : 'var(--bg-surface)',
-                borderColor: activeTool === 'restauracion' ? '#2962ff' : 'var(--border-color)',
-                color: activeTool === 'restauracion' ? '#2962ff' : 'var(--color-text)',
+                borderColor: activeTool === 'restauracion' ? 'var(--color-primary)' : 'var(--border-color)',
+                color: activeTool === 'restauracion' ? 'var(--color-primary)' : 'var(--color-text)',
                 padding: '0.45rem 0.9rem',
                 fontSize: '0.82rem',
                 borderRadius: '10px'
               }}
             >
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#2962ff', display: 'inline-block' }}></span>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', display: 'inline-block' }}></span>
               Restaurar
             </button>
 
@@ -586,14 +599,14 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
               className="btn"
               style={{
                 background: activeTool === 'corona' ? 'rgba(234, 179, 8, 0.08)' : 'var(--bg-surface)',
-                borderColor: activeTool === 'corona' ? '#eab308' : 'var(--border-color)',
-                color: activeTool === 'corona' ? '#eab308' : 'var(--color-text)',
+                borderColor: activeTool === 'corona' ? 'var(--color-amber)' : 'var(--border-color)',
+                color: activeTool === 'corona' ? 'var(--color-amber)' : 'var(--color-text)',
                 padding: '0.45rem 0.9rem',
                 fontSize: '0.82rem',
                 borderRadius: '10px'
               }}
             >
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#eab308', display: 'inline-block' }}></span>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--color-amber)', display: 'inline-block' }}></span>
               Corona
             </button>
 
@@ -602,14 +615,14 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
               className="btn"
               style={{
                 background: activeTool === 'implante' ? 'rgba(100, 116, 139, 0.08)' : 'var(--bg-surface)',
-                borderColor: activeTool === 'implante' ? '#64748b' : 'var(--border-color)',
-                color: activeTool === 'implante' ? '#64748b' : 'var(--color-text)',
+                borderColor: activeTool === 'implante' ? 'var(--color-muted)' : 'var(--border-color)',
+                color: activeTool === 'implante' ? 'var(--color-muted)' : 'var(--color-text)',
                 padding: '0.45rem 0.9rem',
                 fontSize: '0.82rem',
                 borderRadius: '10px'
               }}
             >
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#64748b', display: 'inline-block' }}></span>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--color-muted)', display: 'inline-block' }}></span>
               Implante
             </button>
 
@@ -785,8 +798,8 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
           )}
         </div>
         
-        <div style={{ fontSize: '0.78rem', color: 'var(--color-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-          <AlertCircle style={{ width: '1rem', height: '1rem', color: '#2962ff', flexShrink: 0 }} />
+        <div style={{ fontSize: '0.78rem', color: 'var(--color-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-card)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <AlertCircle style={{ width: '1rem', height: '1rem', color: 'var(--color-primary)', flexShrink: 0 }} />
           <span>Procedimiento: Para tratar una pieza, selecciónala en la barra de "Registrar Pieza" superior. Píntala con las herramientas de caries, conducto, implante, corona o sellador.</span>
         </div>
 
@@ -817,9 +830,11 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
           margin: 0,
           fontFamily: 'var(--font-title)'
         }}>
-          <Sparkles style={{ width: '1.1rem', height: '1.1rem', color: '#2962ff' }} />
+          <Sparkles style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-primary)' }} />
           Historial del Odontograma
         </h4>
+
+        <ClinicalAlerts patientId={patientId} compact title="Alertas antes de intervenir" />
 
         {clinicalResources.length === 0 ? (
           <div style={{ 
@@ -843,8 +858,8 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
               
               let actionLabel = res.code?.text || 'Intervención';
               let badgeColor = isCondition ? 'rgba(239, 68, 68, 0.06)' : 'rgba(41, 98, 255, 0.06)';
-              let borderAccent = isCondition ? 'var(--color-rose)' : '#2962ff';
-              let textColor = isCondition ? 'var(--color-rose)' : '#2962ff';
+              let borderAccent = isCondition ? 'var(--color-rose)' : 'var(--color-primary)';
+              let textColor = isCondition ? 'var(--color-rose)' : 'var(--color-primary)';
 
               return (
                 <div key={res.id} style={{
@@ -881,7 +896,7 @@ export const Odontogram: React.FC<OdontogramProps> = ({ patientId }) => {
                   </p>
 
                   <span style={{ fontSize: '0.68rem', color: 'var(--color-muted)', textAlign: 'right', display: 'block', marginTop: '0.1rem' }}>
-                    ID: {res.id.slice(0, 8).toUpperCase()}
+                    Registro odontologico
                   </span>
                 </div>
               );

@@ -1,8 +1,9 @@
-import { useState, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme, useModules } from './context/ThemeContext';
 import { useRoles } from './hooks/useRoles';
 import { roleDisplayName } from './utils/roles';
 import { ModuleUpsell } from './components/ModuleUpsell';
+import { TenantLogoMark } from './components/TenantLogoMark';
 import keycloak from './utils/keycloak-config';
 import { LogOut, User, Shield, Menu, X, Home, CalendarDays, PlusCircle, Users, Palette, ChevronDown, Wrench, DollarSign } from 'lucide-react';
 
@@ -42,6 +43,27 @@ function AppContent() {
   const [navOpen, setNavOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { config, loading } = useTheme();
+
+  useEffect(() => {
+    if (!keycloak.authenticated) {
+      document.title = 'Denta Cloud · Systia.ar';
+      return;
+    }
+
+    if (isSuperAdmin) {
+      document.title = 'Super Admin · Denta Cloud';
+      return;
+    }
+
+    if (isLaboratorio) {
+      document.title = `${config.clinicName || 'Portal Laboratorio'} · Denta Cloud`;
+      return;
+    }
+
+    document.title = config.clinicName
+      ? `${config.clinicName} · Denta Cloud`
+      : 'Denta Cloud · Systia.ar';
+  }, [config.clinicName, isLaboratorio, isSuperAdmin]);
 
   if (!keycloak.authenticated) {
     return <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)' }}><p style={{ color: 'var(--color-muted)' }}>Cargando...</p></div>}><LandingDentaCloud /></Suspense>;
@@ -99,44 +121,24 @@ function AppContent() {
       <header className="app-header">
         {/* Logo + Nombre del Consultorio (dinámico) */}
         <div className="app-logo-container">
-          {config.logoUrl ? (
-            <img
-              src={config.logoUrl}
-              alt="Logo"
-              style={{ height: '2.2rem', width: '2.2rem', objectFit: 'contain', borderRadius: '8px' }}
-            />
-          ) : (
-            <div style={{
-              width: '2.2rem',
-              height: '2.2rem',
-              background: 'linear-gradient(135deg, var(--color-primary, #1e6fd9), color-mix(in srgb, var(--color-primary, #1e6fd9) 55%, #ffffff))',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              color: '#ffffff',
-              fontSize: '1.1rem',
-              boxShadow: 'var(--shadow-sm)',
-            }}>
-              {(config.clinicName || 'D').charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <h1 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--color-text)', fontFamily: 'var(--font-title)' }}>
+          <TenantLogoMark logoUrl={config.logoUrl} clinicName={config.clinicName} />
+          <div className="app-brand-text">
+            <h1 title={config.clinicName || 'Denta Cloud'}>
               {config.clinicName || 'Denta Cloud'}
             </h1>
-            <p style={{ fontSize: '0.68rem', color: 'var(--accent-text)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, margin: 0 }}>
+            <p title={config.specialty || 'Odontología Digital'}>
               {config.specialty || 'Odontología Digital'}
             </p>
           </div>
         </div>
 
         {/* Navegación central (cinta con degradé + scroll; oculta al colapsar) */}
-        <nav className="app-nav">
+        <nav className="app-nav" aria-label="Navegación principal">
           {NAV_ITEMS.map(item => (
             <button
               key={item.key}
+              type="button"
+              aria-label={item.label}
               onClick={() => setActiveView(item.key)}
               className={`app-nav-btn${activeView === item.key ? ' is-active' : ''}`}
             >
@@ -175,13 +177,13 @@ function AppContent() {
                 <User style={{ width: '1rem', height: '1rem' }} />
               </div>
               <div className="user-info-text" style={{ textAlign: 'left' }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', display: 'block' }}>{fullName}</span>
-                <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.15rem' }}>
+                <span title={fullName} style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', display: 'block' }}>{fullName}</span>
+                <div className="user-role-list">
                   {clinicalRoles.map(role => (
                     <span key={role} style={{
                       fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase',
                       background: role === 'administrador' ? 'rgba(99,102,241,0.06)' : role === 'medico' ? 'rgba(41,98,255,0.06)' : 'rgba(16,185,129,0.06)',
-                      color: role === 'administrador' ? 'var(--color-violet)' : role === 'medico' ? '#2962ff' : 'var(--color-emerald)',
+                      color: role === 'administrador' ? 'var(--color-violet-text)' : role === 'medico' ? 'var(--accent-text)' : 'var(--color-emerald-text)',
                       border: `1px solid ${role === 'administrador' ? 'rgba(99,102,241,0.15)' : role === 'medico' ? 'rgba(41,98,255,0.15)' : 'rgba(16,185,129,0.15)'}`,
                       padding: '0.05rem 0.35rem', borderRadius: '5px', display: 'inline-flex', alignItems: 'center', gap: '0.15rem',
                     }}>
@@ -256,10 +258,12 @@ function AppContent() {
 
         {/* Drawer: menú colapsado en pantallas chicas (clínico + administración + salir) */}
         {navOpen && (
-          <div className="app-drawer">
+          <div className="app-drawer" role="navigation" aria-label="Navegación principal">
             {[...NAV_ITEMS, ...ADMIN_ITEMS].map(item => (
               <button
                 key={item.key}
+                type="button"
+                aria-label={item.label}
                 className={`app-nav-btn${activeView === item.key ? ' is-active' : ''}`}
                 onClick={() => { setActiveView(item.key); setNavOpen(false); }}
               >
@@ -268,7 +272,7 @@ function AppContent() {
               </button>
             ))}
             <div className="app-drawer__sep" />
-            <button className="app-drawer__logout" onClick={() => keycloak.logout()}>
+            <button type="button" className="app-drawer__logout" onClick={() => keycloak.logout()}>
               <LogOut size={18} /> Salir
             </button>
           </div>

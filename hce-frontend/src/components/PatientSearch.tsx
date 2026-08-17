@@ -31,6 +31,7 @@ import { AntecedentsTab } from './tabs/AntecedentsTab';
 import { PrescriptionsTab } from './tabs/PrescriptionsTab';
 import { FinanzasTab } from './tabs/FinanzasTab';
 import { Stethoscope, ClipboardList, Pill, DollarSign } from 'lucide-react';
+import { ClinicalAlerts } from './ClinicalAlerts';
 
 export const PatientSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -205,7 +206,7 @@ export const PatientSearch: React.FC = () => {
             </button>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#edf2f7', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#4a5568' }} className="mobile-badge-paciente">
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2962ff' }} />
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)' }} />
               Paciente Activo
             </div>
           </div>
@@ -215,7 +216,7 @@ export const PatientSearch: React.FC = () => {
           </h2>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#edf2f7', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#4a5568' }} className="desktop-badge-paciente">
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2962ff' }} />
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)' }} />
             Paciente Activo
           </div>
         </div>
@@ -356,7 +357,7 @@ export const PatientSearch: React.FC = () => {
                 cursor: 'pointer'
               }}
             >
-              <Edit style={{ width: '0.95rem', height: '0.95rem', color: '#2962ff' }} />
+              <Edit style={{ width: '0.95rem', height: '0.95rem', color: 'var(--color-primary)' }} />
               Editar Datos
             </button>
 
@@ -429,6 +430,10 @@ export const PatientSearch: React.FC = () => {
                 </div>
 
                 {/* Panel de Contenido del Tab Activo */}
+                {activeTab !== 'odontogram' && (
+                  <ClinicalAlerts patientId={selectedPatient.id} title="Alertas clinicas criticas del paciente" />
+                )}
+
                 <div className="panel ficha-clinica-content-panel" style={{ overflow: 'visible' }}>
                   {activeTab === 'encounter' && <EncountersTab patientId={selectedPatient.id} />}
                   {activeTab === 'antecedents' && <AntecedentsTab patientId={selectedPatient.id} />}
@@ -459,7 +464,7 @@ export const PatientSearch: React.FC = () => {
       {/* Cabecera de búsqueda */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Search style={{ width: '1.6rem', height: '1.6rem', color: '#2962ff' }} />
+          <Search style={{ width: '1.6rem', height: '1.6rem', color: 'var(--color-primary)' }} />
           Búsqueda de Pacientes
         </h3>
         
@@ -479,8 +484,8 @@ export const PatientSearch: React.FC = () => {
             className="btn" 
             style={{ 
               background: showAdvanced ? 'rgba(41, 98, 255, 0.08)' : 'transparent', 
-              border: `1px solid ${showAdvanced ? '#2962ff' : 'var(--border-color)'}`, 
-              color: showAdvanced ? '#2962ff' : 'var(--color-text)',
+              border: `1px solid ${showAdvanced ? 'var(--color-primary)' : 'var(--border-color)'}`, 
+              color: showAdvanced ? 'var(--color-primary)' : 'var(--color-text)',
               padding: '0.55rem 1.1rem', 
               display: 'flex', 
               alignItems: 'center', 
@@ -674,7 +679,7 @@ export const PatientSearch: React.FC = () => {
                         {familyName}, {givenName}
                       </h4>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem 0.65rem', fontSize: '0.8rem', color: 'var(--color-muted)', marginTop: '0.25rem' }}>
-                        <span>DNI: <strong style={{ color: '#2962ff' }}>{dni}</strong></span>
+                        <span>DNI: <strong style={{ color: 'var(--color-primary)' }}>{dni}</strong></span>
                         <span style={{ opacity: 0.5 }}>|</span>
                         <span>Género: {getGenderDisplayName(patient.gender)}</span>
                         <span style={{ opacity: 0.5 }}>|</span>

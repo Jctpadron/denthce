@@ -4,7 +4,7 @@ import {
   Search,
   ArrowLeft,
   ChevronRight,
-  ChevronLeft,
+  ChevronDown,
   Grid,
   ClipboardList,
   Stethoscope,
@@ -67,6 +67,40 @@ const TABS: { key: OdontoTab; label: string; icon: React.ReactNode }[] = [
   { key: 'finanzas', label: 'Finanzas', icon: <DollarSign style={{ width: '1rem', height: '1rem' }} /> },
 ];
 
+const MOBILE_QUICK_TABS: OdontoTab[] = ['odontogram', 'oral-status', 'evolution'];
+const NAV_TAB_ORDER: OdontoTab[] = ['odontogram', 'anamnesis', 'oral-status', 'evolution', 'documents', 'consent', 'coverage', 'finanzas', 'protesis'];
+
+const navTabLabel = (tab: { key: OdontoTab; label: string }) => {
+  switch (tab.key) {
+    case 'odontogram': return 'Odontograma';
+    case 'oral-status': return 'Estado bucal y plan';
+    case 'coverage': return 'Afiliado / Obra social';
+    case 'consent': return 'Consentimiento';
+    case 'documents': return 'Imágenes y documentos';
+    case 'protesis': return 'Prótesis / Laboratorio';
+    default: return tab.label;
+  }
+};
+
+const quickTabLabel = (tab: { key: OdontoTab; label: string }) => {
+  switch (tab.key) {
+    case 'odontogram': return 'Odonto';
+    case 'oral-status': return 'Plan';
+    case 'coverage': return 'Cobertura';
+    case 'consent': return 'Consent.';
+    case 'documents': return 'Imágenes';
+    case 'protesis': return 'Prótesis';
+    default: return tab.label;
+  }
+};
+
+const tabGroup = (key: OdontoTab) => {
+  if (['odontogram', 'anamnesis', 'oral-status', 'evolution'].includes(key)) return 'Clínica';
+  if (['documents', 'consent'].includes(key)) return 'Documentos';
+  if (key === 'protesis') return 'Laboratorio';
+  return 'Administración';
+};
+
 export const OdontologyHC: React.FC = () => {
   const { isModuleEnabled } = useModules();
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,6 +108,8 @@ export const OdontologyHC: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<OdontoTab>('odontogram');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [patientDetailsOpen, setPatientDetailsOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   // Filtros avanzados (réplica de PatientSearch)
@@ -87,29 +123,6 @@ export const OdontologyHC: React.FC = () => {
   // Paginación de render (la grilla no pinta miles de tarjetas de una sola vez).
   const PAGE = 20;
   const [visibleCount, setVisibleCount] = useState(PAGE);
-
-  // Navegación de la barra de pestañas (flechas ‹ › que aparecen solo si hay
-  // contenido oculto hacia ese lado). Resuelve la falta de affordance del scroll horizontal.
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const [tabNav, setTabNav] = useState({ left: false, right: false });
-  const updateTabNav = () => {
-    const el = tabsRef.current;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    setTabNav({ left: el.scrollLeft > 4, right: el.scrollLeft < max - 4 });
-  };
-  const scrollTabs = (dir: number) => {
-    const el = tabsRef.current;
-    if (el) el.scrollBy({ left: dir * Math.max(160, el.clientWidth * 0.6), behavior: 'smooth' });
-  };
-  useEffect(() => {
-    const el = tabsRef.current;
-    if (!el) return;
-    updateTabNav();
-    const ro = new ResizeObserver(updateTabNav);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [selectedPatient]);
 
   // ---- Visita / Encuentro activo ----
   const [activeVisit, setActiveVisit] = useState<any | null>(null);
@@ -365,10 +378,43 @@ export const OdontologyHC: React.FC = () => {
     const { family: familyName, given: givenName } = patientNameFormatted(selectedPatient);
     const dni = patientDni(selectedPatient) || 'Sin DNI';
     const age = calcAge(selectedPatient.birthDate);
+    const navTabs = NAV_TAB_ORDER.map((key) => TABS.find((tab) => tab.key === key)).filter(Boolean) as typeof TABS;
+    const activeTabInfo = TABS.find((tab) => tab.key === activeTab) || TABS[0];
+    const quickTabs = navTabs.filter((tab) => MOBILE_QUICK_TABS.includes(tab.key));
+    const visitStartLabel = activeVisit?.start
+      ? new Date(activeVisit.start).toLocaleString('es-AR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '';
+    const handleTabChange = (tabKey: OdontoTab) => {
+      setActiveTab(tabKey);
+      setMobileNavOpen(false);
+    };
+    const renderTabContent = () => (
+      <>
+        {activeTab === 'odontogram' && <OdontogramPAMI patientId={selectedPatient.id} birthDate={selectedPatient.birthDate} />}
+        {activeTab === 'anamnesis' && <AnamnesisPAMI patientId={selectedPatient.id} />}
+        {activeTab === 'oral-status' && <OralStatusPAMI patientId={selectedPatient.id} />}
+        {activeTab === 'coverage' && <CoverageForm patientId={selectedPatient.id} />}
+        {activeTab === 'consent' && <ConsentForm patientId={selectedPatient.id} />}
+        {activeTab === 'evolution' && <EvolutionPAMI patientId={selectedPatient.id} />}
+        {activeTab === 'documents' && <OdontologyDocuments patientId={selectedPatient.id} />}
+        {activeTab === 'protesis' && (isModuleEnabled('protesis-lab')
+          ? <ProtesisTab patientId={selectedPatient.id} />
+          : <ModuleUpsell title="Prótesis / Laboratorio" priceMonthly={35} description="Enviá trabajos al laboratorio, seguí el estado de cada caso, chateá con el protesista y adjuntá archivos STL — todo desde la ficha del paciente." />)}
+        {activeTab === 'finanzas' && (isModuleEnabled('finanzas-clinicas')
+          ? <FinanzasTab patientId={selectedPatient.id} />
+          : <ModuleUpsell title="Finanzas de la Clínica" priceMonthly={25} description="Nomenclador de precios, presupuestos, registro de pagos y gastos, y cuenta corriente por paciente." />)}
+      </>
+    );
 
     return (
       <OdontoVisitContext.Provider value={{ activeEncounterId: activeVisit?.id ?? null }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'slideIn 0.25s ease' }}>
+      <div className="odonto-page-shell">
 
         {/* Barra superior de retorno (réplica de PatientSearch) */}
         <div className="ficha-clinica-header">
@@ -379,15 +425,14 @@ export const OdontologyHC: React.FC = () => {
                 setActiveTab('odontogram');
                 fetchPatients();
               }}
-              className="btn btn-secondary"
-              style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              className="btn btn-secondary odonto-back-btn"
             >
               <ArrowLeft style={{ width: '1rem', height: '1rem' }} />
               Volver al Buscador
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#edf2f7', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#4a5568' }} className="mobile-badge-paciente">
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2962ff' }} />
+            <div className="odonto-patient-status mobile-badge-paciente">
+              <span />
               Paciente Activo
             </div>
           </div>
@@ -396,17 +441,16 @@ export const OdontologyHC: React.FC = () => {
             🦷 Ficha Clínica Odontológica
           </h2>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#edf2f7', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#4a5568' }} className="desktop-badge-paciente">
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2962ff' }} />
+          <div className="odonto-header-actions">
+            <div className="odonto-patient-status desktop-badge-paciente">
+              <span />
               Paciente Activo
             </div>
 
             <button
               onClick={handleDownloadPdf}
               disabled={downloadingPdf}
-              className="btn btn-primary"
-              style={{ padding: '0.55rem 1.1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}
+              className="btn btn-primary odonto-header-action-btn"
             >
               <FileText style={{ width: '1rem', height: '1rem' }} />
               {downloadingPdf ? 'Generando PDF...' : 'Exportar Ficha PDF'}
@@ -415,22 +459,13 @@ export const OdontologyHC: React.FC = () => {
         </div>
 
         {/* Barra de VISITA: estado del encuentro activo + iniciar / finalizar (firmar) */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem',
-          padding: '0.75rem 1rem', borderRadius: '14px',
-          background: activeVisit ? 'rgba(4, 120, 87, 0.06)' : 'var(--bg-card)',
-          border: `1px solid ${activeVisit ? 'rgba(4, 120, 87, 0.25)' : 'var(--border-color)'}`,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.88rem', color: 'var(--color-text)' }}>
-            <span style={{
-              width: '9px', height: '9px', borderRadius: '50%',
-              background: activeVisit ? 'var(--color-emerald-text)' : 'var(--color-muted)',
-              boxShadow: activeVisit ? '0 0 8px var(--color-emerald-text)' : 'none', flexShrink: 0,
-            }} />
+        <div className={`odonto-visit-bar${activeVisit ? ' is-active' : ''}`}>
+          <div className="odonto-visit-copy">
+            <span className="odonto-visit-dot" />
             {activeVisit ? (
-              <span><strong>Visita en curso</strong>{activeVisit.start ? ` · iniciada ${new Date(activeVisit.start).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : ''}. Lo que registres se asocia a esta visita.</span>
+              <span><strong>Visita en curso</strong>{visitStartLabel ? ` · iniciada el ${visitStartLabel}` : ''}. Los registros se asociarán a esta visita.</span>
             ) : (
-              <span style={{ color: 'var(--color-muted)' }}>Sin visita activa. Iniciá una visita para agrupar y firmar las prestaciones de hoy.</span>
+              <span>Sin visita activa. Iniciá una visita para agrupar y firmar las prestaciones de hoy.</span>
             )}
           </div>
           {activeVisit ? (
@@ -456,206 +491,160 @@ export const OdontologyHC: React.FC = () => {
           )}
         </div>
 
-        {/* Layout: columna izquierda (datos demográficos) + área principal (tabs) */}
-        <div className="ficha-clinica-layout">
+        <section className={`odonto-patient-strip${patientDetailsOpen ? ' is-open' : ''}`} aria-label="Resumen del paciente activo">
+          <div className="odonto-patient-strip-main">
+            <div className="odonto-patient-strip-avatar" aria-hidden="true">
+              {(familyName.charAt(0) || 'P').toUpperCase()}
+            </div>
 
-          {/* Panel lateral izquierdo: Datos Demográficos */}
-          <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-            {/* Avatar e información rápida */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem' }}>
-              <div style={{
-                width: '4.5rem',
-                height: '4.5rem',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #e0e7ff, #e0f2fe)',
-                color: '#312e81',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.8rem',
-                fontWeight: 700,
-                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06)'
-              }}>
-                {(familyName.charAt(0) || 'P').toUpperCase()}
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-text)', margin: 0, fontFamily: 'var(--font-title)' }}>
-                  {familyName}, {givenName}
-                </h3>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 500, display: 'inline-block', marginTop: '0.2rem' }}>
-                  DNI {dni}
-                </span>
+            <div className="odonto-patient-strip-identity">
+              <span className="odonto-patient-strip-kicker">Paciente activo</span>
+              <h3>{familyName}, {givenName}</h3>
+              <div className="odonto-patient-strip-meta" aria-label="Datos principales del paciente">
+                <span>DNI {dni}</span>
+                <span>{age ? age + ' a\u00f1os' : 'Edad no registrada'}</span>
+                <span>{getGenderDisplayName(selectedPatient.gender)}</span>
+                <span>Ingreso {formatAdmissionDate(selectedPatient.extension)}</span>
               </div>
             </div>
 
-            {/* Datos detallados */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.85rem' }}>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <Calendar style={{ width: '1rem', height: '1rem', color: 'var(--color-muted)', marginTop: '0.15rem', flexShrink: 0 }} />
-                <div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Edad</div>
-                  <div style={{ fontWeight: 600, color: 'var(--color-text)', marginTop: '0.1rem' }}>
-                    {age ? `${age} años (${selectedPatient.birthDate})` : 'No registrada'}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <Heart style={{ width: '1rem', height: '1rem', color: genderInfo(selectedPatient.gender).color, marginTop: '0.15rem', flexShrink: 0 }} />
-                <div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Género</div>
-                  <div style={{ 
-                    fontWeight: 600, 
-                    color: 'var(--color-text)', 
-                    marginTop: '0.1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem'
-                  }}>
-                    <span style={{ 
-                      color: genderInfo(selectedPatient.gender).color, 
-                      fontWeight: 800, 
-                      fontSize: '1.1rem', 
-                      lineHeight: 1 
-                    }}>
-                      {genderInfo(selectedPatient.gender).symbol}
-                    </span>
-                    {genderInfo(selectedPatient.gender).label}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <Phone style={{ width: '1rem', height: '1rem', color: 'var(--color-muted)', marginTop: '0.15rem', flexShrink: 0 }} />
-                <div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Teléfono</div>
-                  <div style={{ fontWeight: 600, color: 'var(--color-text)', marginTop: '0.1rem' }}>
-                    {formatPhone(selectedPatient.telecom)}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <Mail style={{ width: '1rem', height: '1rem', color: 'var(--color-muted)', marginTop: '0.15rem', flexShrink: 0 }} />
-                <div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Email</div>
-                  <div style={{ fontWeight: 600, color: 'var(--color-text)', wordBreak: 'break-all', fontSize: '0.8rem', marginTop: '0.1rem' }}>
-                    {formatEmail(selectedPatient.telecom)}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <MapPin style={{ width: '1rem', height: '1rem', color: 'var(--color-muted)', marginTop: '0.15rem', flexShrink: 0 }} />
-                <div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Domicilio</div>
-                  <div style={{ fontWeight: 600, color: 'var(--color-text)', marginTop: '0.1rem', lineHeight: '1.25' }}>
-                    {formatAddress(selectedPatient.address)}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <Clock style={{ width: '1rem', height: '1rem', color: 'var(--color-muted)', marginTop: '0.15rem', flexShrink: 0 }} />
-                <div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Fecha de Ingreso</div>
-                  <div style={{ fontWeight: 600, color: 'var(--color-text)', marginTop: '0.1rem' }}>
-                    {formatAdmissionDate(selectedPatient.extension)}
-                  </div>
-                </div>
-              </div>
-
+            <div className="odonto-patient-strip-alert" aria-label="Contexto clinico">
+              <span className="odonto-patient-strip-alert-dot" aria-hidden="true" />
+              <strong>{'Contexto cl\u00ednico visible'}</strong>
+              <span>{'Confirm\u00e1 identidad antes de registrar prestaciones.'}</span>
             </div>
 
-            {/* Badge FHIR */}
-            <div style={{
-              background: 'rgba(16, 185, 129, 0.05)',
-              border: '1px solid rgba(16, 185, 129, 0.15)',
-              borderRadius: '12px',
-              padding: '0.75rem 1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-              marginTop: '0.5rem'
-            }}>
-              <span style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-emerald)',
-                display: 'inline-block',
-                boxShadow: '0 0 8px var(--color-emerald)'
-              }} />
-              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-emerald-text)', letterSpacing: '0.03em' }}>HL7 FHIR R4 Standard</span>
-            </div>
-
+            <button
+              type="button"
+              className="odonto-patient-more-btn"
+              onClick={() => setPatientDetailsOpen((open) => !open)}
+              aria-expanded={patientDetailsOpen}
+              aria-controls="odonto-patient-more-details"
+            >
+              <span>{patientDetailsOpen ? 'Ocultar datos' : 'Ver m\u00e1s datos'}</span>
+              <ChevronDown style={{ width: '1rem', height: '1rem' }} aria-hidden="true" />
+            </button>
           </div>
 
-          {/* Área principal: barra de pestañas + panel de contenido */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
+          {patientDetailsOpen && (
+            <div id="odonto-patient-more-details" className="odonto-patient-more-details">
+              <div className="odonto-patient-detail-item">
+                <Heart style={{ width: '1rem', height: '1rem', color: genderInfo(selectedPatient.gender).color }} />
+                <span>{'G\u00e9nero'}</span>
+                <strong>{genderInfo(selectedPatient.gender).label}</strong>
+              </div>
+              <div className="odonto-patient-detail-item">
+                <Phone style={{ width: '1rem', height: '1rem' }} />
+                <span>{'Tel\u00e9fono'}</span>
+                <strong>{formatPhone(selectedPatient.telecom)}</strong>
+              </div>
+              <div className="odonto-patient-detail-item">
+                <Mail style={{ width: '1rem', height: '1rem' }} />
+                <span>Email</span>
+                <strong>{formatEmail(selectedPatient.telecom)}</strong>
+              </div>
+              <div className="odonto-patient-detail-item">
+                <MapPin style={{ width: '1rem', height: '1rem' }} />
+                <span>Domicilio</span>
+                <strong>{formatAddress(selectedPatient.address)}</strong>
+              </div>
+              <div className="odonto-patient-detail-item">
+                <Clock style={{ width: '1rem', height: '1rem' }} />
+                <span>Ingreso</span>
+                <strong>{formatAdmissionDate(selectedPatient.extension)}</strong>
+              </div>
+              <div className="odonto-patient-detail-item odonto-fhir-detail">
+                <span className="odonto-fhir-dot" aria-hidden="true" />
+                <span>{'Est\u00e1ndar'}</span>
+                <strong>HL7 FHIR R4</strong>
+              </div>
+            </div>
+          )}
+        </section>
 
-            {/* Control Segmentado (Pills) con flechas de desplazamiento en los bordes */}
-            <div className="segmented-tabs-wrap">
-              <button
-                type="button"
-                className="seg-arrow seg-arrow--left"
-                aria-label="Ver pestañas anteriores"
-                data-show={tabNav.left}
-                onClick={() => scrollTabs(-1)}
-              >
-                <ChevronLeft style={{ width: '1.15rem', height: '1.15rem' }} />
-              </button>
-
-              <div
-                ref={tabsRef}
-                onScroll={updateTabNav}
-                className="segmented-control"
-                style={{ overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}
-              >
-                {TABS.map((tab) => {
-                  const isActive = activeTab === tab.key;
-                  return (
+        {/* Layout principal: navegacion clinica + area de trabajo */}
+        <div className="ficha-clinica-layout">
+          <div className="odonto-workspace">
+            <nav className="odonto-side-nav" aria-label="Secciones de la ficha odontológica">
+              {navTabs.map((tab, index) => {
+                const previous = navTabs[index - 1];
+                const showGroup = index === 0 || tabGroup(previous.key) !== tabGroup(tab.key);
+                const isActive = activeTab === tab.key;
+                return (
+                  <React.Fragment key={tab.key}>
+                    {showGroup && <div className="odonto-side-nav-group">{tabGroup(tab.key)}</div>}
                     <button
-                      key={tab.key}
-                      onClick={() => setActiveTab(tab.key)}
-                      className={`segmented-button ${isActive ? 'active' : ''}`}
-                      style={{ flexShrink: 0 }}
+                      type="button"
+                      onClick={() => handleTabChange(tab.key)}
+                      className={`odonto-side-nav-item${isActive ? ' is-active' : ''}`}
+                      aria-current={isActive ? 'page' : undefined}
                     >
                       {tab.icon}
-                      {tab.label}
+                      <span>{navTabLabel(tab)}</span>
                     </button>
-                  );
-                })}
+                  </React.Fragment>
+                );
+              })}
+            </nav>
+
+            <div className="odonto-main-panel">
+              <div className="odonto-mobile-nav">
+                <button
+                  type="button"
+                  className="odonto-mobile-selector"
+                  aria-expanded={mobileNavOpen}
+                  aria-controls="odonto-mobile-sections"
+                  onClick={() => setMobileNavOpen((open) => !open)}
+                >
+                  <span className="odonto-mobile-selector-label">
+                    {activeTabInfo.icon}
+                    <span>{activeTabInfo.label}</span>
+                  </span>
+                  <ChevronDown style={{ width: '1rem', height: '1rem' }} />
+                </button>
+
+                <div className="odonto-mobile-quick" aria-label="Accesos rápidos de ficha odontológica">
+                  {quickTabs.map((tab) => {
+                    const isActive = activeTab === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => handleTabChange(tab.key)}
+                        className={`odonto-mobile-quick-btn${isActive ? ' is-active' : ''}`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {tab.icon}
+                        <span>{quickTabLabel(tab)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {mobileNavOpen && (
+                  <nav id="odonto-mobile-sections" className="odonto-mobile-sheet" aria-label="Todas las secciones odontológicas">
+                    {navTabs.map((tab) => {
+                      const isActive = activeTab === tab.key;
+                      return (
+                        <button
+                          key={tab.key}
+                          type="button"
+                          onClick={() => handleTabChange(tab.key)}
+                          className={`odonto-mobile-sheet-item${isActive ? ' is-active' : ''}`}
+                        >
+                          {tab.icon}
+                          <span>{navTabLabel(tab)}</span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                )}
               </div>
 
-              <button
-                type="button"
-                className="seg-arrow seg-arrow--right"
-                aria-label="Ver más pestañas"
-                data-show={tabNav.right}
-                onClick={() => scrollTabs(1)}
-              >
-                <ChevronRight style={{ width: '1.15rem', height: '1.15rem' }} />
-              </button>
-            </div>
-
-            {/* Panel de Contenido del Tab Activo */}
-            <div className="panel ficha-clinica-content-panel" style={{ overflow: 'visible' }}>
-              {activeTab === 'odontogram' && <OdontogramPAMI patientId={selectedPatient.id} birthDate={selectedPatient.birthDate} />}
-              {activeTab === 'anamnesis' && <AnamnesisPAMI patientId={selectedPatient.id} />}
-              {activeTab === 'oral-status' && <OralStatusPAMI patientId={selectedPatient.id} />}
-              {activeTab === 'coverage' && <CoverageForm patientId={selectedPatient.id} />}
-              {activeTab === 'consent' && <ConsentForm patientId={selectedPatient.id} />}
-              {activeTab === 'evolution' && <EvolutionPAMI patientId={selectedPatient.id} />}
-              {activeTab === 'documents' && <OdontologyDocuments patientId={selectedPatient.id} />}
-              {activeTab === 'protesis' && (isModuleEnabled('protesis-lab')
-                ? <ProtesisTab patientId={selectedPatient.id} />
-                : <ModuleUpsell title="Prótesis / Laboratorio" priceMonthly={35} description="Enviá trabajos al laboratorio, seguí el estado de cada caso, chateá con el protesista y adjuntá archivos STL — todo desde la ficha del paciente." />)}
-              {activeTab === 'finanzas' && (isModuleEnabled('finanzas-clinicas')
-                ? <FinanzasTab patientId={selectedPatient.id} />
-                : <ModuleUpsell title="Finanzas de la Clínica" priceMonthly={25} description="Nomenclador de precios, presupuestos, registro de pagos y gastos, y cuenta corriente por paciente." />)}
+              {/* Panel de Contenido del Tab Activo */}
+              <div className="panel ficha-clinica-content-panel" style={{ overflow: 'visible' }}>
+                {renderTabContent()}
+              </div>
             </div>
 
           </div>

@@ -104,27 +104,33 @@ export const Modulos: React.FC<{ onDemo: () => void }> = ({ onDemo }) => (
 );
 
 // === Secciones 5 y 6 — Destacadas ============================================
-const Highlight: React.FC<{ data: HighlightData; bg: 'surface' | 'base'; reverse?: boolean; onDemo: () => void; id?: string; visual?: React.ReactNode }> = ({ data, bg, reverse, onDemo, id, visual }) => (
-  <Section id={id} bg={bg} labelledBy={`${data.title}-h`}>
-    <div className={`landing-2col${reverse ? ' landing-2col--reverse' : ''}`}>
-      <div className="landing-2col__media">
-        {visual ?? <LandingImage src={data.image} alt={data.imageAlt} aspect="4 / 3" />}
-      </div>
-      <div className="landing-2col__text" style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-        <SectionHeading as="h3" kicker={data.kicker} icon={data.icon} title={data.title} id={`${data.title}-h`} />
-        <p className="landing-subtitle">{data.body}</p>
-        <ul className="landing-bullets">
-          {data.bullets.map((b) => (
-            <li key={b}><Check size={18} strokeWidth={2.5} aria-hidden="true" /> {b}</li>
-          ))}
-        </ul>
-        <div>
-          <button type="button" className="landing-btn-primary" onClick={onDemo}>{data.cta}</button>
+const slugId = (value: string) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const Highlight: React.FC<{ data: HighlightData; bg: 'surface' | 'base'; reverse?: boolean; onDemo: () => void; id?: string; visual?: React.ReactNode }> = ({ data, bg, reverse, onDemo, id, visual }) => {
+  const headingId = `${slugId(data.title)}-h`;
+
+  return (
+    <Section id={id} bg={bg} labelledBy={headingId}>
+      <div className={`landing-2col${reverse ? ' landing-2col--reverse' : ''}`}>
+        <div className="landing-2col__media">
+          {visual ?? <LandingImage src={data.image} alt={data.imageAlt} aspect="4 / 3" />}
+        </div>
+        <div className="landing-2col__text" style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+          <SectionHeading kicker={data.kicker} icon={data.icon} title={data.title} id={headingId} />
+          <p className="landing-subtitle">{data.body}</p>
+          <ul className="landing-bullets">
+            {data.bullets.map((b) => (
+              <li key={b}><Check size={18} strokeWidth={2.5} aria-hidden="true" /> {b}</li>
+            ))}
+          </ul>
+          <div>
+            <button type="button" className="landing-btn-primary" onClick={onDemo}>{data.cta}</button>
+          </div>
         </div>
       </div>
-    </div>
-  </Section>
-);
+    </Section>
+  );
+};
 
 export const Odontograma: React.FC<{ onDemo: () => void }> = ({ onDemo }) => (
   <Highlight data={HIGHLIGHT_ODONTOGRAMA} bg="surface" onDemo={onDemo} visual={<OdontogramMockup />} />
@@ -145,7 +151,7 @@ export const Transformacion: React.FC = () => (
         />
       </div>
       <div className="landing-2col__text" style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-        <SectionHeading as="h3" kicker="DEL PAPEL AL DIGITAL" icon={ArrowRight} title="Dejá atrás las fichas de papel" id="transf-h" />
+        <SectionHeading kicker="DEL PAPEL AL DIGITAL" icon={ArrowRight} title="Dejá atrás las fichas de papel" id="transf-h" />
         <p className="landing-subtitle">
           Pasá del desorden de carpetas y planillas sueltas a una clínica ordenada y digital.
           Toda la información de tus pacientes en un solo lugar, accesible desde donde estés.

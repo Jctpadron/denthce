@@ -8,7 +8,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-hce_admin}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-hce_dev_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hce_secure_password_2026}
       POSTGRES_DB: keycloak_db
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
     ports:
@@ -36,7 +36,7 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://hce-db:5432/keycloak_db
       KC_DB_USERNAME: ${DB_USER:-hce_admin}
-      KC_DB_PASSWORD: ${DB_PASSWORD:-hce_dev_password}
+      KC_DB_PASSWORD: ${DB_PASSWORD:-hce_secure_password_2026}
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
       KC_PROXY: "edge"
@@ -64,14 +64,14 @@ services:
       DB_HOST: hce-db
       DB_PORT: 5432
       DB_USER: ${DB_USER:-hce_admin}
-      DB_PASSWORD: ${DB_PASSWORD:-hce_dev_password}
+      DB_PASSWORD: ${DB_PASSWORD:-hce_secure_password_2026}
       DB_NAME: hce_fhir
       PORT: 3000
       DB_SYNCHRONIZE: "false"
       DB_LOGGING: ${DB_LOGGING:-false}
       KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL:-http://localhost:8080}/realms/hce-realm
       KEYCLOAK_JWKS_URI: ${KEYCLOAK_ISSUER_URL:-http://localhost:8080}/realms/hce-realm/protocol/openid-connect/certs
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000,https://app.systia.ar}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,https://app.systia.ar}
       CLINICHAT_WEBHOOK_URL: https://hooks.systia.ar/api/public/hooks/sync-appointment
     ports:
       - "3000:3000"

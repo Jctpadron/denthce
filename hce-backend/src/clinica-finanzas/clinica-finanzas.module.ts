@@ -8,9 +8,10 @@ import { ClinicalGasto } from './clinical-gasto.entity';
 import { ClinicaFinanzasService } from './clinica-finanzas.service';
 import { ClinicaFinanzasController } from './clinica-finanzas.controller';
 import { PlatformModule } from '../platform/platform.module';
+import { PatientEntity } from '../patient/patient.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClinicalPrecio, ClinicalPresupuesto, ClinicalPresupuestoItem, ClinicalPago, ClinicalGasto]), PlatformModule],
+  imports: [TypeOrmModule.forFeature([ClinicalPrecio, ClinicalPresupuesto, ClinicalPresupuestoItem, ClinicalPago, ClinicalGasto, PatientEntity]), PlatformModule],
   providers: [ClinicaFinanzasService],
   controllers: [ClinicaFinanzasController],
   exports: [ClinicaFinanzasService],

@@ -57,7 +57,7 @@ const HuecoLibre: React.FC<{ onClick: () => void; compact?: boolean }> = ({ onCl
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
       fontSize: '0.72rem', fontWeight: 600, transition: 'var(--transition-smooth)',
     }}
-    onMouseOver={(e) => { e.currentTarget.style.borderColor = '#2962ff'; e.currentTarget.style.color = '#2962ff'; }}
+    onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
     onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--color-muted)'; }}
   >
     <Plus style={{ width: '0.9rem', height: '0.9rem' }} /> {!compact && 'Disponible'}
@@ -114,10 +114,10 @@ export const AgendaGrid: React.FC<Props> = ({ vista, fechaRef, appts, scheduleJs
           const esHoy = startOfDay(d).getTime() === startOfDay(new Date()).getTime();
           return (
             <div key={d.toISOString()} style={{ textAlign: 'center', padding: '0.4rem', borderRadius: '8px', background: esHoy ? 'rgba(41,98,255,0.07)' : 'transparent' }}>
-              <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700, color: esHoy ? '#2962ff' : 'var(--color-muted)' }}>
+              <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700, color: esHoy ? 'var(--color-primary)' : 'var(--color-muted)' }}>
                 {DIAS_SEMANA_LABEL[DIA_POR_INDICE[d.getDay()]]?.slice(0, 3)}
               </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: esHoy ? '#2962ff' : 'var(--color-text)' }}>{formatFechaCorta(d)}</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: esHoy ? 'var(--color-primary)' : 'var(--color-text)' }}>{formatFechaCorta(d)}</div>
             </div>
           );
         })}
