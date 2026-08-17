@@ -25,3 +25,21 @@ aws/scripts/deploy-log.txt
 /*.pdf
 /*_logs*.txt
 /temp_logs.txt
+
+# Config del editor (personal de cada uno).
+.vscode/
+
+# Evidencia clinica subida en runtime: NUNCA versionar (son datos de paciente).
+hce-backend/uploads/
+
+# Salidas de auditorias y capturas: se regeneran, pesan 7 MB.
+testing/audits/
+testing/logs/
+testing/branding-systia-favicon-options/
+testing/visual-audit-prod-*/
+testing/youtube-analysis/
+testing/scripts/*.pdf
+
+# Capturas sueltas de trabajo.
+hce-frontend/*.png
+img/*.jpeg
