@@ -538,8 +538,8 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: '0.75rem',
-          background: activeLayer === 'existing' ? '#fff5f5' : '#eff6ff',
-          borderBottom: `1px solid ${activeLayer === 'existing' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)'}`,
+          background: activeLayer === 'existing' ? 'color-mix(in srgb, var(--color-amber) 8%, var(--bg-surface))' : 'color-mix(in srgb, var(--color-primary) 8%, var(--bg-surface))',
+          borderBottom: `1px solid ${activeLayer === 'existing' ? 'color-mix(in srgb, var(--color-amber) 22%, var(--border-color))' : 'color-mix(in srgb, var(--color-primary) 22%, var(--border-color))'}`,
           padding: '0.75rem 1rem',
           margin: '-0.35rem -0.35rem 0.5rem -0.35rem', // sangría negativa para ocupar todo el ancho superior del panel
           borderRadius: '14px 14px 0 0',
@@ -556,7 +556,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
               <div style={{
                 fontSize: '0.8rem',
                 fontWeight: 800,
-                color: activeLayer === 'existing' ? '#991b1b' : '#1e40af',
+                color: activeLayer === 'existing' ? 'var(--color-amber)' : 'var(--accent-text)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.03em'
               }}>
@@ -564,7 +564,7 @@ export const OdontogramPAMI: React.FC<OdontogramProps> = ({ patientId, birthDate
               </div>
               <div style={{
                 fontSize: '0.7rem',
-                color: activeLayer === 'existing' ? '#b91c1c' : '#2563eb',
+                color: activeLayer === 'existing' ? 'var(--color-muted)' : 'var(--accent-text)',
                 fontWeight: 500,
                 marginTop: '0.05rem'
               }}>
