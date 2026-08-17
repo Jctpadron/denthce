@@ -344,6 +344,19 @@ export class ClinicaFinanzasService {
       if (presupuesto.estado === 'cancelado') {
         throw new BadRequestException('No se pueden registrar pagos sobre un presupuesto cancelado.');
       }
+      // No se puede cobrar mas que el saldo pendiente. Sin esto, el excedente
+      // resta en deudaActual del paciente y ENMASCARA la deuda de otros
+      // presupuestos: un moroso aparece al dia.
+      const yaPagado = await this.sumarPagosVigentes(tenantId, dto.presupuestoId);
+      const saldoPendiente = Number(presupuesto.total) - yaPagado;
+      // Tolerancia de medio centavo: los importes son NUMERIC(12,2) y la suma se
+      // hace en punto flotante, asi que un pago que salda exacto podria quedar
+      // apenas por encima del saldo y ser rechazado sin motivo real.
+      if (monto > saldoPendiente + 0.005) {
+        throw new BadRequestException(
+          `El importe supera el saldo pendiente del presupuesto (saldo: $${saldoPendiente.toFixed(2)})`,
+        );
+      }
     }
     const pago = this.pagoRepo.create({
       tenantId,
@@ -577,8 +590,7 @@ export class ClinicaFinanzasService {
     if (presupuesto.estado === 'cancelado') return;
 
     // Σ SOLO de pagos vigentes (excluye anulados) → es lo que hace que anular baje el estado.
-    const pagos = await this.pagoRepo.find({ where: { presupuestoId, anuladoAt: IsNull() } });
-    const totalPagado = pagos.reduce((s, p) => s + Number(p.monto), 0);
+    const totalPagado = await this.sumarPagosVigentes(tenantId, presupuestoId);
     const total = Number(presupuesto.total);
 
     // Piso al quedar en 0 (DEC-3): fue aceptado → 'aceptado'; fue presentado → 'presentado'; si no → 'borrador'.
@@ -604,6 +616,21 @@ export class ClinicaFinanzasService {
       presupuesto.estado = nuevoEstado;
       await this.presupuestoRepo.save(presupuesto);
     }
+  }
+
+  /**
+   * Σ de los pagos VIGENTES (no anulados) de un presupuesto.
+   * Unico punto donde se suma lo cobrado: lo usan el recalculo de estado (DEC-1)
+   * y la validacion de sobrepago, para que no puedan divergir.
+   * El filtro por tenantId es defensa en profundidad — el presupuestoId ya viene
+   * validado contra el tenant, pero la invariante "toda query lleva tenantId" es
+   * lo que hace auditable el aislamiento multi-inquilino.
+   */
+  private async sumarPagosVigentes(tenantId: string, presupuestoId: string): Promise<number> {
+    const pagos = await this.pagoRepo.find({
+      where: { tenantId, presupuestoId, anuladoAt: IsNull() },
+    });
+    return pagos.reduce((s, p) => s + Number(p.monto), 0);
   }
 
   private async generarNumeroPresupuesto(tenantId: string): Promise<string> {
