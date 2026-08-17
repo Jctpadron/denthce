@@ -323,8 +323,18 @@ export class ClinicaFinanzasService {
     await this.assertPatientBelongsToTenant(tenantId, dto.patientId);
 
     // Importe válido (CA-16): el DTO es interface (por el ValidationPipe), se valida a mano.
-    if (dto.monto == null || Number(dto.monto) <= 0) {
+    const monto = Number(dto.monto);
+    if (dto.monto == null || !Number.isFinite(monto) || monto <= 0) {
       throw new BadRequestException('El importe debe ser mayor a cero');
+    }
+    const fechaPago = dto.fechaPago ? new Date(dto.fechaPago) : new Date();
+    if (Number.isNaN(fechaPago.getTime())) {
+      throw new BadRequestException('La fecha del pago no es valida');
+    }
+    const finDeHoy = new Date();
+    finDeHoy.setHours(23, 59, 59, 999);
+    if (fechaPago > finDeHoy) {
+      throw new BadRequestException('La fecha del pago no puede ser futura');
     }
     // DEC-1: se cobra en cualquier estado ≠ cancelado; el estado se DERIVA de los pagos.
     // Se preserva la validación cross-tenant (where incluye tenantId) y el NotFound.
@@ -340,9 +350,9 @@ export class ClinicaFinanzasService {
       patientId: dto.patientId,
       presupuestoId: dto.presupuestoId || null,
       tipo: dto.tipo || 'pago_directo',
-      monto: dto.monto,
+      monto,
       metodoPago: dto.metodoPago || 'efectivo',
-      fechaPago: dto.fechaPago || new Date(),
+      fechaPago,
       comprobante: dto.comprobante,
       notas: dto.notas,
       registeredBy: userId,

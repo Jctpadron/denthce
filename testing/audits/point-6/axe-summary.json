@@ -1,0 +1,26 @@
+[
+  {
+    "viewport": "mobile-360",
+    "url": "http://127.0.0.1:4173/",
+    "violations": 0,
+    "incomplete": 1,
+    "passes": 39,
+    "violationIds": []
+  },
+  {
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:4173/",
+    "violations": 0,
+    "incomplete": 1,
+    "passes": 39,
+    "violationIds": []
+  },
+  {
+    "viewport": "desktop-1280",
+    "url": "http://127.0.0.1:4173/",
+    "violations": 0,
+    "incomplete": 1,
+    "passes": 39,
+    "violationIds": []
+  }
+]

@@ -1,0 +1,1192 @@
+[0:06] Hola a todos, un honor y un placer estar
+[0:06] Hola a todos, un honor y un placer estar acá. Qué suerte que hayamos podido
+[0:08] acá. Qué suerte que hayamos podido
+[0:09] acá. Qué suerte que hayamos podido convocar a este evento, sobre todo en un
+[0:11] convocar a este evento, sobre todo en un
+[0:11] convocar a este evento, sobre todo en un momento tan impactante como el que
+[0:13] momento tan impactante como el que
+[0:13] momento tan impactante como el que estamos viviendo hoy día. Los que
+[0:15] estamos viviendo hoy día. Los que
+[0:15] estamos viviendo hoy día. Los que trabajamos en inteligencia artificial,
+[0:17] trabajamos en inteligencia artificial,
+[0:17] trabajamos en inteligencia artificial, yo creo que lo sentimos y lo lo vivimos
+[0:19] yo creo que lo sentimos y lo lo vivimos
+[0:19] yo creo que lo sentimos y lo lo vivimos y lo percibimos
+[0:21] y lo percibimos
+[0:21] y lo percibimos mucho más fuerte, mucho más impactante e
+[0:25] mucho más fuerte, mucho más impactante e
+[0:25] mucho más fuerte, mucho más impactante e que las personas que no trabajan en
+[0:27] que las personas que no trabajan en
+[0:27] que las personas que no trabajan en inteligencia artificial. Pero por eso
+[0:29] inteligencia artificial. Pero por eso
+[0:29] inteligencia artificial. Pero por eso también sentimos que es nuestra misión
+[0:30] también sentimos que es nuestra misión
+[0:31] también sentimos que es nuestra misión compartirlo, conversarlo, discutirlo y
+[0:33] compartirlo, conversarlo, discutirlo y
+[0:33] compartirlo, conversarlo, discutirlo y por sobre todo en nuestro rol de Health
+[0:35] por sobre todo en nuestro rol de Health
+[0:35] por sobre todo en nuestro rol de Health Atom producirlo.
+[0:37] Atom producirlo.
+[0:37] Atom producirlo. Como contaba Pascal, eh yo creo que hoy
+[0:41] Como contaba Pascal, eh yo creo que hoy
+[0:41] Como contaba Pascal, eh yo creo que hoy estamos viviendo uno de los momentos más
+[0:45] estamos viviendo uno de los momentos más
+[0:45] estamos viviendo uno de los momentos más impactantes de la humanidad, de seguro.
+[0:49] impactantes de la humanidad, de seguro.
+[0:49] impactantes de la humanidad, de seguro. No sé si la revolución industrial fue
+[0:52] No sé si la revolución industrial fue
+[0:52] No sé si la revolución industrial fue más relevante de lo que estamos viviendo
+[0:54] más relevante de lo que estamos viviendo
+[0:54] más relevante de lo que estamos viviendo hoy día. No sé si la invención de
+[0:57] hoy día. No sé si la invención de
+[0:57] hoy día. No sé si la invención de la rueda fue más impactante de lo que
+[1:00] la rueda fue más impactante de lo que
+[1:00] la rueda fue más impactante de lo que estamos viviendo y está por venir. Yo
+[1:02] estamos viviendo y está por venir. Yo
+[1:02] estamos viviendo y está por venir. Yo creo que hoy día somos unos afortunados
+[1:05] creo que hoy día somos unos afortunados
+[1:05] creo que hoy día somos unos afortunados de poder estar presenciando esto y
+[1:07] de poder estar presenciando esto y
+[1:07] de poder estar presenciando esto y quizás quién sabe lo que nos depara para
+[1:10] quizás quién sabe lo que nos depara para
+[1:10] quizás quién sabe lo que nos depara para el futuro, pero al menos como Hellatum
+[1:12] el futuro, pero al menos como Hellatum
+[1:12] el futuro, pero al menos como Hellatum nosotros estamos
+[1:14] nosotros estamos
+[1:14] nosotros estamos apasionadísimos y estamos demasiado
+[1:17] apasionadísimos y estamos demasiado
+[1:18] apasionadísimos y estamos demasiado entretenidos y obsesionados con
+[1:22] entretenidos y obsesionados con
+[1:22] entretenidos y obsesionados con revolucionar la industria dental con
+[1:24] revolucionar la industria dental con
+[1:24] revolucionar la industria dental con inteligencia artificial.
+[1:30] La gran diferencia de lo que existía
+[1:30] La gran diferencia de lo que existía antes a lo que existe hoy es que
+[1:32] antes a lo que existe hoy es que
+[1:32] antes a lo que existe hoy es que antiguamente el software o el código que
+[1:34] antiguamente el software o el código que
+[1:34] antiguamente el software o el código que nosotros escribíamos era determinístico.
+[1:37] nosotros escribíamos era determinístico.
+[1:37] nosotros escribíamos era determinístico. ¿Qué significa que sea determinístico?
+[1:39] ¿Qué significa que sea determinístico?
+[1:39] ¿Qué significa que sea determinístico? que nosotros programábamos una
+[1:41] que nosotros programábamos una
+[1:41] que nosotros programábamos una calculadora donde 1 + 1 es 2. Y hoy en
+[1:44] calculadora donde 1 + 1 es 2. Y hoy en
+[1:44] calculadora donde 1 + 1 es 2. Y hoy en día, tanto con machine learning, con
+[1:47] día, tanto con machine learning, con
+[1:47] día, tanto con machine learning, con redes neuronales, con los LLMs que
+[1:49] redes neuronales, con los LLMs que
+[1:49] redes neuronales, con los LLMs que hablaba Pascal, nosotros podemos
+[1:51] hablaba Pascal, nosotros podemos
+[1:51] hablaba Pascal, nosotros podemos producir resultados que antes eran
+[1:53] producir resultados que antes eran
+[1:54] producir resultados que antes eran impensados, que es el famoso Gen ai o
+[1:57] impensados, que es el famoso Gen ai o
+[1:57] impensados, que es el famoso Gen ai o inteligencia artificial generativa. Y el
+[1:59] inteligencia artificial generativa. Y el
+[1:59] inteligencia artificial generativa. Y el gran desafío de la inteligencia
+[2:01] gran desafío de la inteligencia
+[2:01] gran desafío de la inteligencia artificial generativa es que, a
+[2:02] artificial generativa es que, a
+[2:02] artificial generativa es que, a diferencia de lo que existía antes, la
+[2:04] diferencia de lo que existía antes, la
+[2:04] diferencia de lo que existía antes, la inteligencia artificial es
+[2:06] inteligencia artificial es
+[2:06] inteligencia artificial es probabilística, no es determinística.
+[2:09] probabilística, no es determinística.
+[2:09] probabilística, no es determinística. La forma más fácil de poder explicarles
+[2:11] La forma más fácil de poder explicarles
+[2:11] La forma más fácil de poder explicarles eso es que le preguntan 10 veces lo
+[2:13] eso es que le preguntan 10 veces lo
+[2:13] eso es que le preguntan 10 veces lo mismo a chatpt y probablemente en más de
+[2:16] mismo a chatpt y probablemente en más de
+[2:16] mismo a chatpt y probablemente en más de una ocasión la respuesta va a ser
+[2:18] una ocasión la respuesta va a ser
+[2:18] una ocasión la respuesta va a ser distinta.
+[2:19] distinta.
+[2:19] distinta. Entonces, cuando nosotros pensamos en la
+[2:21] Entonces, cuando nosotros pensamos en la
+[2:21] Entonces, cuando nosotros pensamos en la inteligencia artificial y y lo tratamos
+[2:23] inteligencia artificial y y lo tratamos
+[2:23] inteligencia artificial y y lo tratamos de llevar a algo relativamente básico
+[2:25] de llevar a algo relativamente básico
+[2:25] de llevar a algo relativamente básico para poder entenderlo,
+[2:27] para poder entenderlo,
+[2:27] para poder entenderlo, no es tan sencillo como escribir un buen
+[2:30] no es tan sencillo como escribir un buen
+[2:30] no es tan sencillo como escribir un buen prompt en CHPT o escribir un buen prompt
+[2:33] prompt en CHPT o escribir un buen prompt
+[2:33] prompt en CHPT o escribir un buen prompt con cualquier LLM.
+[2:35] con cualquier LLM.
+[2:35] con cualquier LLM. Lo que nosotros tenemos que lograr son
+[2:37] Lo que nosotros tenemos que lograr son
+[2:37] Lo que nosotros tenemos que lograr son resultados predecibles
+[2:40] resultados predecibles
+[2:40] resultados predecibles con inteligencia artificial generativa.
+[2:43] con inteligencia artificial generativa.
+[2:43] con inteligencia artificial generativa. Y eso es lo que hemos venido
+[2:44] Y eso es lo que hemos venido
+[2:44] Y eso es lo que hemos venido desarrollando, entrenando hace ya más de
+[2:47] desarrollando, entrenando hace ya más de
+[2:47] desarrollando, entrenando hace ya más de un año de cómo podemos lograr en la
+[2:49] un año de cómo podemos lograr en la
+[2:49] un año de cómo podemos lograr en la industria dental resultados predecibles
+[2:54] industria dental resultados predecibles
+[2:54] industria dental resultados predecibles de forma generativa para poder hacer una
+[2:57] de forma generativa para poder hacer una
+[2:57] de forma generativa para poder hacer una disrupción en como hoy operamos.
+[3:01] disrupción en como hoy operamos.
+[3:01] disrupción en como hoy operamos. En esa disrupción y en esos productos,
+[3:03] En esa disrupción y en esos productos,
+[3:03] En esa disrupción y en esos productos, nosotros nos preguntamos y soñamos en
+[3:06] nosotros nos preguntamos y soñamos en
+[3:06] nosotros nos preguntamos y soñamos en decir, ¿cómo podemos ayudar a las
+[3:09] decir, ¿cómo podemos ayudar a las
+[3:09] decir, ¿cómo podemos ayudar a las clínicas a duplicar sus ingresos con los
+[3:13] clínicas a duplicar sus ingresos con los
+[3:13] clínicas a duplicar sus ingresos con los mismos recursos
+[3:15] mismos recursos
+[3:15] mismos recursos o triplicar su capacidad con los mismos
+[3:17] o triplicar su capacidad con los mismos
+[3:17] o triplicar su capacidad con los mismos recursos?
+[3:19] recursos?
+[3:19] recursos? Y hoy estamos en la cruzada de cómo lo
+[3:23] Y hoy estamos en la cruzada de cómo lo
+[3:23] Y hoy estamos en la cruzada de cómo lo logramos en una carrera de los próximos
+[3:25] logramos en una carrera de los próximos
+[3:25] logramos en una carrera de los próximos 3, 5, 10 años. Los productos que vieron
+[3:28] 3, 5, 10 años. Los productos que vieron
+[3:28] 3, 5, 10 años. Los productos que vieron en el video o lo que yo les voy a
+[3:29] en el video o lo que yo les voy a
+[3:29] en el video o lo que yo les voy a mostrar no son el fin, son el comienzo
+[3:33] mostrar no son el fin, son el comienzo
+[3:33] mostrar no son el fin, son el comienzo de lo que estamos construyendo para esta
+[3:36] de lo que estamos construyendo para esta
+[3:36] de lo que estamos construyendo para esta disrupción en la industria.
+[3:39] disrupción en la industria.
+[3:39] disrupción en la industria. Y dentro de esos eh productos, hay tres
+[3:43] Y dentro de esos eh productos, hay tres
+[3:43] Y dentro de esos eh productos, hay tres productos que les voy a compartir
+[3:45] productos que les voy a compartir
+[3:45] productos que les voy a compartir brevemente ahora para que los podamos
+[3:48] brevemente ahora para que los podamos
+[3:48] brevemente ahora para que los podamos para que los podamos visualizar.
+[3:51] para que los podamos visualizar.
+[3:51] para que los podamos visualizar. Uno es el CRD de inteligencia
+[3:54] Uno es el CRD de inteligencia
+[3:54] Uno es el CRD de inteligencia artificial. Luego tenemos el copilot
+[3:57] artificial. Luego tenemos el copilot
+[3:57] artificial. Luego tenemos el copilot clínico y finalmente la reportería AI.
+[4:00] clínico y finalmente la reportería AI.
+[4:00] clínico y finalmente la reportería AI. Todos los otros productos los podemos
+[4:01] Todos los otros productos los podemos
+[4:01] Todos los otros productos los podemos ver después en otras instancias o los
+[4:03] ver después en otras instancias o los
+[4:03] ver después en otras instancias o los pueden conversar con el equipo después
+[4:05] pueden conversar con el equipo después
+[4:05] pueden conversar con el equipo después de la presentación.
+[4:06] de la presentación.
+[4:06] de la presentación. Una de las eh claves de estos productos
+[4:11] Una de las eh claves de estos productos
+[4:11] Una de las eh claves de estos productos es que nos van a permitir automatizar y
+[4:15] es que nos van a permitir automatizar y
+[4:15] es que nos van a permitir automatizar y nos van a permitir que hagan trabajo por
+[4:17] nos van a permitir que hagan trabajo por
+[4:17] nos van a permitir que hagan trabajo por nosotros. Así que sin ir más lejos, les
+[4:20] nosotros. Así que sin ir más lejos, les
+[4:20] nosotros. Así que sin ir más lejos, les voy a compartir mi pantalla.
+[4:24] voy a compartir mi pantalla.
+[4:24] voy a compartir mi pantalla. Cuando nosotros pensamos en la atención
+[4:25] Cuando nosotros pensamos en la atención
+[4:25] Cuando nosotros pensamos en la atención de pacientes, e nosotros quisimos tomar
+[4:28] de pacientes, e nosotros quisimos tomar
+[4:28] de pacientes, e nosotros quisimos tomar el desafío de decir, bueno, toda la
+[4:30] el desafío de decir, bueno, toda la
+[4:30] el desafío de decir, bueno, toda la atención remuta del paciente la queremos
+[4:33] atención remuta del paciente la queremos
+[4:33] atención remuta del paciente la queremos adoptar y la queremos vivir nosotros, la
+[4:36] adoptar y la queremos vivir nosotros, la
+[4:36] adoptar y la queremos vivir nosotros, la queremos automatizar para las clínicas y
+[4:38] queremos automatizar para las clínicas y
+[4:38] queremos automatizar para las clínicas y que esto sea un trabajo 247 sin descanso
+[4:42] que esto sea un trabajo 247 sin descanso
+[4:42] que esto sea un trabajo 247 sin descanso por una cabeza que sea equivalente a un
+[4:46] por una cabeza que sea equivalente a un
+[4:46] por una cabeza que sea equivalente a un estudiante de doctorado o más. De
+[4:49] estudiante de doctorado o más. De
+[4:49] estudiante de doctorado o más. De hecho, como anécdota, cuando partimos
+[4:50] hecho, como anécdota, cuando partimos
+[4:50] hecho, como anécdota, cuando partimos desarrollando este producto, la cabeza
+[4:51] desarrollando este producto, la cabeza
+[4:51] desarrollando este producto, la cabeza que funcionaba, o sea, el modelo que
+[4:53] que funcionaba, o sea, el modelo que
+[4:53] que funcionaba, o sea, el modelo que usábamos en esa época era más como un
+[4:54] usábamos en esa época era más como un
+[4:54] usábamos en esa época era más como un alumno de segundo de segundo medio un
+[4:56] alumno de segundo de segundo medio un
+[4:56] alumno de segundo de segundo medio un poco borracho. Entonces, de repente
+[4:58] poco borracho. Entonces, de repente
+[4:58] poco borracho. Entonces, de repente overnight la inteligencia artificial
+[5:00] overnight la inteligencia artificial
+[5:00] overnight la inteligencia artificial avanza tan rápido que ya teníamos un
+[5:02] avanza tan rápido que ya teníamos un
+[5:02] avanza tan rápido que ya teníamos un estudiante de doctorado y eso también es
+[5:04] estudiante de doctorado y eso también es
+[5:04] estudiante de doctorado y eso también es un game changer.
+[5:05] un game changer.
+[5:05] un game changer. Y en esa atensión del paciente, no solo
+[5:08] Y en esa atensión del paciente, no solo
+[5:08] Y en esa atensión del paciente, no solo nuestra misión es cómo atendemos al
+[5:10] nuestra misión es cómo atendemos al
+[5:10] nuestra misión es cómo atendemos al paciente de forma remota, sino que cómo
+[5:13] paciente de forma remota, sino que cómo
+[5:14] paciente de forma remota, sino que cómo hacemos el seguimiento del paciente a
+[5:16] hacemos el seguimiento del paciente a
+[5:16] hacemos el seguimiento del paciente a través de todo el proceso del viaje y el
+[5:19] través de todo el proceso del viaje y el
+[5:19] través de todo el proceso del viaje y el journey del paciente. Y también cómo
+[5:21] journey del paciente. Y también cómo
+[5:21] journey del paciente. Y también cómo retroalimentamos
+[5:23] retroalimentamos
+[5:23] retroalimentamos las herramientas de marketing que nos
+[5:25] las herramientas de marketing que nos
+[5:25] las herramientas de marketing que nos generan la demanda para poder cerrar el
+[5:28] generan la demanda para poder cerrar el
+[5:28] generan la demanda para poder cerrar el loop.
+[5:31] loop.
+[5:31] loop. Entonces, lo que estamos viendo acá es
+[5:34] Entonces, lo que estamos viendo acá es
+[5:34] Entonces, lo que estamos viendo acá es nuestro eh panel de nuestro CRM con
+[5:36] nuestro eh panel de nuestro CRM con
+[5:36] nuestro eh panel de nuestro CRM con inteligencia artificial, donde tenemos
+[5:39] inteligencia artificial, donde tenemos
+[5:39] inteligencia artificial, donde tenemos agentes que van a atender todas las
+[5:42] agentes que van a atender todas las
+[5:42] agentes que van a atender todas las comunicaciones de forma omniganal por
+[5:45] comunicaciones de forma omniganal por
+[5:45] comunicaciones de forma omniganal por WhatsApp, por teléfono, por redes
+[5:48] WhatsApp, por teléfono, por redes
+[5:48] WhatsApp, por teléfono, por redes sociales. conversación que nos entra,
+[5:50] sociales. conversación que nos entra,
+[5:50] sociales. conversación que nos entra, nuestro agente las atiende de forma
+[5:54] nuestro agente las atiende de forma
+[5:54] nuestro agente las atiende de forma automática y esa atención tiene una
+[5:57] automática y esa atención tiene una
+[5:57] automática y esa atención tiene una particularidad y es que no solo las
+[6:01] particularidad y es que no solo las
+[6:01] particularidad y es que no solo las atiende, sino que conoce el contexto del
+[6:04] atiende, sino que conoce el contexto del
+[6:04] atiende, sino que conoce el contexto del paciente. O sea, alguien escribe y
+[6:07] paciente. O sea, alguien escribe y
+[6:07] paciente. O sea, alguien escribe y nuestro agente le va a responder por su
+[6:09] nuestro agente le va a responder por su
+[6:09] nuestro agente le va a responder por su nombre, sabe cuándo fue su última cita,
+[6:12] nombre, sabe cuándo fue su última cita,
+[6:12] nombre, sabe cuándo fue su última cita, sabe qué citas tiene mañana. Entonces,
+[6:15] sabe qué citas tiene mañana. Entonces,
+[6:15] sabe qué citas tiene mañana. Entonces, cuando recibimos una conversación que
+[6:16] cuando recibimos una conversación que
+[6:16] cuando recibimos una conversación que dice, "Hola, la respuesta va a ser,
+[6:19] dice, "Hola, la respuesta va a ser,
+[6:19] dice, "Hola, la respuesta va a ser, hola, Daniel. ¿En qué te puedo ayudar?
+[6:21] hola, Daniel. ¿En qué te puedo ayudar?
+[6:21] hola, Daniel. ¿En qué te puedo ayudar? Necesito tomar una hora. Dale, te
+[6:24] Necesito tomar una hora. Dale, te
+[6:24] Necesito tomar una hora. Dale, te atiendos, o sea, te agendo una hora con
+[6:27] atiendos, o sea, te agendo una hora con
+[6:27] atiendos, o sea, te agendo una hora con el doctor Pérez que te atendiste la
+[6:28] el doctor Pérez que te atendiste la
+[6:28] el doctor Pérez que te atendiste la última vez en la sucursal de los
+[6:30] última vez en la sucursal de los
+[6:30] última vez en la sucursal de los Domínicos y eso hace que la experiencia
+[6:32] Domínicos y eso hace que la experiencia
+[6:32] Domínicos y eso hace que la experiencia del paciente llegue a a un nivel mucho
+[6:35] del paciente llegue a a un nivel mucho
+[6:36] del paciente llegue a a un nivel mucho más cercano y mucho más, entre comillas,
+[6:38] más cercano y mucho más, entre comillas,
+[6:38] más cercano y mucho más, entre comillas, humano.
+[6:40] humano.
+[6:40] humano. Como nuestros productos están embebidos
+[6:42] Como nuestros productos están embebidos
+[6:42] Como nuestros productos están embebidos 100% en lo que se conoce como el System
+[6:44] 100% en lo que se conoce como el System
+[6:44] 100% en lo que se conoce como el System of Record, que en este caso es
+[6:45] of Record, que en este caso es
+[6:45] of Record, que en este caso es Ventalink, o también lo podemos conectar
+[6:47] Ventalink, o también lo podemos conectar
+[6:47] Ventalink, o también lo podemos conectar a cualquier otro system of record, tiene
+[6:50] a cualquier otro system of record, tiene
+[6:50] a cualquier otro system of record, tiene la particularidad de que el nivel de
+[6:52] la particularidad de que el nivel de
+[6:52] la particularidad de que el nivel de precisión es muy alto. Nosotros llevamos
+[6:54] precisión es muy alto. Nosotros llevamos
+[6:54] precisión es muy alto. Nosotros llevamos trabajando mucho tiempo en técnicas para
+[6:56] trabajando mucho tiempo en técnicas para
+[6:56] trabajando mucho tiempo en técnicas para evitar la alucinación, que los modelos
+[6:58] evitar la alucinación, que los modelos
+[6:58] evitar la alucinación, que los modelos alucinan y para explicar lo que es la
+[7:00] alucinan y para explicar lo que es la
+[7:00] alucinan y para explicar lo que es la alucinación, escriben la chat div y a
+[7:02] alucinación, escriben la chat div y a
+[7:02] alucinación, escriben la chat div y a veces puede que les responda algo que no
+[7:03] veces puede que les responda algo que no
+[7:03] veces puede que les responda algo que no tiene sentido. ¿Qué lo inventó? Y esa es
+[7:06] tiene sentido. ¿Qué lo inventó? Y esa es
+[7:06] tiene sentido. ¿Qué lo inventó? Y esa es la alucinación.
+[7:08] la alucinación.
+[7:08] la alucinación. Y el hecho de que esté embedido y
+[7:10] Y el hecho de que esté embedido y
+[7:10] Y el hecho de que esté embedido y conectado a las entrañas del System of
+[7:12] conectado a las entrañas del System of
+[7:12] conectado a las entrañas del System of Record es lo que nos permite también eh
+[7:14] Record es lo que nos permite también eh
+[7:14] Record es lo que nos permite también eh tomar decisiones, como por ejemplo que
+[7:16] tomar decisiones, como por ejemplo que
+[7:16] tomar decisiones, como por ejemplo que si el paciente se va a agendar la
+[7:18] si el paciente se va a agendar la
+[7:18] si el paciente se va a agendar la continuación de una endodoncia, quizás
+[7:20] continuación de una endodoncia, quizás
+[7:20] continuación de una endodoncia, quizás no necesita 15 minutos, quizás son 45 y
+[7:23] no necesita 15 minutos, quizás son 45 y
+[7:23] no necesita 15 minutos, quizás son 45 y eso nosotros lo sabemos y lo podemos
+[7:25] eso nosotros lo sabemos y lo podemos
+[7:25] eso nosotros lo sabemos y lo podemos determinar.
+[7:27] determinar.
+[7:27] determinar. Entonces, acá lo que estamos viendo es
+[7:29] Entonces, acá lo que estamos viendo es
+[7:29] Entonces, acá lo que estamos viendo es un panel de métrica que nos habla de la
+[7:30] un panel de métrica que nos habla de la
+[7:30] un panel de métrica que nos habla de la tasa de éxito, cuántas conversaciones
+[7:32] tasa de éxito, cuántas conversaciones
+[7:32] tasa de éxito, cuántas conversaciones efectivas ha tenido nuestro agente. Y en
+[7:35] efectivas ha tenido nuestro agente. Y en
+[7:35] efectivas ha tenido nuestro agente. Y en este panel nosotros podemos ver en
+[7:36] este panel nosotros podemos ver en
+[7:36] este panel nosotros podemos ver en tiempo real todas las conversaciones que
+[7:38] tiempo real todas las conversaciones que
+[7:38] tiempo real todas las conversaciones que está teniendo el agente con los
+[7:41] está teniendo el agente con los
+[7:41] está teniendo el agente con los pacientes. Nosotros las podemos
+[7:43] pacientes. Nosotros las podemos
+[7:43] pacientes. Nosotros las podemos monitorear, podemos ver que ya está
+[7:44] monitorear, podemos ver que ya está
+[7:44] monitorear, podemos ver que ya está agendando una cita y en cualquier caso
+[7:46] agendando una cita y en cualquier caso
+[7:46] agendando una cita y en cualquier caso nosotros también la podríamos intervenir
+[7:49] nosotros también la podríamos intervenir
+[7:49] nosotros también la podríamos intervenir y tomarla para que un humano siga
+[7:51] y tomarla para que un humano siga
+[7:51] y tomarla para que un humano siga adelante. Si la gente no sabe responder
+[7:53] adelante. Si la gente no sabe responder
+[7:53] adelante. Si la gente no sabe responder algo o el mismo paciente pide hablar con
+[7:57] algo o el mismo paciente pide hablar con
+[7:57] algo o el mismo paciente pide hablar con un humano, automáticamente se va a ir a
+[8:00] un humano, automáticamente se va a ir a
+[8:00] un humano, automáticamente se va a ir a la bandeja de entrada, que esta es una
+[8:01] la bandeja de entrada, que esta es una
+[8:01] la bandeja de entrada, que esta es una bandeja que manejan los humanos. Esta
+[8:04] bandeja que manejan los humanos. Esta
+[8:04] bandeja que manejan los humanos. Esta bandesca tiene todas las conversaciones
+[8:05] bandesca tiene todas las conversaciones
+[8:05] bandesca tiene todas las conversaciones activas y yo las puedo ir moviendo de
+[8:07] activas y yo las puedo ir moviendo de
+[8:07] activas y yo las puedo ir moviendo de fase como si fuera un funnel para poder
+[8:10] fase como si fuera un funnel para poder
+[8:10] fase como si fuera un funnel para poder llegar a cumplir el objetivo. Y
+[8:14] llegar a cumplir el objetivo. Y
+[8:14] llegar a cumplir el objetivo. Y finalmente eh también podemos ir
+[8:16] finalmente eh también podemos ir
+[8:16] finalmente eh también podemos ir monitoreando todas las conversaciones
+[8:18] monitoreando todas las conversaciones
+[8:18] monitoreando todas las conversaciones que han sido ya resueltas por la
+[8:20] que han sido ya resueltas por la
+[8:20] que han sido ya resueltas por la inteligencia artificial, que esto
+[8:21] inteligencia artificial, que esto
+[8:22] inteligencia artificial, que esto generalmente se traduce en
+[8:23] generalmente se traduce en
+[8:23] generalmente se traduce en agendamientos, cambios de cita,
+[8:25] agendamientos, cambios de cita,
+[8:25] agendamientos, cambios de cita, confirmaciones, una venta, una encobro
+[8:27] confirmaciones, una venta, una encobro
+[8:27] confirmaciones, una venta, una encobro de una deuda, un recordatorio o
+[8:30] de una deuda, un recordatorio o
+[8:30] de una deuda, un recordatorio o cualquier otra de las actividades que ya
+[8:32] cualquier otra de las actividades que ya
+[8:32] cualquier otra de las actividades que ya les voy a contar.
+[8:34] les voy a contar.
+[8:34] les voy a contar. Cuando nosotros pensamos en la
+[8:35] Cuando nosotros pensamos en la
+[8:35] Cuando nosotros pensamos en la inteligencia artificial,
+[8:38] inteligencia artificial,
+[8:38] inteligencia artificial, que se usa mucho hoy en día para hablar
+[8:41] que se usa mucho hoy en día para hablar
+[8:41] que se usa mucho hoy en día para hablar con los pacientes, una parte importante
+[8:44] con los pacientes, una parte importante
+[8:44] con los pacientes, una parte importante cuando nosotros pensamos en el CRM no es
+[8:46] cuando nosotros pensamos en el CRM no es
+[8:46] cuando nosotros pensamos en el CRM no es solo atender la comunicación entrante.
+[8:50] solo atender la comunicación entrante.
+[8:50] solo atender la comunicación entrante. Pensemos en un CRM o en un proceso de
+[8:53] Pensemos en un CRM o en un proceso de
+[8:53] Pensemos en un CRM o en un proceso de venta de cualquier compañía. Nosotros
+[8:55] venta de cualquier compañía. Nosotros
+[8:55] venta de cualquier compañía. Nosotros vamos a tener un SDR, un sales
+[8:58] vamos a tener un SDR, un sales
+[8:58] vamos a tener un SDR, un sales development representative que va a
+[9:00] development representative que va a
+[9:00] development representative que va a tomar un lead, un prospecto, ¿cierto? y
+[9:03] tomar un lead, un prospecto, ¿cierto? y
+[9:03] tomar un lead, un prospecto, ¿cierto? y lo va a tratar de convencer, de agendar
+[9:05] lo va a tratar de convencer, de agendar
+[9:05] lo va a tratar de convencer, de agendar una reunión o de que le pide una
+[9:07] una reunión o de que le pide una
+[9:07] una reunión o de que le pide una cotización y eso es el equivalente a que
+[9:09] cotización y eso es el equivalente a que
+[9:09] cotización y eso es el equivalente a que nosotros tomemos un paciente y lo
+[9:11] nosotros tomemos un paciente y lo
+[9:11] nosotros tomemos un paciente y lo sentemos en la clínica. Pero cuando le
+[9:12] sentemos en la clínica. Pero cuando le
+[9:12] sentemos en la clínica. Pero cuando le hacemos un presupuesto a ese paciente,
+[9:14] hacemos un presupuesto a ese paciente,
+[9:15] hacemos un presupuesto a ese paciente, ese paciente se va a ir y no
+[9:17] ese paciente se va a ir y no
+[9:17] ese paciente se va a ir y no necesariamente va a haber comprado
+[9:19] necesariamente va a haber comprado
+[9:19] necesariamente va a haber comprado nuestro presupuesto. Entonces, ¿qué
+[9:21] nuestro presupuesto. Entonces, ¿qué
+[9:21] nuestro presupuesto. Entonces, ¿qué debiese ocurrir en un proceso de venta
+[9:23] debiese ocurrir en un proceso de venta
+[9:23] debiese ocurrir en un proceso de venta normal? Que un agente, una persona, un
+[9:26] normal? Que un agente, una persona, un
+[9:26] normal? Que un agente, una persona, un ser humano, un representativo
+[9:28] ser humano, un representativo
+[9:28] ser humano, un representativo se va a programar una tarea para tr días
+[9:31] se va a programar una tarea para tr días
+[9:31] se va a programar una tarea para tr días más. llamar a Daniel para venderle el
+[9:34] más. llamar a Daniel para venderle el
+[9:34] más. llamar a Daniel para venderle el presupuesto o para da lo mismo, en la
+[9:36] presupuesto o para da lo mismo, en la
+[9:36] presupuesto o para da lo mismo, en la piscina o lo que sea en un CRM
+[9:39] piscina o lo que sea en un CRM
+[9:40] piscina o lo que sea en un CRM y eso depende de un humano. Pero, ¿qué
+[9:42] y eso depende de un humano. Pero, ¿qué
+[9:42] y eso depende de un humano. Pero, ¿qué pasa si nosotros automatizamos ese
+[9:44] pasa si nosotros automatizamos ese
+[9:45] pasa si nosotros automatizamos ese proceso? Y hoy día lo que podemos ver
+[9:47] proceso? Y hoy día lo que podemos ver
+[9:47] proceso? Y hoy día lo que podemos ver acá, que esta es para mí una de las
+[9:50] acá, que esta es para mí una de las
+[9:50] acá, que esta es para mí una de las guindas de la torta, son los flujos
+[9:52] guindas de la torta, son los flujos
+[9:52] guindas de la torta, son los flujos automáticos.
+[9:54] automáticos.
+[9:54] automáticos. Lo que estamos viendo es todo el proceso
+[9:56] Lo que estamos viendo es todo el proceso
+[9:56] Lo que estamos viendo es todo el proceso de CRM de seguimiento de un paciente, de
+[9:59] de CRM de seguimiento de un paciente, de
+[9:59] de CRM de seguimiento de un paciente, de un lead, para que convierta y se quede
+[10:02] un lead, para que convierta y se quede
+[10:02] un lead, para que convierta y se quede en nuestra clínica. Entonces,
+[10:04] en nuestra clínica. Entonces,
+[10:04] en nuestra clínica. Entonces, monitoreando cada una de las actividades
+[10:08] monitoreando cada una de las actividades
+[10:08] monitoreando cada una de las actividades que ocurren dentro de la clínica con los
+[10:11] que ocurren dentro de la clínica con los
+[10:11] que ocurren dentro de la clínica con los pacientes, nosotros vamos generando
+[10:13] pacientes, nosotros vamos generando
+[10:13] pacientes, nosotros vamos generando tareas que se las asignamos a un agente
+[10:16] tareas que se las asignamos a un agente
+[10:16] tareas que se las asignamos a un agente y esa gente contacta al paciente para
+[10:20] y esa gente contacta al paciente para
+[10:20] y esa gente contacta al paciente para convertir. Esas tareas pueden ser de
+[10:22] convertir. Esas tareas pueden ser de
+[10:22] convertir. Esas tareas pueden ser de cobranza. hay una deuda y nosotros vamos
+[10:24] cobranza. hay una deuda y nosotros vamos
+[10:24] cobranza. hay una deuda y nosotros vamos con el paciente y le pedimos que pague
+[10:26] con el paciente y le pedimos que pague
+[10:26] con el paciente y le pedimos que pague la deuda, incluso con un link de pago
+[10:28] la deuda, incluso con un link de pago
+[10:28] la deuda, incluso con un link de pago online. Nosotros vamos donde un paciente
+[10:31] online. Nosotros vamos donde un paciente
+[10:31] online. Nosotros vamos donde un paciente que se le asignó la tarea a un agente
+[10:33] que se le asignó la tarea a un agente
+[10:33] que se le asignó la tarea a un agente que no llegó a su cita o la canceló,
+[10:36] que no llegó a su cita o la canceló,
+[10:36] que no llegó a su cita o la canceló, vamos a reajendarlo para traerlo de
+[10:38] vamos a reajendarlo para traerlo de
+[10:38] vamos a reajendarlo para traerlo de vuelta. se hizo un presupuesto, no lo
+[10:40] vuelta. se hizo un presupuesto, no lo
+[10:40] vuelta. se hizo un presupuesto, no lo compró, vamos y agendamos, o sea, esa
+[10:44] compró, vamos y agendamos, o sea, esa
+[10:44] compró, vamos y agendamos, o sea, esa tarea la programamos con un agente, se
+[10:46] tarea la programamos con un agente, se
+[10:46] tarea la programamos con un agente, se la asignamos a un agente para que esa
+[10:47] la asignamos a un agente para que esa
+[10:47] la asignamos a un agente para que esa gente vaya y la ejecute. Lo mismo con
+[10:50] gente vaya y la ejecute. Lo mismo con
+[10:50] gente vaya y la ejecute. Lo mismo con los recalls, o sea, tener un paciente
+[10:52] los recalls, o sea, tener un paciente
+[10:52] los recalls, o sea, tener un paciente que lo dimos de alta y necesitamos que
+[10:54] que lo dimos de alta y necesitamos que
+[10:54] que lo dimos de alta y necesitamos que vuelva 6 meses después de forma
+[10:56] vuelva 6 meses después de forma
+[10:56] vuelva 6 meses después de forma automática y tener este centro de mando,
+[10:59] automática y tener este centro de mando,
+[10:59] automática y tener este centro de mando, este cerebro operando la clínica por
+[11:02] este cerebro operando la clínica por
+[11:02] este cerebro operando la clínica por nosotros, es donde vamos a generar gran
+[11:04] nosotros, es donde vamos a generar gran
+[11:04] nosotros, es donde vamos a generar gran parte del valor y esto nos puede ayudar
+[11:06] parte del valor y esto nos puede ayudar
+[11:06] parte del valor y esto nos puede ayudar a aumentar la conversión de
+[11:08] a aumentar la conversión de
+[11:08] a aumentar la conversión de presupuestos, nos puede ayudar a
+[11:10] presupuestos, nos puede ayudar a
+[11:10] presupuestos, nos puede ayudar a aumentar la ocupación,
+[11:12] aumentar la ocupación,
+[11:12] aumentar la ocupación, un sinfín de tareas que hoy día
+[11:14] un sinfín de tareas que hoy día
+[11:14] un sinfín de tareas que hoy día probablemente no tenemos el tiempo, los
+[11:16] probablemente no tenemos el tiempo, los
+[11:16] probablemente no tenemos el tiempo, los recursos y el seguimiento para poder
+[11:18] recursos y el seguimiento para poder
+[11:18] recursos y el seguimiento para poder hacerlas. Entonces, cada tarea yo puedo
+[11:20] hacerlas. Entonces, cada tarea yo puedo
+[11:20] hacerlas. Entonces, cada tarea yo puedo ir verificando para cuándo está
+[11:22] ir verificando para cuándo está
+[11:22] ir verificando para cuándo está programada, si ya empezó la ejecución o
+[11:24] programada, si ya empezó la ejecución o
+[11:24] programada, si ya empezó la ejecución o no empezó la ejecución, en qué estado
+[11:26] no empezó la ejecución, en qué estado
+[11:26] no empezó la ejecución, en qué estado va, puedo leer la conversación si está
+[11:28] va, puedo leer la conversación si está
+[11:29] va, puedo leer la conversación si está en ejecución o incluso puedo ver el
+[11:32] en ejecución o incluso puedo ver el
+[11:32] en ejecución o incluso puedo ver el detalle de la tarea que está programada
+[11:34] detalle de la tarea que está programada
+[11:34] detalle de la tarea que está programada en en este caso esta tarea que está
+[11:35] en en este caso esta tarea que está
+[11:35] en en este caso esta tarea que está programada y veo que hay un presupuesto
+[11:37] programada y veo que hay un presupuesto
+[11:37] programada y veo que hay un presupuesto que se va a vender, pero ojo que también
+[11:39] que se va a vender, pero ojo que también
+[11:39] que se va a vender, pero ojo que también tiene deuda el paciente y todo esto
+[11:42] tiene deuda el paciente y todo esto
+[11:42] tiene deuda el paciente y todo esto ocurre de forma automática.
+[11:45] ocurre de forma automática.
+[11:45] ocurre de forma automática. Ahora, la parte relevante es que
+[11:49] Ahora, la parte relevante es que
+[11:49] Ahora, la parte relevante es que nosotros, además de hacer seguimiento
+[11:51] nosotros, además de hacer seguimiento
+[11:51] nosotros, además de hacer seguimiento del paciente y de poder atender todo el
+[11:54] del paciente y de poder atender todo el
+[11:54] del paciente y de poder atender todo el flujo entrante, es que necesitamos
+[11:56] flujo entrante, es que necesitamos
+[11:56] flujo entrante, es que necesitamos generar demanda. Y para generar demanda
+[11:59] generar demanda. Y para generar demanda
+[11:59] generar demanda. Y para generar demanda hoy día, una herramienta importante es
+[12:02] hoy día, una herramienta importante es
+[12:02] hoy día, una herramienta importante es eh la inversión publicitaria que
+[12:05] eh la inversión publicitaria que
+[12:05] eh la inversión publicitaria que nosotros podemos hacer en Google, Meta,
+[12:07] nosotros podemos hacer en Google, Meta,
+[12:07] nosotros podemos hacer en Google, Meta, TikTok u otra plataforma. LinkedIn, pero
+[12:10] TikTok u otra plataforma. LinkedIn, pero
+[12:10] TikTok u otra plataforma. LinkedIn, pero yo creo que nadie hace promociones de o
+[12:13] yo creo que nadie hace promociones de o
+[12:13] yo creo que nadie hace promociones de o inversiones marketing dental en
+[12:14] inversiones marketing dental en
+[12:14] inversiones marketing dental en LinkedIn. Y lo que vemos acá es la
+[12:17] LinkedIn. Y lo que vemos acá es la
+[12:17] LinkedIn. Y lo que vemos acá es la última guinda de la torta en la que
+[12:19] última guinda de la torta en la que
+[12:19] última guinda de la torta en la que nosotros lo que hacemos es extraer toda
+[12:22] nosotros lo que hacemos es extraer toda
+[12:22] nosotros lo que hacemos es extraer toda la analítica de inversión de las
+[12:25] la analítica de inversión de las
+[12:25] la analítica de inversión de las plataformas que sea que estemos
+[12:27] plataformas que sea que estemos
+[12:27] plataformas que sea que estemos utilizando. Creamos el funel desde el
+[12:30] utilizando. Creamos el funel desde el
+[12:30] utilizando. Creamos el funel desde el lead. Una persona que hizo clic en un
+[12:31] lead. Una persona que hizo clic en un
+[12:31] lead. Una persona que hizo clic en un anuncio y nos habló hasta cuánto
+[12:34] anuncio y nos habló hasta cuánto
+[12:34] anuncio y nos habló hasta cuánto revenue, cuánto ingreso nos generó esa
+[12:37] revenue, cuánto ingreso nos generó esa
+[12:37] revenue, cuánto ingreso nos generó esa persona en el global. y también por cada
+[12:40] persona en el global. y también por cada
+[12:41] persona en el global. y también por cada una de las campañas. Si se fijan, abajo
+[12:43] una de las campañas. Si se fijan, abajo
+[12:43] una de las campañas. Si se fijan, abajo nosotros tenemos [carraspeo] el
+[12:45] nosotros tenemos [carraspeo] el
+[12:45] nosotros tenemos [carraspeo] el rendimiento de las campañas. Entonces yo
+[12:48] rendimiento de las campañas. Entonces yo
+[12:48] rendimiento de las campañas. Entonces yo acá tengo tres campañas, una que es
+[12:50] acá tengo tres campañas, una que es
+[12:51] acá tengo tres campañas, una que es blanqueamiento de verano, implantes
+[12:52] blanqueamiento de verano, implantes
+[12:52] blanqueamiento de verano, implantes premium, ortodoncia, promo
+[12:56] premium, ortodoncia, promo
+[12:56] premium, ortodoncia, promo y yo puedo ir a buscar el detalle de
+[12:59] y yo puedo ir a buscar el detalle de
+[12:59] y yo puedo ir a buscar el detalle de cada una de estas campañas para saber
+[13:01] cada una de estas campañas para saber
+[13:01] cada una de estas campañas para saber qué anuncio, qué grupo de anuncios fue
+[13:04] qué anuncio, qué grupo de anuncios fue
+[13:04] qué anuncio, qué grupo de anuncios fue el que más convirtió y el que más
+[13:07] el que más convirtió y el que más
+[13:07] el que más convirtió y el que más reveniu me trajo. Si el paciente hizo
+[13:09] reveniu me trajo. Si el paciente hizo
+[13:09] reveniu me trajo. Si el paciente hizo clic en el anuncio, si el paciente
+[13:11] clic en el anuncio, si el paciente
+[13:11] clic en el anuncio, si el paciente compró o no compró, si el paciente se
+[13:13] compró o no compró, si el paciente se
+[13:13] compró o no compró, si el paciente se agendó y llegó o no llegó. Y finalmente
+[13:17] agendó y llegó o no llegó. Y finalmente
+[13:17] agendó y llegó o no llegó. Y finalmente esa información que nos permite tomar
+[13:18] esa información que nos permite tomar
+[13:18] esa información que nos permite tomar decisiones de marketing, nosotros
+[13:20] decisiones de marketing, nosotros
+[13:20] decisiones de marketing, nosotros automáticamente se la retroalimentamos
+[13:23] automáticamente se la retroalimentamos
+[13:23] automáticamente se la retroalimentamos al proveedor de advertising para que él
+[13:25] al proveedor de advertising para que él
+[13:25] al proveedor de advertising para que él entienda cuál de cada uno de estos
+[13:28] entienda cuál de cada uno de estos
+[13:28] entienda cuál de cada uno de estos puntos o de estos pacientes son los que
+[13:31] puntos o de estos pacientes son los que
+[13:31] puntos o de estos pacientes son los que más convierten. Entonces, si yo tengo un
+[13:33] más convierten. Entonces, si yo tengo un
+[13:33] más convierten. Entonces, si yo tengo un anuncio que tiene muchos clics,
+[13:34] anuncio que tiene muchos clics,
+[13:34] anuncio que tiene muchos clics, generamos muchos leads, pero los
+[13:36] generamos muchos leads, pero los
+[13:36] generamos muchos leads, pero los pacientes faltan a sus citas y no me
+[13:38] pacientes faltan a sus citas y no me
+[13:38] pacientes faltan a sus citas y no me generan ingresos, yo eso es un es una
+[13:40] generan ingresos, yo eso es un es una
+[13:40] generan ingresos, yo eso es un es una información que le tengo que
+[13:41] información que le tengo que
+[13:41] información que le tengo que retroalimentar a mi proveedor de
+[13:43] retroalimentar a mi proveedor de
+[13:43] retroalimentar a mi proveedor de advertising para que él sepa que tiene
+[13:44] advertising para que él sepa que tiene
+[13:44] advertising para que él sepa que tiene que disminuir eh el tipo de paciente al
+[13:47] que disminuir eh el tipo de paciente al
+[13:47] que disminuir eh el tipo de paciente al que está apuntando, al margen de que yo
+[13:48] que está apuntando, al margen de que yo
+[13:48] que está apuntando, al margen de que yo manualmente también tenga que disminuir
+[13:51] manualmente también tenga que disminuir
+[13:51] manualmente también tenga que disminuir la inversión en ese grupo o en ese tipo
+[13:53] la inversión en ese grupo o en ese tipo
+[13:53] la inversión en ese grupo o en ese tipo de anuncios. Entonces, cuando nosotros
+[13:55] de anuncios. Entonces, cuando nosotros
+[13:55] de anuncios. Entonces, cuando nosotros pensamos en el CRM de inteligencia
+[13:57] pensamos en el CRM de inteligencia
+[13:57] pensamos en el CRM de inteligencia artificial, lo que hacemos es cerrar el
+[13:58] artificial, lo que hacemos es cerrar el
+[13:58] artificial, lo que hacemos es cerrar el ciclo. Atendemos las comunicaciones
+[14:01] ciclo. Atendemos las comunicaciones
+[14:01] ciclo. Atendemos las comunicaciones IBAL, ejecutamos el journey del paciente
+[14:04] IBAL, ejecutamos el journey del paciente
+[14:04] IBAL, ejecutamos el journey del paciente y retroalimentamos a nuestro proveedor
+[14:08] y retroalimentamos a nuestro proveedor
+[14:08] y retroalimentamos a nuestro proveedor de demanda para que tenga la puntería
+[14:10] de demanda para que tenga la puntería
+[14:10] de demanda para que tenga la puntería cada vez más fina. Y eso es lo que hoy
+[14:12] cada vez más fina. Y eso es lo que hoy
+[14:12] cada vez más fina. Y eso es lo que hoy día nosotros denominamos el CRM de
+[14:15] día nosotros denominamos el CRM de
+[14:15] día nosotros denominamos el CRM de inteligencia artificial. Este tipo de
+[14:17] inteligencia artificial. Este tipo de
+[14:17] inteligencia artificial. Este tipo de productos no es el final y lo que
+[14:19] productos no es el final y lo que
+[14:19] productos no es el final y lo que estamos viendo acá nuevamente es el
+[14:21] estamos viendo acá nuevamente es el
+[14:21] estamos viendo acá nuevamente es el comienzo. Probablemente este producto va
+[14:23] comienzo. Probablemente este producto va
+[14:24] comienzo. Probablemente este producto va a ir cambiando tan rápido como avanza la
+[14:26] a ir cambiando tan rápido como avanza la
+[14:26] a ir cambiando tan rápido como avanza la inteligencia artificial.
+[14:30] inteligencia artificial.
+[14:30] inteligencia artificial. Luego pasamos al siguiente producto, que
+[14:33] Luego pasamos al siguiente producto, que
+[14:33] Luego pasamos al siguiente producto, que este es uno de los productos que a mí
+[14:34] este es uno de los productos que a mí
+[14:34] este es uno de los productos que a mí más eh me gusta porque es el que tiene
+[14:37] más eh me gusta porque es el que tiene
+[14:37] más eh me gusta porque es el que tiene un impacto absolutamente disruptivo en
+[14:40] un impacto absolutamente disruptivo en
+[14:40] un impacto absolutamente disruptivo en la industria.
+[14:48] Y lo que hacemos con Clinical Copilot es
+[14:48] Y lo que hacemos con Clinical Copilot es simular
+[14:50] simular
+[14:50] simular un dentista
+[14:52] un dentista
+[14:52] un dentista que va a hacer un diagnóstico con las
+[14:57] que va a hacer un diagnóstico con las
+[14:57] que va a hacer un diagnóstico con las herramientas para poder vender ese
+[14:59] herramientas para poder vender ese
+[14:59] herramientas para poder vender ese presupuesto al paciente.
+[15:02] presupuesto al paciente.
+[15:02] presupuesto al paciente. Entonces, en clinical Copilot lo que
+[15:03] Entonces, en clinical Copilot lo que
+[15:03] Entonces, en clinical Copilot lo que nosotros hacemos es entregarle
+[15:05] nosotros hacemos es entregarle
+[15:05] nosotros hacemos es entregarle radiografías
+[15:07] radiografías
+[15:07] radiografías y entregarle fotografías intraorales
+[15:10] y entregarle fotografías intraorales
+[15:10] y entregarle fotografías intraorales para que las pueda analizar, hacer el
+[15:12] para que las pueda analizar, hacer el
+[15:12] para que las pueda analizar, hacer el odontograma, crear un diagnóstico, crear
+[15:15] odontograma, crear un diagnóstico, crear
+[15:15] odontograma, crear un diagnóstico, crear un tratamiento conceptual, valorizar el
+[15:17] un tratamiento conceptual, valorizar el
+[15:17] un tratamiento conceptual, valorizar el tratamiento de acuerdo a los aranceles y
+[15:20] tratamiento de acuerdo a los aranceles y
+[15:20] tratamiento de acuerdo a los aranceles y a los precios que nosotros manejamos con
+[15:22] a los precios que nosotros manejamos con
+[15:22] a los precios que nosotros manejamos con descuento en la clínica y terminar
+[15:24] descuento en la clínica y terminar
+[15:24] descuento en la clínica y terminar finalmente en un keynote, en una
+[15:26] finalmente en un keynote, en una
+[15:26] finalmente en un keynote, en una presentación para el paciente. ¿Cuál es
+[15:28] presentación para el paciente. ¿Cuál es
+[15:28] presentación para el paciente. ¿Cuál es el impacto de esto? Porque esto va más
+[15:30] el impacto de esto? Porque esto va más
+[15:30] el impacto de esto? Porque esto va más allá de una funcionalidad, decir, mira
+[15:31] allá de una funcionalidad, decir, mira
+[15:31] allá de una funcionalidad, decir, mira qué cool que ahora podamos hacer un
+[15:34] qué cool que ahora podamos hacer un
+[15:34] qué cool que ahora podamos hacer un diagnóstico automático. Cuando nosotros
+[15:36] diagnóstico automático. Cuando nosotros
+[15:36] diagnóstico automático. Cuando nosotros pensamos en los procesos de diagnóstico,
+[15:38] pensamos en los procesos de diagnóstico,
+[15:38] pensamos en los procesos de diagnóstico, quizás nos dedicamos 20 o 30 minutos a
+[15:41] quizás nos dedicamos 20 o 30 minutos a
+[15:41] quizás nos dedicamos 20 o 30 minutos a diagnosticar un paciente, donde tenemos
+[15:42] diagnosticar un paciente, donde tenemos
+[15:42] diagnosticar un paciente, donde tenemos que analizar la boca, donde tenemos que
+[15:44] que analizar la boca, donde tenemos que
+[15:44] que analizar la boca, donde tenemos que escribir una ficha, donde tenemos que
+[15:46] escribir una ficha, donde tenemos que
+[15:47] escribir una ficha, donde tenemos que hacer un presupuesto para poder
+[15:48] hacer un presupuesto para poder
+[15:48] hacer un presupuesto para poder dedicarle 5 o 10 minutos a la venta.
+[15:52] dedicarle 5 o 10 minutos a la venta.
+[15:52] dedicarle 5 o 10 minutos a la venta. Imaginemos un mundo donde nosotros vamos
+[15:54] Imaginemos un mundo donde nosotros vamos
+[15:54] Imaginemos un mundo donde nosotros vamos a cambiar los procesos y un mundo donde
+[15:56] a cambiar los procesos y un mundo donde
+[15:56] a cambiar los procesos y un mundo donde el paciente entra a la clínica y tenemos
+[15:59] el paciente entra a la clínica y tenemos
+[15:59] el paciente entra a la clínica y tenemos un técnico, un higienista, una asistente
+[16:02] un técnico, un higienista, una asistente
+[16:02] un técnico, un higienista, una asistente que va a tomar las radiografías, va a
+[16:05] que va a tomar las radiografías, va a
+[16:05] que va a tomar las radiografías, va a tomar fotos intraorales y se van a
+[16:08] tomar fotos intraorales y se van a
+[16:08] tomar fotos intraorales y se van a cargar en el Copilot. Esto ya sea porque
+[16:10] cargar en el Copilot. Esto ya sea porque
+[16:10] cargar en el Copilot. Esto ya sea porque se cargan manualmente, porque se extraen
+[16:12] se cargan manualmente, porque se extraen
+[16:12] se cargan manualmente, porque se extraen del System of Record o porque se usa
+[16:14] del System of Record o porque se usa
+[16:14] del System of Record o porque se usa alguna de nuestras nuevas herramientas
+[16:16] alguna de nuestras nuevas herramientas
+[16:16] alguna de nuestras nuevas herramientas que se conectan con las máquinas de
+[16:17] que se conectan con las máquinas de
+[16:17] que se conectan con las máquinas de rayos.
+[16:19] rayos.
+[16:19] rayos. Y en ese proceso el paciente sale de de
+[16:24] Y en ese proceso el paciente sale de de
+[16:24] Y en ese proceso el paciente sale de de esta toma de rayos o o toma de
+[16:28] esta toma de rayos o o toma de
+[16:28] esta toma de rayos o o toma de fotografías y cuando llega donde el
+[16:31] fotografías y cuando llega donde el
+[16:31] fotografías y cuando llega donde el odontólogo, esto ya está listo.
+[16:35] odontólogo, esto ya está listo.
+[16:35] odontólogo, esto ya está listo. Entonces, vamos a ver acá un flujo
+[16:36] Entonces, vamos a ver acá un flujo
+[16:36] Entonces, vamos a ver acá un flujo automático donde primero se carga una
+[16:38] automático donde primero se carga una
+[16:38] automático donde primero se carga una radiografía, se hace un análisis.
+[16:41] radiografía, se hace un análisis.
+[16:41] radiografía, se hace un análisis. Nosotros trabajamos eh las radiografías
+[16:43] Nosotros trabajamos eh las radiografías
+[16:43] Nosotros trabajamos eh las radiografías con en partnership con distintos
+[16:45] con en partnership con distintos
+[16:45] con en partnership con distintos proveedores. Adravision, Pearl, Overjet,
+[16:48] proveedores. Adravision, Pearl, Overjet,
+[16:48] proveedores. Adravision, Pearl, Overjet, Alison, nos conectamos con todos. Luego
+[16:51] Alison, nos conectamos con todos. Luego
+[16:51] Alison, nos conectamos con todos. Luego se genera automáticamente elograma que
+[16:53] se genera automáticamente elograma que
+[16:53] se genera automáticamente elograma que se va a cargar en la ficha del paciente.
+[16:56] se va a cargar en la ficha del paciente.
+[16:56] se va a cargar en la ficha del paciente. Automáticamente, si se fijan, arriba
+[16:57] Automáticamente, si se fijan, arriba
+[16:57] Automáticamente, si se fijan, arriba están los pasos que van circulando
+[16:59] están los pasos que van circulando
+[16:59] están los pasos que van circulando autónomamente. Se hizo el diagnóstico
+[17:01] autónomamente. Se hizo el diagnóstico
+[17:01] autónomamente. Se hizo el diagnóstico integral del paciente para pasar a una
+[17:04] integral del paciente para pasar a una
+[17:04] integral del paciente para pasar a una fase de tratamiento
+[17:06] fase de tratamiento
+[17:06] fase de tratamiento conceptual. Acá me voy a detener un
+[17:09] conceptual. Acá me voy a detener un
+[17:09] conceptual. Acá me voy a detener un segundo. Esta parte del tratamiento
+[17:11] segundo. Esta parte del tratamiento
+[17:11] segundo. Esta parte del tratamiento conceptual es donde nosotros estamos
+[17:12] conceptual es donde nosotros estamos
+[17:13] conceptual es donde nosotros estamos generando tres planes de tratamiento.
+[17:14] generando tres planes de tratamiento.
+[17:14] generando tres planes de tratamiento. Uno básico, más urgente, hasta uno
+[17:16] Uno básico, más urgente, hasta uno
+[17:16] Uno básico, más urgente, hasta uno integral que puede incluir diseño de
+[17:18] integral que puede incluir diseño de
+[17:18] integral que puede incluir diseño de sonrisa. Pero la confección de estos
+[17:20] sonrisa. Pero la confección de estos
+[17:20] sonrisa. Pero la confección de estos planes de tratamiento es donde nosotros
+[17:22] planes de tratamiento es donde nosotros
+[17:22] planes de tratamiento es donde nosotros también agregamos un valor que es un
+[17:25] también agregamos un valor que es un
+[17:25] también agregamos un valor que es un dolor clásico de muchas clínicas o
+[17:29] dolor clásico de muchas clínicas o
+[17:29] dolor clásico de muchas clínicas o grandes redes sobre todo donde la
+[17:32] grandes redes sobre todo donde la
+[17:32] grandes redes sobre todo donde la dirección clínica de estas compañías
+[17:36] dirección clínica de estas compañías
+[17:36] dirección clínica de estas compañías muchas veces tiene el dolor de que los
+[17:38] muchas veces tiene el dolor de que los
+[17:38] muchas veces tiene el dolor de que los odontólogos que trabajan, que pueden ser
+[17:41] odontólogos que trabajan, que pueden ser
+[17:41] odontólogos que trabajan, que pueden ser cientos o miles, no siguen las reglas de
+[17:44] cientos o miles, no siguen las reglas de
+[17:44] cientos o miles, no siguen las reglas de la dirección clínica. ¿Qué significa
+[17:46] la dirección clínica. ¿Qué significa
+[17:46] la dirección clínica. ¿Qué significa eso? Quizás una regla de la de dirección
+[17:48] eso? Quizás una regla de la de dirección
+[17:48] eso? Quizás una regla de la de dirección clínica es si alguien viene con amalgama
+[17:51] clínica es si alguien viene con amalgama
+[17:51] clínica es si alguien viene con amalgama se cambia por incrustación. Estoy dando
+[17:53] se cambia por incrustación. Estoy dando
+[17:53] se cambia por incrustación. Estoy dando un ejemplo que puede ser ridículo o no,
+[17:55] un ejemplo que puede ser ridículo o no,
+[17:55] un ejemplo que puede ser ridículo o no, pero puede ser una regla de alguna
+[17:57] pero puede ser una regla de alguna
+[17:57] pero puede ser una regla de alguna clínica de acuerdo a sus protocolos. Y
+[17:59] clínica de acuerdo a sus protocolos. Y
+[17:59] clínica de acuerdo a sus protocolos. Y eso hoy día nosotros lo podemos podemos
+[18:03] eso hoy día nosotros lo podemos podemos
+[18:03] eso hoy día nosotros lo podemos podemos hacer un enforcement de esas reglas con
+[18:05] hacer un enforcement de esas reglas con
+[18:05] hacer un enforcement de esas reglas con esto. Entonces, cuando nosotros
+[18:07] esto. Entonces, cuando nosotros
+[18:07] esto. Entonces, cuando nosotros procesamos ese plan de tratamiento y
+[18:09] procesamos ese plan de tratamiento y
+[18:09] procesamos ese plan de tratamiento y termina de valorizarse, nosotros nos
+[18:11] termina de valorizarse, nosotros nos
+[18:11] termina de valorizarse, nosotros nos vamos a enfrentar a todas las reglas
+[18:13] vamos a enfrentar a todas las reglas
+[18:13] vamos a enfrentar a todas las reglas clínicas junto con todo el diagnóstico
+[18:16] clínicas junto con todo el diagnóstico
+[18:16] clínicas junto con todo el diagnóstico en un plan de tratamiento valorizado con
+[18:18] en un plan de tratamiento valorizado con
+[18:18] en un plan de tratamiento valorizado con los precios de la clínica, que no lo
+[18:21] los precios de la clínica, que no lo
+[18:21] los precios de la clínica, que no lo tuvo que hacer un odontólogo y
+[18:23] tuvo que hacer un odontólogo y
+[18:24] tuvo que hacer un odontólogo y finalmente puede terminar en una
+[18:26] finalmente puede terminar en una
+[18:26] finalmente puede terminar en una planificación por sesiones.
+[18:30] planificación por sesiones.
+[18:30] planificación por sesiones. Si el odontólogo no está de acuerdo con
+[18:33] Si el odontólogo no está de acuerdo con
+[18:33] Si el odontólogo no está de acuerdo con algo, puede retroceder y modificar un
+[18:35] algo, puede retroceder y modificar un
+[18:35] algo, puede retroceder y modificar un hallazgo de la radiografía, cambiar un
+[18:37] hallazgo de la radiografía, cambiar un
+[18:37] hallazgo de la radiografía, cambiar un hallazgo del odontograma y volver a
+[18:39] hallazgo del odontograma y volver a
+[18:39] hallazgo del odontograma y volver a generar la valoración. Recuerden que
+[18:41] generar la valoración. Recuerden que
+[18:41] generar la valoración. Recuerden que esto para nosotros es un copilot, no es
+[18:43] esto para nosotros es un copilot, no es
+[18:43] esto para nosotros es un copilot, no es un autopilot. Después voy a hablar de
+[18:44] un autopilot. Después voy a hablar de
+[18:44] un autopilot. Después voy a hablar de algunas diferencias. Y finalmente
+[18:46] algunas diferencias. Y finalmente
+[18:46] algunas diferencias. Y finalmente terminamos en esta exportación. Y esta
+[18:50] terminamos en esta exportación. Y esta
+[18:50] terminamos en esta exportación. Y esta exportación para nosotros no es solo
+[18:52] exportación para nosotros no es solo
+[18:52] exportación para nosotros no es solo cargarlo de vuelta en el System of
+[18:53] cargarlo de vuelta en el System of
+[18:53] cargarlo de vuelta en el System of Record, sino que es que el odontólogo
+[18:56] Record, sino que es que el odontólogo
+[18:56] Record, sino que es que el odontólogo tenga una presentación para hacerle al
+[18:59] tenga una presentación para hacerle al
+[18:59] tenga una presentación para hacerle al paciente y concretar esa venta. Entonces
+[19:02] paciente y concretar esa venta. Entonces
+[19:02] paciente y concretar esa venta. Entonces si nosotros logramos reducir el tiempo
+[19:04] si nosotros logramos reducir el tiempo
+[19:04] si nosotros logramos reducir el tiempo de diagnóstico de 30 minutos, donde
+[19:07] de diagnóstico de 30 minutos, donde
+[19:07] de diagnóstico de 30 minutos, donde fueron 25 de diagnóstico y cinco de
+[19:09] fueron 25 de diagnóstico y cinco de
+[19:09] fueron 25 de diagnóstico y cinco de venta, a 10 minutos de venta y cinco de
+[19:13] venta, a 10 minutos de venta y cinco de
+[19:14] venta, a 10 minutos de venta y cinco de diagnóstico, podemos atender al doble de
+[19:16] diagnóstico, podemos atender al doble de
+[19:16] diagnóstico, podemos atender al doble de pacientes en el mismo tiempo. Yo sé que
+[19:17] pacientes en el mismo tiempo. Yo sé que
+[19:17] pacientes en el mismo tiempo. Yo sé que es cuestionable que algunos me pueden
+[19:19] es cuestionable que algunos me pueden
+[19:19] es cuestionable que algunos me pueden decir, "Sí, pero es que 15 minutos es
+[19:21] decir, "Sí, pero es que 15 minutos es
+[19:21] decir, "Sí, pero es que 15 minutos es muy poco para generar vínculo con el
+[19:22] muy poco para generar vínculo con el
+[19:22] muy poco para generar vínculo con el paciente." Y está bien, hoy día todavía
+[19:24] paciente." Y está bien, hoy día todavía
+[19:24] paciente." Y está bien, hoy día todavía quizás no estamos en eso, pero lo vamos
+[19:26] quizás no estamos en eso, pero lo vamos
+[19:26] quizás no estamos en eso, pero lo vamos a estar, sin duda. Y esta es la
+[19:29] a estar, sin duda. Y esta es la
+[19:29] a estar, sin duda. Y esta es la herramienta que nosotros llamamos el
+[19:32] herramienta que nosotros llamamos el
+[19:32] herramienta que nosotros llamamos el clinical copiloting.
+[19:39] Y finalmente de lo que les vamos a
+[19:39] Y finalmente de lo que les vamos a mostrar son los reportes de inteligencia
+[19:41] mostrar son los reportes de inteligencia
+[19:41] mostrar son los reportes de inteligencia artificial,
+[19:44] artificial,
+[19:44] artificial, que es básicamente una suit que nosotros
+[19:47] que es básicamente una suit que nosotros
+[19:47] que es básicamente una suit que nosotros denominamos Analytics Studio. Y esta
+[19:50] denominamos Analytics Studio. Y esta
+[19:50] denominamos Analytics Studio. Y esta suit de Analytics Studio se compone de
+[19:54] suit de Analytics Studio se compone de
+[19:54] suit de Analytics Studio se compone de un listado de dashboards en el lado
+[19:56] un listado de dashboards en el lado
+[19:56] un listado de dashboards en el lado izquierdo que yo puedo ir creando nuevos
+[19:58] izquierdo que yo puedo ir creando nuevos
+[19:58] izquierdo que yo puedo ir creando nuevos dashboards y un conjunto de reportes que
+[20:00] dashboards y un conjunto de reportes que
+[20:00] dashboards y un conjunto de reportes que están acá dentro donde yo puedo ir
+[20:02] están acá dentro donde yo puedo ir
+[20:02] están acá dentro donde yo puedo ir alternando la visualización, puedo
+[20:03] alternando la visualización, puedo
+[20:03] alternando la visualización, puedo definir distintas metas para cada uno de
+[20:07] definir distintas metas para cada uno de
+[20:07] definir distintas metas para cada uno de mis gráficos o de mis reportes y tenemos
+[20:11] mis gráficos o de mis reportes y tenemos
+[20:11] mis gráficos o de mis reportes y tenemos una gran cantidad de reportes y
+[20:14] una gran cantidad de reportes y
+[20:14] una gran cantidad de reportes y gráficos. Ahora, alguien me podría
+[20:16] gráficos. Ahora, alguien me podría
+[20:16] gráficos. Ahora, alguien me podría decir, "Daniel, está buenísimo, pero
+[20:18] decir, "Daniel, está buenísimo, pero
+[20:18] decir, "Daniel, está buenísimo, pero ¿dónde está la inteligencia artificial?"
+[20:19] ¿dónde está la inteligencia artificial?"
+[20:19] ¿dónde está la inteligencia artificial?" Si yo tengo lo mismo entablo, en Power
+[20:21] Si yo tengo lo mismo entablo, en Power
+[20:21] Si yo tengo lo mismo entablo, en Power BI, primero nosotros podemos hacer
+[20:23] BI, primero nosotros podemos hacer
+[20:23] BI, primero nosotros podemos hacer análisis automático de cada uno de estos
+[20:27] análisis automático de cada uno de estos
+[20:27] análisis automático de cada uno de estos dashbof y esos análisis, si no tenemos
+[20:30] dashbof y esos análisis, si no tenemos
+[20:30] dashbof y esos análisis, si no tenemos tiempo, eh nos da los insight clave, nos
+[20:32] tiempo, eh nos da los insight clave, nos
+[20:32] tiempo, eh nos da los insight clave, nos da recomendaciones, nos dice dónde
+[20:34] da recomendaciones, nos dice dónde
+[20:34] da recomendaciones, nos dice dónde debiésemos estar leyendo o dónde
+[20:37] debiésemos estar leyendo o dónde
+[20:37] debiésemos estar leyendo o dónde debiésemos estar estudiando o
+[20:38] debiésemos estar estudiando o
+[20:38] debiésemos estar estudiando o enfocándonos. Pero también una de las
+[20:41] enfocándonos. Pero también una de las
+[20:41] enfocándonos. Pero también una de las partes eh super relevantes es cómo se
+[20:43] partes eh super relevantes es cómo se
+[20:43] partes eh super relevantes es cómo se construyen estos gráficos. Y acá me voy
+[20:46] construyen estos gráficos. Y acá me voy
+[20:46] construyen estos gráficos. Y acá me voy a detener un segundo porque cada uno de
+[20:49] a detener un segundo porque cada uno de
+[20:49] a detener un segundo porque cada uno de los gráficos o los reportes que componen
+[20:51] los gráficos o los reportes que componen
+[20:51] los gráficos o los reportes que componen estos dashboards han sido escritos en
+[20:54] estos dashboards han sido escritos en
+[20:54] estos dashboards han sido escritos en lenguaje natural en base a un ROM. Eso
+[20:58] lenguaje natural en base a un ROM. Eso
+[20:58] lenguaje natural en base a un ROM. Eso significa que ustedes pueden agregar
+[21:02] significa que ustedes pueden agregar
+[21:02] significa que ustedes pueden agregar todos los gráficos que quieran a un
+[21:05] todos los gráficos que quieran a un
+[21:05] todos los gráficos que quieran a un dashboard de forma ser sencilla, sin
+[21:08] dashboard de forma ser sencilla, sin
+[21:08] dashboard de forma ser sencilla, sin pedirle ayuda a un analista de datos,
+[21:11] pedirle ayuda a un analista de datos,
+[21:11] pedirle ayuda a un analista de datos, sin pedirle ayuda a un equipo de datos o
+[21:13] sin pedirle ayuda a un equipo de datos o
+[21:13] sin pedirle ayuda a un equipo de datos o de ingeniería. Y acá les voy a mostrar
+[21:16] de ingeniería. Y acá les voy a mostrar
+[21:16] de ingeniería. Y acá les voy a mostrar que, bueno, más allá de de los gráficos
+[21:19] que, bueno, más allá de de los gráficos
+[21:19] que, bueno, más allá de de los gráficos que se ven s super bonitos, ah, les voy
+[21:23] que se ven s super bonitos, ah, les voy
+[21:23] que se ven s super bonitos, ah, les voy a mostrar que al final de el dashword
+[21:26] a mostrar que al final de el dashword
+[21:26] a mostrar que al final de el dashword ustedes van a poder hacer clic en el
+[21:27] ustedes van a poder hacer clic en el
+[21:27] ustedes van a poder hacer clic en el botón más y crear un nuevo gráfico en su
+[21:31] botón más y crear un nuevo gráfico en su
+[21:31] botón más y crear un nuevo gráfico en su reporte.
+[21:33] reporte.
+[21:33] reporte. Eh, una de las partes más innovadoras
+[21:37] Eh, una de las partes más innovadoras
+[21:37] Eh, una de las partes más innovadoras que tenemos acá no son solo los
+[21:39] que tenemos acá no son solo los
+[21:39] que tenemos acá no son solo los dashboard, sino que es lo que nosotros
+[21:42] dashboard, sino que es lo que nosotros
+[21:42] dashboard, sino que es lo que nosotros denominamos los notebooks o los chats.
+[21:46] denominamos los notebooks o los chats.
+[21:46] denominamos los notebooks o los chats. Arriba a la izquierda, donde está el
+[21:49] Arriba a la izquierda, donde está el
+[21:49] Arriba a la izquierda, donde está el puntero,
+[21:51] puntero,
+[21:51] puntero, están los chats. Y los chats son una
+[21:54] están los chats. Y los chats son una
+[21:54] están los chats. Y los chats son una herramienta de notebooks o
+[21:56] herramienta de notebooks o
+[21:56] herramienta de notebooks o conversaciones o chat GPT, si lo quieren
+[21:59] conversaciones o chat GPT, si lo quieren
+[21:59] conversaciones o chat GPT, si lo quieren llamar de otra forma, donde nosotros
+[22:02] llamar de otra forma, donde nosotros
+[22:02] llamar de otra forma, donde nosotros modelamos un business analyst para
+[22:05] modelamos un business analyst para
+[22:06] modelamos un business analyst para ustedes. Y yo no le voy a pedir un
+[22:08] ustedes. Y yo no le voy a pedir un
+[22:08] ustedes. Y yo no le voy a pedir un gráfico, yo le voy a decir que me ayude,
+[22:10] gráfico, yo le voy a decir que me ayude,
+[22:10] gráfico, yo le voy a decir que me ayude, ayúdame a hacer más eficiente la agenda
+[22:13] ayúdame a hacer más eficiente la agenda
+[22:13] ayúdame a hacer más eficiente la agenda de la sucursal dos.
+[22:15] de la sucursal dos.
+[22:15] de la sucursal dos. y él va a pensar, va a buscar todas las
+[22:19] y él va a pensar, va a buscar todas las
+[22:19] y él va a pensar, va a buscar todas las herramientas y los datos disponibles
+[22:21] herramientas y los datos disponibles
+[22:21] herramientas y los datos disponibles para poder darnos una recomendación. Y
+[22:24] para poder darnos una recomendación. Y
+[22:24] para poder darnos una recomendación. Y la verdad es que para nosotros esto ha
+[22:26] la verdad es que para nosotros esto ha
+[22:26] la verdad es que para nosotros esto ha sido bien sorprendente porque él
+[22:29] sido bien sorprendente porque él
+[22:29] sido bien sorprendente porque él automáticamente y de forma autónoma
+[22:32] automáticamente y de forma autónoma
+[22:32] automáticamente y de forma autónoma busca cuáles son las oportunidades que
+[22:34] busca cuáles son las oportunidades que
+[22:34] busca cuáles son las oportunidades que tenemos. Y estos notebooks o estos chats
+[22:37] tenemos. Y estos notebooks o estos chats
+[22:37] tenemos. Y estos notebooks o estos chats no solo son para el dueño de la clínica,
+[22:40] no solo son para el dueño de la clínica,
+[22:40] no solo son para el dueño de la clínica, para el equipo gerencial de la clínica,
+[22:42] para el equipo gerencial de la clínica,
+[22:43] para el equipo gerencial de la clínica, sino que son por usuario. Entonces,
+[22:45] sino que son por usuario. Entonces,
+[22:45] sino que son por usuario. Entonces, imagínense el poder de que cada director
+[22:47] imagínense el poder de que cada director
+[22:47] imagínense el poder de que cada director clínico, cada gerente zonal o cada
+[22:49] clínico, cada gerente zonal o cada
+[22:49] clínico, cada gerente zonal o cada gerente de clínica tenga en sus manos un
+[22:52] gerente de clínica tenga en sus manos un
+[22:52] gerente de clínica tenga en sus manos un notebook para poder hacer investigación
+[22:56] notebook para poder hacer investigación
+[22:56] notebook para poder hacer investigación y tomar decisiones en tiempo real. Yo
+[22:58] y tomar decisiones en tiempo real. Yo
+[22:58] y tomar decisiones en tiempo real. Yo que le dije, necesito hacerla más
+[23:00] que le dije, necesito hacerla más
+[23:00] que le dije, necesito hacerla más rentable y él automáticamente y de forma
+[23:05] rentable y él automáticamente y de forma
+[23:05] rentable y él automáticamente y de forma proactiva va a ver los datos que tiene
+[23:07] proactiva va a ver los datos que tiene
+[23:07] proactiva va a ver los datos que tiene disponibles para cruzarlos. Y y en este
+[23:10] disponibles para cruzarlos. Y y en este
+[23:10] disponibles para cruzarlos. Y y en este minuto me dice, prioriza especialidades
+[23:12] minuto me dice, prioriza especialidades
+[23:12] minuto me dice, prioriza especialidades de alto margen, me habla de los márgenes
+[23:15] de alto margen, me habla de los márgenes
+[23:15] de alto margen, me habla de los márgenes de cada especialidad, el problema de la
+[23:16] de cada especialidad, el problema de la
+[23:16] de cada especialidad, el problema de la captura, tenemos problema de captura en
+[23:18] captura, tenemos problema de captura en
+[23:18] captura, tenemos problema de captura en ortodoncia, eh implantología está muy
+[23:21] ortodoncia, eh implantología está muy
+[23:22] ortodoncia, eh implantología está muy bien, nos dice que optimicemos la
+[23:24] bien, nos dice que optimicemos la
+[23:24] bien, nos dice que optimicemos la fábrica, que es odontología general. Y
+[23:26] fábrica, que es odontología general. Y
+[23:26] fábrica, que es odontología general. Y yo ahora le voy a preguntar
+[23:29] yo ahora le voy a preguntar
+[23:29] yo ahora le voy a preguntar básicamente a quién tengo que echar y a
+[23:30] básicamente a quién tengo que echar y a
+[23:30] básicamente a quién tengo que echar y a quién tengo que promover, qué dentistas
+[23:32] quién tengo que promover, qué dentistas
+[23:32] quién tengo que promover, qué dentistas puedo bajar su oferta y a quiénes se las
+[23:34] puedo bajar su oferta y a quiénes se las
+[23:34] puedo bajar su oferta y a quiénes se las tengo que aumentar
+[23:36] tengo que aumentar
+[23:36] tengo que aumentar y él también
+[23:38] y él también
+[23:38] y él también va a hacer su reset. Esta pregunta no es
+[23:40] va a hacer su reset. Esta pregunta no es
+[23:40] va a hacer su reset. Esta pregunta no es tan fácil porque tiene que mezclar
+[23:42] tan fácil porque tiene que mezclar
+[23:42] tan fácil porque tiene que mezclar ocupación con productividad y
+[23:45] ocupación con productividad y
+[23:45] ocupación con productividad y rentabilidad. Entonces acá si se fijan
+[23:48] rentabilidad. Entonces acá si se fijan
+[23:48] rentabilidad. Entonces acá si se fijan está mezclando conceptos de ocupación
+[23:51] está mezclando conceptos de ocupación
+[23:51] está mezclando conceptos de ocupación con productividad. ¿Cuánto me rinde por
+[23:55] con productividad. ¿Cuánto me rinde por
+[23:55] con productividad. ¿Cuánto me rinde por hora atendida o hora ofertada cada
+[23:59] hora atendida o hora ofertada cada
+[23:59] hora atendida o hora ofertada cada odontólogo? Incluso yo le puedo mostrar,
+[24:02] odontólogo? Incluso yo le puedo mostrar,
+[24:02] odontólogo? Incluso yo le puedo mostrar, le puedo pedir que me muestre un gráfico
+[24:04] le puedo pedir que me muestre un gráfico
+[24:04] le puedo pedir que me muestre un gráfico de su ocupación por mes. Y acá él
+[24:07] de su ocupación por mes. Y acá él
+[24:07] de su ocupación por mes. Y acá él también proactivamente me va a hacer un
+[24:08] también proactivamente me va a hacer un
+[24:09] también proactivamente me va a hacer un lindo gráfico en el notebook de research
+[24:11] lindo gráfico en el notebook de research
+[24:11] lindo gráfico en el notebook de research que nosotros tenemos.
+[24:14] que nosotros tenemos.
+[24:14] que nosotros tenemos. Estos productos son los que nosotros
+[24:18] Estos productos son los que nosotros
+[24:19] Estos productos son los que nosotros conectamos eh directamente al System of
+[24:22] conectamos eh directamente al System of
+[24:22] conectamos eh directamente al System of Record y son solo un ejemplo de todos
+[24:25] Record y son solo un ejemplo de todos
+[24:25] Record y son solo un ejemplo de todos los productos que hoy día estamos
+[24:27] los productos que hoy día estamos
+[24:27] los productos que hoy día estamos lanzando y que ya pueden utilizar.
+[24:31] lanzando y que ya pueden utilizar.
+[24:31] lanzando y que ya pueden utilizar. y decirles que la inteligencia
+[24:33] y decirles que la inteligencia
+[24:33] y decirles que la inteligencia artificial es [resoplido] algo que ya
+[24:37] artificial es [resoplido] algo que ya
+[24:37] artificial es [resoplido] algo que ya llegó para quedarse. No es un futuro, es
+[24:39] llegó para quedarse. No es un futuro, es
+[24:39] llegó para quedarse. No es un futuro, es algo que llegó y que tenemos que adoptar
+[24:43] algo que llegó y que tenemos que adoptar
+[24:43] algo que llegó y que tenemos que adoptar y abrazar con mucha fuerza.
+[24:49] [música]
+[24:50] [música] I know what thinking tomorrow

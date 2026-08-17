@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit:axe": "node ../testing/audits/point-6/run-axe.cjs",
+    "audit:lighthouse": "node ../testing/audits/point-6/run-lighthouse.cjs"
   },
   "dependencies": {
     "@types/three": "^0.184.1",
@@ -19,6 +21,7 @@
     "three": "^0.184.0"
   },
   "devDependencies": {
+    "@axe-core/puppeteer": "^4.12.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
@@ -28,6 +31,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "lighthouse": "^12.8.2",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12"
