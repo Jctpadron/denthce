@@ -157,4 +157,55 @@ describe('ClinicaFinanzasService', () => {
     expect(patientRepo.exists).toHaveBeenCalledWith({ where: { id: patientId, tenantId } });
     expect(pagoRepo.save).not.toHaveBeenCalled();
   });
+
+  it('rechaza pago con importe cero, negativo o no numerico', async () => {
+    patientRepo.exists.mockResolvedValue(true);
+
+    await expect(
+      service.registrarPago(
+        tenantId,
+        {
+          patientId,
+          monto: 0,
+          metodoPago: 'efectivo',
+        },
+        'doctor_julio',
+      ),
+    ).rejects.toThrow(BadRequestException);
+
+    await expect(
+      service.registrarPago(
+        tenantId,
+        {
+          patientId,
+          monto: Number.NaN,
+          metodoPago: 'efectivo',
+        },
+        'doctor_julio',
+      ),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(pagoRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('rechaza pago con fecha futura', async () => {
+    patientRepo.exists.mockResolvedValue(true);
+    const futura = new Date();
+    futura.setDate(futura.getDate() + 1);
+
+    await expect(
+      service.registrarPago(
+        tenantId,
+        {
+          patientId,
+          monto: 1500,
+          metodoPago: 'efectivo',
+          fechaPago: futura,
+        },
+        'doctor_julio',
+      ),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(pagoRepo.save).not.toHaveBeenCalled();
+  });
 });
