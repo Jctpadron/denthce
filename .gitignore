@@ -12,3 +12,7 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+# Registro local de procedencia de deploys (guard de deploy-aws.ps1).
+# Es por maquina: la trazabilidad compartida son los tags, no este archivo.
+aws/scripts/deploy-log.txt
