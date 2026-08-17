@@ -16,12 +16,18 @@ interface DashboardData {
   rentabilidadNeta: number; deudaTotal: number; pacientesMorosos: number;
 }
 interface Precio { id: string; snomedCode: string; snomedDisplay: string; precio: number; active: boolean; }
-interface Presupuesto { id: string; numero: string; patientId: string; estado: string; subtotal: number; descuento: number; total: number; senhaPorcentaje: number; senhaMonto: number; fechaEmision: string; fechaValidez: string; createdBy: string; items?: PresupuestoItem[]; pagos?: Pago[]; }
+interface Presupuesto { id: string; numero: string; patientId: string; patientDisplay?: string; patientDni?: string; estado: string; subtotal: number; descuento: number; total: number; senhaPorcentaje: number; senhaMonto: number; fechaEmision: string; fechaValidez: string; createdBy: string; items?: PresupuestoItem[]; pagos?: Pago[]; }
 interface PresupuestoItem { id: string; snomedCode: string; snomedDisplay: string; diente?: string; cantidad: number; precioUnitario: number; subtotal: number; }
-interface Pago { id: string; patientId: string; presupuestoId?: string; tipo: string; monto: number; metodoPago: string; fechaPago: string; comprobante?: string; notas?: string; registeredBy?: string; }
+interface Pago { id: string; patientId: string; patientDisplay?: string; patientDni?: string; presupuestoId?: string; tipo: string; monto: number; metodoPago: string; fechaPago: string; comprobante?: string; notas?: string; registeredBy?: string; }
 interface Gasto { id: string; categoria: string; descripcion: string; monto: number; fechaGasto: string; metodoPago: string; comprobante?: string; }
 
 const MONEY = (n: number) => `$${n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const textField = (data: FormData, name: string) => String(data.get(name) || '').trim();
+const numberField = (data: FormData, name: string) => {
+  const raw = String(data.get(name) || '').replace(',', '.');
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : NaN;
+};
 
 const badge = (variant: string): React.CSSProperties => {
   const base: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '0.2rem 0.55rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700 };
@@ -45,17 +51,26 @@ const badgeEstado = (estado: string): React.CSSProperties => {
   return map[estado] || badge('gray');
 };
 
-const Modal: React.FC<{ title: string; onClose: () => void; children: React.ReactNode }> = ({ title, onClose, children }) => (
-  <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--color-text) 35%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-    <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-surface)', borderRadius: '20px', padding: '1.5rem', width: '480px', maxWidth: '90vw', boxShadow: 'var(--shadow-card)' }}>
+const Modal: React.FC<{ title: string; onClose: () => void; children: React.ReactNode }> = ({ title, onClose, children }) => {
+  const titleId = `modal-${title.toLowerCase().replace(/\s+/g, '-')}`;
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+  <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--color-text) 35%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+    <div role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-surface)', borderRadius: '20px', padding: '1.5rem', width: '480px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-card)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)' }}>{title}</h3>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}><X size={20} /></button>
+        <h3 id={titleId} style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)' }}>{title}</h3>
+        <button type="button" onClick={onClose} aria-label="Cerrar" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}><X size={20} /></button>
       </div>
       {children}
     </div>
   </div>
-);
+  );
+};
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div style={{ marginBottom: '0.8rem' }}>
@@ -167,6 +182,7 @@ export const FinanzasClinicas: React.FC = () => {
   const [gastos, setGastos] = useState<Gasto[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [showNuevoPresupuesto, setShowNuevoPresupuesto] = useState(false);
   const [showRegistrarPago, setShowRegistrarPago] = useState(false);
@@ -205,6 +221,10 @@ export const FinanzasClinicas: React.FC = () => {
   useEffect(() => { fetchAll(); }, []);
 
   const refresh = () => fetchAll(true);
+  const presupuestoLabel = (presupuestoId?: string) => {
+    if (!presupuestoId) return 'Sin presupuesto';
+    return presupuestos.find((presupuesto) => presupuesto.id === presupuestoId)?.numero || 'Presupuesto vinculado';
+  };
 
   const handleTransicion = async (id: string, estado: string) => {
     try {
@@ -219,71 +239,129 @@ export const FinanzasClinicas: React.FC = () => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
+    const patientId = textField(data, 'patientId');
+    const descripcion = textField(data, 'descripcion');
+    const total = numberField(data, 'total');
+    const descuento = numberField(data, 'descuento') || 0;
+    const senhaPorcentaje = numberField(data, 'senhaPorcentaje') || 30;
+    if (!patientId) { setFormError('Seleccioná un paciente de la lista antes de guardar.'); return; }
+    if (!descripcion) { setFormError('Ingresá la descripción del servicio.'); return; }
+    if (!Number.isFinite(total) || total <= 0) { setFormError('El monto total debe ser mayor a cero.'); return; }
+    if (descuento < 0 || descuento > total) { setFormError('El descuento no puede ser negativo ni superar el total.'); return; }
+    if (senhaPorcentaje < 0 || senhaPorcentaje > 100) { setFormError('La seña debe estar entre 0% y 100%.'); return; }
+    setFormError(null);
     const dto = {
-      patientId: data.get('patientId') as string,
-      descuento: parseFloat(data.get('descuento') as string) || 0,
-      senhaPorcentaje: parseFloat(data.get('senhaPorcentaje') as string) || 30,
-      items: [{ snomedCode: 'GENERAL', snomedDisplay: data.get('descripcion') as string || 'Servicio odontologico', precioUnitario: parseFloat(data.get('total') as string) || 0 }]
+      patientId,
+      descuento,
+      senhaPorcentaje,
+      items: [{ snomedCode: 'GENERAL', snomedDisplay: descripcion, precioUnitario: total }]
     };
+    setSubmitting(true);
     try {
       await axios.post(`${API_URL}/clinica/finanzas/presupuesto`, dto, { headers: getHeaders() });
       setShowNuevoPresupuesto(false);
       refresh();
-    } catch (e: any) { setFormError(e?.response?.data?.message || 'Error al crear el presupuesto.'); }
+    } catch (e: any) {
+      setFormError(e?.response?.data?.message || 'Error al crear el presupuesto.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleRegistrarPago = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
+    const patientId = textField(data, 'patientId');
+    const tipo = textField(data, 'tipo');
+    const presupuestoId = textField(data, 'presupuestoId');
+    const monto = numberField(data, 'monto');
+    const metodoPago = textField(data, 'metodoPago');
+    if (!patientId) { setFormError('Seleccioná un paciente de la lista antes de registrar el pago.'); return; }
+    if (!tipo) { setFormError('Seleccioná el tipo de pago.'); return; }
+    if (tipo !== 'pago_directo' && !presupuestoId) { setFormError('Seleccioná el presupuesto asociado o usá Pago Directo.'); return; }
+    if (!Number.isFinite(monto) || monto <= 0) { setFormError('El monto del pago debe ser mayor a cero.'); return; }
+    if (!metodoPago) { setFormError('Seleccioná el método de pago.'); return; }
+    setFormError(null);
     const dto = {
-      patientId: data.get('patientId') as string,
-      presupuestoId: data.get('presupuestoId') as string || undefined,
-      tipo: data.get('tipo') as string,
-      monto: parseFloat(data.get('monto') as string),
-      metodoPago: data.get('metodoPago') as string,
-      comprobante: data.get('comprobante') as string || undefined,
-      notas: data.get('notas') as string || undefined,
+      patientId,
+      presupuestoId: presupuestoId || undefined,
+      tipo,
+      monto,
+      metodoPago,
+      comprobante: textField(data, 'comprobante') || undefined,
+      notas: textField(data, 'notas') || undefined,
     };
+    setSubmitting(true);
     try {
       await axios.post(`${API_URL}/clinica/finanzas/pago`, dto, { headers: getHeaders() });
       setShowRegistrarPago(false);
       refresh();
-    } catch (e: any) { setFormError(e?.response?.data?.message || 'Error al registrar el pago.'); }
+    } catch (e: any) {
+      setFormError(e?.response?.data?.message || 'Error al registrar el pago.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleRegistrarGasto = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
+    const categoria = textField(data, 'categoria');
+    const descripcion = textField(data, 'descripcion');
+    const monto = numberField(data, 'monto');
+    const metodoPago = textField(data, 'metodoPago');
+    if (!categoria) { setFormError('Seleccioná la categoría del gasto.'); return; }
+    if (!descripcion) { setFormError('Ingresá la descripción del gasto.'); return; }
+    if (!Number.isFinite(monto) || monto <= 0) { setFormError('El monto del gasto debe ser mayor a cero.'); return; }
+    if (!metodoPago) { setFormError('Seleccioná el método de pago.'); return; }
+    setFormError(null);
     const dto = {
-      categoria: data.get('categoria') as string,
-      descripcion: data.get('descripcion') as string,
-      monto: parseFloat(data.get('monto') as string),
-      metodoPago: data.get('metodoPago') as string,
-      comprobante: data.get('comprobante') as string || undefined,
+      categoria,
+      descripcion,
+      monto,
+      metodoPago,
+      comprobante: textField(data, 'comprobante') || undefined,
     };
+    setSubmitting(true);
     try {
       await axios.post(`${API_URL}/clinica/finanzas/gasto`, dto, { headers: getHeaders() });
       setShowRegistrarGasto(false);
       refresh();
-    } catch (e: any) { setFormError(e?.response?.data?.message || 'Error al registrar el gasto.'); }
+    } catch (e: any) {
+      setFormError(e?.response?.data?.message || 'Error al registrar el gasto.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleNuevoPrecio = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
+    const snomedCode = textField(data, 'snomedCode');
+    const snomedDisplay = textField(data, 'snomedDisplay');
+    const precio = numberField(data, 'precio');
+    if (!snomedCode) { setFormError('Ingresá el código SNOMED o código interno.'); return; }
+    if (!snomedDisplay) { setFormError('Ingresá el nombre de la prestación.'); return; }
+    if (!Number.isFinite(precio) || precio <= 0) { setFormError('El precio debe ser mayor a cero.'); return; }
+    setFormError(null);
     const dto = {
-      snomedCode: data.get('snomedCode') as string,
-      snomedDisplay: data.get('snomedDisplay') as string,
-      precio: parseFloat(data.get('precio') as string),
+      snomedCode,
+      snomedDisplay,
+      precio,
     };
+    setSubmitting(true);
     try {
       await axios.post(`${API_URL}/clinica/finanzas/nomenclador`, dto, { headers: getHeaders() });
       setShowNuevoPrecio(false);
       refresh();
-    } catch (e: any) { setFormError(e?.response?.data?.message || 'Error al agregar la prestación.'); }
+    } catch (e: any) {
+      setFormError(e?.response?.data?.message || 'Error al agregar la prestación.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const TABS = [
@@ -327,7 +405,7 @@ export const FinanzasClinicas: React.FC = () => {
         <>
           {refreshing && <div style={{ textAlign: 'center', padding: '0.5rem', fontSize: '0.72rem', color: 'var(--color-muted)', fontWeight: 600 }}>Actualizando...</div>}
           {error && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '1rem 1.25rem', borderRadius: '12px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+            <div role="alert" aria-live="assertive" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '1rem 1.25rem', borderRadius: '12px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.85rem', marginBottom: '1rem' }}>
               <AlertCircle size={18} />
               <span>{error}</span>
             </div>
@@ -389,8 +467,11 @@ export const FinanzasClinicas: React.FC = () => {
                         <tr key={p.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                           <td style={{ ...TD, ...COLS.numero }}>{p.numero}</td>
                           <td style={{ ...TD, ...COLS.paciente }}>
-                            <span style={{ fontWeight: 600, display: 'inline-block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }} title={p.patientId}>
-                              {p.patientId?.slice(0, 10)}...
+                            <span style={{ fontWeight: 700, display: 'block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }} title={p.patientDisplay || p.patientId}>
+                              {p.patientDisplay || 'Paciente sin nombre'}
+                            </span>
+                            <span style={{ color: 'var(--color-muted)', fontSize: '0.68rem' }}>
+                              {p.patientDni ? `DNI ${p.patientDni}` : 'DNI no disponible'}
                             </span>
                           </td>
                           <td style={{ ...TD_RIGHT, ...COLS.total }}>{MONEY(Number(p.total))}</td>
@@ -460,16 +541,20 @@ export const FinanzasClinicas: React.FC = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
                   <thead>
                     <tr style={{ background: 'var(--bg-card)' }}>
-                      <th style={TH}>Tipo</th><th style={TH}>Monto</th><th style={TH}>Método</th><th style={TH}>Presupuesto</th><th style={TH}>Fecha</th><th style={TH}>Comprobante</th>
+                      <th style={TH}>Paciente / Tipo</th><th style={TH}>Monto</th><th style={TH}>Método</th><th style={TH}>Presupuesto</th><th style={TH}>Fecha</th><th style={TH}>Comprobante</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pagos.map(p => (
                       <tr key={p.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={TD}><span style={p.tipo === 'senha' ? badge('purple') : p.tipo === 'cuota' ? badge('blue') : badge('gray')}>{p.tipo}</span></td>
+                        <td style={TD}>
+                          <span style={{ fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>{p.patientDisplay || 'Paciente sin nombre'}</span>
+                          <span style={{ color: 'var(--color-muted)', fontSize: '0.68rem', display: 'block', marginBottom: '0.35rem' }}>{p.patientDni ? `DNI ${p.patientDni}` : 'DNI no disponible'}</span>
+                          <span style={p.tipo === 'senha' ? badge('purple') : p.tipo === 'cuota' ? badge('blue') : badge('gray')}>{p.tipo}</span>
+                        </td>
                         <td style={TD}><span style={{ fontWeight: 700, color: 'var(--color-emerald)' }}>{MONEY(Number(p.monto))}</span></td>
                         <td style={TD}>{p.metodoPago}</td>
-                        <td style={TD}>{p.presupuestoId ? `${p.presupuestoId.slice(0, 8)}...` : '—'}</td>
+                        <td style={TD}>{presupuestoLabel(p.presupuestoId)}</td>
                         <td style={TD}><span style={{ color: 'var(--color-muted)', fontSize: '0.7rem' }}>{new Date(p.fechaPago).toLocaleDateString()}</span></td>
                         <td style={TD}>{p.comprobante || '—'}</td>
                       </tr>
@@ -527,29 +612,29 @@ export const FinanzasClinicas: React.FC = () => {
               <input name="descripcion" className="search-input" placeholder="Ej: Restauración + Corona" required />
             </Field>
             <Field label="Monto Total ($)">
-              <input name="total" type="number" className="search-input" placeholder="0.00" required />
+              <input name="total" type="number" min="0.01" step="0.01" inputMode="decimal" className="search-input" placeholder="0.00" required />
             </Field>
             <div style={{ display: 'flex', gap: '0.8rem' }}>
               <div style={{ flex: 1 }}>
                 <Field label="Descuento ($)">
-                  <input name="descuento" type="number" className="search-input" placeholder="0" defaultValue="0" />
+                  <input name="descuento" type="number" min="0" step="0.01" inputMode="decimal" className="search-input" placeholder="0" defaultValue="0" />
                 </Field>
               </div>
               <div style={{ flex: 1 }}>
                 <Field label="Seña (%)">
-                  <input name="senhaPorcentaje" type="number" className="search-input" placeholder="30" defaultValue="30" />
+                  <input name="senhaPorcentaje" type="number" min="0" max="100" step="1" className="search-input" placeholder="30" defaultValue="30" />
                 </Field>
               </div>
             </div>
-                        {formError && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
+            {formError && (
+              <div role="alert" aria-live="assertive" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
                 <AlertCircle size={16} />
                 <span>{formError}</span>
               </div>
             )}
             <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', marginTop: '1.2rem' }}>
               <button type="button" onClick={() => { setShowNuevoPresupuesto(false); setFormError(null); }} className="btn btn-secondary">Cancelar</button>
-              <button type="submit" className="btn btn-primary">Guardar Presupuesto</button>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Guardando...' : 'Guardar Presupuesto'}</button>
             </div>
           </form>
         </Modal>
@@ -614,7 +699,7 @@ export const FinanzasClinicas: React.FC = () => {
             <div style={{ display: 'flex', gap: '0.8rem' }}>
               <div style={{ flex: 1 }}>
                 <Field label="Monto ($)">
-                  <input name="monto" type="number" className="search-input" placeholder="0.00" required />
+                  <input name="monto" type="number" min="0.01" step="0.01" inputMode="decimal" className="search-input" placeholder="0.00" required />
                 </Field>
               </div>
               <div style={{ flex: 1 }}>
@@ -632,15 +717,15 @@ export const FinanzasClinicas: React.FC = () => {
             <Field label="Comprobante / Ref. (opcional)">
               <input name="comprobante" className="search-input" placeholder="N° de recibo o transferencia" />
             </Field>
-                        {formError && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
+            {formError && (
+              <div role="alert" aria-live="assertive" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
                 <AlertCircle size={16} />
                 <span>{formError}</span>
               </div>
             )}
             <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', marginTop: '1.2rem' }}>
               <button type="button" onClick={() => { setShowRegistrarPago(false); setPagoPresupuestos([]); setQuickPagoPresupuesto(null); setFormError(null); }} className="btn btn-secondary">Cancelar</button>
-              <button type="submit" className="btn btn-primary">Confirmar Pago</button>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Registrando...' : 'Confirmar Pago'}</button>
             </div>
           </form>
         </Modal>
@@ -677,20 +762,20 @@ export const FinanzasClinicas: React.FC = () => {
               <input name="descripcion" className="search-input" placeholder="Ej: Alquiler local Junio 2026" required />
             </Field>
             <Field label="Monto ($)">
-              <input name="monto" type="number" className="search-input" placeholder="0.00" required />
+              <input name="monto" type="number" min="0.01" step="0.01" inputMode="decimal" className="search-input" placeholder="0.00" required />
             </Field>
             <Field label="Comprobante (opcional)">
               <input name="comprobante" className="search-input" placeholder="N° de factura o recibo" />
             </Field>
-                        {formError && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
+            {formError && (
+              <div role="alert" aria-live="assertive" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
                 <AlertCircle size={16} />
                 <span>{formError}</span>
               </div>
             )}
             <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', marginTop: '1.2rem' }}>
               <button type="button" onClick={() => { setShowRegistrarGasto(false); setFormError(null); }} className="btn btn-secondary">Cancelar</button>
-              <button type="submit" className="btn btn-primary" style={{ background: 'var(--color-rose)', borderColor: 'var(--color-rose)' }}>Registrar Gasto</button>
+              <button type="submit" className="btn btn-primary" disabled={submitting} style={{ background: 'var(--color-rose)', borderColor: 'var(--color-rose)' }}>{submitting ? 'Registrando...' : 'Registrar Gasto'}</button>
             </div>
           </form>
         </Modal>
@@ -706,17 +791,17 @@ export const FinanzasClinicas: React.FC = () => {
               <input name="snomedDisplay" className="search-input" placeholder="Ej: Consulta odontológica inicial" required />
             </Field>
             <Field label="Precio ($)">
-              <input name="precio" type="number" className="search-input" placeholder="0.00" required />
+              <input name="precio" type="number" min="0.01" step="0.01" inputMode="decimal" className="search-input" placeholder="0.00" required />
             </Field>
-                        {formError && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
+            {formError && (
+              <div role="alert" aria-live="assertive" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'color-mix(in srgb, var(--color-rose) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-rose) 20%, transparent)', color: 'var(--color-rose)', fontSize: '0.8rem', marginBottom: '0.8rem' }}>
                 <AlertCircle size={16} />
                 <span>{formError}</span>
               </div>
             )}
             <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', marginTop: '1.2rem' }}>
               <button type="button" onClick={() => { setShowNuevoPrecio(false); setFormError(null); }} className="btn btn-secondary">Cancelar</button>
-              <button type="submit" className="btn btn-primary">Agregar</button>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Agregando...' : 'Agregar'}</button>
             </div>
           </form>
         </Modal>

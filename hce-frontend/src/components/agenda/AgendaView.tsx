@@ -92,7 +92,7 @@ export const AgendaView: React.FC = () => {
       {/* Cabecera */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0 }}>
-          <CalendarClock style={{ width: '1.6rem', height: '1.6rem', color: '#2962ff' }} />
+          <CalendarClock style={{ width: '1.6rem', height: '1.6rem', color: 'var(--color-primary)' }} />
           Agenda de Turnos
         </h3>
         <button onClick={() => setModal({ mode: 'create' })} className="btn btn-primary" style={{ padding: '0.6rem 1.1rem', display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.85rem', fontWeight: 700 }}>
@@ -147,7 +147,7 @@ export const AgendaView: React.FC = () => {
               <button onClick={() => navegar(1)} className="btn btn-secondary" style={{ padding: '0.45rem', borderRadius: '10px' }} aria-label="Siguiente">
                 <ChevronRight style={{ width: '1.1rem', height: '1.1rem' }} />
               </button>
-              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text)', marginLeft: '0.4rem', textTransform: 'capitalize' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text)', marginLeft: '0.4rem' }}>
                 {tituloRango()}
               </span>
             </div>

@@ -17,6 +17,8 @@ import { ClinicalAttachments } from './ClinicalAttachments';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const authHeaders = () => ({ Authorization: `Bearer ${keycloak.token}` });
 const MONEY = (n: number) => `$${(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const isValidPatientId = (value?: string | null) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
 
 interface PlannedResource {
   id: string;
@@ -156,7 +158,6 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const [pagoFecha, setPagoFecha] = useState('');
   const [pagoSaving, setPagoSaving] = useState(false);
   const [contableMsg, setContableMsg] = useState('');
-  const [adminOpen, setAdminOpen] = useState(false);
   const montoInputRef = useRef<HTMLInputElement | null>(null);
 
   // ── Firma de conformidad del paciente por prestación (C) ──
@@ -225,6 +226,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
 
   // Trae el resumen persistido (cuenta corriente) y los pagos del presupuesto abierto.
   const refreshContable = async (pid: string) => {
+    if (!isValidPatientId(patientId)) return;
     try {
       const [cc, pg] = await Promise.all([
         axios.get(`${API_URL}/clinica/finanzas/cuenta-corriente/${patientId}`, { headers: authHeaders() }),
@@ -241,6 +243,12 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   // (evita duplicados y muestra lo guardado). Si no, se queda con el auto-cargado del plan.
   useEffect(() => {
     (async () => {
+      if (!isValidPatientId(patientId)) {
+        setError('Selecciona un paciente valido para armar el presupuesto.');
+        setLoading(false);
+        return;
+      }
+
       try {
         // 1) Nomenclador de PRECIOS (snomedCode → precio) para auto-proponer importes.
         const precios: Record<string, number> = {};
@@ -313,6 +321,11 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const delLinea = (i: number) => setLineas((ls) => ls.filter((_, idx) => idx !== i));
 
   const guardar = async () => {
+    if (!isValidPatientId(patientId)) {
+      setError('Selecciona un paciente valido antes de guardar el presupuesto.');
+      return;
+    }
+
     // Se presupuestan SOLO las líneas con importe > 0. Las líneas del plan sin precio (importe 0)
     // NO bloquean el guardado: quedan visibles en pantalla para completarlas después.
     const conNombre = lineas.filter((l) => (l.snomedDisplay || '').trim());
@@ -374,7 +387,16 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
   const registrarPago = async () => {
     if (!presupuestoId) return;
     const monto = Number(pagoMonto);
-    if (!(monto > 0)) { setContableMsg('Ingresá un importe mayor a 0.'); return; }
+    const totalContable = ccResumen?.total ?? total;
+    const saldoPendiente = ccResumen?.saldo ?? Math.max(0, totalContable - (ccResumen?.pagado ?? 0));
+    const hoyStr = new Date().toISOString().slice(0, 10);
+    if (!Number.isFinite(monto) || !(monto > 0)) { setContableMsg('Ingresa un importe mayor a 0.'); return; }
+    if (pagoFecha && pagoFecha > hoyStr) { setContableMsg('La fecha del pago no puede ser futura.'); return; }
+    if (monto > saldoPendiente) {
+      const creditoNuevo = monto - saldoPendiente;
+      const ok = window.confirm('El pago supera el saldo pendiente y generar\u00e1 cr\u00e9dito a favor por ' + MONEY(creditoNuevo) + '.\n\n\u00bfConfirm\u00e1s registrar este pago?');
+      if (!ok) return;
+    }
     setPagoSaving(true); setContableMsg('');
     try {
       // Método/tipo por default en backend (efectivo / pago_directo). Concepto → notas.
@@ -593,8 +615,6 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
             const pagado = ccResumen?.pagado ?? 0;
             const saldo = ccResumen ? ccResumen.saldo : totalC;
             const credito = pagado > totalC ? pagado - totalC : 0; // sobrepago (a cuenta)
-            const nCuotas = Number(cantidadCuotas) || 0;
-            const valorCuota = nCuotas > 0 ? totalC / nCuotas : null;
             const hoyStr = new Date().toISOString().slice(0, 10);
             // Saldo decreciente fila por fila (cronológico). Los pagos ANULADOS no cuentan.
             const pagosAsc = [...pagos].sort((a, b) => (a.fechaPago || '').localeCompare(b.fechaPago || ''));
@@ -605,7 +625,10 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
               return { ...p, anulado, saldoTras: anulado ? null : totalC - acum };
             });
             const ESTADO_LABEL: Record<string, string> = { borrador: 'Borrador', presentado: 'Presentado', aceptado: 'Aceptado', en_curso: 'En curso', pagado: 'Pagado', cancelado: 'Cancelado', vencido: 'Vencido' };
-            const saldoColor = saldo <= 0 ? 'var(--color-emerald)' : 'var(--color-rose)';
+            const saldoPendiente = Math.max(0, saldo);
+            const saldoColor = saldoPendiente <= 0 ? 'var(--color-emerald)' : 'var(--color-rose)';
+            const saldoTrasLabel = (value: number) => value < 0 ? 'Cr\u00e9dito ' + MONEY(Math.abs(value)) : MONEY(value);
+            const saldoTrasColor = (value: number) => value < 0 ? 'var(--color-emerald)' : (value > 0 ? 'var(--color-muted)' : 'var(--color-emerald)');
             return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
               {/* Resumen económico — Saldo protagonista */}
@@ -620,11 +643,17 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                 </div>
                 {/* (ux M1) padding compensa el borde de 2px para que el texto quede a ras de las otras cards */}
                 <div style={{ border: `2px solid ${saldoColor}`, borderRadius: '12px', padding: 'calc(0.7rem - 1px) calc(0.85rem - 1px)', background: 'var(--bg-card)', gridColumn: isMobile ? '1 / -1' : 'auto' }}>
-                  <div style={headerCellStyle}>Saldo</div>
-                  <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 900, color: saldoColor, lineHeight: 1.1 }}>{MONEY(saldo)}</div>
-                  {saldo <= 0 && credito === 0 && <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-emerald)' }}>✓ Saldado</div>}
-                  {credito > 0 && <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-emerald)' }}>Crédito a favor: {MONEY(credito)}</div>}
+                  <div style={headerCellStyle}>Saldo pendiente</div>
+                  <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 900, color: saldoColor, lineHeight: 1.1 }}>{MONEY(saldoPendiente)}</div>
+                  {saldoPendiente <= 0 && <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-emerald)' }}>Saldado</div>}
                 </div>
+                {credito > 0 && (
+                  <div style={{ border: '2px solid var(--color-emerald)', borderRadius: '12px', padding: 'calc(0.7rem - 1px) calc(0.85rem - 1px)', background: 'color-mix(in srgb, var(--color-emerald) 7%, var(--bg-card))', gridColumn: isMobile ? '1 / -1' : 'auto' }}>
+                    <div style={headerCellStyle}>{'Cr\u00e9dito a favor'}</div>
+                    <div style={{ fontSize: 'clamp(1.25rem, 4vw, 1.65rem)', fontWeight: 900, color: 'var(--color-emerald)', lineHeight: 1.1 }}>{MONEY(credito)}</div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-emerald)' }}>Sobrepago registrado</div>
+                  </div>
+                )}
               </div>
 
               {!presupuestoId ? (
@@ -645,11 +674,11 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.85fr 1fr 1.3fr auto', gap: '0.5rem', alignItems: 'end' }}>
                       <div>
                         <label htmlFor="pago-fecha" style={labelStyle}>Fecha</label>
-                        <input id="pago-fecha" type="date" value={pagoFecha || hoyStr} onChange={(e) => setPagoFecha(e.target.value)} style={inputStyle} />
+                        <input id="pago-fecha" type="date" max={hoyStr} value={pagoFecha || hoyStr} onChange={(e) => setPagoFecha(e.target.value)} style={inputStyle} />
                       </div>
                       <div>
                         <label htmlFor="pago-monto" style={labelStyle}>Importe</label>
-                        <input id="pago-monto" ref={montoInputRef} autoFocus type="number" min={0} step="0.01" value={pagoMonto}
+                        <input id="pago-monto" ref={montoInputRef} autoFocus type="number" min={0.01} step="0.01" value={pagoMonto}
                           onChange={(e) => setPagoMonto(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); registrarPago(); } }}
                           placeholder="0,00" style={inputStyle} />
@@ -661,8 +690,8 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); registrarPago(); } }}
                           placeholder="seña, cuota, implante…" style={inputStyle} />
                       </div>
-                      <button type="button" onClick={registrarPago} disabled={pagoSaving}
-                        style={{ padding: '0.55rem 1.1rem', borderRadius: '9px', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: pagoSaving ? 'wait' : 'pointer', fontWeight: 800, minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
+                      <button type="button" onClick={registrarPago} disabled={pagoSaving || !(Number(pagoMonto) > 0)}
+                        style={{ padding: '0.55rem 1.1rem', borderRadius: '9px', border: 'none', background: 'var(--color-primary)', color: '#fff', opacity: pagoSaving || !(Number(pagoMonto) > 0) ? 0.55 : 1, cursor: pagoSaving ? 'wait' : (!(Number(pagoMonto) > 0) ? 'not-allowed' : 'pointer'), fontWeight: 800, minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
                         <Plus size={16} /> {pagoSaving ? '…' : 'Agregar'}
                       </button>
                     </div>
@@ -696,7 +725,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', fontSize: '0.74rem', color: 'var(--color-muted)' }}>
                                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.notas || '—'}{p.anulado ? ' · ANULADO' : ''}</span>
-                                {!p.anulado && <span>Saldo {MONEY(p.saldoTras ?? 0)}</span>}
+                                {!p.anulado && <span>{saldoTrasLabel(p.saldoTras ?? 0)}</span>}
                                 {!p.anulado && <button type="button" onClick={() => anularPago(p.id)} title="Anular pago" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-rose)', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 40, minHeight: 40 }}><Trash2 size={14} /></button>}
                               </div>
                             </div>
@@ -705,7 +734,7 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                               <span style={{ color: 'var(--color-text)' }}>{(p.fechaPago || '').slice(0, 10)}</span>
                               <span style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-text)', textDecoration: p.anulado ? 'line-through' : 'none' }}>{MONEY(Number(p.monto) || 0)}</span>
                               <span style={{ color: 'var(--color-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.notas || (p.anulado ? 'anulado' : '—')}</span>
-                              <span style={{ textAlign: 'right', color: p.anulado ? 'var(--color-muted)' : ((p.saldoTras ?? 0) <= 0 ? 'var(--color-emerald)' : 'var(--color-muted)') }}>{p.anulado ? '—' : MONEY(p.saldoTras ?? 0)}</span>
+                              <span style={{ textAlign: 'right', color: p.anulado ? 'var(--color-muted)' : saldoTrasColor(p.saldoTras ?? 0) }}>{p.anulado ? '-' : saldoTrasLabel(p.saldoTras ?? 0)}</span>
                               {p.anulado
                                 ? <span style={{ width: 34 }} aria-hidden="true"></span>
                                 : <button type="button" onClick={() => anularPago(p.id)} title="Anular pago" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-rose)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 34, minHeight: 34, padding: 0, justifySelf: 'center', borderRadius: '8px' }}><Trash2 size={15} /></button>}
@@ -716,44 +745,6 @@ export const PresupuestoOdontologicoModal: React.FC<Props> = ({
                     )}
                   </div>
 
-                  {/* Datos administrativos (colapsable): cuotas, OS, fechas, estado + presentación */}
-                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.6rem' }}>
-                    <button type="button" onClick={() => setAdminOpen((o) => !o)} aria-expanded={adminOpen} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', fontWeight: 700, fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: 0, minHeight: 36 }}>
-                      <span>{adminOpen ? '▾' : '▸'}</span> Datos administrativos (cuotas, obra social, presentación a OS)
-                    </button>
-                    {adminOpen && (
-                      <div style={{ marginTop: '0.7rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
-                          <div>
-                            <label style={labelStyle}>Cantidad de cuotas</label>
-                            <input type="number" min={1} value={cantidadCuotas} onChange={(e) => setCantidadCuotas(e.target.value)} style={inputStyle} />
-                            {valorCuota != null && <span style={{ fontSize: '0.68rem', color: 'var(--color-muted)' }}>Valor cuota: {MONEY(valorCuota)}</span>}
-                          </div>
-                          <div>
-                            <label style={labelStyle}>Obra social</label>
-                            <input value={obraSocial} maxLength={MAX.obraSocial} onChange={(e) => setObraSocial(e.target.value)} placeholder="OSDE, PAMI…" style={inputStyle} />
-                          </div>
-                          <div>
-                            <label style={labelStyle}>Fecha de presentación</label>
-                            <input type="date" value={fechaPresentacion} onChange={(e) => setFechaPresentacion(e.target.value)} style={inputStyle} />
-                          </div>
-                          <div>
-                            <label style={labelStyle}>Fecha de liquidación</label>
-                            <input type="date" value={fechaLiquidacion} onChange={(e) => setFechaLiquidacion(e.target.value)} style={inputStyle} />
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)' }}>Estado:</span>
-                          <span style={{ fontSize: '0.78rem', fontWeight: 800, padding: '0.2rem 0.6rem', borderRadius: '999px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--color-text)' }}>{ESTADO_LABEL[estado] || estado}</span>
-                          {estado === 'borrador' && <button type="button" onClick={() => transicionar('presentar')} style={btnGhost}>Presentar a OS</button>}
-                          {estado === 'presentado' && <>
-                            <button type="button" onClick={() => transicionar('aceptar')} style={btnGhost}>Aceptar</button>
-                            <button type="button" onClick={() => transicionar('cancelar')} style={{ ...btnGhost, color: 'var(--color-rose)' }}>Cancelar</button>
-                          </>}
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </>
               )}
             </div>

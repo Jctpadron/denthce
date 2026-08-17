@@ -28,7 +28,7 @@ export const LandingNav: React.FC<LandingNavProps> = ({ onLogin }) => {
   return (
     <nav className={`landing-nav${scrolled ? ' is-scrolled' : ''}`} aria-label="Navegación principal">
       <div className="landing-container landing-nav__inner">
-        <a href="#top" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Denta Cloud — inicio">
+        <a href="#top" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
           <DentaCloudLogo iconSize="2.4rem" />
         </a>
 

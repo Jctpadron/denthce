@@ -6,6 +6,7 @@ import { useRoles } from '../hooks/useRoles';
 import { getVisibleModules } from '../config/dashboard-modules';
 import { formatHora, statusMeta, nombrePacienteDeAppt } from './agenda/agenda-utils';
 import keycloak from '../utils/keycloak-config';
+import { TenantLogoMark } from './TenantLogoMark';
 
 interface HomeScreenProps {
   onNavigate: (to: string) => void;
@@ -121,6 +122,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const dayStr = now.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   // --- Acciones rápidas según rol ---
+  const sessionName =
+    (keycloak.tokenParsed as any)?.name ||
+    `${(keycloak.tokenParsed as any)?.given_name || ''} ${(keycloak.tokenParsed as any)?.family_name || ''}`.trim() ||
+    (keycloak.tokenParsed as any)?.preferred_username ||
+    '';
+  const userFirstName = sessionName ? sessionName.split(/\s+/)[0] : '';
+  const tokenTitle = String((keycloak.tokenParsed as any)?.doctorTitle || (keycloak.tokenParsed as any)?.title || '').trim();
+  const tokenGender = String((keycloak.tokenParsed as any)?.gender || (keycloak.tokenParsed as any)?.sex || '').toLowerCase();
+  const userProfessionalTitle =
+    /^dra\.?$/i.test(tokenTitle) ? 'Dra.' :
+    /^dr\.?$/i.test(tokenTitle) ? 'Dr.' :
+    ['female', 'femenino', 'mujer', 'f'].includes(tokenGender) ? 'Dra.' :
+    ['male', 'masculino', 'varon', 'varón', 'm'].includes(tokenGender) ? 'Dr.' :
+    isMedico ? 'Dr.' :
+    '';
+  const greetingTarget = userFirstName
+    ? `${userProfessionalTitle ? `${userProfessionalTitle} ` : ''}${userFirstName}`
+    : 'equipo';
+
   const quickActions = [
     canSeeAgenda && { label: 'Nuevo turno', icon: CalendarPlus, to: 'agenda', primary: true },
     has('form') && { label: 'Nuevo paciente', icon: UserPlus, to: 'form', primary: false },
@@ -137,16 +157,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem',
         boxShadow: 'var(--shadow-card, 0 4px 6px -1px rgba(0,0,0,0.02))',
       }}>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', minWidth: 0 }}>
+          <TenantLogoMark logoUrl={config.logoUrl} clinicName={config.clinicName} size="3.25rem" />
+          <div style={{ minWidth: 0 }}>
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-muted)', fontWeight: 500 }}>
             {dayStr.charAt(0).toUpperCase() + dayStr.slice(1)}
           </p>
           <h2 style={{ margin: '0.25rem 0 0', fontSize: 'clamp(1.3rem, 4vw, 1.6rem)', fontWeight: 700, color: 'var(--color-text)', letterSpacing: '-0.02em' }}>
-            {greeting}, {config.doctorTitle || 'Dr.'} {config.doctorName?.split(' ')[0] || 'Profesional'} 👋
+            {greeting}, {greetingTarget}
           </h2>
           <p style={{ margin: '0.35rem 0 0', fontSize: '0.9rem', color: 'var(--color-muted)', fontWeight: 500 }}>
             {config.clinicName} · <span style={{ color: accentText }}>{config.specialty}</span>
           </p>
+          </div>
         </div>
         {quickActions.length > 0 && (
           <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
@@ -179,13 +202,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
           display: 'grid', gap: '1rem',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
         }}>
-          <KpiCard value={apptsError ? '—' : activos.length} label="Turnos de hoy" color="#2962ff" loading={apptsLoading} />
-          <KpiCard value={apptsError ? '—' : enSala} label="En sala de espera" color="#d97706" loading={apptsLoading} />
-          <KpiCard value={apptsError ? '—' : atendidos} label="Atendidos" color="#059669" loading={apptsLoading} />
+          <KpiCard value={apptsError ? '—' : activos.length} label="Turnos de hoy" color="var(--color-primary)" loading={apptsLoading} />
+          <KpiCard value={apptsError ? '—' : enSala} label="En sala de espera" color="var(--color-amber)" loading={apptsLoading} />
+          <KpiCard value={apptsError ? '—' : atendidos} label="Atendidos" color="var(--color-emerald)" loading={apptsLoading} />
           <KpiCard
             value={apptsError ? '—' : (proximo ? formatHora(new Date(proximo.start)) : 'Sin turnos')}
             label={proximo ? `Próximo · ${nombrePacienteDeAppt(proximo)}` : 'Próximo turno'}
-            color="#7c3aed" loading={apptsLoading}
+            color="var(--color-violet)" loading={apptsLoading}
           />
         </section>
       )}

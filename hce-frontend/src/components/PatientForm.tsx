@@ -9,6 +9,8 @@ interface PatientFormProps {
   onCancel?: () => void;
 }
 
+type PatientFormErrors = Partial<Record<'dni' | 'givenName' | 'familyName' | 'birthDate' | 'gender', string>>;
+
 export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, onCancel }) => {
   const [dni, setDni] = useState('');
   const [givenName, setGivenName] = useState('');
@@ -22,6 +24,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<PatientFormErrors>({});
 
   // ── Estado: Cobertura de Salud ──────────────────────────────────────────
   const [insuranceList, setInsuranceList] = useState<any[]>([]); // catálogo de OS
@@ -196,8 +199,17 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!gender || gender === 'unknown') {
-      setMessage({ type: 'error', text: 'El género es obligatorio. Por favor seleccione una opción.' });
+    const errors: PatientFormErrors = {};
+    if (!dni.trim()) errors.dni = 'Ingresa el DNI del paciente.';
+    else if (!/^\d{6,10}$/.test(dni.trim())) errors.dni = 'El DNI debe tener entre 6 y 10 numeros.';
+    if (!givenName.trim()) errors.givenName = 'Ingresa el nombre del paciente.';
+    if (!familyName.trim()) errors.familyName = 'Ingresa el apellido del paciente.';
+    if (!birthDate) errors.birthDate = 'Selecciona la fecha de nacimiento.';
+    if (!gender || gender === 'unknown') errors.gender = 'Selecciona el genero del paciente.';
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setMessage({ type: 'error', text: 'Revisa los campos marcados antes de guardar el paciente.' });
       return;
     }
     setLoading(true);
@@ -307,6 +319,29 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
     }
   };
 
+  const clearFieldError = (field: keyof PatientFormErrors) => {
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const FieldError = ({ field }: { field: keyof PatientFormErrors }) => (
+    fieldErrors[field] ? (
+      <span style={{ color: 'var(--color-rose)', fontSize: '0.74rem', fontWeight: 600 }}>
+        {fieldErrors[field]}
+      </span>
+    ) : null
+  );
+
+  const filteredInsuranceList = covSearch.trim()
+    ? insuranceList.filter((os) => os.nombre.toLowerCase().includes(covSearch.toLowerCase().trim()))
+    : insuranceList;
+  const coverageSearchHasNoResults = covSearch.trim().length >= 2 && filteredInsuranceList.length === 0;
+  const coverageSearchNeedsSelection = covSearch.trim().length >= 2 && filteredInsuranceList.length > 0 && !newCovInsuranceId;
+
   return (
     <div className="panel" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2rem', backdropFilter: 'blur(16px)' }}>
       <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -331,7 +366,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid-form-2col">
+      <form onSubmit={handleSubmit} className="grid-form-2col" noValidate>
         
         {/* Identificación DNI + Verificación SISA */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -350,6 +385,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
                 const val = e.target.value;
                 if (/^\d*$/.test(val)) {
                   setDni(val);
+                  clearFieldError('dni');
                   setSisaStatus('idle');
                 }
               }}
@@ -369,7 +405,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
                 borderRadius: '10px',
                 border: `1px solid ${sisaStatus === 'found' ? 'rgba(16,185,129,0.4)' : 'var(--border-color)'}`,
                 background: sisaStatus === 'found' ? 'rgba(16,185,129,0.08)' : 'rgba(41,98,255,0.06)',
-                color: sisaStatus === 'found' ? '#10b981' : '#2962ff',
+                color: sisaStatus === 'found' ? 'var(--color-emerald)' : 'var(--color-primary)',
                 fontWeight: 600,
                 fontSize: '0.78rem',
                 cursor: sisaStatus === 'loading' ? 'wait' : 'pointer',
@@ -401,6 +437,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
               {sisaMessage}
             </div>
           )}
+          <FieldError field="dni" />
         </div>
 
         {/* Género biológico */}
@@ -413,13 +450,17 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
             style={{ paddingLeft: '1rem', height: '43px', background: 'var(--bg-card)' }}
             value={gender}
             required
-            onChange={(e) => setGender(e.target.value)}
+            onChange={(e) => {
+              setGender(e.target.value);
+              clearFieldError('gender');
+            }}
           >
             <option value="" disabled>Seleccione una opción...</option>
             <option value="male">Masculino</option>
             <option value="female">Femenino</option>
             <option value="other">Otro</option>
           </select>
+          <FieldError field="gender" />
         </div>
 
         {/* Nombres */}
@@ -432,8 +473,12 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
             style={{ paddingLeft: '1rem' }}
             placeholder="Ej: Julio César"
             value={givenName}
-            onChange={(e) => setGivenName(e.target.value)}
+            onChange={(e) => {
+              setGivenName(e.target.value);
+              clearFieldError('givenName');
+            }}
           />
+          <FieldError field="givenName" />
         </div>
 
         {/* Apellidos */}
@@ -444,10 +489,14 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
             required
             className="search-input"
             style={{ paddingLeft: '1rem' }}
-            placeholder="Ej: Mendoza"
+            placeholder="Ej: Rodriguez"
             value={familyName}
-            onChange={(e) => setFamilyName(e.target.value)}
+            onChange={(e) => {
+              setFamilyName(e.target.value);
+              clearFieldError('familyName');
+            }}
           />
+          <FieldError field="familyName" />
         </div>
 
         {/* Fecha de nacimiento */}
@@ -461,8 +510,12 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
             className="search-input"
             style={{ paddingLeft: '1rem', color: 'var(--color-text)' }}
             value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
+            onChange={(e) => {
+              setBirthDate(e.target.value);
+              clearFieldError('birthDate');
+            }}
           />
+          <FieldError field="birthDate" />
         </div>
 
         {/* Teléfono */}
@@ -622,10 +675,20 @@ export const PatientForm: React.FC<PatientFormProps> = ({ patient, onSuccess, on
                   }}
                 />
                 <datalist id="patient-obras-sociales-list">
-                  {insuranceList.map((os) => (
+                  {filteredInsuranceList.map((os) => (
                     <option key={os.id} value={os.nombre} />
                   ))}
                 </datalist>
+                {coverageSearchHasNoResults && (
+                  <span style={{ color: 'var(--color-muted)', fontSize: '0.74rem', fontWeight: 600 }}>
+                    No encontramos esa obra social en el catalogo de la clinica.
+                  </span>
+                )}
+                {coverageSearchNeedsSelection && (
+                  <span style={{ color: 'var(--color-amber)', fontSize: '0.74rem', fontWeight: 600 }}>
+                    Elegi una obra social del listado para asociarla correctamente.
+                  </span>
+                )}
               </div>
 
               {/* Dos columnas: Nro. Afiliado + Plan */}

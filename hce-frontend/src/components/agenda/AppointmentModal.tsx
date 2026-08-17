@@ -10,6 +10,7 @@ import {
   formatHora, statusMeta, nombrePacienteDeAppt, toLocalDateTimeInput,
   PRIORITY_LEVELS, priorityMeta, prioridadDeAppt,
 } from './agenda-utils';
+import { ClinicalAlerts } from '../ClinicalAlerts';
 
 const API = import.meta.env.VITE_API_URL;
 const authHeader = () => ({ headers: { Authorization: `Bearer ${keycloak.token}` } });
@@ -29,6 +30,11 @@ interface Props {
 const genderLabel = (g: string) =>
   ({ male: 'Masculino', female: 'Femenino', other: 'Otro', unknown: 'Sin especificar' } as Record<string, string>)[g] || g;
 
+const patientIdFromAppointment = (appt: any) => {
+  const patientActor = (appt?.participant || []).find((x: any) => x?.actor?.reference?.startsWith('Patient/'));
+  return patientActor?.actor?.reference?.replace('Patient/', '') || null;
+};
+
 export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, onClose, onSaved }) => {
   const { config } = useTheme();
 
@@ -44,6 +50,8 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recordatorioMsg, setRecordatorioMsg] = useState<string | null>(null);
+  const [confirmarCancelacion, setConfirmarCancelacion] = useState(false);
+  const [motivoCancelacion, setMotivoCancelacion] = useState('');
 
   // ------- Búsqueda de paciente por DNI -------
   const buscarPaciente = async () => {
@@ -71,10 +79,19 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
       setError('Seleccioná un paciente.');
       return;
     }
+    const startDate = new Date(start);
+    if (!start || Number.isNaN(startDate.getTime())) {
+      setError('Elegí una fecha y hora válidas.');
+      return;
+    }
+    if (!Number.isFinite(duracion) || duracion < 15) {
+      setError('La duración mínima del turno es de 15 minutos.');
+      return;
+    }
     setGuardando(true);
     setError(null);
     try {
-      const startISO = new Date(start).toISOString();
+      const startISO = startDate.toISOString();
       await axios.post(
         `${API}/fhir/r4/Appointment`,
         {
@@ -145,13 +162,12 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
 
   const cancelarTurno = async () => {
     if (!appt?.id) return;
-    const reason = window.prompt('Motivo de la cancelación (opcional):') ?? undefined;
     setGuardando(true);
     setError(null);
     try {
       await axios.patch(
         `${API}/fhir/r4/Appointment/${appt.id}`,
-        { status: 'cancelled', cancellationReason: { text: reason } },
+        { status: 'cancelled', cancellationReason: { text: motivoCancelacion.trim() || undefined } },
         authHeader(),
       );
       onSaved();
@@ -178,14 +194,15 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
         style={{
           width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto',
           display: 'flex', flexDirection: 'column', gap: '1.1rem', animation: 'slideIn 0.2s ease',
+          position: 'relative',
         }}
       >
         {/* Cabecera */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ margin: 0, fontFamily: 'var(--font-title)', fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {mode === 'create'
-              ? (<><CalendarPlus style={{ width: '1.2rem', height: '1.2rem', color: '#2962ff' }} /> Nuevo turno</>)
-              : (<><Stethoscope style={{ width: '1.2rem', height: '1.2rem', color: '#2962ff' }} /> Detalle del turno</>)}
+              ? (<><CalendarPlus style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-primary)' }} /> Nuevo turno</>)
+              : (<><Stethoscope style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-primary)' }} /> Detalle del turno</>)}
           </h3>
           <button onClick={onClose} className="btn btn-secondary" style={{ padding: '0.4rem', borderRadius: '10px' }} aria-label="Cerrar">
             <X style={{ width: '1.1rem', height: '1.1rem' }} />
@@ -193,7 +210,7 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
         </div>
 
         {error && (
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '0.7rem 0.9rem', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 500 }}>
+          <div role="alert" aria-live="assertive" style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '0.7rem 0.9rem', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 500 }}>
             <AlertTriangle style={{ width: '1rem', height: '1rem', flexShrink: 0, marginTop: '0.1rem' }} />
             <span>{error}</span>
           </div>
@@ -234,6 +251,7 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
                 )}
               </div>
             ) : (
+              <>
               <div className="card-premium-health" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem 1rem', border: '1px solid rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                   <UserCheck style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-emerald)' }} />
@@ -246,17 +264,19 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
                 </div>
                 <button onClick={() => { setPacienteSel(null); setResultados([]); }} className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem' }}>Cambiar</button>
               </div>
+              <ClinicalAlerts patientId={pacienteSel.id} compact title="Alertas antes de agendar" />
+              </>
             )}
 
             {/* Fecha/hora, duración, motivo */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <label style={{ fontSize: '0.78rem', color: 'var(--color-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Fecha y hora</label>
-              <input type="datetime-local" className="search-input" value={start} onChange={(e) => setStart(e.target.value)} style={{ color: 'var(--color-text)' }} />
+              <input type="datetime-local" className="search-input" value={start} onChange={(e) => setStart(e.target.value)} style={{ color: 'var(--color-text)' }} required />
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minWidth: '130px' }}>
                 <label style={{ fontSize: '0.78rem', color: 'var(--color-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Duración</label>
-                <select className="search-input" value={duracion} onChange={(e) => setDuracion(Number(e.target.value))} style={{ color: 'var(--color-text)' }}>
+                <select className="search-input" value={duracion} onChange={(e) => setDuracion(Number(e.target.value))} style={{ color: 'var(--color-text)' }} required>
                   {[15, 30, 45, 60].map((m) => <option key={m} value={m}>{m} min</option>)}
                 </select>
               </div>
@@ -276,9 +296,36 @@ export const AppointmentModal: React.FC<Props> = ({ mode, prefillStart, appt, on
             guardando={guardando}
             recordatorioMsg={recordatorioMsg}
             onEstado={cambiarEstado}
-            onCancelar={cancelarTurno}
+            onCancelar={() => { setConfirmarCancelacion(true); setError(null); }}
             onRecordatorio={enviarRecordatorio}
           />
+        )}
+        {confirmarCancelacion && (
+          <div role="dialog" aria-modal="true" aria-labelledby="cancelar-turno-title" style={{ position: 'absolute', inset: 0, background: 'color-mix(in srgb, var(--bg-surface) 92%, transparent)', borderRadius: 'inherit', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <h4 id="cancelar-turno-title" style={{ margin: 0, color: 'var(--color-text)', fontSize: '1rem', fontWeight: 800 }}>Cancelar turno</h4>
+              <p style={{ margin: 0, color: 'var(--color-muted)', fontSize: '0.82rem', lineHeight: 1.45 }}>
+                Confirmá la cancelación del turno. Podés dejar un motivo para auditoría clínica.
+              </p>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.78rem', color: 'var(--color-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                Motivo opcional
+                <textarea
+                  className="search-input"
+                  rows={3}
+                  value={motivoCancelacion}
+                  onChange={(event) => setMotivoCancelacion(event.target.value)}
+                  placeholder="Ej: el paciente solicitó reprogramar"
+                  style={{ resize: 'vertical', minHeight: '88px', color: 'var(--color-text)' }}
+                />
+              </label>
+              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => { setConfirmarCancelacion(false); setMotivoCancelacion(''); }} disabled={guardando}>Volver</button>
+                <button type="button" className="btn btn-primary" onClick={cancelarTurno} disabled={guardando} style={{ background: 'var(--color-rose)', borderColor: 'var(--color-rose)' }}>
+                  {guardando ? 'Cancelando...' : 'Confirmar cancelación'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -296,6 +343,7 @@ const DetalleTurno: React.FC<{
   const fin = appt?.end ? new Date(appt.end) : null;
   const finalizado = ['fulfilled', 'cancelled', 'noshow'].includes(appt?.status);
   const puedeRecordar = ['booked', 'arrived', 'proposed'].includes(appt?.status);
+  const patientId = patientIdFromAppointment(appt);
 
   // Nivel de urgencia seleccionado (default: el del turno, o 4 = estándar).
   const [prioridad, setPrioridad] = useState<number>(prioridadDeAppt(appt) ?? 4);
@@ -316,6 +364,8 @@ const DetalleTurno: React.FC<{
           <div style={{ fontSize: '0.82rem', color: 'var(--color-text)' }}>{appt.serviceType[0].text}</div>
         )}
       </div>
+
+      <ClinicalAlerts patientId={patientId} compact title="Alertas del paciente" />
 
       {!finalizado ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -366,7 +416,7 @@ const DetalleTurno: React.FC<{
 
           {/* Recordatorio por WhatsApp (CliniChat) */}
           {puedeRecordar && (
-            <button onClick={onRecordatorio} disabled={guardando} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', fontSize: '0.82rem', color: '#2962ff' }}>
+            <button onClick={onRecordatorio} disabled={guardando} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', fontSize: '0.82rem', color: 'var(--color-primary)' }}>
               <Bell style={{ width: '0.95rem', height: '0.95rem' }} /> Enviar recordatorio por WhatsApp
             </button>
           )}

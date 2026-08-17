@@ -114,6 +114,15 @@ function contrastOnBase(rgb: [number, number, number]): number {
   const L = relLuminance(rgb);
   return (BASE_BG_L + 0.05) / (L + 0.05);
 }
+function colorOnPrimaryFor(hex: string): string {
+  const rgb = parseHex(hex);
+  if (!rgb) return '#ffffff';
+  const primaryL = relLuminance(rgb);
+  const whiteContrast = (1 + 0.05) / (primaryL + 0.05);
+  const charcoalL = relLuminance([30, 41, 59]);
+  const charcoalContrast = (Math.max(primaryL, charcoalL) + 0.05) / (Math.min(primaryL, charcoalL) + 0.05);
+  return whiteContrast >= charcoalContrast ? '#ffffff' : '#1e293b';
+}
 function toHex([r, g, b]: [number, number, number]): string {
   return '#' + [r, g, b].map((c) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0')).join('');
 }
@@ -141,9 +150,9 @@ function applyTheme(config: TenantConfig) {
   root.style.setProperty('--color-primary', config.primaryColor);
   // Variante con contraste AA garantizado para texto chico sobre blanco (white-label).
   root.style.setProperty('--accent-text', accentTextFor(config.primaryColor));
+  root.style.setProperty('--color-on-primary', colorOnPrimaryFor(config.primaryColor));
 
-  // Título de la pestaña del navegador
-  document.title = config.clinicName || 'DentHCE';
+  // El título del navegador se gestiona en AppContent para distinguir landing pública y sesión autenticada.
 }
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
