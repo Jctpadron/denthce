@@ -12,3 +12,16 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+# Salida de build de deploy-aws.ps1 (el script la regenera en cada corrida).
+# Estuvo versionada por error y llego a divergir del backend real.
+aws/scripts/build-backend/
+
+# Registro local de procedencia de deploys (guard de deploy-aws.ps1).
+aws/scripts/deploy-log.txt
+
+# Ruido de trabajo local en la raiz (PDFs de prueba, volcados de logs).
+# Acotado a la raiz: docs/ e img/ pueden versionar PDFs legitimos.
+/*.pdf
+/*_logs*.txt
+/temp_logs.txt
