@@ -208,4 +208,91 @@ describe('ClinicaFinanzasService', () => {
 
     expect(pagoRepo.save).not.toHaveBeenCalled();
   });
+
+  describe('sobrepago', () => {
+    const presupuestoId = '6b1f0c3e-9a4d-4f52-8c11-77b0d9e4a210';
+
+    /** Presupuesto de $10.000 con `yaPagado` ya cobrado en pagos vigentes. */
+    const armarPresupuesto = (yaPagado: number) => {
+      patientRepo.exists.mockResolvedValue(true);
+      presupuestoRepo.findOne.mockResolvedValue({
+        id: presupuestoId,
+        tenantId,
+        patientId,
+        total: '10000.00',
+        estado: 'aceptado',
+      } as any);
+      pagoRepo.find.mockResolvedValue(
+        yaPagado > 0 ? ([{ monto: String(yaPagado.toFixed(2)) }] as any) : ([] as any),
+      );
+    };
+
+    const pagar = (monto: number) =>
+      service.registrarPago(
+        tenantId,
+        { patientId, presupuestoId, monto, metodoPago: 'efectivo' },
+        'doctor_julio',
+      );
+
+    it('rechaza un pago mayor al total cuando no hay pagos previos', async () => {
+      armarPresupuesto(0);
+
+      await expect(pagar(1_000_000)).rejects.toThrow(BadRequestException);
+      expect(pagoRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un pago que excede el saldo pendiente tras un pago parcial', async () => {
+      armarPresupuesto(6000); // saldo pendiente: 4000
+
+      await expect(pagar(4000.01)).rejects.toThrow(BadRequestException);
+      expect(pagoRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('informa el saldo real en el mensaje de error', async () => {
+      armarPresupuesto(6000);
+
+      await expect(pagar(9999)).rejects.toThrow(/4000\.00/);
+    });
+
+    it('acepta el pago que salda exactamente el saldo pendiente', async () => {
+      armarPresupuesto(6000);
+      pagoRepo.create.mockImplementation((d: any) => d);
+      pagoRepo.save.mockImplementation(async (d: any) => d);
+
+      await pagar(4000);
+
+      expect(pagoRepo.save).toHaveBeenCalled();
+    });
+
+    it('no cuenta los pagos anulados como cobrados', async () => {
+      // El repo ya filtra anuladoAt IS NULL: si todo fue anulado devuelve [],
+      // y el saldo vuelve a ser el total. Cobrar 10.000 debe poder hacerse.
+      armarPresupuesto(0);
+      pagoRepo.create.mockImplementation((d: any) => d);
+      pagoRepo.save.mockImplementation(async (d: any) => d);
+
+      await pagar(10000);
+
+      expect(pagoRepo.save).toHaveBeenCalled();
+      expect(pagoRepo.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ tenantId, presupuestoId }),
+        }),
+      );
+    });
+
+    it('no aplica el tope a un pago directo sin presupuesto', async () => {
+      patientRepo.exists.mockResolvedValue(true);
+      pagoRepo.create.mockImplementation((d: any) => d);
+      pagoRepo.save.mockImplementation(async (d: any) => d);
+
+      await service.registrarPago(
+        tenantId,
+        { patientId, monto: 999_999, metodoPago: 'efectivo' },
+        'doctor_julio',
+      );
+
+      expect(pagoRepo.save).toHaveBeenCalled();
+    });
+  });
 });
