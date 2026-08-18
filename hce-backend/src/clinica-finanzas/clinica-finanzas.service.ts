@@ -88,6 +88,15 @@ const ESTADOS_VALIDOS: Record<string, string[]> = {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/**
+ * Estados que DEVENGAN deuda. Definicion unica para todo el modulo.
+ * - `borrador`  : nunca se presento al paciente, no es dinero exigible.
+ * - `cancelado` : quedo sin efecto.
+ * - `presentado`: presentado pero no aceptado; todavia no es un compromiso.
+ * - `pagado`    : se incluye porque su saldo es 0 y mantiene coherentes los totales.
+ */
+const ESTADOS_DEVENGAN_DEUDA = ['aceptado', 'en_curso', 'vencido', 'pagado'];
+
 @Injectable()
 export class ClinicaFinanzasService {
   private readonly logger = new Logger(ClinicaFinanzasService.name);
@@ -450,13 +459,16 @@ export class ClinicaFinanzasService {
     const gastosMes = await this.gastoRepo.find({ where: { tenantId, fechaGasto: Between(inicioMes, new Date()) } });
     const gastosTotal = gastosMes.reduce((s, g) => s + Number(g.monto), 0);
 
-    // Deuda total
+    // Deuda total — misma definicion que la cuenta corriente del paciente
+    // (ESTADOS_DEVENGAN_DEUDA + clamp por presupuesto), para que las dos
+    // pantallas no puedan mostrar numeros distintos sobre los mismos datos.
+    // Incluye 'vencido': es deuda, y ademas la que mas importa.
     const presupuestos = await this.presupuestoRepo.find({
-      where: { tenantId, estado: In(['aceptado', 'en_curso']) },
+      where: { tenantId, estado: In(ESTADOS_DEVENGAN_DEUDA) },
     });
     const presupuestoIds = presupuestos.map((p) => p.id);
     const pagosVinculados = presupuestoIds.length > 0
-      ? await this.pagoRepo.find({ where: { presupuestoId: In(presupuestoIds), anuladoAt: IsNull() } })
+      ? await this.pagoRepo.find({ where: { tenantId, presupuestoId: In(presupuestoIds), anuladoAt: IsNull() } })
       : [];
     const pagoPorPresupuesto: Record<string, number> = {};
     for (const p of pagosVinculados) {
@@ -464,10 +476,21 @@ export class ClinicaFinanzasService {
         pagoPorPresupuesto[p.presupuestoId] = (pagoPorPresupuesto[p.presupuestoId] || 0) + Number(p.monto);
       }
     }
-    const deudaTotal = presupuestos.reduce((s, p) => s + Math.max(0, Number(p.total) - (pagoPorPresupuesto[p.id] || 0)), 0);
+    const deudaTotal = presupuestos.reduce(
+      (s, p) => s + this.saldoDePresupuesto(Number(p.total), pagoPorPresupuesto[p.id] || 0).saldo,
+      0,
+    );
 
-    // Pacientes morosos (presupuestos vencidos)
-    const vencidos = await this.presupuestoRepo.count({ where: { tenantId, estado: 'vencido' } });
+    // Pacientes morosos: PACIENTES distintos con al menos un presupuesto vencido.
+    // Antes contaba presupuestos, asi que un paciente con 3 vencidos figuraba
+    // como 3 morosos.
+    const morosos = await this.presupuestoRepo
+      .createQueryBuilder('p')
+      .select('COUNT(DISTINCT p.patient_id)', 'total')
+      .where('p.tenant_id = :tenantId', { tenantId })
+      .andWhere('p.estado = :estado', { estado: 'vencido' })
+      .getRawOne<{ total: string }>();
+    const vencidos = Number(morosos?.total ?? 0);
 
     return {
       cobradoHoy,
@@ -490,21 +513,36 @@ export class ClinicaFinanzasService {
       order: { createdAt: 'DESC' },
     });
 
+    // Los totales recorren TODO el historial, porque acompañan a la lista que se
+    // muestra. La deuda, en cambio, solo suma los estados que devengan y se
+    // clampea por presupuesto: por eso `deudaActual` NO es totalPresupuestado -
+    // totalPagado, y no debe calcularse asi.
     let totalPresupuestado = 0;
     let totalPagado = 0;
+    let deudaActual = 0;
+    let excedentePagado = 0;
 
     const presupuestosDetalle = presupuestos.map((p) => {
       // Los pagos vienen por relación → se excluyen los anulados en memoria (no por where).
       const pagosPresupuesto = (p.pagos || []).filter((pg) => !pg.anuladoAt).reduce((s, pg) => s + Number(pg.monto), 0);
-      totalPresupuestado += Number(p.total);
+      const total = Number(p.total);
+      const { saldo, excedente } = this.saldoDePresupuesto(total, pagosPresupuesto);
+
+      totalPresupuestado += total;
       totalPagado += pagosPresupuesto;
+      if (ESTADOS_DEVENGAN_DEUDA.includes(p.estado)) {
+        deudaActual += saldo;
+        excedentePagado += excedente;
+      }
+
       return {
         id: p.id,
         numero: p.numero,
         fecha: p.fechaEmision,
-        total: Number(p.total),
+        total,
         pagado: pagosPresupuesto,
-        saldo: Math.max(0, Number(p.total) - pagosPresupuesto),
+        saldo,
+        excedente,
         estado: p.estado,
       };
     });
@@ -513,7 +551,10 @@ export class ClinicaFinanzasService {
       patientId,
       totalPresupuestado,
       totalPagado,
-      deudaActual: totalPresupuestado - totalPagado,
+      deudaActual,
+      // Dinero cobrado por encima del total de sus presupuestos. Deberia ser 0;
+      // si no lo es, hay un sobrepago historico que la clinica debe revisar.
+      excedentePagado,
       presupuestos: presupuestosDetalle,
     };
   }
@@ -616,6 +657,23 @@ export class ClinicaFinanzasService {
       presupuesto.estado = nuevoEstado;
       await this.presupuestoRepo.save(presupuesto);
     }
+  }
+
+  /**
+   * Definicion canonica del saldo de UN presupuesto. Unico lugar donde se decide
+   * que es deuda y que es dinero cobrado de mas.
+   *
+   * La deuda nunca puede ser negativa: si se cobro de mas, ese excedente NO debe
+   * restar de la deuda de otros presupuestos (haria que un moroso figure al dia).
+   * Se devuelve aparte como `excedente` para que quede VISIBLE en vez de oculto:
+   * un excedente > 0 es una anomalia que la clinica tiene que poder ver.
+   */
+  private saldoDePresupuesto(total: number, pagado: number): { saldo: number; excedente: number } {
+    const diferencia = total - pagado;
+    return {
+      saldo: Math.max(0, diferencia),
+      excedente: Math.max(0, -diferencia),
+    };
   }
 
   /**
