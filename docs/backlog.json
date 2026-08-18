@@ -1621,5 +1621,473 @@
         ]
       }
     ]
+  },
+  {
+    "id": "REQ-011-AUD-1",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.1: Punto cero del repositorio (PR #3): produccion se compilaba desde archivos SIN commitear, no era reconstruible ni reversible desde git. 163 pendientes -> 0, 7 ramas muertas eliminadas, copia fantasma del backend (115 archivos) y 13 MB de evidencia clinica sacados de git. Respaldo: rama snapshot/pre-limpieza-2026-08-17.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "orchestrator",
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-2",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.2: Guard de trazabilidad en deploy-aws.ps1 (PR #4): bloquea empaquetar o desplegar desde un arbol sucio, -RequireTag y log de procedencia.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-3",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.3: Tags de produccion por componente. Eliminado el desfasaje frontend 03/08 vs backend 30/07.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-4",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.4: CI verde (PR #6): primera corrida verde desde 2026-06-18. test-backend ya no depende de lint; los 172 tests no se ejecutaron en GitHub durante dos meses. Baseline de lint congelado con trinquete --max-warnings; prettier resuelto de raiz (117 archivos).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "devops",
+      "qa"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-5",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.5: Validacion de pagos (NaN, fecha invalida, fecha futura) + rechazo de sobrepago (PR #5). Desplegado en prod-backend-20260817.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "qa"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-6",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.6: Definicion canonica de deuda: clamp, filtro ESTADOS_DEVENGAN_DEUDA, vencido en dashboard, morosos por COUNT(DISTINCT paciente). Bug reproducido contra prod (deudaActual -188 -> 0). Desplegado en prod-backend-20260818.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "qa"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-7",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.7: Usuario IAM denthce-deploy de minimo privilegio (PR #7, #8). Antes: cero usuarios IAM y dos claves root activas. Deny explicito sobre evidencia clinica, IAM y RDS, verificado.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "security",
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-8",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.8: CRITICO: /uploads sirve ePHI sin autenticacion (radiografias y firma del odontologo con nombre predecible). Migrar a EvidenceStorageService. Orden obligatorio: firma+adjuntos de paciente -> separar /uploads/logos (publico por diseno) -> documentos odontologicos con lectura dual -> quitar express.static.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "architect"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-9",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.9: CRITICO: rotar secretos. Clave RDS de produccion en 8 archivos de testing/scripts, admin de Keycloak y client_secret en keycloak-admin.service.ts. Secuencia de 4 pasos: env con fallback -> deploy -> setear variable -> rotar -> quitar fallback. Complementa GOV.6.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-10",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.10: CRITICO: contrasenas semilla vivas en produccion (patron {username}_pass_2026, temporary:false) + ROPC habilitado + realm sin MFA, sin password policy y sin anti-fuerza bruta.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-11",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.11: CRITICO: hceWebhookSecret devuelto a cualquier rol autenticado por GET /api/tenant/config. Falta select:false + DTO de proyeccion.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-12",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.12: CRITICO: DTOs como interface, el ValidationPipe no valida nada. Habilita mass-assignment cross-tenant. Mitigacion inmediata sin riesgo: invertir el spread create({...dto, tenantId}). Migracion a clases con class-validator endpoint por endpoint, nunca global.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "security"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-13",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.13: RolesGuard fail-open (sin @Roles permite) y /api/sisa/verificar sin @Roles, habilitando enumeracion del padron RENAPER. Pasar a deny-by-default con modo sombra previo.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-14",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.14: deleteFile ignora el tenant: un medico de cualquier clinica borra archivos de otra. Soft-delete + auditoria.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "architect"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-15",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.15: Deuda estructural: sin paginacion en ningun service, sin transacciones en operaciones multi-tabla, sin migraciones versionadas, tenantId de doble semantica con AUTH_STRICT=false, sin auditoria de lectura de ePHI, rate limit por IP compartido entre tenants.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "architect",
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-16",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.16: 13 bugs reales de React congelados como warn (3 render impuro, 8 componentes que se remontan y pierden el foco, 2 mutacion). Listados con archivo y linea en hce-frontend/eslint.config.js. Corregir y volver a error.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "ux",
+      "revisor"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-17",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.17: Desactivar las 2 claves root de AWS. Requiere inventario humano (IAM -> Last used). Orden seguro en aws/iam/README.md.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "security",
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-18",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.18: Decisiones de producto que bloquean sus ADR: (a) se vende a clinicas multi-profesional? Hoy Practitioner se sintetiza desde tenant_config, un profesional por clinica cableado en la capa de datos; (b) que pasa con la Ficha Clinica general, hoy inalcanzable desde el menu, lo que deja las alertas de alergia sin datos posibles.",
+    "prioridad": "alta",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-011-AUD-19",
+    "modulo_id": 11,
+    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "descripcion": "AUD.19: Avisar a los tenants del cambio de numeros (deuda negativa -> 0, deudaTotal sube al incluir vencidos, pacientesMorosos baja) y decidir que hacer con el sobrepago historico de $188 en PRES-0001.",
+    "prioridad": "media",
+    "estado": "pendiente",
+    "agentes_asignados": [
+      "product"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-17T23:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Registrada desde la auditoria integral del 2026-08-17.",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
+      }
+    ]
   }
 ]

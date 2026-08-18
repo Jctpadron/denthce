@@ -226,6 +226,36 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
+### Iniciativa transversal: Auditoría integral y remediación (2026-08-17)
+*Auditoría con 5 subagentes (security/revisor/ux/architect/qa) + punto cero del repositorio. **Handoff canónico:** `docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md`. Responsable: Claude. **(Fuera del conteo de los 70.)***
+
+**Hecho el 2026-08-17:**
+
+- [x] **AUD.1:** Punto cero del repositorio (PR #3). Producción se compilaba desde archivos **sin commitear**: no era reconstruible ni reversible desde git. 163 pendientes → 0; 7 ramas muertas eliminadas; copia fantasma del backend (115 archivos) y 13 MB de evidencia clínica sacados de git. Respaldo íntegro: rama `snapshot/pre-limpieza-2026-08-17`. *(Prioridad: Alta)*
+- [x] **AUD.2:** Guard de trazabilidad en `deploy-aws.ps1` (PR #4) — bloquea empaquetar o desplegar desde un árbol sucio; `-RequireTag` y log de procedencia. *(Prioridad: Alta)*
+- [x] **AUD.3:** Tags de producción por componente (`prod-backend-20260730/20260817/20260818`, `prod-frontend-20260803`). Eliminado el desfasaje frontend 03/08 ↔ backend 30/07. *(Prioridad: Alta)*
+- [x] **AUD.4:** **CI verde** (PR #6) — primera corrida verde desde el 2026-06-18. `test-backend` ya no depende de `lint`: los 172 tests **no se ejecutaron en GitHub durante dos meses**. Baseline de lint congelado con trinquete `--max-warnings`; prettier resuelto de raíz (117 archivos). *(Prioridad: Alta)*
+- [x] **AUD.5:** Validación de pagos + rechazo de sobrepago (PR #5) — desplegado en `prod-backend-20260817`. *(Prioridad: Alta)*
+- [x] **AUD.6:** Definición canónica de deuda — clamp, filtro de estados, `vencido` en dashboard, morosos por paciente. Bug reproducido contra prod (`deudaActual: -188` → `0`). Desplegado en `prod-backend-20260818`. *(Prioridad: Alta)*
+- [x] **AUD.7:** Usuario IAM `denthce-deploy` de mínimo privilegio (PR #7, #8). Antes: cero usuarios IAM y dos claves root activas. `Deny` explícito sobre evidencia clínica, IAM y RDS — verificado. *(Prioridad: Alta)*
+
+**PENDIENTE — ningún crítico de seguridad fue corregido:**
+
+- [ ] **AUD.8:** 🔴 **`/uploads` sirve ePHI sin autenticación** (radiografías y firma del odontólogo, nombre predecible). Migrar a `EvidenceStorageService`, que ya existe. Orden obligatorio: firma+adjuntos de paciente (colateral casi nulo, ya rotos en prod) → separar `/uploads/logos/` (público por diseño, si no se rompe el login) → documentos odontológicos con lectura dual → recién ahí quitar `express.static`. *(Prioridad: Alta)*
+- [ ] **AUD.9:** 🔴 **Rotar secretos** — clave RDS de prod en 8 archivos de `testing/scripts/`, admin de Keycloak y `client_secret` en `keycloak-admin.service.ts`. Secuencia de 4 pasos (env con fallback → deploy → setear variable → rotar → quitar fallback): rotar antes rompe el alta de clínicas. Complementa GOV.6. *(Prioridad: Alta)*
+- [ ] **AUD.10:** 🔴 **Contraseñas semilla vivas en producción** (`doctor_julio`/`doctor_pass_2026`, patrón `{username}_pass_2026`, `temporary:false`) + ROPC habilitado + realm sin MFA, sin política de contraseñas y sin anti-fuerza bruta. *(Prioridad: Alta)*
+- [ ] **AUD.11:** 🔴 **`hceWebhookSecret` devuelto a cualquier rol autenticado** por `GET /api/tenant/config` (incluye `paciente` y `laboratorio-operador`). Falta `select: false` + DTO de proyección. *(Prioridad: Alta)*
+- [ ] **AUD.12:** 🔴 **DTOs como `interface` → el `ValidationPipe` no valida nada.** Habilita mass-assignment cross-tenant. Mitigación inmediata sin riesgo: invertir el spread `create({ ...dto, tenantId })`. Migración a clases con `class-validator`: endpoint por endpoint, nunca global (ya rompió endpoints una vez — ver PRES.1). *(Prioridad: Alta)*
+- [ ] **AUD.13:** `RolesGuard` **fail-open** (sin `@Roles` → permite) y `/api/sisa/verificar` sin `@Roles` → enumeración del padrón RENAPER. Pasar a deny-by-default con modo sombra previo. *(Prioridad: Alta)*
+- [ ] **AUD.14:** `deleteFile` ignora el tenant: un `medico` de cualquier clínica borra archivos de otra. Soft-delete + auditoría. *(Prioridad: Alta)*
+- [ ] **AUD.15:** Deuda estructural: sin paginación en ningún service · sin transacciones en operaciones multi-tabla · sin migraciones versionadas · `tenantId` de doble semántica con `AUTH_STRICT=false` · sin auditoría de **lectura** de ePHI · rate limit por IP compartido entre tenants. *(Prioridad: Media)*
+- [ ] **AUD.16:** 13 bugs reales de React congelados como `warn` (3 render impuro, 8 componentes que se remontan y pierden el foco, 2 mutación). Listados con archivo y línea en `hce-frontend/eslint.config.js`. Corregir y volver a `error`. *(Prioridad: Media)*
+- [ ] **AUD.17:** **Desactivar las 2 claves root de AWS.** Requiere inventario humano (IAM → Last used). Orden seguro en `aws/iam/README.md`. *(Prioridad: Alta)*
+- [ ] **AUD.18:** Decisiones de producto que bloquean sus ADR: (a) ¿se vende a clínicas multi-profesional? Hoy `Practitioner` se sintetiza desde `tenant_config` — **un profesional por clínica cableado en la capa de datos**; (b) ¿qué pasa con la Ficha Clínica general, hoy inalcanzable desde el menú, lo que deja las alertas de alergia sin datos posibles? *(Prioridad: Alta)*
+- [ ] **AUD.19:** Avisar a los tenants activos del cambio de números (deuda negativa → 0, `deudaTotal` sube al incluir vencidos, `pacientesMorosos` baja) y decidir qué hacer con el sobrepago histórico de $188 en `PRES-0001`. *(Prioridad: Media)*
+
+---
+
 > 🤝 **Coordinación entre agentes (Claude + Gemini):** la **fuente única de verdad del estado** es este `tablero_control.md` + `docs/backlog.json`. Todo trabajo/propuesta se registra acá con **responsable**. Regla de artefactos: **uno canónico**; los duplicados se marcan **SUPERSEDIDO** apuntando al vigente. Las memorias privadas de cada agente **no** son estado compartido. Editar el tablero **solo si está libre** (no pisar al otro agente).
 
 ---
