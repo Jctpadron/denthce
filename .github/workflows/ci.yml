@@ -34,11 +34,22 @@ jobs:
           cache: 'npm'
           cache-dependency-path: hce-backend/package-lock.json
       - run: npm ci
-      - run: npm run lint
+      # Sin --fix: en CI, `eslint --fix` corrige en un árbol que después se
+      # descarta, así que enmascara la deuda auto-corregible en vez de mostrarla.
+      # --max-warnings congela el baseline: los warnings heredados no rompen,
+      # pero uno nuevo sí. Es el trinquete que impide que la deuda crezca.
+      # Baseline al 2026-08-17: 0 errores, ~1.508 warnings. El techo lleva una
+      # holgura minima porque el conteo se midio en Windows; se ajusta al valor
+      # exacto del runner tras la primera corrida verde.
+      - run: npx eslint "{src,apps,libs,test}/**/*.ts" --max-warnings 1520
 
   test-backend:
     runs-on: ubuntu-latest
-    needs: lint
+    # NO declara `needs: lint` a propósito. Cuando lo hacía, un lint en rojo
+    # dejaba los tests en `skipped`: entre el 2026-06-18 y el 2026-08-17 los
+    # 172 tests del backend no se ejecutaron ni una sola vez en GitHub, y nadie
+    # lo noto porque el PR mostraba "checks failed" sin distinguir por que.
+    # Los tests son la red de seguridad: nunca deben depender del estilo.
     services:
       postgres:
         image: postgres:16-alpine
@@ -72,7 +83,9 @@ jobs:
           cache-dependency-path: hce-backend/package-lock.json
       - run: npm ci
       - run: npm run build
-      - run: npm test -- --passWithNoTests
+      # Sin --passWithNoTests: si la config de jest se rompe o alguien borra los
+      # specs, el job debe fallar, no pasar en verde con cero pruebas.
+      - run: npm test
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -87,5 +100,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path: hce-frontend/package-lock.json
       - run: npm ci
-      - run: npm run lint
+      # Techo exacto del baseline al 2026-08-17: 328 warnings, 0 errores.
+      # Ajustado al valor real, no redondeado: un trinquete con holgura no
+      # impide que la deuda crezca dentro de esa holgura.
+      - run: npx eslint . --max-warnings 328
       - run: npm run build
