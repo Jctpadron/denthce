@@ -6,7 +6,9 @@ import { InsuranceService } from './insurance.service';
 import { InsuranceController } from './insurance.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InsuranceCompanyEntity, PatientCoverageEntity])],
+  imports: [
+    TypeOrmModule.forFeature([InsuranceCompanyEntity, PatientCoverageEntity]),
+  ],
   providers: [InsuranceService],
   controllers: [InsuranceController],
   exports: [InsuranceService],

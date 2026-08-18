@@ -23,7 +23,10 @@ export class HealthController {
       await this.dataSource.query('SELECT 1');
       checks.database = { status: 'ok' };
     } catch (err) {
-      checks.database = { status: 'error', message: 'No se puede conectar a la base de datos' };
+      checks.database = {
+        status: 'error',
+        message: 'No se puede conectar a la base de datos',
+      };
       checks.status = 'degraded';
       this.logger.error('Health check — database error', err);
     }

@@ -38,10 +38,16 @@ export class WebhookService {
   /**
    * Despacha un webhook firmado hacia CliniChat notificando un cambio en un turno.
    */
-  async dispatch(action: 'CREATE' | 'CANCEL' | 'REMINDER', appt: AppointmentEntity, tenantId: string): Promise<void> {
+  async dispatch(
+    action: 'CREATE' | 'CANCEL' | 'REMINDER',
+    appt: AppointmentEntity,
+    tenantId: string,
+  ): Promise<void> {
     try {
       // 1. Obtener configuración del tenant
-      const config = await this.tenantConfigRepository.findOne({ where: { tenantId } });
+      const config = await this.tenantConfigRepository.findOne({
+        where: { tenantId },
+      });
       const secret = config?.hceWebhookSecret;
 
       if (!secret) {
@@ -73,7 +79,9 @@ export class WebhookService {
       let patientName = 'Paciente Desconocido';
 
       if (appt.patientId) {
-        const patient = await this.patientRepository.findOne({ where: { id: appt.patientId } });
+        const patient = await this.patientRepository.findOne({
+          where: { id: appt.patientId },
+        });
         if (patient) {
           patientGender = patient.gender || 'unknown';
           patientName = `${patient.givenName} ${patient.familyName}`.trim();
@@ -110,7 +118,9 @@ export class WebhookService {
         .update(bodyStr)
         .digest('hex');
 
-      this.logger.log(`[Webhook] Despachando evento "${eventStr}" para cita "${appt.id}" a la URL: ${webhookUrl}`);
+      this.logger.log(
+        `[Webhook] Despachando evento "${eventStr}" para cita "${appt.id}" a la URL: ${webhookUrl}`,
+      );
 
       // 8. Enviar la llamada POST usando fetch nativo de Node.js (con timeout)
       const controller = new AbortController();
@@ -134,11 +144,15 @@ export class WebhookService {
           `[Webhook] Error al enviar webhook a CliniChat. Status: ${response.status}. Detalle: ${errorText}`,
         );
       } else {
-        this.logger.log(`[Webhook] Webhook de cita "${appt.id}" enviado con éxito a CliniChat.`);
+        this.logger.log(
+          `[Webhook] Webhook de cita "${appt.id}" enviado con éxito a CliniChat.`,
+        );
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        this.logger.error(`[Webhook] Timeout al enviar webhook de cita para el tenant "${tenantId}".`);
+        this.logger.error(
+          `[Webhook] Timeout al enviar webhook de cita para el tenant "${tenantId}".`,
+        );
       } else {
         this.logger.error(
           `[Webhook] Error inesperado al despachar webhook de cita para el tenant "${tenantId}": ${error.message}`,

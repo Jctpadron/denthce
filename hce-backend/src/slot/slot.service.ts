@@ -53,7 +53,9 @@ export class SlotService {
     endDateStr: string,
     tenantId: string,
   ): Promise<any> {
-    const config = await this.tenantConfigRepository.findOne({ where: { tenantId } });
+    const config = await this.tenantConfigRepository.findOne({
+      where: { tenantId },
+    });
     const schedule = config?.scheduleJson || {
       lunes: '09:00-18:00',
       martes: '09:00-18:00',
@@ -106,7 +108,9 @@ export class SlotService {
           // Verificar si este bloque horario choca con alguna cita activa
           const isOccupied = activeAppointments.some((appt) => {
             const apptStart = new Date(appt.startDate);
-            const apptEnd = appt.endDate ? new Date(appt.endDate) : new Date(apptStart.getTime() + 30 * 60000);
+            const apptEnd = appt.endDate
+              ? new Date(appt.endDate)
+              : new Date(apptStart.getTime() + 30 * 60000);
             // Si hay solapamiento de intervalos
             return slotStart < apptEnd && slotEnd > apptStart;
           });
@@ -151,7 +155,9 @@ export class SlotService {
    * Endpoint de Discovery: Devolvemos el único profesional de la clínica
    */
   async findPractitioner(tenantId: string): Promise<any> {
-    const config = await this.tenantConfigRepository.findOne({ where: { tenantId } });
+    const config = await this.tenantConfigRepository.findOne({
+      where: { tenantId },
+    });
     const doctorName = config?.doctorName || 'Médico Principal';
     const parts = doctorName.trim().split(/\s+/);
     const family = parts[parts.length - 1] || 'Consultorio';
@@ -193,7 +199,9 @@ export class SlotService {
    * Endpoint de Discovery: Devolvemos la especialidad de la clínica
    */
   async findHealthcareService(tenantId: string): Promise<any> {
-    const config = await this.tenantConfigRepository.findOne({ where: { tenantId } });
+    const config = await this.tenantConfigRepository.findOne({
+      where: { tenantId },
+    });
     const specialtyName = config?.specialty || 'Odontología General';
     const specialtyId = deterministicUUID(tenantId + '-specialty');
 

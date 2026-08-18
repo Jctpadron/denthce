@@ -20,7 +20,12 @@ import { TenantConfigService } from './tenant-config.service';
 import { ModulesService } from '../platform/modules.service';
 import * as fs from 'fs';
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'];
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/svg+xml',
+  'image/webp',
+];
 const MAX_LOGO_SIZE = 1 * 1024 * 1024; // 1 MB
 
 @Controller('api/tenant')
@@ -37,11 +42,21 @@ export class TenantConfigController {
    * (necesario para cargar el branding al iniciar la app)
    */
   @Get('config')
-  @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'paciente', 'laboratorio-operador', 'laboratorio-admin')
+  @Roles(
+    'medico',
+    'enfermero',
+    'recepcionista',
+    'administrador',
+    'paciente',
+    'laboratorio-operador',
+    'laboratorio-admin',
+  )
   async getConfig(@Request() req: any) {
     const config = await this.tenantService.getConfig(req.user.tenantId);
     // Módulos contratados y vigentes del tenant → el front muestra/oculta features y upsell.
-    const enabledModules = await this.modulesService.enabledModules(req.user.tenantId);
+    const enabledModules = await this.modulesService.enabledModules(
+      req.user.tenantId,
+    );
     return { ...config, enabledModules };
   }
 
@@ -54,14 +69,26 @@ export class TenantConfigController {
   async updateConfig(@Body() body: any, @Request() req: any) {
     // Sanitizar campos permitidos (evitar inyección de campos no permitidos)
     const allowed = [
-      'clinicName', 'specialty', 'primaryColor', 'darkMode',
-      'doctorName', 'doctorLicense', 'doctorTitle',
-      'address', 'city', 'province', 'postalCode',
-      'phone', 'email', 'cuit', 'healthInsurance',
-      'scheduleJson', 'hceWebhookSecret',
+      'clinicName',
+      'specialty',
+      'primaryColor',
+      'darkMode',
+      'doctorName',
+      'doctorLicense',
+      'doctorTitle',
+      'address',
+      'city',
+      'province',
+      'postalCode',
+      'phone',
+      'email',
+      'cuit',
+      'healthInsurance',
+      'scheduleJson',
+      'hceWebhookSecret',
     ];
     const dto: Record<string, any> = {};
-    allowed.forEach(key => {
+    allowed.forEach((key) => {
       if (body[key] !== undefined) dto[key] = body[key];
     });
 
@@ -94,7 +121,12 @@ export class TenantConfigController {
         if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('Solo se permiten imágenes PNG, SVG, JPG o WebP.'), false);
+          cb(
+            new BadRequestException(
+              'Solo se permiten imágenes PNG, SVG, JPG o WebP.',
+            ),
+            false,
+          );
         }
       },
     }),
@@ -133,7 +165,12 @@ export class TenantConfigController {
         if (['image/png', 'image/jpeg', 'image/webp'].includes(file.mimetype)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('La firma debe ser una imagen PNG, JPG o WebP.'), false);
+          cb(
+            new BadRequestException(
+              'La firma debe ser una imagen PNG, JPG o WebP.',
+            ),
+            false,
+          );
         }
       },
     }),

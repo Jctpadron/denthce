@@ -68,19 +68,36 @@ describe('ClinicaFinanzasService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ClinicaFinanzasService,
-        { provide: getRepositoryToken(ClinicalPrecio), useValue: precioRepository },
-        { provide: getRepositoryToken(ClinicalPresupuesto), useValue: presupuestoRepository },
-        { provide: getRepositoryToken(ClinicalPresupuestoItem), useValue: presupuestoItemRepository },
+        {
+          provide: getRepositoryToken(ClinicalPrecio),
+          useValue: precioRepository,
+        },
+        {
+          provide: getRepositoryToken(ClinicalPresupuesto),
+          useValue: presupuestoRepository,
+        },
+        {
+          provide: getRepositoryToken(ClinicalPresupuestoItem),
+          useValue: presupuestoItemRepository,
+        },
         { provide: getRepositoryToken(ClinicalPago), useValue: pagoRepository },
-        { provide: getRepositoryToken(ClinicalGasto), useValue: gastoRepository },
-        { provide: getRepositoryToken(PatientEntity), useValue: patientRepository },
+        {
+          provide: getRepositoryToken(ClinicalGasto),
+          useValue: gastoRepository,
+        },
+        {
+          provide: getRepositoryToken(PatientEntity),
+          useValue: patientRepository,
+        },
       ],
     }).compile();
 
     service = module.get(ClinicaFinanzasService);
     precioRepo = module.get(getRepositoryToken(ClinicalPrecio));
     presupuestoRepo = module.get(getRepositoryToken(ClinicalPresupuesto));
-    presupuestoItemRepo = module.get(getRepositoryToken(ClinicalPresupuestoItem));
+    presupuestoItemRepo = module.get(
+      getRepositoryToken(ClinicalPresupuestoItem),
+    );
     pagoRepo = module.get(getRepositoryToken(ClinicalPago));
     patientRepo = module.get(getRepositoryToken(PatientEntity));
     gastoRepo = module.get(getRepositoryToken(ClinicalGasto));
@@ -94,7 +111,13 @@ describe('ClinicaFinanzasService', () => {
         tenantId,
         {
           patientId: 'paciente-seleccionado-en-ui',
-          items: [{ snomedCode: '123', snomedDisplay: 'Consulta', precioUnitario: 1000 }],
+          items: [
+            {
+              snomedCode: '123',
+              snomedDisplay: 'Consulta',
+              precioUnitario: 1000,
+            },
+          ],
         },
         'doctor_julio',
       ),
@@ -112,13 +135,21 @@ describe('ClinicaFinanzasService', () => {
         tenantId,
         {
           patientId,
-          items: [{ snomedCode: '123', snomedDisplay: 'Consulta', precioUnitario: 1000 }],
+          items: [
+            {
+              snomedCode: '123',
+              snomedDisplay: 'Consulta',
+              precioUnitario: 1000,
+            },
+          ],
         },
         'doctor_julio',
       ),
     ).rejects.toThrow(NotFoundException);
 
-    expect(patientRepo.exists).toHaveBeenCalledWith({ where: { id: patientId, tenantId } });
+    expect(patientRepo.exists).toHaveBeenCalledWith({
+      where: { id: patientId, tenantId },
+    });
     expect(presupuestoRepo.save).not.toHaveBeenCalled();
   });
 
@@ -162,7 +193,9 @@ describe('ClinicaFinanzasService', () => {
       ),
     ).rejects.toThrow(NotFoundException);
 
-    expect(patientRepo.exists).toHaveBeenCalledWith({ where: { id: patientId, tenantId } });
+    expect(patientRepo.exists).toHaveBeenCalledWith({
+      where: { id: patientId, tenantId },
+    });
     expect(pagoRepo.save).not.toHaveBeenCalled();
   });
 
@@ -231,7 +264,9 @@ describe('ClinicaFinanzasService', () => {
         estado: 'aceptado',
       } as any);
       pagoRepo.find.mockResolvedValue(
-        yaPagado > 0 ? ([{ monto: String(yaPagado.toFixed(2)) }] as any) : ([] as any),
+        yaPagado > 0
+          ? ([{ monto: String(yaPagado.toFixed(2)) }] as any)
+          : ([] as any),
       );
     };
 
@@ -311,13 +346,18 @@ describe('ClinicaFinanzasService', () => {
       estado,
       total: String(total.toFixed(2)),
       fechaEmision: new Date('2026-07-30'),
-      pagos: pagado > 0 ? [{ monto: String(pagado.toFixed(2)), anuladoAt: null }] : [],
+      pagos:
+        pagado > 0
+          ? [{ monto: String(pagado.toFixed(2)), anuladoAt: null }]
+          : [],
     });
 
     it('deudaActual nunca es negativa aunque haya sobrepago', async () => {
       // Caso real de produccion: PRES-0001, total 45112, cobrado 45300.
       // Antes devolvia deudaActual = -188.
-      presupuestoRepo.find.mockResolvedValue([pres('pagado', 45112, 45300)] as any);
+      presupuestoRepo.find.mockResolvedValue([
+        pres('pagado', 45112, 45300),
+      ] as any);
 
       const cc = await service.getCuentaCorriente(tenantId, patientId);
 
@@ -351,7 +391,9 @@ describe('ClinicaFinanzasService', () => {
     });
 
     it('cuenta como deuda los presupuestos vencidos', async () => {
-      presupuestoRepo.find.mockResolvedValue([pres('vencido', 5000, 1000)] as any);
+      presupuestoRepo.find.mockResolvedValue([
+        pres('vencido', 5000, 1000),
+      ] as any);
 
       const cc = await service.getCuentaCorriente(tenantId, patientId);
 
@@ -370,7 +412,8 @@ describe('ClinicaFinanzasService', () => {
       expect(dash.deudaTotal).toBe(5000);
       // El filtro de estados debe incluir 'vencido': es un FindOperator In(),
       // asi que se inspecciona su valor interno.
-      const estadosPedidos = (presupuestoRepo.find.mock.calls[0][0] as any).where.estado;
+      const estadosPedidos = (presupuestoRepo.find.mock.calls[0][0] as any)
+        .where.estado;
       expect(estadosPedidos.value).toContain('vencido');
     });
 

@@ -28,9 +28,38 @@ import { OdontologyPdfService } from './odontology-pdf.service';
  * al tenant, y AppointmentEntity para derivar "última visita" y marcar el turno fulfilled.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([OdontologyResourceEntity, OdontologyEncounterEntity, OdontologyEncounterAuditEntity, OdontologyPatientSignatureEntity, ClinicalEvidenceAuditEntity, ClinicalAttachmentEntity, ClinicalPresupuesto, PatientEntity, AppointmentEntity])],
-  providers: [OdontologyService, OdontologyEncounterService, OdontologyEncounterAuditService, OdontologyPatientSignatureService, ClinicalAttachmentService, EvidenceStorageService, OdontologyPdfService],
-  controllers: [OdontologyController, OdontologyEncounterController, OdontologyPatientSignatureController, ClinicalAttachmentController],
-  exports: [OdontologyService, OdontologyEncounterService, OdontologyPdfService],
+  imports: [
+    TypeOrmModule.forFeature([
+      OdontologyResourceEntity,
+      OdontologyEncounterEntity,
+      OdontologyEncounterAuditEntity,
+      OdontologyPatientSignatureEntity,
+      ClinicalEvidenceAuditEntity,
+      ClinicalAttachmentEntity,
+      ClinicalPresupuesto,
+      PatientEntity,
+      AppointmentEntity,
+    ]),
+  ],
+  providers: [
+    OdontologyService,
+    OdontologyEncounterService,
+    OdontologyEncounterAuditService,
+    OdontologyPatientSignatureService,
+    ClinicalAttachmentService,
+    EvidenceStorageService,
+    OdontologyPdfService,
+  ],
+  controllers: [
+    OdontologyController,
+    OdontologyEncounterController,
+    OdontologyPatientSignatureController,
+    ClinicalAttachmentController,
+  ],
+  exports: [
+    OdontologyService,
+    OdontologyEncounterService,
+    OdontologyPdfService,
+  ],
 })
 export class OdontologyModule {}

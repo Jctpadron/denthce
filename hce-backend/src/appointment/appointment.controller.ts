@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request, Headers, ConflictException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Request,
+  Headers,
+  ConflictException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AppointmentService } from './appointment.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -11,10 +23,17 @@ export class AppointmentController {
 
   /** Extrae el contexto de usuario del token JWT para la auditoría */
   private getUserCtx(req: any) {
-    const isServiceAccount = req.user?.roles?.includes('servicio-turnos') || req.user?.isServiceAccount || false;
+    const isServiceAccount =
+      req.user?.roles?.includes('servicio-turnos') ||
+      req.user?.isServiceAccount ||
+      false;
     return {
       actorId: req.user?.userId || req.user?.sub || 'unknown',
-      actorName: req.user?.preferred_username || req.user?.name || req.user?.username || (isServiceAccount ? 'Servicio Turnos' : 'Desconocido'),
+      actorName:
+        req.user?.preferred_username ||
+        req.user?.name ||
+        req.user?.username ||
+        (isServiceAccount ? 'Servicio Turnos' : 'Desconocido'),
       isServiceAccount,
     };
   }
@@ -31,7 +50,11 @@ export class AppointmentController {
       ...fhirAppointment,
       idempotencyKey: idempotencyKey || fhirAppointment.idempotencyKey,
     };
-    return this.appointmentService.create(dto, req.user.tenantId, this.getUserCtx(req));
+    return this.appointmentService.create(
+      dto,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 
   @Get()
@@ -87,6 +110,11 @@ export class AppointmentController {
     @Request() req: any,
   ) {
     const reason = body?.cancellationReason?.text || body?.comment || undefined;
-    return this.appointmentService.cancel(id, reason, req.user.tenantId, this.getUserCtx(req));
+    return this.appointmentService.cancel(
+      id,
+      reason,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 }

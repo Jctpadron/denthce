@@ -27,7 +27,9 @@ describe('Health smoke (e2e)', () => {
   });
 
   it('/health (GET) responde OK y verifica base de datos', async () => {
-    const response = await request(app.getHttpServer()).get('/health').expect(200);
+    const response = await request(app.getHttpServer())
+      .get('/health')
+      .expect(200);
 
     expect(response.body.statusCode).toBe(200);
     expect(response.body.status).toBe('ok');

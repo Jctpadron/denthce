@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 /**
  * EncounterEntity — Tarea 3.1
@@ -35,10 +41,18 @@ export class EncounterEntity {
   @Column({ name: 'class_code', default: 'AMB' })
   classCode: string;
 
-  @Column({ name: 'start_date', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'start_date',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   startDate: Date;
 
-  @Column({ name: 'end_date', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'end_date',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   endDate: Date;
 
   /** Recurso FHIR Encounter R4 completo en formato JSONB */
@@ -50,7 +64,11 @@ export class EncounterEntity {
   signedBy: string;
 
   /** Fecha y hora de la firma */
-  @Column({ name: 'signed_at', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'signed_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   signedAt: Date;
 
   /** Hash SHA-256 del contenido SOAP al momento de la firma (integridad) */

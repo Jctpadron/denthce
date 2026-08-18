@@ -1,6 +1,17 @@
 import {
-  Controller, Get, Post, Delete, Param, Query, Body, UseGuards, Request, Res,
-  UploadedFile, UseInterceptors, BadRequestException,
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Query,
+  Body,
+  UseGuards,
+  Request,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -41,18 +52,32 @@ export class ClinicalAttachmentController {
       limits: { fileSize: MAX_BYTES },
       fileFilter: (_req, file, cb) => {
         if (ALLOWED.includes(file.mimetype)) cb(null, true);
-        else cb(new BadRequestException(`Tipo no permitido: ${file.mimetype}. Se aceptan JPG, PNG y PDF.`), false);
+        else
+          cb(
+            new BadRequestException(
+              `Tipo no permitido: ${file.mimetype}. Se aceptan JPG, PNG y PDF.`,
+            ),
+            false,
+          );
       },
     }),
   )
   async upload(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: { ownerType: AttachmentOwnerType; ownerId: string; kind?: string },
+    @Body()
+    body: { ownerType: AttachmentOwnerType; ownerId: string; kind?: string },
     @Request() req: any,
   ) {
     if (!file) throw new BadRequestException('No se recibió ningún archivo.');
-    if (!body?.ownerType || !body?.ownerId) throw new BadRequestException('Falta ownerType/ownerId.');
-    return this.service.upload(this.ctx(req), body.ownerType, body.ownerId, file, { kind: body.kind });
+    if (!body?.ownerType || !body?.ownerId)
+      throw new BadRequestException('Falta ownerType/ownerId.');
+    return this.service.upload(
+      this.ctx(req),
+      body.ownerType,
+      body.ownerId,
+      file,
+      { kind: body.kind },
+    );
   }
 
   @Get('attachments')
@@ -62,7 +87,8 @@ export class ClinicalAttachmentController {
     @Query('ownerId') ownerId: string,
     @Request() req: any,
   ) {
-    if (!ownerType || !ownerId) throw new BadRequestException('Falta ownerType/ownerId.');
+    if (!ownerType || !ownerId)
+      throw new BadRequestException('Falta ownerType/ownerId.');
     return this.service.list(req.user.tenantId, ownerType, ownerId);
   }
 
@@ -79,14 +105,24 @@ export class ClinicalAttachmentController {
 
   @Get('attachment/:id/download')
   @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
-  async download(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
-    const { stream, mimeType, filename } = await this.service.download(this.ctx(req), id);
+  async download(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Res() res: Response,
+  ) {
+    const { stream, mimeType, filename } = await this.service.download(
+      this.ctx(req),
+      id,
+    );
     // PDF/documentos: attachment (evita ejecución de JS embebido); imágenes: inline con tipo fijado por servidor.
     const disposition = mimeType.startsWith('image/') ? 'inline' : 'attachment';
     res.setHeader('Content-Type', mimeType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');
-    res.setHeader('Content-Disposition', `${disposition}; filename="${encodeURIComponent(filename)}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `${disposition}; filename="${encodeURIComponent(filename)}"`,
+    );
     stream.pipe(res);
   }
 

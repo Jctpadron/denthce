@@ -33,8 +33,14 @@ describe('InsuranceService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InsuranceService,
-        { provide: getRepositoryToken(InsuranceCompanyEntity), useValue: mockCompanyRepo },
-        { provide: getRepositoryToken(PatientCoverageEntity), useValue: mockCoverageRepo },
+        {
+          provide: getRepositoryToken(InsuranceCompanyEntity),
+          useValue: mockCompanyRepo,
+        },
+        {
+          provide: getRepositoryToken(PatientCoverageEntity),
+          useValue: mockCoverageRepo,
+        },
       ],
     }).compile();
 
@@ -64,7 +70,11 @@ describe('InsuranceService', () => {
 
   describe('findOneCompany', () => {
     it('debería retornar la obra social si existe', async () => {
-      const mockCompany = { id: '1', nombre: 'ISJ', activa: true } as InsuranceCompanyEntity;
+      const mockCompany = {
+        id: '1',
+        nombre: 'ISJ',
+        activa: true,
+      } as InsuranceCompanyEntity;
       companyRepo.findOne.mockResolvedValue(mockCompany);
 
       const result = await service.findOneCompany('1');
@@ -75,7 +85,9 @@ describe('InsuranceService', () => {
 
     it('debería lanzar NotFoundException si no existe', async () => {
       companyRepo.findOne.mockResolvedValue(null);
-      await expect(service.findOneCompany('non-existent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOneCompany('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -99,7 +111,9 @@ describe('InsuranceService', () => {
   describe('createCoverage', () => {
     it('debería crear cobertura y desmarcar otras coberturas como principal si la nueva es principal', async () => {
       coverageRepo.update.mockResolvedValue({} as any);
-      coverageRepo.save.mockImplementation((e: any) => Promise.resolve({ id: 'new-cov-id', ...e }));
+      coverageRepo.save.mockImplementation((e: any) =>
+        Promise.resolve({ id: 'new-cov-id', ...e }),
+      );
 
       const data = {
         insuranceCompanyId: 'company-1',
@@ -144,7 +158,12 @@ describe('InsuranceService', () => {
         principal: true,
       };
 
-      const result = await service.updateCoverage('c1', PATIENT_1, TENANT_A, updateData);
+      const result = await service.updateCoverage(
+        'c1',
+        PATIENT_1,
+        TENANT_A,
+        updateData,
+      );
 
       expect(coverageRepo.findOne).toHaveBeenCalledWith({
         where: { id: 'c1', patientId: PATIENT_1, tenantId: TENANT_A },
@@ -187,9 +206,9 @@ describe('InsuranceService', () => {
 
     it('debería lanzar NotFoundException al eliminar si no existe o no pertenece al tenant/patient', async () => {
       coverageRepo.findOne.mockResolvedValue(null);
-      await expect(service.deleteCoverage('c1', PATIENT_1, TENANT_A)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.deleteCoverage('c1', PATIENT_1, TENANT_A),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

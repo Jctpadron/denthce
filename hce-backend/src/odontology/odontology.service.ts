@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { join } from 'path';
@@ -54,11 +59,18 @@ export class OdontologyService {
    * no puede modificarse ni borrarse (solo addenda a nivel visita). Recursos sin
    * encuentro o de visita activa: editables.
    */
-  private async assertResourceMutable(encounterId: string | null | undefined, tenantId: string): Promise<void> {
+  private async assertResourceMutable(
+    encounterId: string | null | undefined,
+    tenantId: string,
+  ): Promise<void> {
     if (!encounterId) return;
-    const enc = await this.encounterRepository.findOne({ where: { id: encounterId, tenantId } });
+    const enc = await this.encounterRepository.findOne({
+      where: { id: encounterId, tenantId },
+    });
     if (enc && enc.status === 'finished') {
-      throw new ForbiddenException('Una visita firmada no puede modificarse. Usá una addenda.');
+      throw new ForbiddenException(
+        'Una visita firmada no puede modificarse. Usá una addenda.',
+      );
     }
   }
 
@@ -75,14 +87,21 @@ export class OdontologyService {
   async enrichPatients(
     patientIds: string[],
     tenantId: string,
-  ): Promise<Record<string, { lastVisit: string | null; obraSocial: string | null }>> {
-    const result: Record<string, { lastVisit: string | null; obraSocial: string | null }> = {};
+  ): Promise<
+    Record<string, { lastVisit: string | null; obraSocial: string | null }>
+  > {
+    const result: Record<
+      string,
+      { lastVisit: string | null; obraSocial: string | null }
+    > = {};
     // Cota defensiva: solo se enriquece lo que se muestra en una página de grilla.
     const ids = (patientIds || [])
       .filter((id) => typeof id === 'string' && id.length > 0)
       .slice(0, 300);
     if (ids.length === 0) return result;
-    ids.forEach((id) => { result[id] = { lastVisit: null, obraSocial: null }; });
+    ids.forEach((id) => {
+      result[id] = { lastVisit: null, obraSocial: null };
+    });
 
     // 1a) Última visita por turno atendido (fulfilled).
     const apptRows = await this.appointmentRepository
@@ -125,7 +144,8 @@ export class OdontologyService {
     for (const cov of coverages) {
       const entry = result[cov.patientId];
       if (entry && !entry.obraSocial) {
-        const os = cov.payload?.obraSocial || cov.payload?.payor?.[0]?.display || null;
+        const os =
+          cov.payload?.obraSocial || cov.payload?.payor?.[0]?.display || null;
         if (os) entry.obraSocial = os;
       }
     }
@@ -133,15 +153,23 @@ export class OdontologyService {
     return result;
   }
 
-  async getPatient(patientId: string, tenantId: string): Promise<PatientEntity> {
-    const patient = await this.patientRepository.findOne({ where: { id: patientId, tenantId } });
+  async getPatient(
+    patientId: string,
+    tenantId: string,
+  ): Promise<PatientEntity> {
+    const patient = await this.patientRepository.findOne({
+      where: { id: patientId, tenantId },
+    });
     if (!patient) {
       throw new NotFoundException('Paciente no encontrado en tu consultorio.');
     }
     return patient;
   }
 
-  private async assertPatient(patientId: string, tenantId: string): Promise<void> {
+  private async assertPatient(
+    patientId: string,
+    tenantId: string,
+  ): Promise<void> {
     await this.getPatient(patientId, tenantId);
   }
 
@@ -171,17 +199,30 @@ export class OdontologyService {
 
     // Si se asocia a una visita, debe existir, ser del paciente/tenant y estar activa.
     if (encounterId) {
-      const enc = await this.encounterRepository.findOne({ where: { id: encounterId, patientId, tenantId } });
-      if (!enc) throw new BadRequestException('La visita indicada no existe en tu consultorio.');
-      if (enc.status === 'finished') throw new ForbiddenException('Una visita firmada no puede modificarse. Usá una addenda.');
-      if (enc.status === 'cancelled') throw new BadRequestException('La visita fue cancelada.');
+      const enc = await this.encounterRepository.findOne({
+        where: { id: encounterId, patientId, tenantId },
+      });
+      if (!enc)
+        throw new BadRequestException(
+          'La visita indicada no existe en tu consultorio.',
+        );
+      if (enc.status === 'finished')
+        throw new ForbiddenException(
+          'Una visita firmada no puede modificarse. Usá una addenda.',
+        );
+      if (enc.status === 'cancelled')
+        throw new BadRequestException('La visita fue cancelada.');
     }
 
     payload.resourceType = resourceType;
     payload.subject = { reference: `Patient/${patientId}` };
     if (encounterId) {
       payload.encounter = { reference: `Encounter/${encounterId}` };
-      if (resourceType === 'Procedure' && !payload.performedDateTime && !payload.performedPeriod) {
+      if (
+        resourceType === 'Procedure' &&
+        !payload.performedDateTime &&
+        !payload.performedPeriod
+      ) {
         payload.performedDateTime = new Date().toISOString();
       }
     }
@@ -203,7 +244,11 @@ export class OdontologyService {
         resources.find((r) => {
           const rTooth = r.payload.bodySite?.coding?.[0]?.code;
           const rFace = r.payload.bodySite?.coding?.[1]?.code;
-          return rTooth === toothCode && rFace === faceCode && getLayer(r.payload) === layer;
+          return (
+            rTooth === toothCode &&
+            rFace === faceCode &&
+            getLayer(r.payload) === layer
+          );
         }) || null;
     }
 
@@ -227,7 +272,10 @@ export class OdontologyService {
     return saved.payload;
   }
 
-  async getResourcesByPatient(patientId: string, tenantId: string): Promise<any[]> {
+  async getResourcesByPatient(
+    patientId: string,
+    tenantId: string,
+  ): Promise<any[]> {
     await this.assertPatient(patientId, tenantId);
     const resources = await this.resourceRepository.find({
       where: { patientId, tenantId },
@@ -269,8 +317,15 @@ export class OdontologyService {
           resourceType: 'Media',
           status: 'completed',
           subject: { reference: `Patient/${patientId}` },
-          content: { contentType: fileInfo.mimetype, url: fileUrl, title, size: fileInfo.size },
-          note: description?.trim() ? [{ text: description.trim() }] : undefined,
+          content: {
+            contentType: fileInfo.mimetype,
+            url: fileUrl,
+            title,
+            size: fileInfo.size,
+          },
+          note: description?.trim()
+            ? [{ text: description.trim() }]
+            : undefined,
           ...meta,
         }
       : {
@@ -278,7 +333,16 @@ export class OdontologyService {
           status: 'current',
           subject: { reference: `Patient/${patientId}` },
           description: title,
-          content: [{ attachment: { contentType: fileInfo.mimetype, url: fileUrl, title, size: fileInfo.size } }],
+          content: [
+            {
+              attachment: {
+                contentType: fileInfo.mimetype,
+                url: fileUrl,
+                title,
+                size: fileInfo.size,
+              },
+            },
+          ],
           date: meta._uploadedAt,
           ...meta,
         };
@@ -300,9 +364,13 @@ export class OdontologyService {
    * tratamiento "a realizar" pasó a "realizado".
    */
   async completeResource(id: string, tenantId: string): Promise<any> {
-    const resource = await this.resourceRepository.findOne({ where: { id, tenantId } });
+    const resource = await this.resourceRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!resource) {
-      throw new NotFoundException('Recurso clínico no encontrado en tu consultorio.');
+      throw new NotFoundException(
+        'Recurso clínico no encontrado en tu consultorio.',
+      );
     }
     await this.assertResourceMutable(resource.encounterId, tenantId);
 
@@ -330,7 +398,9 @@ export class OdontologyService {
   }
 
   async deleteResource(id: string, tenantId: string): Promise<any> {
-    const resource = await this.resourceRepository.findOne({ where: { id, tenantId } });
+    const resource = await this.resourceRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!resource) {
       throw new NotFoundException('Recurso clínico no encontrado.');
     }
@@ -342,7 +412,11 @@ export class OdontologyService {
       const safe = String(fileName).replace(/[^a-zA-Z0-9.\-_]/g, '');
       const filePath = join(process.cwd(), 'uploads', safe);
       if (fs.existsSync(filePath)) {
-        try { fs.unlinkSync(filePath); } catch { /* archivo ya inexistente: ignorar */ }
+        try {
+          fs.unlinkSync(filePath);
+        } catch {
+          /* archivo ya inexistente: ignorar */
+        }
       }
     }
 

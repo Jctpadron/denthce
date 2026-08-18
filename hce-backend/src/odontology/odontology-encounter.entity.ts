@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * ENCUENTRO / VISITA ODONTOLÓGICA (módulo aislado).
@@ -53,7 +60,11 @@ export class OdontologyEncounterEntity {
   startDate: Date;
 
   /** period.end = cierre/firma de la visita. */
-  @Column({ name: 'end_date', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'end_date',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   endDate: Date | null;
 
   /** Recurso FHIR R4 Encounter completo en JSONB. */
@@ -68,7 +79,11 @@ export class OdontologyEncounterEntity {
   @Column({ name: 'signed_by_id', type: 'varchar', nullable: true })
   signedById: string | null;
 
-  @Column({ name: 'signed_at', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'signed_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   signedAt: Date | null;
 
   /** SHA-256 del set de prestaciones + motivo + apertura, calculado al firmar (integridad). */

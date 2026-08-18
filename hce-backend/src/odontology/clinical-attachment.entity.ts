@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * Adjunto clínico (RX/imagen/PDF) anclado polimórficamente a un presupuesto o a una prestación (Procedure).
@@ -79,7 +85,11 @@ export class ClinicalAttachmentEntity {
   uploadedAt: Date;
 
   // --- Soft-delete ---
-  @Column({ name: 'deleted_at', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'deleted_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   deletedAt: Date | null;
 
   @Column({ name: 'deleted_by', type: 'varchar', nullable: true })

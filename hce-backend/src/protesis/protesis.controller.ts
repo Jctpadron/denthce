@@ -1,10 +1,31 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { ModulesGuard } from '../auth/modules.guard';
 import { RequiresModule } from '../auth/requires-module.decorator';
-import { ProtesisService, CreateOrderDto, SendMessageDto, CreateInsumoDto, UpdateInsumoDto, UpdateTrazabilidadDto, SignConformidadDto, SetPresupuestoDto, SetPresupuestoEstimadoDto, RegistrarPagoDto, RegistrarConsumoDto } from './protesis.service';
+import {
+  ProtesisService,
+  CreateOrderDto,
+  SendMessageDto,
+  CreateInsumoDto,
+  UpdateInsumoDto,
+  UpdateTrazabilidadDto,
+  SignConformidadDto,
+  SetPresupuestoDto,
+  SetPresupuestoEstimadoDto,
+  RegistrarPagoDto,
+  RegistrarConsumoDto,
+} from './protesis.service';
 
 @Controller('protesis')
 @UseGuards(AuthGuard('jwt'), RolesGuard, ModulesGuard)
@@ -15,7 +36,10 @@ export class ProtesisController {
   // Determinar si el usuario logueado es del laboratorio o clínica en base a sus roles de Keycloak
   private getTenantType(user: any): 'laboratorio' | 'clinica' {
     const roles = user?.roles || [];
-    if (roles.includes('laboratorio-operador') || roles.includes('laboratorio-admin')) {
+    if (
+      roles.includes('laboratorio-operador') ||
+      roles.includes('laboratorio-admin')
+    ) {
       return 'laboratorio';
     }
     return 'clinica';
@@ -60,27 +84,55 @@ export class ProtesisController {
   }
 
   @Get('history')
-  @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'laboratorio-operador', 'laboratorio-admin')
+  @Roles(
+    'medico',
+    'enfermero',
+    'recepcionista',
+    'administrador',
+    'laboratorio-operador',
+    'laboratorio-admin',
+  )
   async getHistoryOrders(@Request() req: any) {
     const tenantType = this.getTenantType(req.user);
     return this.protesisService.getHistoryOrders(req.user.tenantId, tenantType);
   }
 
   @Get()
-  @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'laboratorio-operador', 'laboratorio-admin')
+  @Roles(
+    'medico',
+    'enfermero',
+    'recepcionista',
+    'administrador',
+    'laboratorio-operador',
+    'laboratorio-admin',
+  )
   async getOrders(@Request() req: any) {
     const tenantType = this.getTenantType(req.user);
     return this.protesisService.getOrders(req.user.tenantId, tenantType);
   }
 
   @Get(':id')
-  @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'laboratorio-operador', 'laboratorio-admin')
+  @Roles(
+    'medico',
+    'enfermero',
+    'recepcionista',
+    'administrador',
+    'laboratorio-operador',
+    'laboratorio-admin',
+  )
   async getOrderDetails(@Param('id') id: string, @Request() req: any) {
     return this.protesisService.getOrderDetails(req.user.tenantId, id);
   }
 
   @Get(':id/history')
-  @Roles('medico', 'enfermero', 'recepcionista', 'administrador', 'laboratorio-operador', 'laboratorio-admin')
+  @Roles(
+    'medico',
+    'enfermero',
+    'recepcionista',
+    'administrador',
+    'laboratorio-operador',
+    'laboratorio-admin',
+  )
   async getOrderStatusHistory(@Param('id') id: string, @Request() req: any) {
     return this.protesisService.getOrderStatusHistory(req.user.tenantId, id);
   }
@@ -101,7 +153,14 @@ export class ProtesisController {
   ) {
     const userSub = req.user.sub || 'unknown';
     const userName = req.user.name || req.user.preferred_username || 'Usuario';
-    return this.protesisService.updateStatus(req.user.tenantId, id, status, userSub, userName, reason);
+    return this.protesisService.updateStatus(
+      req.user.tenantId,
+      id,
+      status,
+      userSub,
+      userName,
+      reason,
+    );
   }
 
   @Post(':id/chat')
@@ -113,8 +172,15 @@ export class ProtesisController {
   ) {
     // Usamos el id de usuario de Keycloak y su nombre real (si está en el token)
     const senderId = req.user.sub || 'unknown';
-    const senderName = req.user.name || req.user.preferred_username || 'Usuario';
-    return this.protesisService.addChatMessage(req.user.tenantId, id, senderId, senderName, dto);
+    const senderName =
+      req.user.name || req.user.preferred_username || 'Usuario';
+    return this.protesisService.addChatMessage(
+      req.user.tenantId,
+      id,
+      senderId,
+      senderName,
+      dto,
+    );
   }
 
   @Patch(':id/trazabilidad')
@@ -146,7 +212,11 @@ export class ProtesisController {
     @Body() dto: SetPresupuestoDto,
     @Request() req: any,
   ) {
-    return this.protesisService.setPresupuestoFinal(req.user.tenantId, id, dto.presupuestoFinal);
+    return this.protesisService.setPresupuestoFinal(
+      req.user.tenantId,
+      id,
+      dto.presupuestoFinal,
+    );
   }
 
   @Patch(':id/presupuesto-estimado')
@@ -156,7 +226,11 @@ export class ProtesisController {
     @Body() dto: SetPresupuestoEstimadoDto,
     @Request() req: any,
   ) {
-    return this.protesisService.setPresupuestoEstimado(req.user.tenantId, id, dto.presupuestoEstimado);
+    return this.protesisService.setPresupuestoEstimado(
+      req.user.tenantId,
+      id,
+      dto.presupuestoEstimado,
+    );
   }
 
   @Post(':id/pagos')
@@ -166,8 +240,14 @@ export class ProtesisController {
     @Body() dto: RegistrarPagoDto,
     @Request() req: any,
   ) {
-    const registradoPor = req.user.name || req.user.preferred_username || 'Usuario';
-    return this.protesisService.registrarPago(req.user.tenantId, id, dto, registradoPor);
+    const registradoPor =
+      req.user.name || req.user.preferred_username || 'Usuario';
+    return this.protesisService.registrarPago(
+      req.user.tenantId,
+      id,
+      dto,
+      registradoPor,
+    );
   }
 
   @Post(':id/consumos')
@@ -177,8 +257,14 @@ export class ProtesisController {
     @Body() dto: RegistrarConsumoDto,
     @Request() req: any,
   ) {
-    const registradoPor = req.user.name || req.user.preferred_username || 'Usuario';
-    return this.protesisService.registrarConsumo(req.user.tenantId, id, dto, registradoPor);
+    const registradoPor =
+      req.user.name || req.user.preferred_username || 'Usuario';
+    return this.protesisService.registrarConsumo(
+      req.user.tenantId,
+      id,
+      dto,
+      registradoPor,
+    );
   }
 
   @Get(':id/finanzas')

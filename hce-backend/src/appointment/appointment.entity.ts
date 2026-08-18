@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * AppointmentEntity — Módulo 5, Tarea 5.1
@@ -54,7 +61,11 @@ export class AppointmentEntity {
   startDate: Date;
 
   /** Fin del turno (Appointment.end). Obligatorio en FHIR si status booked/arrived/fulfilled. */
-  @Column({ name: 'end_date', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'end_date',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   endDate: Date | null;
 
   /** Canal de origen: 'whatsapp' | 'recepcion' | 'portal'. Para auditoría y reconciliación. */
@@ -62,7 +73,12 @@ export class AppointmentEntity {
   originChannel: string;
 
   /** Clave de idempotencia provista por el cliente (CliniChat) para evitar turnos duplicados por reintentos. */
-  @Column({ name: 'idempotency_key', type: 'varchar', nullable: true, unique: true })
+  @Column({
+    name: 'idempotency_key',
+    type: 'varchar',
+    nullable: true,
+    unique: true,
+  })
   idempotencyKey: string | null;
 
   /** Motivo de cancelación (Appointment.cancelationReason), cuando status='cancelled'. */

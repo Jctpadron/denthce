@@ -49,7 +49,10 @@ describe('OdontologyController', () => {
       const body = { resourceType: 'Condition', payload: { test: true } };
       const req = { user: { tenantId: 'tenant-abc' } };
 
-      mockOdontologyService.saveResource.mockResolvedValue({ id: 'r-1', ...body.payload });
+      mockOdontologyService.saveResource.mockResolvedValue({
+        id: 'r-1',
+        ...body.payload,
+      });
 
       const result = await controller.createResource(patientId, body, req);
 
@@ -70,11 +73,16 @@ describe('OdontologyController', () => {
       const req = { user: { tenantId: 'tenant-abc' } };
       const mockResources = [{ id: 'r-1' }, { id: 'r-2' }];
 
-      mockOdontologyService.getResourcesByPatient.mockResolvedValue(mockResources);
+      mockOdontologyService.getResourcesByPatient.mockResolvedValue(
+        mockResources,
+      );
 
       const result = await controller.getResources(patientId, req);
 
-      expect(service.getResourcesByPatient).toHaveBeenCalledWith(patientId, 'tenant-abc');
+      expect(service.getResourcesByPatient).toHaveBeenCalledWith(
+        patientId,
+        'tenant-abc',
+      );
       expect(result).toEqual(mockResources);
     });
   });
@@ -84,7 +92,10 @@ describe('OdontologyController', () => {
       const id = 'resource-123';
       const req = { user: { tenantId: 'tenant-abc' } };
 
-      mockOdontologyService.completeResource.mockResolvedValue({ id, completed: true });
+      mockOdontologyService.completeResource.mockResolvedValue({
+        id,
+        completed: true,
+      });
 
       const result = await controller.completeResource(id, req);
 
@@ -111,12 +122,18 @@ describe('OdontologyController', () => {
     it('debería retornar el PDF con las cabeceras e inline stream correctos', async () => {
       const patientId = 'patient-123';
       const req = { user: { tenantId: 'tenant-abc' } };
-      const mockPatient = { id: patientId, dni: '12345678', givenName: 'Juan' } as PatientEntity;
+      const mockPatient = {
+        id: patientId,
+        dni: '12345678',
+        givenName: 'Juan',
+      } as PatientEntity;
       const mockResources = [{ id: 'res-1' }];
       const mockPdfBuffer = Buffer.from('PDF_STREAM');
 
       mockOdontologyService.getPatient.mockResolvedValue(mockPatient);
-      mockOdontologyService.getResourcesByPatient.mockResolvedValue(mockResources);
+      mockOdontologyService.getResourcesByPatient.mockResolvedValue(
+        mockResources,
+      );
       mockOdontologyPdfService.generatePdf.mockResolvedValue(mockPdfBuffer);
 
       // Mock de Response
@@ -130,8 +147,14 @@ describe('OdontologyController', () => {
       await controller.getPdfReport(patientId, req, res as any);
 
       expect(service.getPatient).toHaveBeenCalledWith(patientId, 'tenant-abc');
-      expect(service.getResourcesByPatient).toHaveBeenCalledWith(patientId, 'tenant-abc');
-      expect(pdfService.generatePdf).toHaveBeenCalledWith(mockPatient, mockResources);
+      expect(service.getResourcesByPatient).toHaveBeenCalledWith(
+        patientId,
+        'tenant-abc',
+      );
+      expect(pdfService.generatePdf).toHaveBeenCalledWith(
+        mockPatient,
+        mockResources,
+      );
       expect(res.set).toHaveBeenCalledWith({
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="hc_odontologica_12345678.pdf"`,
@@ -144,7 +167,9 @@ describe('OdontologyController', () => {
       const patientId = 'patient-123';
       const req = { user: { tenantId: 'tenant-abc' } };
 
-      mockOdontologyService.getPatient.mockRejectedValue(new Error('Fallo de BD'));
+      mockOdontologyService.getPatient.mockRejectedValue(
+        new Error('Fallo de BD'),
+      );
 
       const res = {
         set: jest.fn(),

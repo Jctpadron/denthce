@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EncounterEntity } from './encounter.entity';
@@ -30,7 +35,9 @@ export class EncounterService {
     entity.tenantId = tenantId;
     entity.status = 'in-progress';
     entity.classCode = fhirEncounter.class?.code || 'AMB';
-    entity.startDate = fhirEncounter.period?.start ? new Date(fhirEncounter.period.start) : now;
+    entity.startDate = fhirEncounter.period?.start
+      ? new Date(fhirEncounter.period.start)
+      : now;
 
     entity.payload = {
       resourceType: 'Encounter',
@@ -43,8 +50,10 @@ export class EncounterService {
       participant: [
         {
           individual: { display: userCtx.userName },
-          type: [{ coding: [{ code: 'ATND', display: 'Profesional Tratante' }] }]
-        }
+          type: [
+            { coding: [{ code: 'ATND', display: 'Profesional Tratante' }] },
+          ],
+        },
       ],
     };
 
@@ -61,23 +70,36 @@ export class EncounterService {
       where: { patientId, tenantId },
       order: { createdAt: 'DESC' },
     });
-    return encounters.map(e => ({ ...e.payload, id: e.id, status: e.status, signedBy: e.signedBy, signedAt: e.signedAt }));
+    return encounters.map((e) => ({
+      ...e.payload,
+      id: e.id,
+      status: e.status,
+      signedBy: e.signedBy,
+      signedAt: e.signedAt,
+    }));
   }
 
   /** Devuelve un encuentro específico por ID */
   async findOne(id: string, tenantId: string): Promise<any> {
-    const entity = await this.encounterRepository.findOne({ where: { id, tenantId } });
+    const entity = await this.encounterRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!entity) throw new NotFoundException(`Consulta ${id} no encontrada.`);
-    return { ...entity.payload, id: entity.id, status: entity.status, signedBy: entity.signedBy, signedAt: entity.signedAt, contentHash: entity.contentHash };
+    return {
+      ...entity.payload,
+      id: entity.id,
+      status: entity.status,
+      signedBy: entity.signedBy,
+      signedAt: entity.signedAt,
+      contentHash: entity.contentHash,
+    };
   }
 
   /** Actualiza un borrador de encuentro (solo si no está firmado) */
-  async update(
-    id: string,
-    fhirEncounter: any,
-    tenantId: string,
-  ): Promise<any> {
-    const entity = await this.encounterRepository.findOne({ where: { id, tenantId } });
+  async update(id: string, fhirEncounter: any, tenantId: string): Promise<any> {
+    const entity = await this.encounterRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!entity) throw new NotFoundException(`Consulta ${id} no encontrada.`);
     if (entity.status === 'finished') {
       throw new ForbiddenException('Una nota firmada no puede ser modificada.');
@@ -106,7 +128,9 @@ export class EncounterService {
     tenantId: string,
     userCtx: { userId: string; userName: string },
   ): Promise<any> {
-    const entity = await this.encounterRepository.findOne({ where: { id, tenantId } });
+    const entity = await this.encounterRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!entity) throw new NotFoundException(`Consulta ${id} no encontrada.`);
     if (entity.status === 'finished') {
       throw new BadRequestException('Esta nota ya fue firmada anteriormente.');
@@ -114,7 +138,9 @@ export class EncounterService {
 
     const notes = entity.payload?.note || [];
     if (notes.length === 0 || notes.every((n: any) => !n.text?.trim())) {
-      throw new BadRequestException('No se puede firmar una nota SOAP vacía. Complete al menos un campo S/O/A/P.');
+      throw new BadRequestException(
+        'No se puede firmar una nota SOAP vacía. Complete al menos un campo S/O/A/P.',
+      );
     }
 
     const now = new Date();
@@ -133,13 +159,29 @@ export class EncounterService {
       period: { ...entity.payload.period, end: now.toISOString() },
       extension: [
         ...(entity.payload.extension || []),
-        { url: 'http://hospital.gov/fhir/StructureDefinition/soap-signed-by', valueString: userCtx.userName },
-        { url: 'http://hospital.gov/fhir/StructureDefinition/soap-signed-at', valueDateTime: now.toISOString() },
-        { url: 'http://hospital.gov/fhir/StructureDefinition/soap-hash', valueString: hash },
-      ]
+        {
+          url: 'http://hospital.gov/fhir/StructureDefinition/soap-signed-by',
+          valueString: userCtx.userName,
+        },
+        {
+          url: 'http://hospital.gov/fhir/StructureDefinition/soap-signed-at',
+          valueDateTime: now.toISOString(),
+        },
+        {
+          url: 'http://hospital.gov/fhir/StructureDefinition/soap-hash',
+          valueString: hash,
+        },
+      ],
     };
 
     await this.encounterRepository.save(entity);
-    return { ...entity.payload, id: entity.id, status: 'finished', signedBy: entity.signedBy, signedAt: entity.signedAt, contentHash: hash };
+    return {
+      ...entity.payload,
+      id: entity.id,
+      status: 'finished',
+      signedBy: entity.signedBy,
+      signedAt: entity.signedAt,
+      contentHash: hash,
+    };
   }
 }

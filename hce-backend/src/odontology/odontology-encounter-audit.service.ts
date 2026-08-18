@@ -33,7 +33,13 @@ export class OdontologyEncounterAuditService {
     await this.auditRepo.save(entry);
   }
 
-  async getHistory(encounterId: string, tenantId: string): Promise<OdontologyEncounterAuditEntity[]> {
-    return this.auditRepo.find({ where: { encounterId, tenantId }, order: { createdAt: 'DESC' } });
+  async getHistory(
+    encounterId: string,
+    tenantId: string,
+  ): Promise<OdontologyEncounterAuditEntity[]> {
+    return this.auditRepo.find({
+      where: { encounterId, tenantId },
+      order: { createdAt: 'DESC' },
+    });
   }
 }

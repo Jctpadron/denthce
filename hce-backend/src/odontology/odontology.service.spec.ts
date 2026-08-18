@@ -6,7 +6,11 @@ import { OdontologyResourceEntity } from './odontology-resource.entity';
 import { OdontologyEncounterEntity } from './odontology-encounter.entity';
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentEntity } from '../appointment/appointment.entity';
-import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 describe('OdontologyService', () => {
   let service: OdontologyService;
@@ -81,7 +85,11 @@ describe('OdontologyService', () => {
 
   describe('getPatient', () => {
     it('debería retornar el paciente si pertenece al tenant del médico', async () => {
-      const mockPatient = { id: 'patient-123', tenantId: 'tenant-abc', dni: '12345678' } as PatientEntity;
+      const mockPatient = {
+        id: 'patient-123',
+        tenantId: 'tenant-abc',
+        dni: '12345678',
+      } as PatientEntity;
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
 
       const result = await service.getPatient('patient-123', 'tenant-abc');
@@ -94,14 +102,17 @@ describe('OdontologyService', () => {
     it('debería lanzar NotFoundException si el paciente no existe o pertenece a otro tenant', async () => {
       mockPatientRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getPatient('patient-123', 'tenant-xyz')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.getPatient('patient-123', 'tenant-xyz'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('saveResource', () => {
-    const mockPatient = { id: 'patient-123', tenantId: 'tenant-abc' } as PatientEntity;
+    const mockPatient = {
+      id: 'patient-123',
+      tenantId: 'tenant-abc',
+    } as PatientEntity;
 
     it('debería guardar un nuevo recurso si el tipo de recurso es permitido y el paciente es del tenant', async () => {
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
@@ -112,11 +123,26 @@ describe('OdontologyService', () => {
       mockResourceRepository.update.mockResolvedValue({});
 
       const payload = {
-        clinicalStatus: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-clinical', code: 'active' }] },
-        code: { coding: [{ system: 'http://snomed.info/sct', code: '80967001' }] },
+        clinicalStatus: {
+          coding: [
+            {
+              system:
+                'http://terminology.hl7.org/CodeSystem/condition-clinical',
+              code: 'active',
+            },
+          ],
+        },
+        code: {
+          coding: [{ system: 'http://snomed.info/sct', code: '80967001' }],
+        },
       };
 
-      const result = await service.saveResource('patient-123', 'Condition', payload, 'tenant-abc');
+      const result = await service.saveResource(
+        'patient-123',
+        'Condition',
+        payload,
+        'tenant-abc',
+      );
 
       expect(result.id).toBe('resource-uuid');
       expect(result.resourceType).toBe('Condition');
@@ -126,7 +152,12 @@ describe('OdontologyService', () => {
 
     it('debería lanzar BadRequestException si el tipo de recurso no es admitido', async () => {
       await expect(
-        service.saveResource('patient-123', 'ObservationInvalid', {}, 'tenant-abc'),
+        service.saveResource(
+          'patient-123',
+          'ObservationInvalid',
+          {},
+          'tenant-abc',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -148,7 +179,9 @@ describe('OdontologyService', () => {
       } as OdontologyResourceEntity;
 
       mockResourceRepository.find.mockResolvedValue([existingResource]);
-      mockResourceRepository.save.mockImplementation((entity) => Promise.resolve(entity));
+      mockResourceRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
       mockResourceRepository.update.mockResolvedValue({});
 
       const newPayload = {
@@ -159,7 +192,12 @@ describe('OdontologyService', () => {
         note: 'Actualizada',
       };
 
-      const result = await service.saveResource('patient-123', 'Condition', newPayload, 'tenant-abc');
+      const result = await service.saveResource(
+        'patient-123',
+        'Condition',
+        newPayload,
+        'tenant-abc',
+      );
 
       expect(result.id).toBe('existing-id');
       expect(result.note).toBe('Actualizada');
@@ -168,7 +206,10 @@ describe('OdontologyService', () => {
 
   describe('getResourcesByPatient', () => {
     it('debería retornar todos los payloads del paciente seleccionado bajo el tenant activo', async () => {
-      const mockPatient = { id: 'patient-123', tenantId: 'tenant-abc' } as PatientEntity;
+      const mockPatient = {
+        id: 'patient-123',
+        tenantId: 'tenant-abc',
+      } as PatientEntity;
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
 
       const resources = [
@@ -178,7 +219,10 @@ describe('OdontologyService', () => {
 
       mockResourceRepository.find.mockResolvedValue(resources);
 
-      const result = await service.getResourcesByPatient('patient-123', 'tenant-abc');
+      const result = await service.getResourcesByPatient(
+        'patient-123',
+        'tenant-abc',
+      );
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe('r1');
       expect(result[1].id).toBe('r2');
@@ -202,13 +246,20 @@ describe('OdontologyService', () => {
       } as OdontologyResourceEntity;
 
       mockResourceRepository.findOne.mockResolvedValue(existingResource);
-      mockResourceRepository.save.mockImplementation((entity) => Promise.resolve(entity));
+      mockResourceRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
 
-      const result = await service.completeResource('resource-uuid', 'tenant-abc');
+      const result = await service.completeResource(
+        'resource-uuid',
+        'tenant-abc',
+      );
 
       expect(result.status).toBe('completed');
       expect(result.performedDateTime).toBeDefined();
-      const layerExt = result.extension.find((e: any) => e.url === ODONTOGRAM_LAYER_URL);
+      const layerExt = result.extension.find(
+        (e: any) => e.url === ODONTOGRAM_LAYER_URL,
+      );
       expect(layerExt.valueCode).toBe('existing');
     });
 
@@ -225,32 +276,45 @@ describe('OdontologyService', () => {
 
       mockResourceRepository.findOne.mockResolvedValue(existingResource);
 
-      await expect(service.completeResource('resource-uuid', 'tenant-abc')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.completeResource('resource-uuid', 'tenant-abc'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('debería lanzar NotFoundException si el recurso no existe o pertenece a otro tenant', async () => {
       mockResourceRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.completeResource('resource-uuid', 'tenant-xyz')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.completeResource('resource-uuid', 'tenant-xyz'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('saveFile', () => {
-    const mockPatient = { id: 'patient-123', tenantId: 'tenant-abc' } as PatientEntity;
+    const mockPatient = {
+      id: 'patient-123',
+      tenantId: 'tenant-abc',
+    } as PatientEntity;
 
     it('guarda una imagen como FHIR Media con url relativa y categoría', async () => {
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
-      mockResourceRepository.save.mockImplementation((e) => { e.id = 'media-1'; return Promise.resolve(e); });
+      mockResourceRepository.save.mockImplementation((e) => {
+        e.id = 'media-1';
+        return Promise.resolve(e);
+      });
       mockResourceRepository.update.mockResolvedValue({});
 
       const result = await service.saveFile(
         'patient-123',
-        { originalname: 'rx.png', filename: 'odo-123.png', mimetype: 'image/png', size: 5000 },
-        'Panorámica inicial', 'radiografia', 'tenant-abc',
+        {
+          originalname: 'rx.png',
+          filename: 'odo-123.png',
+          mimetype: 'image/png',
+          size: 5000,
+        },
+        'Panorámica inicial',
+        'radiografia',
+        'tenant-abc',
       );
 
       expect(result.resourceType).toBe('Media');
@@ -263,13 +327,23 @@ describe('OdontologyService', () => {
 
     it('guarda un PDF como FHIR DocumentReference', async () => {
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
-      mockResourceRepository.save.mockImplementation((e) => { e.id = 'doc-1'; return Promise.resolve(e); });
+      mockResourceRepository.save.mockImplementation((e) => {
+        e.id = 'doc-1';
+        return Promise.resolve(e);
+      });
       mockResourceRepository.update.mockResolvedValue({});
 
       const result = await service.saveFile(
         'patient-123',
-        { originalname: 'consentimiento.pdf', filename: 'odo-9.pdf', mimetype: 'application/pdf', size: 9000 },
-        '', 'documento', 'tenant-abc',
+        {
+          originalname: 'consentimiento.pdf',
+          filename: 'odo-9.pdf',
+          mimetype: 'application/pdf',
+          size: 9000,
+        },
+        '',
+        'documento',
+        'tenant-abc',
       );
 
       expect(result.resourceType).toBe('DocumentReference');
@@ -280,7 +354,18 @@ describe('OdontologyService', () => {
     it('lanza NotFoundException si el paciente no es del tenant', async () => {
       mockPatientRepository.findOne.mockResolvedValue(null);
       await expect(
-        service.saveFile('patient-123', { originalname: 'x.png', filename: 'y.png', mimetype: 'image/png', size: 1 }, '', 'foto', 'tenant-xyz'),
+        service.saveFile(
+          'patient-123',
+          {
+            originalname: 'x.png',
+            filename: 'y.png',
+            mimetype: 'image/png',
+            size: 1,
+          },
+          '',
+          'foto',
+          'tenant-xyz',
+        ),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -330,7 +415,10 @@ describe('OdontologyService', () => {
       mockResourceRepository.findOne.mockResolvedValue(existingResource);
       mockResourceRepository.remove.mockResolvedValue(existingResource);
 
-      const result = await service.deleteResource('resource-uuid', 'tenant-abc');
+      const result = await service.deleteResource(
+        'resource-uuid',
+        'tenant-abc',
+      );
       expect(result.message).toContain('eliminado con éxito');
       expect(resourceRepository.remove).toHaveBeenCalledWith(existingResource);
     });
@@ -338,9 +426,9 @@ describe('OdontologyService', () => {
     it('debería lanzar NotFoundException si el recurso no existe o pertenece a otro tenant', async () => {
       mockResourceRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.deleteResource('resource-uuid', 'tenant-xyz')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.deleteResource('resource-uuid', 'tenant-xyz'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -351,7 +439,10 @@ describe('OdontologyService', () => {
   // setea encounter_id + payload.encounter + performedDateTime (Procedure).
   // ──────────────────────────────────────────────────────────────────────────
   describe('inmutabilidad por visita firmada (encuentro)', () => {
-    const mockPatient = { id: 'patient-123', tenantId: 'tenant-abc' } as PatientEntity;
+    const mockPatient = {
+      id: 'patient-123',
+      tenantId: 'tenant-abc',
+    } as PatientEntity;
 
     it('saveResource lanza ForbiddenException si sobrescribe una prestación de una visita finished', async () => {
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
@@ -369,7 +460,10 @@ describe('OdontologyService', () => {
         },
       } as OdontologyResourceEntity;
       mockResourceRepository.find.mockResolvedValue([existingResource]);
-      mockEncounterRepository.findOne.mockResolvedValue({ id: 'enc-finished', status: 'finished' });
+      mockEncounterRepository.findOne.mockResolvedValue({
+        id: 'enc-finished',
+        status: 'finished',
+      });
 
       const newPayload = {
         bodySite: { coding: [{ code: '18' }, { code: 'O' }] },
@@ -378,7 +472,12 @@ describe('OdontologyService', () => {
       };
 
       await expect(
-        service.saveResource('patient-123', 'Condition', newPayload, 'tenant-abc'),
+        service.saveResource(
+          'patient-123',
+          'Condition',
+          newPayload,
+          'tenant-abc',
+        ),
       ).rejects.toThrow(ForbiddenException);
       expect(mockResourceRepository.save).not.toHaveBeenCalled();
     });
@@ -386,22 +485,40 @@ describe('OdontologyService', () => {
     it('saveResource con encounterId de una visita FIRMADA lanza ForbiddenException', async () => {
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
       mockEncounterRepository.findOne.mockResolvedValue({
-        id: 'enc-finished', patientId: 'patient-123', tenantId: 'tenant-abc', status: 'finished',
+        id: 'enc-finished',
+        patientId: 'patient-123',
+        tenantId: 'tenant-abc',
+        status: 'finished',
       });
 
       await expect(
-        service.saveResource('patient-123', 'Procedure', {}, 'tenant-abc', 'enc-finished'),
+        service.saveResource(
+          'patient-123',
+          'Procedure',
+          {},
+          'tenant-abc',
+          'enc-finished',
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
     it('saveResource con encounterId de visita CANCELADA lanza BadRequestException', async () => {
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
       mockEncounterRepository.findOne.mockResolvedValue({
-        id: 'enc-cancelled', patientId: 'patient-123', tenantId: 'tenant-abc', status: 'cancelled',
+        id: 'enc-cancelled',
+        patientId: 'patient-123',
+        tenantId: 'tenant-abc',
+        status: 'cancelled',
       });
 
       await expect(
-        service.saveResource('patient-123', 'Procedure', {}, 'tenant-abc', 'enc-cancelled'),
+        service.saveResource(
+          'patient-123',
+          'Procedure',
+          {},
+          'tenant-abc',
+          'enc-cancelled',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -410,14 +527,23 @@ describe('OdontologyService', () => {
       mockEncounterRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.saveResource('patient-123', 'Procedure', {}, 'tenant-abc', 'enc-x'),
+        service.saveResource(
+          'patient-123',
+          'Procedure',
+          {},
+          'tenant-abc',
+          'enc-x',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('saveResource con encounterId de visita ACTIVA setea encounter_id, payload.encounter y performedDateTime (Procedure)', async () => {
       mockPatientRepository.findOne.mockResolvedValue(mockPatient);
       mockEncounterRepository.findOne.mockResolvedValue({
-        id: 'enc-active', patientId: 'patient-123', tenantId: 'tenant-abc', status: 'in-progress',
+        id: 'enc-active',
+        patientId: 'patient-123',
+        tenantId: 'tenant-abc',
+        status: 'in-progress',
       });
       mockResourceRepository.find.mockResolvedValue([]); // sin upsert previo
       let savedEntity: any = null;
@@ -429,7 +555,11 @@ describe('OdontologyService', () => {
       mockResourceRepository.update.mockResolvedValue({});
 
       const result = await service.saveResource(
-        'patient-123', 'Procedure', { status: 'completed' }, 'tenant-abc', 'enc-active',
+        'patient-123',
+        'Procedure',
+        { status: 'completed' },
+        'tenant-abc',
+        'enc-active',
       );
 
       expect(savedEntity.encounterId).toBe('enc-active');
@@ -449,11 +579,14 @@ describe('OdontologyService', () => {
         },
       } as OdontologyResourceEntity;
       mockResourceRepository.findOne.mockResolvedValue(existingResource);
-      mockEncounterRepository.findOne.mockResolvedValue({ id: 'enc-finished', status: 'finished' });
+      mockEncounterRepository.findOne.mockResolvedValue({
+        id: 'enc-finished',
+        status: 'finished',
+      });
 
-      await expect(service.completeResource('resource-uuid', 'tenant-abc')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.completeResource('resource-uuid', 'tenant-abc'),
+      ).rejects.toThrow(ForbiddenException);
       expect(mockResourceRepository.save).not.toHaveBeenCalled();
     });
 
@@ -465,11 +598,14 @@ describe('OdontologyService', () => {
         payload: {},
       } as OdontologyResourceEntity;
       mockResourceRepository.findOne.mockResolvedValue(existingResource);
-      mockEncounterRepository.findOne.mockResolvedValue({ id: 'enc-finished', status: 'finished' });
+      mockEncounterRepository.findOne.mockResolvedValue({
+        id: 'enc-finished',
+        status: 'finished',
+      });
 
-      await expect(service.deleteResource('resource-uuid', 'tenant-abc')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.deleteResource('resource-uuid', 'tenant-abc'),
+      ).rejects.toThrow(ForbiddenException);
       expect(mockResourceRepository.remove).not.toHaveBeenCalled();
     });
   });

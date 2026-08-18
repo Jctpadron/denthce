@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
@@ -8,7 +13,10 @@ import { OdontologyEncounterAuditService } from './odontology-encounter-audit.se
 import { PatientEntity } from '../patient/patient.entity';
 import { AppointmentEntity } from '../appointment/appointment.entity';
 
-interface UserCtx { userId: string; userName: string; }
+interface UserCtx {
+  userId: string;
+  userName: string;
+}
 
 /**
  * Ciclo de vida de la VISITA / ENCUENTRO odontológico (módulo aislado).
@@ -32,9 +40,15 @@ export class OdontologyEncounterService {
     private readonly audit: OdontologyEncounterAuditService,
   ) {}
 
-  private async assertPatient(patientId: string, tenantId: string): Promise<void> {
-    const patient = await this.patientRepo.findOne({ where: { id: patientId, tenantId } });
-    if (!patient) throw new NotFoundException('Paciente no encontrado en tu consultorio.');
+  private async assertPatient(
+    patientId: string,
+    tenantId: string,
+  ): Promise<void> {
+    const patient = await this.patientRepo.findOne({
+      where: { id: patientId, tenantId },
+    });
+    if (!patient)
+      throw new NotFoundException('Paciente no encontrado en tu consultorio.');
   }
 
   /** Proyección FHIR del encuentro (lo que consume el front). */
@@ -61,7 +75,11 @@ export class OdontologyEncounterService {
    */
   async open(
     patientId: string,
-    body: { appointmentId?: string | null; classCode?: string; reasonText?: string },
+    body: {
+      appointmentId?: string | null;
+      classCode?: string;
+      reasonText?: string;
+    },
     tenantId: string,
     userCtx: UserCtx,
   ): Promise<any> {
@@ -90,15 +108,44 @@ export class OdontologyEncounterService {
     entity.payload = {
       resourceType: 'Encounter',
       status: 'in-progress',
-      class: { system: 'http://terminology.hl7.org/CodeSystem/v3-ActCode', code: classCode, display: classCode === 'AMB' ? 'Ambulatorio' : classCode },
-      type: [{ coding: [{ system: 'http://snomed.info/sct', code: '53110001', display: 'Consulta odontológica' }] }],
-      serviceType: { coding: [{ system: 'http://snomed.info/sct', code: '9482002', display: 'Servicio odontológico' }] },
+      class: {
+        system: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+        code: classCode,
+        display: classCode === 'AMB' ? 'Ambulatorio' : classCode,
+      },
+      type: [
+        {
+          coding: [
+            {
+              system: 'http://snomed.info/sct',
+              code: '53110001',
+              display: 'Consulta odontológica',
+            },
+          ],
+        },
+      ],
+      serviceType: {
+        coding: [
+          {
+            system: 'http://snomed.info/sct',
+            code: '9482002',
+            display: 'Servicio odontológico',
+          },
+        ],
+      },
       subject: { reference: `Patient/${patientId}` },
-      ...(appointmentId ? { appointment: [{ reference: `Appointment/${appointmentId}` }] } : {}),
+      ...(appointmentId
+        ? { appointment: [{ reference: `Appointment/${appointmentId}` }] }
+        : {}),
       period: { start: now.toISOString() },
       ...(reasonText ? { reasonCode: [{ text: reasonText }] } : {}),
       participant: [
-        { individual: { display: userCtx.userName }, type: [{ coding: [{ code: 'ATND', display: 'Profesional Tratante' }] }] },
+        {
+          individual: { display: userCtx.userName },
+          type: [
+            { coding: [{ code: 'ATND', display: 'Profesional Tratante' }] },
+          ],
+        },
       ],
     };
 
@@ -107,7 +154,10 @@ export class OdontologyEncounterService {
       saved = await this.encounterRepo.save(entity);
     } catch (err: any) {
       // Carrera (dos pestañas): el índice único parcial rechaza la 2ª visita activa → devolver la existente.
-      const dup = await this.encounterRepo.findOne({ where: { patientId, tenantId, status: 'in-progress' }, order: { startDate: 'DESC' } });
+      const dup = await this.encounterRepo.findOne({
+        where: { patientId, tenantId, status: 'in-progress' },
+        order: { startDate: 'DESC' },
+      });
       if (dup) return this.toFhir(dup);
       throw err;
     }
@@ -116,7 +166,9 @@ export class OdontologyEncounterService {
 
     // Si hay turno, reflejar que la atención empezó (booked → arrived).
     if (appointmentId) {
-      const appt = await this.appointmentRepo.findOne({ where: { id: appointmentId, tenantId } });
+      const appt = await this.appointmentRepo.findOne({
+        where: { id: appointmentId, tenantId },
+      });
       if (appt && (appt.status === 'booked' || appt.status === 'proposed')) {
         appt.status = 'arrived';
         if (appt.payload) appt.payload.status = 'arrived';
@@ -124,7 +176,15 @@ export class OdontologyEncounterService {
       }
     }
 
-    await this.audit.log({ encounterId: saved.id, tenantId, patientId, actorId: userCtx.userId, actorName: userCtx.userName, action: 'OPEN', payloadSnapshot: { reasonText, appointmentId } });
+    await this.audit.log({
+      encounterId: saved.id,
+      tenantId,
+      patientId,
+      actorId: userCtx.userId,
+      actorName: userCtx.userName,
+      action: 'OPEN',
+      payloadSnapshot: { reasonText, appointmentId },
+    });
     return this.toFhir(saved);
   }
 
@@ -161,7 +221,9 @@ export class OdontologyEncounterService {
       .andWhere('r.encounter_id IS NOT NULL')
       .groupBy('r.encounter_id')
       .getRawMany();
-    const countMap = new Map<string, number>(counts.map((c) => [c.eid, parseInt(c.n, 10)]));
+    const countMap = new Map<string, number>(
+      counts.map((c) => [c.eid, parseInt(c.n, 10)]),
+    );
 
     const legacyRow = await this.resourceRepo
       .createQueryBuilder('r')
@@ -192,13 +254,19 @@ export class OdontologyEncounterService {
   /** Una visita con sus prestaciones embebidas + addenda. */
   async getOne(id: string, patientId: string, tenantId: string): Promise<any> {
     await this.assertPatient(patientId, tenantId);
-    const entity = await this.encounterRepo.findOne({ where: { id, patientId, tenantId } });
-    if (!entity) throw new NotFoundException('Visita no encontrada en tu consultorio.');
+    const entity = await this.encounterRepo.findOne({
+      where: { id, patientId, tenantId },
+    });
+    if (!entity)
+      throw new NotFoundException('Visita no encontrada en tu consultorio.');
     const resources = await this.resourceRepo.find({
       where: { encounterId: id, tenantId },
       order: { createdAt: 'ASC' },
     });
-    return { ...this.toFhir(entity), prestaciones: resources.map((r) => r.payload) };
+    return {
+      ...this.toFhir(entity),
+      prestaciones: resources.map((r) => r.payload),
+    };
   }
 
   /**
@@ -206,19 +274,31 @@ export class OdontologyEncounterService {
    * hash SHA-256 del contenido + status finished + bloqueo de mutación posterior.
    * Marca el turno asociado como 'fulfilled' (misma operación).
    */
-  async sign(id: string, patientId: string, tenantId: string, userCtx: UserCtx): Promise<any> {
+  async sign(
+    id: string,
+    patientId: string,
+    tenantId: string,
+    userCtx: UserCtx,
+  ): Promise<any> {
     await this.assertPatient(patientId, tenantId);
-    const entity = await this.encounterRepo.findOne({ where: { id, patientId, tenantId } });
-    if (!entity) throw new NotFoundException('Visita no encontrada en tu consultorio.');
-    if (entity.status === 'finished') throw new BadRequestException('Esta visita ya fue firmada.');
-    if (entity.status === 'cancelled') throw new BadRequestException('No se puede firmar una visita cancelada.');
+    const entity = await this.encounterRepo.findOne({
+      where: { id, patientId, tenantId },
+    });
+    if (!entity)
+      throw new NotFoundException('Visita no encontrada en tu consultorio.');
+    if (entity.status === 'finished')
+      throw new BadRequestException('Esta visita ya fue firmada.');
+    if (entity.status === 'cancelled')
+      throw new BadRequestException('No se puede firmar una visita cancelada.');
 
     const resources = await this.resourceRepo.find({
       where: { encounterId: id, tenantId },
       order: { createdAt: 'ASC' },
     });
     if (resources.length === 0 && !entity.reasonText) {
-      throw new BadRequestException('No se puede firmar una visita vacía: registrá al menos una prestación o el motivo de consulta.');
+      throw new BadRequestException(
+        'No se puede firmar una visita vacía: registrá al menos una prestación o el motivo de consulta.',
+      );
     }
 
     const now = new Date();
@@ -243,17 +323,28 @@ export class OdontologyEncounterService {
       status: 'finished',
       period: { ...(entity.payload?.period || {}), end: now.toISOString() },
       extension: [
-        ...((entity.payload?.extension) || []),
-        { url: 'http://denthce.local/fhir/StructureDefinition/odonto-signed-by', valueString: userCtx.userName },
-        { url: 'http://denthce.local/fhir/StructureDefinition/odonto-signed-at', valueDateTime: now.toISOString() },
-        { url: 'http://denthce.local/fhir/StructureDefinition/odonto-hash', valueString: hash },
+        ...(entity.payload?.extension || []),
+        {
+          url: 'http://denthce.local/fhir/StructureDefinition/odonto-signed-by',
+          valueString: userCtx.userName,
+        },
+        {
+          url: 'http://denthce.local/fhir/StructureDefinition/odonto-signed-at',
+          valueDateTime: now.toISOString(),
+        },
+        {
+          url: 'http://denthce.local/fhir/StructureDefinition/odonto-hash',
+          valueString: hash,
+        },
       ],
     };
     await this.encounterRepo.save(entity);
 
     // Vínculo turno: la visita firmada ⇒ turno cumplido.
     if (entity.appointmentId) {
-      const appt = await this.appointmentRepo.findOne({ where: { id: entity.appointmentId, tenantId } });
+      const appt = await this.appointmentRepo.findOne({
+        where: { id: entity.appointmentId, tenantId },
+      });
       if (appt && appt.status !== 'cancelled' && appt.status !== 'noshow') {
         appt.status = 'fulfilled';
         if (appt.payload) appt.payload.status = 'fulfilled';
@@ -261,34 +352,80 @@ export class OdontologyEncounterService {
       }
     }
 
-    await this.audit.log({ encounterId: entity.id, tenantId, patientId, actorId: userCtx.userId, actorName: userCtx.userName, action: 'SIGN', payloadSnapshot: { contentHash: hash, prestaciones: resources.length, appointmentId: entity.appointmentId } });
+    await this.audit.log({
+      encounterId: entity.id,
+      tenantId,
+      patientId,
+      actorId: userCtx.userId,
+      actorName: userCtx.userName,
+      action: 'SIGN',
+      payloadSnapshot: {
+        contentHash: hash,
+        prestaciones: resources.length,
+        appointmentId: entity.appointmentId,
+      },
+    });
     return this.toFhir(entity);
   }
 
   /** Cancela una visita activa. Las prestaciones se desvinculan a legacy (no se borra el trabajo). */
-  async cancel(id: string, patientId: string, tenantId: string, userCtx: UserCtx): Promise<any> {
+  async cancel(
+    id: string,
+    patientId: string,
+    tenantId: string,
+    userCtx: UserCtx,
+  ): Promise<any> {
     await this.assertPatient(patientId, tenantId);
-    const entity = await this.encounterRepo.findOne({ where: { id, patientId, tenantId } });
-    if (!entity) throw new NotFoundException('Visita no encontrada en tu consultorio.');
-    if (entity.status !== 'in-progress') throw new BadRequestException('Solo se puede cancelar una visita en curso.');
+    const entity = await this.encounterRepo.findOne({
+      where: { id, patientId, tenantId },
+    });
+    if (!entity)
+      throw new NotFoundException('Visita no encontrada en tu consultorio.');
+    if (entity.status !== 'in-progress')
+      throw new BadRequestException(
+        'Solo se puede cancelar una visita en curso.',
+      );
 
-    await this.resourceRepo.update({ encounterId: id, tenantId }, { encounterId: null });
+    await this.resourceRepo.update(
+      { encounterId: id, tenantId },
+      { encounterId: null },
+    );
 
     entity.status = 'cancelled';
     if (entity.payload) entity.payload.status = 'cancelled';
     await this.encounterRepo.save(entity);
-    await this.audit.log({ encounterId: entity.id, tenantId, patientId, actorId: userCtx.userId, actorName: userCtx.userName, action: 'CANCEL' });
+    await this.audit.log({
+      encounterId: entity.id,
+      tenantId,
+      patientId,
+      actorId: userCtx.userId,
+      actorName: userCtx.userName,
+      action: 'CANCEL',
+    });
     return this.toFhir(entity);
   }
 
   /** Agrega una addenda (corrección post-firma, append-only). No altera lo firmado. */
-  async addAddenda(id: string, patientId: string, text: string, tenantId: string, userCtx: UserCtx): Promise<any> {
+  async addAddenda(
+    id: string,
+    patientId: string,
+    text: string,
+    tenantId: string,
+    userCtx: UserCtx,
+  ): Promise<any> {
     await this.assertPatient(patientId, tenantId);
-    const entity = await this.encounterRepo.findOne({ where: { id, patientId, tenantId } });
-    if (!entity) throw new NotFoundException('Visita no encontrada en tu consultorio.');
-    if (entity.status !== 'finished') throw new BadRequestException('Solo se agregan addenda a una visita firmada.');
+    const entity = await this.encounterRepo.findOne({
+      where: { id, patientId, tenantId },
+    });
+    if (!entity)
+      throw new NotFoundException('Visita no encontrada en tu consultorio.');
+    if (entity.status !== 'finished')
+      throw new BadRequestException(
+        'Solo se agregan addenda a una visita firmada.',
+      );
     const clean = (text || '').trim();
-    if (!clean) throw new BadRequestException('La addenda no puede estar vacía.');
+    if (!clean)
+      throw new BadRequestException('La addenda no puede estar vacía.');
 
     const addenda = Array.isArray(entity.addenda) ? entity.addenda : [];
     addenda.push({
@@ -302,10 +439,25 @@ export class OdontologyEncounterService {
     // Reflejo FHIR: cada addenda como note del Encounter.
     entity.payload = {
       ...(entity.payload || {}),
-      note: [...((entity.payload?.note) || []), { authorString: userCtx.userName, time: new Date().toISOString(), text: clean }],
+      note: [
+        ...(entity.payload?.note || []),
+        {
+          authorString: userCtx.userName,
+          time: new Date().toISOString(),
+          text: clean,
+        },
+      ],
     };
     await this.encounterRepo.save(entity);
-    await this.audit.log({ encounterId: entity.id, tenantId, patientId, actorId: userCtx.userId, actorName: userCtx.userName, action: 'ADDENDA', payloadSnapshot: { text: clean } });
+    await this.audit.log({
+      encounterId: entity.id,
+      tenantId,
+      patientId,
+      actorId: userCtx.userId,
+      actorName: userCtx.userName,
+      action: 'ADDENDA',
+      payloadSnapshot: { text: clean },
+    });
     return this.toFhir(entity);
   }
 
@@ -315,15 +467,30 @@ export class OdontologyEncounterService {
    */
   async isFinished(encounterId: string, tenantId: string): Promise<boolean> {
     if (!encounterId) return false;
-    const e = await this.encounterRepo.findOne({ where: { id: encounterId, tenantId } });
+    const e = await this.encounterRepo.findOne({
+      where: { id: encounterId, tenantId },
+    });
     return e?.status === 'finished';
   }
 
   /** Valida que el encuentro exista, sea del paciente/tenant y esté activo (para asociar prestaciones). */
-  async assertActiveForResource(encounterId: string, patientId: string, tenantId: string): Promise<void> {
-    const e = await this.encounterRepo.findOne({ where: { id: encounterId, patientId, tenantId } });
-    if (!e) throw new BadRequestException('La visita indicada no existe en tu consultorio.');
-    if (e.status === 'finished') throw new ForbiddenException('Una visita firmada no puede modificarse. Usá una addenda.');
-    if (e.status === 'cancelled') throw new BadRequestException('La visita fue cancelada.');
+  async assertActiveForResource(
+    encounterId: string,
+    patientId: string,
+    tenantId: string,
+  ): Promise<void> {
+    const e = await this.encounterRepo.findOne({
+      where: { id: encounterId, patientId, tenantId },
+    });
+    if (!e)
+      throw new BadRequestException(
+        'La visita indicada no existe en tu consultorio.',
+      );
+    if (e.status === 'finished')
+      throw new ForbiddenException(
+        'Una visita firmada no puede modificarse. Usá una addenda.',
+      );
+    if (e.status === 'cancelled')
+      throw new BadRequestException('La visita fue cancelada.');
   }
 }

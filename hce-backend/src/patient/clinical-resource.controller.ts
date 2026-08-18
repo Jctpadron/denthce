@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -30,15 +39,15 @@ export class ClinicalResourceController {
     @Param('patientId') patientId: string,
     @Request() req: any,
   ) {
-    return this.resourceService.getResourcesByPatient(patientId, req.user.tenantId);
+    return this.resourceService.getResourcesByPatient(
+      patientId,
+      req.user.tenantId,
+    );
   }
 
   @Delete('clinical-resource/:id')
   @Roles('medico', 'enfermero', 'administrador')
-  async deleteResource(
-    @Param('id') id: string,
-    @Request() req: any,
-  ) {
+  async deleteResource(@Param('id') id: string, @Request() req: any) {
     return this.resourceService.deleteResource(id, req.user.tenantId);
   }
 }

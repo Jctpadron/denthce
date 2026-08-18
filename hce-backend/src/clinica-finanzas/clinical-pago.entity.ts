@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ClinicalPresupuesto } from './clinical-presupuesto.entity';
 
 @Entity('clinica_pagos')
@@ -24,7 +31,11 @@ export class ClinicalPago {
   @Column({ name: 'metodo_pago', length: 50 })
   metodoPago: string;
 
-  @Column({ name: 'fecha_pago', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'fecha_pago',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   fechaPago: Date;
 
   @Column({ type: 'varchar', length: 200, nullable: true })
@@ -33,7 +44,12 @@ export class ClinicalPago {
   @Column({ type: 'text', nullable: true })
   notas?: string | null;
 
-  @Column({ type: 'varchar', name: 'registered_by', length: 100, nullable: true })
+  @Column({
+    type: 'varchar',
+    name: 'registered_by',
+    length: 100,
+    nullable: true,
+  })
   registeredBy?: string | null;
 
   // --- Anulación (soft-delete): un pago anulado NO cuenta en el saldo. anuladoAt != null = anulado. ---
@@ -43,13 +59,21 @@ export class ClinicalPago {
   @Column({ type: 'varchar', name: 'anulado_por', length: 100, nullable: true })
   anuladoPor?: string | null;
 
-  @Column({ type: 'varchar', name: 'motivo_anulacion', length: 300, nullable: true })
+  @Column({
+    type: 'varchar',
+    name: 'motivo_anulacion',
+    length: 300,
+    nullable: true,
+  })
   motivoAnulacion?: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => ClinicalPresupuesto, (p) => p.pagos, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => ClinicalPresupuesto, (p) => p.pagos, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'presupuesto_id' })
   presupuesto?: ClinicalPresupuesto | null;
 }

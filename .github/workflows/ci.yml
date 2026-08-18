@@ -38,10 +38,12 @@ jobs:
       # descarta, así que enmascara la deuda auto-corregible en vez de mostrarla.
       # --max-warnings congela el baseline: los warnings heredados no rompen,
       # pero uno nuevo sí. Es el trinquete que impide que la deuda crezca.
-      # Baseline al 2026-08-17: 0 errores, ~1.508 warnings. El techo lleva una
-      # holgura minima porque el conteo se midio en Windows; se ajusta al valor
-      # exacto del runner tras la primera corrida verde.
-      - run: npx eslint "{src,apps,libs,test}/**/*.ts" --max-warnings 1520
+      # Baseline exacto al 2026-08-17: 0 errores, 1.508 warnings.
+      # El codigo se formateo una vez con prettier (117 archivos) en este mismo
+      # PR: hasta entonces `npm run lint` corria con `--fix` y auto-corregia
+      # 1.418 desviaciones de formato antes de reportar, con lo cual nunca se
+      # veian. Al sacar el `--fix` quedaron expuestas y se resolvieron de raiz.
+      - run: npx eslint "{src,apps,libs,test}/**/*.ts" --max-warnings 1508
 
   test-backend:
     runs-on: ubuntu-latest

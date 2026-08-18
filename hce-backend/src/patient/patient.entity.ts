@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * PatientEntity (`fhir_patients`).
@@ -7,7 +14,9 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
  * con el mismo número de documento y distinto sexo; por eso el DNI NO es único por sí solo.
  */
 @Entity('fhir_patients')
-@Index('uq_patient_dni_gender_tenant', ['dni', 'gender', 'tenantId'], { unique: true })
+@Index('uq_patient_dni_gender_tenant', ['dni', 'gender', 'tenantId'], {
+  unique: true,
+})
 export class PatientEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

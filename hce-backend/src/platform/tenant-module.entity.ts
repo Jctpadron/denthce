@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * TenantModuleEntity (`tenant_modules`) — entitlements: qué módulos contrató cada clínica.
@@ -23,11 +30,19 @@ export class TenantModuleEntity {
   @Column({ type: 'boolean', default: true })
   enabled: boolean;
 
-  @Column({ name: 'activated_at', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'activated_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   activatedAt: Date | null;
 
   /** Vencimiento de la contratación. Null = sin vencimiento. Pasado = se considera inactivo. */
-  @Column({ name: 'expires_at', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'expires_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   expiresAt: Date | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })

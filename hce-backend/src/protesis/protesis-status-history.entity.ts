@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ProtesisOrder } from './protesis-order.entity';
 
 @Entity('protesis_status_history')
@@ -21,7 +28,12 @@ export class ProtesisStatusHistory {
   @Column({ name: 'changed_by_name', type: 'varchar', nullable: true })
   changedByName?: string | null;
 
-  @Column({ name: 'actor_type', type: 'varchar', length: 20, default: 'clinica' })
+  @Column({
+    name: 'actor_type',
+    type: 'varchar',
+    length: 20,
+    default: 'clinica',
+  })
   actorType: string;
 
   @Column({ type: 'text', nullable: true })
@@ -30,7 +42,9 @@ export class ProtesisStatusHistory {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => ProtesisOrder, (order) => order.statusHistory, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ProtesisOrder, (order) => order.statusHistory, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'order_id' })
   order: ProtesisOrder;
 }

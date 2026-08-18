@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('fhir_medication_requests')
 export class MedicationRequestEntity {
@@ -28,7 +34,11 @@ export class MedicationRequestEntity {
   @Column({ name: 'signed_by', nullable: true })
   signedBy: string;
 
-  @Column({ name: 'signed_at', type: 'timestamp with time zone', nullable: true })
+  @Column({
+    name: 'signed_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   signedAt: Date;
 
   @Column({ name: 'content_hash', nullable: true })

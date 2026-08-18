@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * Auditoría INMUTABLE (append-only) de evidencia clínica sensible: firma de conformidad del paciente
@@ -15,7 +21,11 @@ export type EvidenceAuditAction =
   | 'ATTACH_DELETE';
 
 @Entity('clinical_evidence_audit_log')
-@Index('idx_evidence_audit_tenant_entity', ['tenantId', 'entityType', 'entityId'])
+@Index('idx_evidence_audit_tenant_entity', [
+  'tenantId',
+  'entityType',
+  'entityId',
+])
 @Index('idx_evidence_audit_tenant_patient', ['tenantId', 'patientId'])
 export class ClinicalEvidenceAuditEntity {
   @PrimaryGeneratedColumn('uuid')

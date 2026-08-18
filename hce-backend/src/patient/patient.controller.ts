@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PatientService } from './patient.service';
 import { PatientAuditService } from './patient-audit.service';
@@ -17,14 +27,22 @@ export class PatientController {
   private getUserCtx(req: any) {
     return {
       userId: req.user?.userId || req.user?.sub || 'unknown',
-      userName: req.user?.preferred_username || req.user?.name || req.user?.username || 'Desconocido',
+      userName:
+        req.user?.preferred_username ||
+        req.user?.name ||
+        req.user?.username ||
+        'Desconocido',
     };
   }
 
   @Post()
   @Roles('medico', 'recepcionista', 'administrador')
   async create(@Body() fhirPatient: any, @Request() req: any) {
-    return this.patientService.create(fhirPatient, req.user.tenantId, this.getUserCtx(req));
+    return this.patientService.create(
+      fhirPatient,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 
   @Get()
@@ -42,13 +60,16 @@ export class PatientController {
       extractedDni = identifier.split('|')[1];
     }
 
-    return this.patientService.search({
-      dni: extractedDni,
-      gender,
-      name,
-      age,
-      admissionDate,
-    }, req.user.tenantId);
+    return this.patientService.search(
+      {
+        dni: extractedDni,
+        gender,
+        name,
+        age,
+        admissionDate,
+      },
+      req.user.tenantId,
+    );
   }
 
   @Get(':id/audit')
@@ -65,7 +86,16 @@ export class PatientController {
 
   @Put(':id')
   @Roles('medico', 'recepcionista', 'administrador')
-  async update(@Param('id') id: string, @Body() fhirPatient: any, @Request() req: any) {
-    return this.patientService.update(id, fhirPatient, req.user.tenantId, this.getUserCtx(req));
+  async update(
+    @Param('id') id: string,
+    @Body() fhirPatient: any,
+    @Request() req: any,
+  ) {
+    return this.patientService.update(
+      id,
+      fhirPatient,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 }

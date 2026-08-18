@@ -29,8 +29,14 @@ describe('ClinicalResourceService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ClinicalResourceService,
-        { provide: getRepositoryToken(ClinicalResourceEntity), useValue: resourceRepository },
-        { provide: getRepositoryToken(PatientEntity), useValue: patientRepository },
+        {
+          provide: getRepositoryToken(ClinicalResourceEntity),
+          useValue: resourceRepository,
+        },
+        {
+          provide: getRepositoryToken(PatientEntity),
+          useValue: patientRepository,
+        },
       ],
     }).compile();
 
@@ -40,7 +46,10 @@ describe('ClinicalResourceService', () => {
   });
 
   it('guarda AllergyIntolerance como FHIR R4 usando patient y no subject', async () => {
-    patientRepo.findOne.mockResolvedValue({ id: patientId, tenantId } as PatientEntity);
+    patientRepo.findOne.mockResolvedValue({
+      id: patientId,
+      tenantId,
+    } as PatientEntity);
     resourceRepo.save.mockImplementation(async (entity) => ({
       ...(entity as ClinicalResourceEntity),
       id: 'allergy-1',
@@ -67,7 +76,10 @@ describe('ClinicalResourceService', () => {
   });
 
   it('guarda Condition odontologica con subject y sin patient', async () => {
-    patientRepo.findOne.mockResolvedValue({ id: patientId, tenantId } as PatientEntity);
+    patientRepo.findOne.mockResolvedValue({
+      id: patientId,
+      tenantId,
+    } as PatientEntity);
     resourceRepo.find.mockResolvedValue([]);
     resourceRepo.save.mockImplementation(async (entity) => ({
       ...(entity as ClinicalResourceEntity),
@@ -96,11 +108,18 @@ describe('ClinicalResourceService', () => {
     patientRepo.findOne.mockResolvedValue(null);
 
     await expect(
-      service.saveResource(patientId, 'AllergyIntolerance', { criticality: 'high' }, tenantId),
+      service.saveResource(
+        patientId,
+        'AllergyIntolerance',
+        { criticality: 'high' },
+        tenantId,
+      ),
     ).rejects.toThrow(NotFoundException);
   });
 
   it('rechaza tipos FHIR no permitidos', async () => {
-    await expect(service.saveResource(patientId, 'Claim', {}, tenantId)).rejects.toThrow(BadRequestException);
+    await expect(
+      service.saveResource(patientId, 'Claim', {}, tenantId),
+    ).rejects.toThrow(BadRequestException);
   });
 });

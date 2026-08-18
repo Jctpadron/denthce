@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TenantConfigEntity } from '../tenant/tenant-config.entity';
@@ -39,7 +44,9 @@ export class SuperAdminService {
 
   /** Catálogo de módulos contratables. */
   async catalog(): Promise<PlatformModuleEntity[]> {
-    return this.platformModuleRepo.find({ order: { isBase: 'DESC', key: 'ASC' } });
+    return this.platformModuleRepo.find({
+      order: { isBase: 'DESC', key: 'ASC' },
+    });
   }
 
   /** Lista TODAS las clínicas con su plan, estado y módulos activos. */
@@ -51,7 +58,9 @@ export class SuperAdminService {
     return configs.map((c) => {
       const mods = allModules.filter((m) => m.tenantId === c.tenantId);
       const activeModules = mods
-        .filter((m) => m.enabled && (!m.expiresAt || m.expiresAt.getTime() > now))
+        .filter(
+          (m) => m.enabled && (!m.expiresAt || m.expiresAt.getTime() > now),
+        )
         .map((m) => m.moduleKey);
       return {
         tenantId: c.tenantId,
@@ -77,14 +86,23 @@ export class SuperAdminService {
     adminFirstName: string;
     adminLastName: string;
   }): Promise<any> {
-    const tenantId = (dto.tenantId || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+    const tenantId = (dto.tenantId || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '_');
     if (!tenantId || !dto.name || !dto.adminUsername || !dto.adminEmail) {
-      throw new BadRequestException('tenantId, name, adminUsername y adminEmail son obligatorios.');
+      throw new BadRequestException(
+        'tenantId, name, adminUsername y adminEmail son obligatorios.',
+      );
     }
 
-    const existing = await this.tenantConfigRepo.findOne({ where: { tenantId } });
+    const existing = await this.tenantConfigRepo.findOne({
+      where: { tenantId },
+    });
     if (existing) {
-      throw new ConflictException(`Ya existe una clínica con el tenant "${tenantId}".`);
+      throw new ConflictException(
+        `Ya existe una clínica con el tenant "${tenantId}".`,
+      );
     }
 
     // 1. tenant_config
@@ -155,12 +173,19 @@ export class SuperAdminService {
     adminFirstName: string;
     adminLastName: string;
   }): Promise<any> {
-    const tenantId = (dto.tenantId || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+    const tenantId = (dto.tenantId || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '_');
     if (!tenantId || !dto.name || !dto.adminUsername || !dto.adminEmail) {
-      throw new BadRequestException('tenantId, name, adminUsername y adminEmail son obligatorios.');
+      throw new BadRequestException(
+        'tenantId, name, adminUsername y adminEmail son obligatorios.',
+      );
     }
 
-    const existing = await this.tenantConfigRepo.findOne({ where: { tenantId } });
+    const existing = await this.tenantConfigRepo.findOne({
+      where: { tenantId },
+    });
     if (existing) {
       throw new ConflictException(`Ya existe un tenant "${tenantId}".`);
     }
@@ -176,12 +201,21 @@ export class SuperAdminService {
     await this.tenantConfigRepo.save(config);
 
     // 2. Entitlement: el laboratorio solo necesita el módulo del portal de prótesis.
-    const protesisModule = await this.platformModuleRepo.findOne({ where: { key: 'protesis-lab' } });
+    const protesisModule = await this.platformModuleRepo.findOne({
+      where: { key: 'protesis-lab' },
+    });
     if (!protesisModule) {
-      throw new BadRequestException('El módulo "protesis-lab" no está en el catálogo. Registralo antes de dar de alta laboratorios.');
+      throw new BadRequestException(
+        'El módulo "protesis-lab" no está en el catálogo. Registralo antes de dar de alta laboratorios.',
+      );
     }
     await this.tenantModuleRepo.save(
-      this.tenantModuleRepo.create({ tenantId, moduleKey: 'protesis-lab', enabled: true, activatedAt: new Date() }),
+      this.tenantModuleRepo.create({
+        tenantId,
+        moduleKey: 'protesis-lab',
+        enabled: true,
+        activatedAt: new Date(),
+      }),
     );
 
     // 3. Usuario admin del laboratorio en Keycloak (rol laboratorio-admin + tenant_id del lab).
@@ -194,14 +228,22 @@ export class SuperAdminService {
         role: 'laboratorio-admin',
         tenantId,
       });
-      return { tenantId, labName: dto.name, modules: ['protesis-lab'], adminCreated: true, admin };
+      return {
+        tenantId,
+        labName: dto.name,
+        modules: ['protesis-lab'],
+        adminCreated: true,
+        admin,
+      };
     } catch (e: any) {
       return {
         tenantId,
         labName: dto.name,
         modules: ['protesis-lab'],
         adminCreated: false,
-        adminError: e?.message || 'No se pudo crear el usuario administrador del laboratorio.',
+        adminError:
+          e?.message ||
+          'No se pudo crear el usuario administrador del laboratorio.',
       };
     }
   }
@@ -218,12 +260,20 @@ export class SuperAdminService {
     pairingCode?: string,
   ): Promise<any> {
     const clinic = await this.tenantConfigRepo.findOne({ where: { tenantId } });
-    if (!clinic) throw new NotFoundException(`Clínica "${tenantId}" no encontrada.`);
+    if (!clinic)
+      throw new NotFoundException(`Clínica "${tenantId}" no encontrada.`);
 
-    const module = await this.platformModuleRepo.findOne({ where: { key: moduleKey } });
-    if (!module) throw new BadRequestException(`Módulo "${moduleKey}" no existe en el catálogo.`);
+    const module = await this.platformModuleRepo.findOne({
+      where: { key: moduleKey },
+    });
+    if (!module)
+      throw new BadRequestException(
+        `Módulo "${moduleKey}" no existe en el catálogo.`,
+      );
     if (module.isBase && !enabled) {
-      throw new BadRequestException(`El módulo "${moduleKey}" es parte del producto base y no se puede dar de baja.`);
+      throw new BadRequestException(
+        `El módulo "${moduleKey}" es parte del producto base y no se puede dar de baja.`,
+      );
     }
 
     // WhatsApp es un servicio orquestado: antes de anexar/dar de baja el entitlement,
@@ -237,7 +287,9 @@ export class SuperAdminService {
       }
     }
 
-    let tm = await this.tenantModuleRepo.findOne({ where: { tenantId, moduleKey } });
+    let tm = await this.tenantModuleRepo.findOne({
+      where: { tenantId, moduleKey },
+    });
     if (!tm) {
       tm = this.tenantModuleRepo.create({ tenantId, moduleKey });
     }
@@ -246,7 +298,12 @@ export class SuperAdminService {
     if (enabled && !tm.activatedAt) tm.activatedAt = new Date();
     await this.tenantModuleRepo.save(tm);
 
-    return { tenantId, moduleKey, enabled: tm.enabled, expiresAt: tm.expiresAt };
+    return {
+      tenantId,
+      moduleKey,
+      enabled: tm.enabled,
+      expiresAt: tm.expiresAt,
+    };
   }
 
   /**
@@ -255,7 +312,8 @@ export class SuperAdminService {
    */
   async generateServiceAccount(tenantId: string): Promise<any> {
     const clinic = await this.tenantConfigRepo.findOne({ where: { tenantId } });
-    if (!clinic) throw new NotFoundException(`Clínica "${tenantId}" no encontrada.`);
+    if (!clinic)
+      throw new NotFoundException(`Clínica "${tenantId}" no encontrada.`);
     return this.keycloakAdmin.createClinicServiceAccount(tenantId);
   }
 

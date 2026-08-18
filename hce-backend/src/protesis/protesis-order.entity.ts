@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { ProtesisChat } from './protesis-chat.entity';
 import { ProtesisStatusHistory } from './protesis-status-history.entity';
 import { ProtesisPago } from './protesis-pago.entity';
@@ -70,10 +76,22 @@ export class ProtesisOrder {
   } | null;
 
   // --- Campos financieros ---
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'presupuesto_estimado', nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    name: 'presupuesto_estimado',
+    nullable: true,
+  })
   presupuestoEstimado?: number | null;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'presupuesto_final', nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    name: 'presupuesto_final',
+    nullable: true,
+  })
   presupuestoFinal?: number | null;
 
   @Column({ type: 'date', name: 'fecha_vencimiento', nullable: true })
@@ -86,12 +104,16 @@ export class ProtesisOrder {
   @OneToMany(() => ProtesisChat, (chat) => chat.order, { cascade: true })
   messages: ProtesisChat[];
 
-  @OneToMany(() => ProtesisStatusHistory, (history) => history.order, { cascade: true })
+  @OneToMany(() => ProtesisStatusHistory, (history) => history.order, {
+    cascade: true,
+  })
   statusHistory: ProtesisStatusHistory[];
 
   @OneToMany(() => ProtesisPago, (pago) => pago.order, { cascade: true })
   pagos: ProtesisPago[];
 
-  @OneToMany(() => ProtesisConsumoInsumo, (consumo) => consumo.order, { cascade: true })
+  @OneToMany(() => ProtesisConsumoInsumo, (consumo) => consumo.order, {
+    cascade: true,
+  })
   consumos: ProtesisConsumoInsumo[];
 }

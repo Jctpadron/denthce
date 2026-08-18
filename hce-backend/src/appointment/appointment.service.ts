@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppointmentEntity } from './appointment.entity';
@@ -10,7 +16,8 @@ import { ModulesService } from '../platform/modules.service';
 /** Clave del módulo de integración WhatsApp/CliniChat en el catálogo de servicios. */
 const WHATSAPP_MODULE = 'whatsapp';
 
-const ORIGIN_CHANNEL_EXT = 'http://hospital.gov/fhir/StructureDefinition/origin-channel';
+const ORIGIN_CHANNEL_EXT =
+  'http://hospital.gov/fhir/StructureDefinition/origin-channel';
 const STATUSES_REQUIRING_END = ['booked', 'arrived', 'fulfilled'];
 
 type ActorCtx = {
@@ -39,29 +46,39 @@ export class AppointmentService {
     const patientDni = dto.patientDni || null;
     const gender = dto.gender || 'unknown';
     const start = dto.start || dto.startDate;
-    const serviceType = dto.serviceType || (Array.isArray(dto.serviceType) ? dto.serviceType?.[0]?.text : undefined);
+    const serviceType =
+      dto.serviceType ||
+      (Array.isArray(dto.serviceType) ? dto.serviceType?.[0]?.text : undefined);
     const practitionerName = dto.practitionerName || null;
     const practitionerRef = dto.practitionerRef || null;
     const status = dto.status || 'booked';
     const originChannel = dto.originChannel || 'recepcion';
     const idempotencyKey = dto.idempotencyKey || null;
-    const minutesDuration = dto.minutesDuration ? parseInt(String(dto.minutesDuration), 10) : 30;
+    const minutesDuration = dto.minutesDuration
+      ? parseInt(String(dto.minutesDuration), 10)
+      : 30;
 
     if (!start) {
-      throw new BadRequestException('Falta la fecha/hora de inicio del turno (start).');
+      throw new BadRequestException(
+        'Falta la fecha/hora de inicio del turno (start).',
+      );
     }
 
     // Calcular start y end del nuevo turno para verificar colisiones y reglas FHIR
     const startDate = new Date(start);
-    let endDate: Date | null = dto.end || dto.endDate ? new Date(dto.end || dto.endDate) : null;
+    let endDate: Date | null =
+      dto.end || dto.endDate ? new Date(dto.end || dto.endDate) : null;
     if (!endDate && STATUSES_REQUIRING_END.includes(status)) {
       endDate = new Date(startDate.getTime() + minutesDuration * 60000);
     }
-    const finalEnd = endDate || new Date(startDate.getTime() + minutesDuration * 60000);
+    const finalEnd =
+      endDate || new Date(startDate.getTime() + minutesDuration * 60000);
 
     // Idempotencia: si ya existe un turno con esa key en el tenant, devolverlo en vez de crear otro.
     if (idempotencyKey) {
-      const dup = await this.appointmentRepository.findOne({ where: { idempotencyKey, tenantId } });
+      const dup = await this.appointmentRepository.findOne({
+        where: { idempotencyKey, tenantId },
+      });
       if (dup) {
         return dup.payload;
       }
@@ -74,7 +91,9 @@ export class AppointmentService {
       const collision = await this.appointmentRepository
         .createQueryBuilder('appt')
         .where('appt.tenant_id = :tenantId', { tenantId })
-        .andWhere('appt.status != :cancelledStatus', { cancelledStatus: 'cancelled' })
+        .andWhere('appt.status != :cancelledStatus', {
+          cancelledStatus: 'cancelled',
+        })
         .andWhere('appt.start_date < :newEnd', { newEnd: finalEnd })
         .andWhere('appt.end_date > :newStart', { newStart: startDate })
         .getOne();
@@ -90,7 +109,8 @@ export class AppointmentService {
               details: {
                 coding: [
                   {
-                    system: 'http://hospital.gov/fhir/StructureDefinition/appointment-errors',
+                    system:
+                      'http://hospital.gov/fhir/StructureDefinition/appointment-errors',
                     code: 'slot-unavailable',
                     display: 'Slot ocupado o no disponible',
                   },
@@ -107,7 +127,9 @@ export class AppointmentService {
     let patientId: string | null = null;
     let patientDisplay: string | undefined;
     if (patientDni) {
-      const patient = await this.patientRepository.findOne({ where: { dni: patientDni, gender, tenantId } });
+      const patient = await this.patientRepository.findOne({
+        where: { dni: patientDni, gender, tenantId },
+      });
       if (!patient) {
         throw new NotFoundException(
           `No existe un paciente con DNI ${patientDni} y sexo ${gender} en tu consultorio. Registrá el paciente antes de agendar el turno.`,
@@ -130,13 +152,18 @@ export class AppointmentService {
     entity.originChannel = originChannel;
     entity.idempotencyKey = idempotencyKey;
     const prioNum = Number(dto.priority);
-    entity.priority = Number.isInteger(prioNum) && prioNum >= 1 && prioNum <= 5 ? prioNum : null;
+    entity.priority =
+      Number.isInteger(prioNum) && prioNum >= 1 && prioNum <= 5
+        ? prioNum
+        : null;
 
     entity.payload = this.buildFhir(entity, patientDisplay, dto.comment);
 
     const saved = await this.appointmentRepository.save(entity);
     saved.payload.id = saved.id;
-    await this.appointmentRepository.update(saved.id, { payload: saved.payload });
+    await this.appointmentRepository.update(saved.id, {
+      payload: saved.payload,
+    });
 
     await this.auditService.log({
       appointmentId: saved.id,
@@ -151,7 +178,10 @@ export class AppointmentService {
 
     // Disparar Webhook a CliniChat solo si el origen es Recepción (evitar bucles con WhatsApp)
     // Y solo si la clínica tiene contratado el módulo WhatsApp (gate de servicio anexable).
-    if (saved.originChannel === 'recepcion' && (await this.modulesService.isEnabled(tenantId, WHATSAPP_MODULE))) {
+    if (
+      saved.originChannel === 'recepcion' &&
+      (await this.modulesService.isEnabled(tenantId, WHATSAPP_MODULE))
+    ) {
       this.webhookService.dispatch('CREATE', saved, tenantId).catch(() => {});
     }
 
@@ -159,18 +189,31 @@ export class AppointmentService {
   }
 
   async findOne(id: string, tenantId: string): Promise<any> {
-    const appt = await this.appointmentRepository.findOne({ where: { id, tenantId } });
+    const appt = await this.appointmentRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!appt) {
-      throw new NotFoundException(`Turno con ID ${id} no encontrado en tu consultorio.`);
+      throw new NotFoundException(
+        `Turno con ID ${id} no encontrado en tu consultorio.`,
+      );
     }
     return appt.payload;
   }
 
   /** Cancela un turno: status='cancelled' + motivo, auditado. */
-  async cancel(id: string, reason: string | undefined, tenantId: string, actor: ActorCtx): Promise<any> {
-    const appt = await this.appointmentRepository.findOne({ where: { id, tenantId } });
+  async cancel(
+    id: string,
+    reason: string | undefined,
+    tenantId: string,
+    actor: ActorCtx,
+  ): Promise<any> {
+    const appt = await this.appointmentRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!appt) {
-      throw new NotFoundException(`Turno con ID ${id} no encontrado en tu consultorio.`);
+      throw new NotFoundException(
+        `Turno con ID ${id} no encontrado en tu consultorio.`,
+      );
     }
 
     appt.status = 'cancelled';
@@ -183,7 +226,9 @@ export class AppointmentService {
     // El participante paciente pasa a 'declined' al cancelar (FHIR).
     if (Array.isArray(appt.payload.participant)) {
       appt.payload.participant = appt.payload.participant.map((p: any) =>
-        p?.actor?.reference?.startsWith('Patient/') ? { ...p, status: 'declined' } : p,
+        p?.actor?.reference?.startsWith('Patient/')
+          ? { ...p, status: 'declined' }
+          : p,
       );
     }
 
@@ -226,9 +271,13 @@ export class AppointmentService {
       );
     }
 
-    const appt = await this.appointmentRepository.findOne({ where: { id, tenantId } });
+    const appt = await this.appointmentRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!appt) {
-      throw new NotFoundException(`Turno con ID ${id} no encontrado en tu consultorio.`);
+      throw new NotFoundException(
+        `Turno con ID ${id} no encontrado en tu consultorio.`,
+      );
     }
 
     appt.status = newStatus;
@@ -238,7 +287,9 @@ export class AppointmentService {
     if (priority !== undefined && priority !== null) {
       const p = Number(priority);
       if (!Number.isInteger(p) || p < 1 || p > 5) {
-        throw new BadRequestException('La prioridad debe ser un entero entre 1 (más urgente) y 5.');
+        throw new BadRequestException(
+          'La prioridad debe ser un entero entre 1 (más urgente) y 5.',
+        );
       }
       appt.priority = p;
       appt.payload.priority = p;
@@ -272,9 +323,13 @@ export class AppointmentService {
         'El módulo WhatsApp no está contratado para esta clínica. Contratá el servicio para enviar recordatorios.',
       );
     }
-    const appt = await this.appointmentRepository.findOne({ where: { id, tenantId } });
+    const appt = await this.appointmentRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!appt) {
-      throw new NotFoundException(`Turno con ID ${id} no encontrado en tu consultorio.`);
+      throw new NotFoundException(
+        `Turno con ID ${id} no encontrado en tu consultorio.`,
+      );
     }
     if (!['booked', 'arrived', 'proposed'].includes(appt.status)) {
       throw new BadRequestException(
@@ -287,7 +342,14 @@ export class AppointmentService {
 
   /** Búsqueda tenant-scoped (Zero Trust) que devuelve un Bundle FHIR searchset. */
   async search(
-    query: { date?: string; dateFrom?: string; dateTo?: string; patient?: string; practitioner?: string; status?: string },
+    query: {
+      date?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      patient?: string;
+      practitioner?: string;
+      status?: string;
+    },
     tenantId: string,
   ): Promise<any> {
     const qb = this.appointmentRepository.createQueryBuilder('appt');
@@ -303,13 +365,19 @@ export class AppointmentService {
       qb.andWhere('appt.start_date <= :dateTo', { dateTo: query.dateTo });
     }
     if (query.patient) {
-      qb.andWhere('(appt.patient_id = :patient OR appt.patient_dni = :patient)', { patient: query.patient });
+      qb.andWhere(
+        '(appt.patient_id = :patient OR appt.patient_dni = :patient)',
+        { patient: query.patient },
+      );
     }
     if (query.practitioner) {
-      qb.andWhere('(appt.practitioner_ref = :pr OR LOWER(appt.practitioner_name) LIKE LOWER(:prLike))', {
-        pr: query.practitioner,
-        prLike: `%${query.practitioner}%`,
-      });
+      qb.andWhere(
+        '(appt.practitioner_ref = :pr OR LOWER(appt.practitioner_name) LIKE LOWER(:prLike))',
+        {
+          pr: query.practitioner,
+          prLike: `%${query.practitioner}%`,
+        },
+      );
     }
     if (query.status) {
       qb.andWhere('appt.status = :status', { status: query.status });
@@ -330,11 +398,18 @@ export class AppointmentService {
   }
 
   // --- Auxiliar: arma el recurso FHIR R4 Appointment ---
-  private buildFhir(entity: AppointmentEntity, patientDisplay: string | undefined, comment?: string): any {
+  private buildFhir(
+    entity: AppointmentEntity,
+    patientDisplay: string | undefined,
+    comment?: string,
+  ): any {
     const participant: any[] = [];
     if (entity.patientId) {
       participant.push({
-        actor: { reference: `Patient/${entity.patientId}`, display: patientDisplay },
+        actor: {
+          reference: `Patient/${entity.patientId}`,
+          display: patientDisplay,
+        },
         status: 'accepted',
         required: 'required',
       });
@@ -354,7 +429,9 @@ export class AppointmentService {
       resourceType: 'Appointment',
       status: entity.status,
       priority: entity.priority ?? undefined,
-      serviceType: entity.serviceType ? [{ text: entity.serviceType }] : undefined,
+      serviceType: entity.serviceType
+        ? [{ text: entity.serviceType }]
+        : undefined,
       start: entity.startDate.toISOString(),
       end: entity.endDate ? entity.endDate.toISOString() : undefined,
       created: new Date().toISOString(),

@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, In, IsNull } from 'typeorm';
 import { ClinicalPrecio } from './clinical-precio.entity';
@@ -32,7 +38,7 @@ export interface CreatePresupuestoDto {
   obraSocial?: string;
   cantidadCuotas?: number;
   fechaPresentacion?: string; // ISO date (YYYY-MM-DD)
-  fechaLiquidacion?: string;  // ISO date (YYYY-MM-DD)
+  fechaLiquidacion?: string; // ISO date (YYYY-MM-DD)
   items: CreatePresupuestoItemDto[];
 }
 
@@ -42,11 +48,11 @@ export interface CreatePresupuestoItemDto {
   codigoNomenclador?: string; // código de facturación a la OS (distinto del SNOMED clínico)
   diente?: string;
   cara?: string;
-  detalle?: string;           // texto libre (puentes multi-pieza, notas)
+  detalle?: string; // texto libre (puentes multi-pieza, notas)
   cantidad?: number;
   precioUnitario: number;
   orden?: number;
-  sourceResourceId?: string;  // recurso FHIR planificado que originó la línea
+  sourceResourceId?: string; // recurso FHIR planificado que originó la línea
 }
 
 export interface RegistrarPagoDto {
@@ -86,7 +92,8 @@ const ESTADOS_VALIDOS: Record<string, string[]> = {
   vencido: [],
 };
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**
  * Estados que DEVENGAN deuda. Definicion unica para todo el modulo.
@@ -119,11 +126,19 @@ export class ClinicaFinanzasService {
   // ========== NOMENCLADOR ==========
 
   async getNomenclador(tenantId: string): Promise<ClinicalPrecio[]> {
-    return this.precioRepo.find({ where: { tenantId, active: true }, order: { snomedDisplay: 'ASC' } });
+    return this.precioRepo.find({
+      where: { tenantId, active: true },
+      order: { snomedDisplay: 'ASC' },
+    });
   }
 
-  async upsertPrecio(tenantId: string, dto: CreatePrecioDto): Promise<ClinicalPrecio> {
-    const existing = await this.precioRepo.findOne({ where: { tenantId, snomedCode: dto.snomedCode } });
+  async upsertPrecio(
+    tenantId: string,
+    dto: CreatePrecioDto,
+  ): Promise<ClinicalPrecio> {
+    const existing = await this.precioRepo.findOne({
+      where: { tenantId, snomedCode: dto.snomedCode },
+    });
     if (existing) {
       existing.precio = dto.precio;
       existing.snomedDisplay = dto.snomedDisplay;
@@ -132,7 +147,11 @@ export class ClinicaFinanzasService {
     return this.precioRepo.save(this.precioRepo.create({ ...dto, tenantId }));
   }
 
-  async updatePrecio(tenantId: string, id: string, dto: UpdatePrecioDto): Promise<ClinicalPrecio> {
+  async updatePrecio(
+    tenantId: string,
+    id: string,
+    dto: UpdatePrecioDto,
+  ): Promise<ClinicalPrecio> {
     const precio = await this.precioRepo.findOne({ where: { id, tenantId } });
     if (!precio) throw new NotFoundException('Precio no encontrado');
     Object.assign(precio, dto);
@@ -148,32 +167,53 @@ export class ClinicaFinanzasService {
 
   // ========== PRESUPUESTOS ==========
 
-  async getPresupuestos(tenantId: string, filters?: { patientId?: string; estado?: string }): Promise<any[]> {
+  async getPresupuestos(
+    tenantId: string,
+    filters?: { patientId?: string; estado?: string },
+  ): Promise<any[]> {
     const where: any = { tenantId };
     if (filters?.patientId) where.patientId = filters.patientId;
     if (filters?.estado) where.estado = filters.estado;
-    const presupuestos = await this.presupuestoRepo.find({ where, relations: { items: true, pagos: true }, order: { createdAt: 'DESC' } });
+    const presupuestos = await this.presupuestoRepo.find({
+      where,
+      relations: { items: true, pagos: true },
+      order: { createdAt: 'DESC' },
+    });
     return this.enrichWithPatientIdentity(tenantId, presupuestos);
   }
 
   async getPresupuesto(tenantId: string, id: string): Promise<any> {
-    const p = await this.presupuestoRepo.findOne({ where: { id, tenantId }, relations: { items: true, pagos: true } });
+    const p = await this.presupuestoRepo.findOne({
+      where: { id, tenantId },
+      relations: { items: true, pagos: true },
+    });
     if (!p) throw new NotFoundException('Presupuesto no encontrado');
     const [enriched] = await this.enrichWithPatientIdentity(tenantId, [p]);
     return enriched;
   }
 
-  async createPresupuesto(tenantId: string, dto: CreatePresupuestoDto, userId: string): Promise<ClinicalPresupuesto> {
+  async createPresupuesto(
+    tenantId: string,
+    dto: CreatePresupuestoDto,
+    userId: string,
+  ): Promise<ClinicalPresupuesto> {
     if (!dto.patientId || !UUID_RE.test(dto.patientId)) {
-      throw new BadRequestException('Selecciona un paciente valido antes de guardar el presupuesto');
+      throw new BadRequestException(
+        'Selecciona un paciente valido antes de guardar el presupuesto',
+      );
     }
     await this.assertPatientBelongsToTenant(tenantId, dto.patientId);
 
     if (!dto.items || dto.items.length === 0) {
-      throw new BadRequestException('El presupuesto debe tener al menos un item');
+      throw new BadRequestException(
+        'El presupuesto debe tener al menos un item',
+      );
     }
 
-    const subtotal = dto.items.reduce((s, i) => s + (i.precioUnitario * (i.cantidad || 1)), 0);
+    const subtotal = dto.items.reduce(
+      (s, i) => s + i.precioUnitario * (i.cantidad || 1),
+      0,
+    );
     const descuento = dto.descuento || 0;
     const total = Math.max(0, subtotal - descuento);
     const senhaPorcentaje = dto.senhaPorcentaje || 30;
@@ -195,8 +235,12 @@ export class ClinicaFinanzasService {
       rxPresentadas: dto.rxPresentadas ?? null,
       obraSocial: dto.obraSocial ?? null,
       cantidadCuotas: dto.cantidadCuotas ?? null,
-      fechaPresentacion: dto.fechaPresentacion ? new Date(dto.fechaPresentacion) : null,
-      fechaLiquidacion: dto.fechaLiquidacion ? new Date(dto.fechaLiquidacion) : null,
+      fechaPresentacion: dto.fechaPresentacion
+        ? new Date(dto.fechaPresentacion)
+        : null,
+      fechaLiquidacion: dto.fechaLiquidacion
+        ? new Date(dto.fechaLiquidacion)
+        : null,
       createdBy: userId,
     });
 
@@ -217,23 +261,33 @@ export class ClinicaFinanzasService {
         precioUnitario: item.precioUnitario,
         subtotal: item.precioUnitario * (item.cantidad || 1),
         orden: item.orden ?? i,
-      })
+      }),
     );
     await this.presupuestoItemRepo.save(items);
 
     return this.getPresupuesto(tenantId, saved.id);
   }
 
-  async updatePresupuesto(tenantId: string, id: string, dto: Partial<CreatePresupuestoDto>, userId: string): Promise<ClinicalPresupuesto> {
-    const presupuesto = await this.presupuestoRepo.findOne({ where: { id, tenantId } });
+  async updatePresupuesto(
+    tenantId: string,
+    id: string,
+    dto: Partial<CreatePresupuestoDto>,
+    userId: string,
+  ): Promise<ClinicalPresupuesto> {
+    const presupuesto = await this.presupuestoRepo.findOne({
+      where: { id, tenantId },
+    });
     if (!presupuesto) throw new NotFoundException('Presupuesto no encontrado');
     // DEC-4: documento vivo → editable mientras esté abierto; solo 'cancelado' bloquea.
     if (presupuesto.estado === 'cancelado') {
-      throw new ForbiddenException('No se puede editar un presupuesto cancelado');
+      throw new ForbiddenException(
+        'No se puede editar un presupuesto cancelado',
+      );
     }
 
     if (dto.items) {
-      if (dto.items.length === 0) throw new BadRequestException('Debe haber al menos un item');
+      if (dto.items.length === 0)
+        throw new BadRequestException('Debe haber al menos un item');
       await this.presupuestoItemRepo.delete({ presupuestoId: id });
       const items = dto.items.map((item, i) =>
         this.presupuestoItemRepo.create({
@@ -250,13 +304,16 @@ export class ClinicaFinanzasService {
           precioUnitario: item.precioUnitario,
           subtotal: item.precioUnitario * (item.cantidad || 1),
           orden: item.orden ?? i,
-        })
+        }),
       );
       await this.presupuestoItemRepo.save(items);
 
       const subtotal = items.reduce((s, i) => s + Number(i.subtotal), 0);
       presupuesto.subtotal = subtotal;
-      presupuesto.total = Math.max(0, subtotal - (dto.descuento ?? presupuesto.descuento));
+      presupuesto.total = Math.max(
+        0,
+        subtotal - (dto.descuento ?? presupuesto.descuento),
+      );
     }
 
     if (dto.descuento !== undefined) {
@@ -267,14 +324,21 @@ export class ClinicaFinanzasService {
       presupuesto.senhaPorcentaje = dto.senhaPorcentaje;
     }
     // Cabecera contable odontológica (aditiva, opcional)
-    if (dto.rxPresentadas !== undefined) presupuesto.rxPresentadas = dto.rxPresentadas;
+    if (dto.rxPresentadas !== undefined)
+      presupuesto.rxPresentadas = dto.rxPresentadas;
     if (dto.obraSocial !== undefined) presupuesto.obraSocial = dto.obraSocial;
-    if (dto.cantidadCuotas !== undefined) presupuesto.cantidadCuotas = dto.cantidadCuotas;
+    if (dto.cantidadCuotas !== undefined)
+      presupuesto.cantidadCuotas = dto.cantidadCuotas;
     if (dto.fechaPresentacion !== undefined)
-      presupuesto.fechaPresentacion = dto.fechaPresentacion ? new Date(dto.fechaPresentacion) : null;
+      presupuesto.fechaPresentacion = dto.fechaPresentacion
+        ? new Date(dto.fechaPresentacion)
+        : null;
     if (dto.fechaLiquidacion !== undefined)
-      presupuesto.fechaLiquidacion = dto.fechaLiquidacion ? new Date(dto.fechaLiquidacion) : null;
-    presupuesto.senhaMonto = presupuesto.total * (presupuesto.senhaPorcentaje / 100);
+      presupuesto.fechaLiquidacion = dto.fechaLiquidacion
+        ? new Date(dto.fechaLiquidacion)
+        : null;
+    presupuesto.senhaMonto =
+      presupuesto.total * (presupuesto.senhaPorcentaje / 100);
 
     await this.presupuestoRepo.save(presupuesto);
     // DEC-4: si cambió el total, re-derivar el estado desde los pagos (ej: pagado→en_curso al agregar líneas).
@@ -282,13 +346,22 @@ export class ClinicaFinanzasService {
     return this.getPresupuesto(tenantId, id);
   }
 
-  async transicionarEstado(tenantId: string, id: string, nuevoEstado: string, userId?: string): Promise<ClinicalPresupuesto> {
-    const presupuesto = await this.presupuestoRepo.findOne({ where: { id, tenantId } });
+  async transicionarEstado(
+    tenantId: string,
+    id: string,
+    nuevoEstado: string,
+    userId?: string,
+  ): Promise<ClinicalPresupuesto> {
+    const presupuesto = await this.presupuestoRepo.findOne({
+      where: { id, tenantId },
+    });
     if (!presupuesto) throw new NotFoundException('Presupuesto no encontrado');
 
     const permitidos = ESTADOS_VALIDOS[presupuesto.estado];
     if (!permitidos || !permitidos.includes(nuevoEstado)) {
-      throw new BadRequestException(`Transicion de '${presupuesto.estado}' a '${nuevoEstado}' no permitida`);
+      throw new BadRequestException(
+        `Transicion de '${presupuesto.estado}' a '${nuevoEstado}' no permitida`,
+      );
     }
 
     if (nuevoEstado === 'aceptado') {
@@ -301,33 +374,53 @@ export class ClinicaFinanzasService {
   }
 
   async deletePresupuesto(tenantId: string, id: string): Promise<void> {
-    const presupuesto = await this.presupuestoRepo.findOne({ where: { id, tenantId } });
+    const presupuesto = await this.presupuestoRepo.findOne({
+      where: { id, tenantId },
+    });
     if (!presupuesto) throw new NotFoundException('Presupuesto no encontrado');
     if (presupuesto.estado !== 'borrador') {
-      throw new ForbiddenException('Solo se puede eliminar un presupuesto en estado borrador');
+      throw new ForbiddenException(
+        'Solo se puede eliminar un presupuesto en estado borrador',
+      );
     }
     // Defensa en profundidad: un borrador no debería tener pagos (registrarPago lo impide), pero
     // si por datos legacy los tuviera, no lo borramos para no dejar pagos huérfanos.
-    const pagosVinculados = await this.pagoRepo.count({ where: { presupuestoId: id } });
+    const pagosVinculados = await this.pagoRepo.count({
+      where: { presupuestoId: id },
+    });
     if (pagosVinculados > 0) {
-      throw new ForbiddenException('No se puede eliminar un presupuesto con pagos registrados');
+      throw new ForbiddenException(
+        'No se puede eliminar un presupuesto con pagos registrados',
+      );
     }
     await this.presupuestoRepo.remove(presupuesto);
   }
 
   // ========== PAGOS ==========
 
-  async getPagos(tenantId: string, filters?: { patientId?: string; presupuestoId?: string }): Promise<any[]> {
+  async getPagos(
+    tenantId: string,
+    filters?: { patientId?: string; presupuestoId?: string },
+  ): Promise<any[]> {
     const where: any = { tenantId };
     if (filters?.patientId) where.patientId = filters.patientId;
     if (filters?.presupuestoId) where.presupuestoId = filters.presupuestoId;
-    const pagos = await this.pagoRepo.find({ where, order: { fechaPago: 'DESC' } });
+    const pagos = await this.pagoRepo.find({
+      where,
+      order: { fechaPago: 'DESC' },
+    });
     return this.enrichWithPatientIdentity(tenantId, pagos);
   }
 
-  async registrarPago(tenantId: string, dto: RegistrarPagoDto, userId: string): Promise<ClinicalPago> {
+  async registrarPago(
+    tenantId: string,
+    dto: RegistrarPagoDto,
+    userId: string,
+  ): Promise<ClinicalPago> {
     if (!dto.patientId || !UUID_RE.test(dto.patientId)) {
-      throw new BadRequestException('Selecciona un paciente valido antes de registrar el pago');
+      throw new BadRequestException(
+        'Selecciona un paciente valido antes de registrar el pago',
+      );
     }
     await this.assertPatientBelongsToTenant(tenantId, dto.patientId);
 
@@ -348,15 +441,23 @@ export class ClinicaFinanzasService {
     // DEC-1: se cobra en cualquier estado ≠ cancelado; el estado se DERIVA de los pagos.
     // Se preserva la validación cross-tenant (where incluye tenantId) y el NotFound.
     if (dto.presupuestoId) {
-      const presupuesto = await this.presupuestoRepo.findOne({ where: { id: dto.presupuestoId, tenantId } });
-      if (!presupuesto) throw new NotFoundException('Presupuesto no encontrado');
+      const presupuesto = await this.presupuestoRepo.findOne({
+        where: { id: dto.presupuestoId, tenantId },
+      });
+      if (!presupuesto)
+        throw new NotFoundException('Presupuesto no encontrado');
       if (presupuesto.estado === 'cancelado') {
-        throw new BadRequestException('No se pueden registrar pagos sobre un presupuesto cancelado.');
+        throw new BadRequestException(
+          'No se pueden registrar pagos sobre un presupuesto cancelado.',
+        );
       }
       // No se puede cobrar mas que el saldo pendiente. Sin esto, el excedente
       // resta en deudaActual del paciente y ENMASCARA la deuda de otros
       // presupuestos: un moroso aparece al dia.
-      const yaPagado = await this.sumarPagosVigentes(tenantId, dto.presupuestoId);
+      const yaPagado = await this.sumarPagosVigentes(
+        tenantId,
+        dto.presupuestoId,
+      );
       const saldoPendiente = Number(presupuesto.total) - yaPagado;
       // Tolerancia de medio centavo: los importes son NUMERIC(12,2) y la suma se
       // hace en punto flotante, asi que un pago que salda exacto podria quedar
@@ -394,7 +495,12 @@ export class ClinicaFinanzasService {
    * Un pago anulado deja de contar en el saldo → recalcula el estado del presupuesto (puede BAJAR).
    * Roles: administrador/médico (recepcionista NO revierte su propio cobro).
    */
-  async anularPago(tenantId: string, id: string, dto: AnularPagoDto, userId: string): Promise<ClinicalPago> {
+  async anularPago(
+    tenantId: string,
+    id: string,
+    dto: AnularPagoDto,
+    userId: string,
+  ): Promise<ClinicalPago> {
     if (!dto?.motivo || !dto.motivo.trim()) {
       throw new BadRequestException('El motivo de anulación es obligatorio');
     }
@@ -421,7 +527,10 @@ export class ClinicaFinanzasService {
 
   // ========== GASTOS ==========
 
-  async getGastos(tenantId: string, filters?: { categoria?: string; desde?: Date; hasta?: Date }): Promise<ClinicalGasto[]> {
+  async getGastos(
+    tenantId: string,
+    filters?: { categoria?: string; desde?: Date; hasta?: Date },
+  ): Promise<ClinicalGasto[]> {
     const where: any = { tenantId };
     if (filters?.categoria) where.categoria = filters.categoria;
     if (filters?.desde && filters?.hasta) {
@@ -430,7 +539,11 @@ export class ClinicaFinanzasService {
     return this.gastoRepo.find({ where, order: { fechaGasto: 'DESC' } });
   }
 
-  async registrarGasto(tenantId: string, dto: CreateGastoDto, userId: string): Promise<ClinicalGasto> {
+  async registrarGasto(
+    tenantId: string,
+    dto: CreateGastoDto,
+    userId: string,
+  ): Promise<ClinicalGasto> {
     const gasto = this.gastoRepo.create({
       tenantId,
       ...dto,
@@ -448,15 +561,29 @@ export class ClinicaFinanzasService {
     const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
 
     // Cobrado hoy (excluye pagos anulados)
-    const pagosHoy = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(hoy, new Date()), anuladoAt: IsNull() } });
+    const pagosHoy = await this.pagoRepo.find({
+      where: {
+        tenantId,
+        fechaPago: Between(hoy, new Date()),
+        anuladoAt: IsNull(),
+      },
+    });
     const cobradoHoy = pagosHoy.reduce((s, p) => s + Number(p.monto), 0);
 
     // Cobrado este mes (excluye pagos anulados)
-    const pagosMes = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(inicioMes, new Date()), anuladoAt: IsNull() } });
+    const pagosMes = await this.pagoRepo.find({
+      where: {
+        tenantId,
+        fechaPago: Between(inicioMes, new Date()),
+        anuladoAt: IsNull(),
+      },
+    });
     const cobradoMes = pagosMes.reduce((s, p) => s + Number(p.monto), 0);
 
     // Gastos este mes
-    const gastosMes = await this.gastoRepo.find({ where: { tenantId, fechaGasto: Between(inicioMes, new Date()) } });
+    const gastosMes = await this.gastoRepo.find({
+      where: { tenantId, fechaGasto: Between(inicioMes, new Date()) },
+    });
     const gastosTotal = gastosMes.reduce((s, g) => s + Number(g.monto), 0);
 
     // Deuda total — misma definicion que la cuenta corriente del paciente
@@ -467,17 +594,28 @@ export class ClinicaFinanzasService {
       where: { tenantId, estado: In(ESTADOS_DEVENGAN_DEUDA) },
     });
     const presupuestoIds = presupuestos.map((p) => p.id);
-    const pagosVinculados = presupuestoIds.length > 0
-      ? await this.pagoRepo.find({ where: { tenantId, presupuestoId: In(presupuestoIds), anuladoAt: IsNull() } })
-      : [];
+    const pagosVinculados =
+      presupuestoIds.length > 0
+        ? await this.pagoRepo.find({
+            where: {
+              tenantId,
+              presupuestoId: In(presupuestoIds),
+              anuladoAt: IsNull(),
+            },
+          })
+        : [];
     const pagoPorPresupuesto: Record<string, number> = {};
     for (const p of pagosVinculados) {
       if (p.presupuestoId) {
-        pagoPorPresupuesto[p.presupuestoId] = (pagoPorPresupuesto[p.presupuestoId] || 0) + Number(p.monto);
+        pagoPorPresupuesto[p.presupuestoId] =
+          (pagoPorPresupuesto[p.presupuestoId] || 0) + Number(p.monto);
       }
     }
     const deudaTotal = presupuestos.reduce(
-      (s, p) => s + this.saldoDePresupuesto(Number(p.total), pagoPorPresupuesto[p.id] || 0).saldo,
+      (s, p) =>
+        s +
+        this.saldoDePresupuesto(Number(p.total), pagoPorPresupuesto[p.id] || 0)
+          .saldo,
       0,
     );
 
@@ -504,7 +642,9 @@ export class ClinicaFinanzasService {
 
   async getCuentaCorriente(tenantId: string, patientId: string): Promise<any> {
     if (!patientId || !UUID_RE.test(patientId)) {
-      throw new BadRequestException('Selecciona un paciente valido para consultar la cuenta corriente');
+      throw new BadRequestException(
+        'Selecciona un paciente valido para consultar la cuenta corriente',
+      );
     }
 
     const presupuestos = await this.presupuestoRepo.find({
@@ -524,9 +664,14 @@ export class ClinicaFinanzasService {
 
     const presupuestosDetalle = presupuestos.map((p) => {
       // Los pagos vienen por relación → se excluyen los anulados en memoria (no por where).
-      const pagosPresupuesto = (p.pagos || []).filter((pg) => !pg.anuladoAt).reduce((s, pg) => s + Number(pg.monto), 0);
+      const pagosPresupuesto = (p.pagos || [])
+        .filter((pg) => !pg.anuladoAt)
+        .reduce((s, pg) => s + Number(pg.monto), 0);
       const total = Number(p.total);
-      const { saldo, excedente } = this.saldoDePresupuesto(total, pagosPresupuesto);
+      const { saldo, excedente } = this.saldoDePresupuesto(
+        total,
+        pagosPresupuesto,
+      );
 
       totalPresupuestado += total;
       totalPagado += pagosPresupuesto;
@@ -560,19 +705,29 @@ export class ClinicaFinanzasService {
   }
 
   async getReporte(tenantId: string, desde: Date, hasta: Date): Promise<any> {
-    const pagos = await this.pagoRepo.find({ where: { tenantId, fechaPago: Between(desde, hasta), anuladoAt: IsNull() } });
-    const gastos = await this.gastoRepo.find({ where: { tenantId, fechaGasto: Between(desde, hasta) } });
+    const pagos = await this.pagoRepo.find({
+      where: {
+        tenantId,
+        fechaPago: Between(desde, hasta),
+        anuladoAt: IsNull(),
+      },
+    });
+    const gastos = await this.gastoRepo.find({
+      where: { tenantId, fechaGasto: Between(desde, hasta) },
+    });
     const ingresos = pagos.reduce((s, p) => s + Number(p.monto), 0);
     const egresos = gastos.reduce((s, g) => s + Number(g.monto), 0);
 
     const pagosPorMetodo: Record<string, number> = {};
     for (const p of pagos) {
-      pagosPorMetodo[p.metodoPago] = (pagosPorMetodo[p.metodoPago] || 0) + Number(p.monto);
+      pagosPorMetodo[p.metodoPago] =
+        (pagosPorMetodo[p.metodoPago] || 0) + Number(p.monto);
     }
 
     const gastosPorCategoria: Record<string, number> = {};
     for (const g of gastos) {
-      gastosPorCategoria[g.categoria] = (gastosPorCategoria[g.categoria] || 0) + Number(g.monto);
+      gastosPorCategoria[g.categoria] =
+        (gastosPorCategoria[g.categoria] || 0) + Number(g.monto);
     }
 
     return {
@@ -590,15 +745,25 @@ export class ClinicaFinanzasService {
 
   // ========== UTILITY ==========
 
-  private async assertPatientBelongsToTenant(tenantId: string, patientId: string): Promise<void> {
-    const exists = await this.patientRepo.exists({ where: { id: patientId, tenantId } });
+  private async assertPatientBelongsToTenant(
+    tenantId: string,
+    patientId: string,
+  ): Promise<void> {
+    const exists = await this.patientRepo.exists({
+      where: { id: patientId, tenantId },
+    });
     if (!exists) {
       throw new NotFoundException('Paciente no encontrado en tu consultorio');
     }
   }
 
-  private async enrichWithPatientIdentity<T extends { patientId?: string }>(tenantId: string, rows: T[]): Promise<any[]> {
-    const patientIds = [...new Set(rows.map((row) => row.patientId).filter(Boolean))] as string[];
+  private async enrichWithPatientIdentity<T extends { patientId?: string }>(
+    tenantId: string,
+    rows: T[],
+  ): Promise<any[]> {
+    const patientIds = [
+      ...new Set(rows.map((row) => row.patientId).filter(Boolean)),
+    ] as string[];
     if (patientIds.length === 0) return rows;
 
     const patients = await this.patientRepo.find({
@@ -625,8 +790,13 @@ export class ClinicaFinanzasService {
    * (no pasa por ESTADOS_VALIDOS): permite borrador→en_curso por pago, y BAJA al anular pagos.
    * 'cancelado' es terminal-manual y no se deriva.
    */
-  private async recalcularEstadoPresupuesto(tenantId: string, presupuestoId: string): Promise<void> {
-    const presupuesto = await this.presupuestoRepo.findOne({ where: { id: presupuestoId, tenantId } });
+  private async recalcularEstadoPresupuesto(
+    tenantId: string,
+    presupuestoId: string,
+  ): Promise<void> {
+    const presupuesto = await this.presupuestoRepo.findOne({
+      where: { id: presupuestoId, tenantId },
+    });
     if (!presupuesto) return;
     if (presupuesto.estado === 'cancelado') return;
 
@@ -637,19 +807,25 @@ export class ClinicaFinanzasService {
     // Piso al quedar en 0 (DEC-3): fue aceptado → 'aceptado'; fue presentado → 'presentado'; si no → 'borrador'.
     const estadoBase = presupuesto.fechaAceptacion
       ? 'aceptado'
-      : (presupuesto.fechaPresentacion ? 'presentado' : 'borrador');
+      : presupuesto.fechaPresentacion
+        ? 'presentado'
+        : 'borrador';
 
     let nuevoEstado: string;
     if (totalPagado <= 0) {
-      nuevoEstado = estadoBase;                 // BAJA: se anularon todos los pagos
+      nuevoEstado = estadoBase; // BAJA: se anularon todos los pagos
     } else if (totalPagado >= total) {
       nuevoEstado = 'pagado';
     } else {
-      nuevoEstado = 'en_curso';                 // 0 < Σ < total (incluye borrador/presentado → en_curso)
+      nuevoEstado = 'en_curso'; // 0 < Σ < total (incluye borrador/presentado → en_curso)
     }
 
     // Vencido: solo si no está pagado y la validez pasó (regla preservada).
-    if (presupuesto.fechaValidez && new Date(presupuesto.fechaValidez) < new Date() && nuevoEstado !== 'pagado') {
+    if (
+      presupuesto.fechaValidez &&
+      new Date(presupuesto.fechaValidez) < new Date() &&
+      nuevoEstado !== 'pagado'
+    ) {
       nuevoEstado = 'vencido';
     }
 
@@ -668,7 +844,10 @@ export class ClinicaFinanzasService {
    * Se devuelve aparte como `excedente` para que quede VISIBLE en vez de oculto:
    * un excedente > 0 es una anomalia que la clinica tiene que poder ver.
    */
-  private saldoDePresupuesto(total: number, pagado: number): { saldo: number; excedente: number } {
+  private saldoDePresupuesto(
+    total: number,
+    pagado: number,
+  ): { saldo: number; excedente: number } {
     const diferencia = total - pagado;
     return {
       saldo: Math.max(0, diferencia),
@@ -684,7 +863,10 @@ export class ClinicaFinanzasService {
    * validado contra el tenant, pero la invariante "toda query lleva tenantId" es
    * lo que hace auditable el aislamiento multi-inquilino.
    */
-  private async sumarPagosVigentes(tenantId: string, presupuestoId: string): Promise<number> {
+  private async sumarPagosVigentes(
+    tenantId: string,
+    presupuestoId: string,
+  ): Promise<number> {
     const pagos = await this.pagoRepo.find({
       where: { tenantId, presupuestoId, anuladoAt: IsNull() },
     });
@@ -696,5 +878,3 @@ export class ClinicaFinanzasService {
     return `PRES-${String(count + 1).padStart(4, '0')}`;
   }
 }
-
-

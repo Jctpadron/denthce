@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ClinicalPresupuesto } from './clinical-presupuesto.entity';
 
 @Entity('clinica_presupuesto_items')
@@ -20,7 +26,12 @@ export class ClinicalPresupuestoItem {
 
   // Código del nomenclador de facturación (nacional / PAMI / OS). Eje distinto del snomedCode
   // (terminología clínica): éste es el código con el que se factura a la Obra Social.
-  @Column({ name: 'codigo_nomenclador', type: 'varchar', length: 50, nullable: true })
+  @Column({
+    name: 'codigo_nomenclador',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
   codigoNomenclador?: string | null;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
@@ -36,7 +47,12 @@ export class ClinicalPresupuestoItem {
 
   // Trazabilidad al recurso FHIR planificado del odontograma que originó esta línea.
   // Evita re-importar la misma línea y permite marcar el plan como "presupuestado".
-  @Column({ name: 'source_resource_id', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'source_resource_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   sourceResourceId?: string | null;
 
   @Column({ default: 1 })

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { EncounterService } from './encounter.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -30,16 +39,18 @@ export class EncounterController {
     @Body() fhirEncounter: any,
     @Request() req: any,
   ) {
-    return this.encounterService.create(patientId, fhirEncounter, req.user.tenantId, this.getUserCtx(req));
+    return this.encounterService.create(
+      patientId,
+      fhirEncounter,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 
   /** GET /fhir/r4/Patient/:patientId/encounter — Listar todas las consultas del paciente */
   @Get()
   @Roles('medico', 'recepcionista', 'administrador')
-  async findAll(
-    @Param('patientId') patientId: string,
-    @Request() req: any,
-  ) {
+  async findAll(@Param('patientId') patientId: string, @Request() req: any) {
     return this.encounterService.findAll(patientId, req.user.tenantId);
   }
 
@@ -74,6 +85,10 @@ export class EncounterController {
     @Param('id') id: string,
     @Request() req: any,
   ) {
-    return this.encounterService.sign(id, req.user.tenantId, this.getUserCtx(req));
+    return this.encounterService.sign(
+      id,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 }

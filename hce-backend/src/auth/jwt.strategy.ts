@@ -22,13 +22,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      issuer: process.env.KEYCLOAK_ISSUER_URL || 'http://localhost:8080/realms/hce-realm',
+      issuer:
+        process.env.KEYCLOAK_ISSUER_URL ||
+        'http://localhost:8080/realms/hce-realm',
       algorithms: ['RS256'],
       secretOrKeyProvider: passportJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: process.env.KEYCLOAK_JWKS_URI || 'http://localhost:8080/realms/hce-realm/protocol/openid-connect/certs',
+        jwksUri:
+          process.env.KEYCLOAK_JWKS_URI ||
+          'http://localhost:8080/realms/hce-realm/protocol/openid-connect/certs',
       }),
     });
   }
@@ -45,13 +49,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (AUTH_STRICT) {
       // ZT-06: sin tenant_id no hay identidad de inquilino → se rechaza (no fallback a sub).
       if (!tenantId) {
-        throw new UnauthorizedException('Token sin tenant_id: acceso denegado (Zero Trust).');
+        throw new UnauthorizedException(
+          'Token sin tenant_id: acceso denegado (Zero Trust).',
+        );
       }
       // ZT-08: la audiencia del token debe incluir este backend.
       const aud = payload.aud;
-      const audOk = Array.isArray(aud) ? aud.includes(EXPECTED_AUDIENCE) : aud === EXPECTED_AUDIENCE;
+      const audOk = Array.isArray(aud)
+        ? aud.includes(EXPECTED_AUDIENCE)
+        : aud === EXPECTED_AUDIENCE;
       if (!audOk) {
-        throw new UnauthorizedException('Audiencia (aud) del token inválida: acceso denegado.');
+        throw new UnauthorizedException(
+          'Audiencia (aud) del token inválida: acceso denegado.',
+        );
       }
     } else {
       // Modo compatible (transitorio): se mantiene el fallback a `sub` hasta migrar el realm.

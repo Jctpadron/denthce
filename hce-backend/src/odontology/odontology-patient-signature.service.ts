@@ -1,11 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { Readable } from 'stream';
 import * as crypto from 'crypto';
 import { OdontologyResourceEntity } from './odontology-resource.entity';
 import { OdontologyPatientSignatureEntity } from './odontology-patient-signature.entity';
-import { ClinicalEvidenceAuditEntity, EvidenceAuditAction } from './clinical-evidence-audit.entity';
+import {
+  ClinicalEvidenceAuditEntity,
+  EvidenceAuditAction,
+} from './clinical-evidence-audit.entity';
 import { EvidenceStorageService } from './evidence-storage.service';
 
 export interface ActorCtx {
@@ -30,7 +38,11 @@ export class OdontologyPatientSignatureService {
   private async audit(
     action: EvidenceAuditAction,
     ctx: ActorCtx,
-    params: { patientId?: string | null; entityId?: string | null; payload?: any },
+    params: {
+      patientId?: string | null;
+      entityId?: string | null;
+      payload?: any;
+    },
   ): Promise<void> {
     const entry = new ClinicalEvidenceAuditEntity();
     entry.tenantId = ctx.tenantId;
@@ -52,7 +64,9 @@ export class OdontologyPatientSignatureService {
       resourceId: res.id,
       snomedCode: p.code?.coding?.[0]?.code ?? null,
       snomedDisplay: p.code?.text ?? null,
-      codigoNomenclador: p.code?.coding?.find((c: any) => c?.system?.includes('nomenclador'))?.code ?? null,
+      codigoNomenclador:
+        p.code?.coding?.find((c: any) => c?.system?.includes('nomenclador'))
+          ?.code ?? null,
       diente: p.bodySite?.coding?.[0]?.code ?? null,
       cara: p.bodySite?.coding?.[1]?.code ?? null,
       performedDateTime: p.performedDateTime ?? null,
@@ -70,30 +84,59 @@ export class OdontologyPatientSignatureService {
     file: { buffer: Buffer; mimetype: string; size: number },
     opts?: { encounterId?: string; deviceInfo?: string },
   ): Promise<any> {
-    if (!file?.buffer?.length) throw new BadRequestException('No se recibió la imagen de la firma.');
-    if (file.mimetype !== 'image/png') throw new BadRequestException('La firma debe ser PNG.');
+    if (!file?.buffer?.length)
+      throw new BadRequestException('No se recibió la imagen de la firma.');
+    if (file.mimetype !== 'image/png')
+      throw new BadRequestException('La firma debe ser PNG.');
     // Magic-bytes PNG: 89 50 4E 47 0D 0A 1A 0A (no confiar en el Content-Type del cliente).
     const sig = file.buffer.subarray(0, 8);
-    const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-    if (!sig.equals(PNG_MAGIC)) throw new BadRequestException('El archivo no es un PNG válido.');
+    const PNG_MAGIC = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+    if (!sig.equals(PNG_MAGIC))
+      throw new BadRequestException('El archivo no es un PNG válido.');
 
     // El recurso debe existir, pertenecer al paciente/tenant, ser Procedure y estar completado.
-    const res = await this.resourceRepo.findOne({ where: { id: resourceId, patientId, tenantId: ctx.tenantId } });
+    const res = await this.resourceRepo.findOne({
+      where: { id: resourceId, patientId, tenantId: ctx.tenantId },
+    });
     if (!res) throw new NotFoundException('Prestación no encontrada.');
-    if (res.resourceType !== 'Procedure' || res.payload?.status !== 'completed') {
-      throw new BadRequestException('Solo se puede firmar una prestación realizada (Procedure completado).');
+    if (
+      res.resourceType !== 'Procedure' ||
+      res.payload?.status !== 'completed'
+    ) {
+      throw new BadRequestException(
+        'Solo se puede firmar una prestación realizada (Procedure completado).',
+      );
     }
 
     // Una sola firma vigente por prestación.
-    const vigente = await this.sigRepo.findOne({ where: { tenantId: ctx.tenantId, resourceId, supersededBy: IsNull() } });
-    if (vigente) throw new ConflictException('La prestación ya tiene una firma de conformidad vigente.');
+    const vigente = await this.sigRepo.findOne({
+      where: { tenantId: ctx.tenantId, resourceId, supersededBy: IsNull() },
+    });
+    if (vigente)
+      throw new ConflictException(
+        'La prestación ya tiene una firma de conformidad vigente.',
+      );
 
     const snapshot = this.buildSnapshot(res);
-    const contentHash = crypto.createHash('sha256').update(file.buffer).digest('hex');
-    const snapshotHash = crypto.createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
+    const contentHash = crypto
+      .createHash('sha256')
+      .update(file.buffer)
+      .digest('hex');
+    const snapshotHash = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(snapshot))
+      .digest('hex');
 
     const storageKey = `sig-${Date.now()}-${crypto.randomBytes(8).toString('hex')}.png`;
-    await this.storage.put('signatures', ctx.tenantId, storageKey, file.buffer, 'image/png');
+    await this.storage.put(
+      'signatures',
+      ctx.tenantId,
+      storageKey,
+      file.buffer,
+      'image/png',
+    );
 
     const row = this.sigRepo.create({
       tenantId: ctx.tenantId,
@@ -124,31 +167,60 @@ export class OdontologyPatientSignatureService {
   }
 
   /** Firma vigente de una prestación (o null). Para armar la Ficha. */
-  async getByResource(tenantId: string, patientId: string, resourceId: string): Promise<any | null> {
-    const row = await this.sigRepo.findOne({ where: { tenantId, patientId, resourceId, supersededBy: IsNull() } });
+  async getByResource(
+    tenantId: string,
+    patientId: string,
+    resourceId: string,
+  ): Promise<any | null> {
+    const row = await this.sigRepo.findOne({
+      where: { tenantId, patientId, resourceId, supersededBy: IsNull() },
+    });
     return row ? this.project(row, patientId) : null;
   }
 
   /** Todas las firmas vigentes de una visita (Ficha de Atención completa, sin N+1). */
-  async getByEncounter(tenantId: string, patientId: string, encounterId: string): Promise<any[]> {
-    const rows = await this.sigRepo.find({ where: { tenantId, patientId, encounterId, supersededBy: IsNull() } });
+  async getByEncounter(
+    tenantId: string,
+    patientId: string,
+    encounterId: string,
+  ): Promise<any[]> {
+    const rows = await this.sigRepo.find({
+      where: { tenantId, patientId, encounterId, supersededBy: IsNull() },
+    });
     return rows.map((r) => this.project(r, patientId));
   }
 
   /** Todas las firmas vigentes del paciente (batch para armar la Ficha en 1 request, no N). */
   async getAllByPatient(tenantId: string, patientId: string): Promise<any[]> {
-    const rows = await this.sigRepo.find({ where: { tenantId, patientId, supersededBy: IsNull() } });
+    const rows = await this.sigRepo.find({
+      where: { tenantId, patientId, supersededBy: IsNull() },
+    });
     return rows.map((r) => this.project(r, patientId));
   }
 
   /**
    * Devuelve el binario de la firma (ruta + mime) tras validar el tenant, y AUDITA la descarga (ePHI).
    */
-  async getImage(ctx: ActorCtx, patientId: string, id: string): Promise<{ stream: Readable; mimeType: string }> {
-    const row = await this.sigRepo.findOne({ where: { id, tenantId: ctx.tenantId, patientId } });
+  async getImage(
+    ctx: ActorCtx,
+    patientId: string,
+    id: string,
+  ): Promise<{ stream: Readable; mimeType: string }> {
+    const row = await this.sigRepo.findOne({
+      where: { id, tenantId: ctx.tenantId, patientId },
+    });
     if (!row) throw new NotFoundException('Firma no encontrada.');
-    const stream = await this.storage.getStream(row.storageBackend, 'signatures', row.tenantId, row.storageKey);
-    await this.audit('PATIENT_SIGN_VIEW', ctx, { patientId, entityId: id, payload: { resourceId: row.resourceId } });
+    const stream = await this.storage.getStream(
+      row.storageBackend,
+      'signatures',
+      row.tenantId,
+      row.storageKey,
+    );
+    await this.audit('PATIENT_SIGN_VIEW', ctx, {
+      patientId,
+      entityId: id,
+      payload: { resourceId: row.resourceId },
+    });
     return { stream, mimeType: row.mimeType };
   }
 

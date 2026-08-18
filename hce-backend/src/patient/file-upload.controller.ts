@@ -99,10 +99,7 @@ export class FileUploadController {
   @Delete(':patientId/upload/:filename')
   @Roles('medico', 'administrador')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteFile(
-    @Param('filename') filename: string,
-    @Request() _req: any,
-  ) {
+  async deleteFile(@Param('filename') filename: string, @Request() _req: any) {
     // Sanitizar para evitar path traversal
     const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '');
     const filePath = join(process.cwd(), 'uploads', safeFilename);
