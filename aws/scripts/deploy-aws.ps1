@@ -27,6 +27,20 @@ Omite los bloqueos del guard. Uso excepcional (hotfix). Queda asentado en el log
 Eleva a bloqueante la exigencia de que HEAD sea un tag. Activar cuando se adopte
 el tagueo de releases.
 
+CREDENCIALES (2026-08-17)
+Usar SIEMPRE el perfil `denthce-deploy`, no las claves root de la cuenta.
+El perfil tiene permisos de minimo privilegio (politica IAM DentHCE-Deploy):
+puede desplegar backend y frontend, y NO puede tocar el bucket de evidencia
+clinica, IAM ni RDS — verificado con explicit deny.
+
+    $env:AWS_PROFILE = 'denthce-deploy'
+    .\deploy-aws.ps1 -Backend -RequireTag
+
+El script avisa si detecta que estas corriendo como root de la cuenta.
+
+.PARAMETER Profile
+Perfil de AWS CLI a usar. Por defecto `denthce-deploy`.
+
 .EXAMPLE
 .\deploy-aws.ps1 -Frontend
 .EXAMPLE
@@ -39,8 +53,23 @@ param (
     [switch]$Keycloak,
     [switch]$CloudFront,
     [switch]$Force,
-    [switch]$RequireTag
+    [switch]$RequireTag,
+    [string]$Profile = 'denthce-deploy'
 )
+
+# Se usa el perfil acotado salvo que el entorno ya defina uno explicitamente.
+if (-not $env:AWS_PROFILE) { $env:AWS_PROFILE = $Profile }
+
+# Aviso si se esta operando con las credenciales root de la cuenta: dan acceso
+# irrestricto, incluido el bucket con evidencia clinica de pacientes.
+$identidad = aws sts get-caller-identity --query Arn --output text 2>$null
+if ($identidad -and $identidad -match ':root$') {
+    Write-Host ""
+    Write-Host "  [AVISO] Estas usando las credenciales ROOT de la cuenta AWS." -ForegroundColor Yellow
+    Write-Host "          Dan acceso irrestricto, incluido el bucket de evidencia clinica." -ForegroundColor Yellow
+    Write-Host "          Configura el perfil acotado:  `$env:AWS_PROFILE = 'denthce-deploy'" -ForegroundColor Yellow
+    Write-Host ""
+}
 
 # IDs de distribuciones CloudFront (se completan tras la Fase 2)
 $CF_FRONTEND_ID  = $env:CF_FRONTEND_ID   # Ejemplo: E1ABCDEFGHIJKL
