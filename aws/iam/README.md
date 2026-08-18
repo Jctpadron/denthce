@@ -10,8 +10,25 @@ evidencia clínica de los pacientes (firmas de conformidad y adjuntos).
 
 ## Qué se creó
 
-**Usuario:** `denthce-deploy`
-**Política:** `DentHCE-Deploy` (`DentHCE-Deploy.policy.json`, versionada acá)
+**Usuario:** `denthce-deploy`, con **dos políticas adjuntas**:
+
+| Política | Origen | Rol |
+| :-- | :-- | :-- |
+| `AdministratorAccess-AWSElasticBeanstalk` | Gestionada por AWS | Otorga la superficie que EB necesita |
+| `DentHCE-Deploy` | Propia (`DentHCE-Deploy.policy.json`, acá) | **Recorta** con `Deny` explícito |
+
+### Por qué este diseño y no una política propia y minimalista
+
+El primer intento fue una única política propia con sólo los permisos que parecían necesarios. Falló dos veces seguidas en `UpdateEnvironment`:
+
+1. `s3:CreateBucket` — EB verifica su bucket de almacenamiento aunque ya exista.
+2. `cloudformation:GetTemplate` — EB orquesta CloudFormation por debajo.
+
+Elastic Beanstalk toca CloudFormation, Auto Scaling, ELB, EC2 y CloudWatch de forma no documentada exhaustivamente, así que enumerar sus permisos a mano es descubrirlos de a uno y quedar desactualizado en cuanto AWS cambie algo.
+
+**La solución es invertir el enfoque:** que AWS otorgue la superficie de EB con su política gestionada —que ellos mantienen al día— y que la política propia **reste** lo que nunca debe tocarse. En IAM, un `Deny` explícito gana siempre sobre cualquier `Allow`, incluso de una política gestionada. El resultado es un deploy que funciona hoy y que seguirá funcionando cuando AWS cambie los internos de EB, sin perder las protecciones críticas.
+
+**Verificado después de adjuntar la política gestionada:** las tres denegaciones siguen activas.
 
 ### Puede
 
