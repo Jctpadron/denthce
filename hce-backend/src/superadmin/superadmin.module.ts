@@ -24,6 +24,10 @@ import { KeycloakAdminService } from '../tenant/keycloak-admin.service';
     ]),
   ],
   controllers: [SuperAdminController],
-  providers: [SuperAdminService, KeycloakAdminService, ClinichatOrchestrationService],
+  providers: [
+    SuperAdminService,
+    KeycloakAdminService,
+    ClinichatOrchestrationService,
+  ],
 })
 export class SuperAdminModule {}

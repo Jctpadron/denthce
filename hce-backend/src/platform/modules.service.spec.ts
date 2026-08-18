@@ -13,8 +13,14 @@ describe('ModulesService — entitlements (gate de servicios anexables)', () => 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ModulesService,
-        { provide: getRepositoryToken(TenantModuleEntity), useValue: mockTenantModuleRepo },
-        { provide: getRepositoryToken(PlatformModuleEntity), useValue: mockPlatformModuleRepo },
+        {
+          provide: getRepositoryToken(TenantModuleEntity),
+          useValue: mockTenantModuleRepo,
+        },
+        {
+          provide: getRepositoryToken(PlatformModuleEntity),
+          useValue: mockPlatformModuleRepo,
+        },
       ],
     }).compile();
     service = module.get<ModulesService>(ModulesService);
@@ -28,12 +34,18 @@ describe('ModulesService — entitlements (gate de servicios anexables)', () => 
     });
 
     it('true si está contratado, habilitado y sin vencimiento', async () => {
-      mockTenantModuleRepo.findOne.mockResolvedValue({ enabled: true, expiresAt: null });
+      mockTenantModuleRepo.findOne.mockResolvedValue({
+        enabled: true,
+        expiresAt: null,
+      });
       expect(await service.isEnabled('t1', 'whatsapp')).toBe(true);
     });
 
     it('false si está contratado pero deshabilitado', async () => {
-      mockTenantModuleRepo.findOne.mockResolvedValue({ enabled: false, expiresAt: null });
+      mockTenantModuleRepo.findOne.mockResolvedValue({
+        enabled: false,
+        expiresAt: null,
+      });
       expect(await service.isEnabled('t1', 'whatsapp')).toBe(false);
     });
 
@@ -63,8 +75,16 @@ describe('ModulesService — entitlements (gate de servicios anexables)', () => 
     it('filtra los vencidos y devuelve solo las keys vigentes', async () => {
       mockTenantModuleRepo.find.mockResolvedValue([
         { moduleKey: 'hc-base', enabled: true, expiresAt: null },
-        { moduleKey: 'whatsapp', enabled: true, expiresAt: new Date(Date.now() - 1000) }, // vencido
-        { moduleKey: 'agenda', enabled: true, expiresAt: new Date(Date.now() + 100000) },
+        {
+          moduleKey: 'whatsapp',
+          enabled: true,
+          expiresAt: new Date(Date.now() - 1000),
+        }, // vencido
+        {
+          moduleKey: 'agenda',
+          enabled: true,
+          expiresAt: new Date(Date.now() + 100000),
+        },
       ]);
       const result = await service.enabledModules('t1');
       expect(result).toEqual(['hc-base', 'agenda']);

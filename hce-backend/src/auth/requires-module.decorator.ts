@@ -8,4 +8,5 @@ import { SetMetadata } from '@nestjs/common';
  * Ej: @RequiresModule('protesis-lab')
  */
 export const REQUIRED_MODULE_KEY = 'requiredModule';
-export const RequiresModule = (moduleKey: string) => SetMetadata(REQUIRED_MODULE_KEY, moduleKey);
+export const RequiresModule = (moduleKey: string) =>
+  SetMetadata(REQUIRED_MODULE_KEY, moduleKey);

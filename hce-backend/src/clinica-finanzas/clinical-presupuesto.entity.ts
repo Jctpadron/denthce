@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { ClinicalPresupuestoItem } from './clinical-presupuesto-item.entity';
 import { ClinicalPago } from './clinical-pago.entity';
 
@@ -19,7 +26,11 @@ export class ClinicalPresupuesto {
   @Column({ length: 20, default: 'borrador' })
   estado: string;
 
-  @Column({ name: 'fecha_emision', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'fecha_emision',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   fechaEmision: Date;
 
   @Column({ name: 'fecha_validez', type: 'date', nullable: true })
@@ -37,10 +48,22 @@ export class ClinicalPresupuesto {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   total: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, name: 'senha_porcentaje', default: 30 })
+  @Column({
+    type: 'decimal',
+    precision: 5,
+    scale: 2,
+    name: 'senha_porcentaje',
+    default: 30,
+  })
   senhaPorcentaje: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'senha_monto', nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    name: 'senha_monto',
+    nullable: true,
+  })
   senhaMonto?: number | null;
 
   @Column({ type: 'varchar', nullable: true })
@@ -77,7 +100,9 @@ export class ClinicalPresupuesto {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => ClinicalPresupuestoItem, (item) => item.presupuesto, { cascade: true })
+  @OneToMany(() => ClinicalPresupuestoItem, (item) => item.presupuesto, {
+    cascade: true,
+  })
   items?: ClinicalPresupuestoItem[];
 
   @OneToMany(() => ClinicalPago, (pago) => pago.presupuesto, { cascade: true })

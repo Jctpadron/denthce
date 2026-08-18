@@ -1,7 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProtesisService, CreateOrderDto, SendMessageDto, CreateInsumoDto } from './protesis.service';
+import {
+  ProtesisService,
+  CreateOrderDto,
+  SendMessageDto,
+  CreateInsumoDto,
+} from './protesis.service';
 import { ProtesisOrder } from './protesis-order.entity';
 import { ProtesisChat } from './protesis-chat.entity';
 import { ProtesisInsumo } from './protesis-insumo.entity';
@@ -36,9 +41,23 @@ describe('ProtesisService', () => {
   };
 
   // Repos agregados por el módulo financiero / máquina de estados (PRO.7-PRO.12).
-  const mockStatusHistoryRepository = { find: jest.fn(), create: jest.fn(), save: jest.fn() };
-  const mockPagoRepository = { find: jest.fn(), findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
-  const mockConsumoRepository = { find: jest.fn(), findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
+  const mockStatusHistoryRepository = {
+    find: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+  const mockPagoRepository = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+  const mockConsumoRepository = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -72,9 +91,15 @@ describe('ProtesisService', () => {
     }).compile();
 
     service = module.get<ProtesisService>(ProtesisService);
-    orderRepository = module.get<Repository<ProtesisOrder>>(getRepositoryToken(ProtesisOrder));
-    chatRepository = module.get<Repository<ProtesisChat>>(getRepositoryToken(ProtesisChat));
-    insumoRepository = module.get<Repository<ProtesisInsumo>>(getRepositoryToken(ProtesisInsumo));
+    orderRepository = module.get<Repository<ProtesisOrder>>(
+      getRepositoryToken(ProtesisOrder),
+    );
+    chatRepository = module.get<Repository<ProtesisChat>>(
+      getRepositoryToken(ProtesisChat),
+    );
+    insumoRepository = module.get<Repository<ProtesisInsumo>>(
+      getRepositoryToken(ProtesisInsumo),
+    );
   });
 
   afterEach(() => {
@@ -114,7 +139,12 @@ describe('ProtesisService', () => {
   describe('getOrderDetails', () => {
     it('debería retornar el detalle si el usuario pertenece al tenant emisor', async () => {
       const tenantId = 'clinica_test';
-      const mockOrder = { id: 'order_123', tenantId, performerTenantId: 'lab_test', messages: [] };
+      const mockOrder = {
+        id: 'order_123',
+        tenantId,
+        performerTenantId: 'lab_test',
+        messages: [],
+      };
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
 
       const result = await service.getOrderDetails(tenantId, 'order_123');
@@ -124,7 +154,12 @@ describe('ProtesisService', () => {
 
     it('debería retornar el detalle si el usuario pertenece al tenant receptor (laboratorio)', async () => {
       const tenantId = 'lab_test';
-      const mockOrder = { id: 'order_123', tenantId: 'clinica_test', performerTenantId: tenantId, messages: [] };
+      const mockOrder = {
+        id: 'order_123',
+        tenantId: 'clinica_test',
+        performerTenantId: tenantId,
+        messages: [],
+      };
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
 
       const result = await service.getOrderDetails(tenantId, 'order_123');
@@ -134,16 +169,25 @@ describe('ProtesisService', () => {
 
     it('debería lanzar ForbiddenException si el usuario no pertenece a la clínica ni al laboratorio de la orden', async () => {
       const tenantId = 'hacker_tenant';
-      const mockOrder = { id: 'order_123', tenantId: 'clinica_test', performerTenantId: 'lab_test', messages: [] };
+      const mockOrder = {
+        id: 'order_123',
+        tenantId: 'clinica_test',
+        performerTenantId: 'lab_test',
+        messages: [],
+      };
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
 
-      await expect(service.getOrderDetails(tenantId, 'order_123')).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.getOrderDetails(tenantId, 'order_123'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('debería lanzar NotFoundException si la orden no existe', async () => {
       mockOrderRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getOrderDetails('tenant', 'invalid_id')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getOrderDetails('tenant', 'invalid_id'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -161,7 +205,13 @@ describe('ProtesisService', () => {
         },
       };
 
-      const mockSavedOrder = { ...dto, id: 'new_id', tenantId, status: 'received', isManual: false };
+      const mockSavedOrder = {
+        ...dto,
+        id: 'new_id',
+        tenantId,
+        status: 'received',
+        isManual: false,
+      };
       mockOrderRepository.create.mockReturnValue(mockSavedOrder);
       mockOrderRepository.save.mockResolvedValue(mockSavedOrder);
 
@@ -199,7 +249,12 @@ describe('ProtesisService', () => {
         },
       };
 
-      const mockSavedOrder = { ...dto, id: 'manual_id', performerTenantId: tenantId, status: 'received' };
+      const mockSavedOrder = {
+        ...dto,
+        id: 'manual_id',
+        performerTenantId: tenantId,
+        status: 'received',
+      };
       mockOrderRepository.create.mockReturnValue(mockSavedOrder);
       mockOrderRepository.save.mockResolvedValue(mockSavedOrder);
 
@@ -225,7 +280,12 @@ describe('ProtesisService', () => {
     it('debería actualizar el estado de la orden correctamente si es del tenant', async () => {
       const tenantId = 'lab_test';
       const orderId = 'order_123';
-      const mockOrder = { id: orderId, tenantId: 'clinica_test', performerTenantId: tenantId, status: 'received' };
+      const mockOrder = {
+        id: orderId,
+        tenantId: 'clinica_test',
+        performerTenantId: tenantId,
+        status: 'received',
+      };
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
       mockOrderRepository.save.mockImplementation((x) => Promise.resolve(x));
 
@@ -238,10 +298,17 @@ describe('ProtesisService', () => {
     it('debería lanzar ForbiddenException al actualizar estado si el usuario no pertenece a la orden', async () => {
       const tenantId = 'hacker_tenant';
       const orderId = 'order_123';
-      const mockOrder = { id: orderId, tenantId: 'clinica_test', performerTenantId: 'lab_test', status: 'received' };
+      const mockOrder = {
+        id: orderId,
+        tenantId: 'clinica_test',
+        performerTenantId: 'lab_test',
+        status: 'received',
+      };
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
 
-      await expect(service.updateStatus(tenantId, orderId, 'designing')).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.updateStatus(tenantId, orderId, 'designing'),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -249,16 +316,32 @@ describe('ProtesisService', () => {
     it('debería agregar un mensaje de chat si el tenant es válido', async () => {
       const tenantId = 'clinica_test';
       const orderId = 'order_123';
-      const mockOrder = { id: orderId, tenantId, performerTenantId: 'lab_test' };
+      const mockOrder = {
+        id: orderId,
+        tenantId,
+        performerTenantId: 'lab_test',
+      };
       const dto: SendMessageDto = { textContent: 'Hola laboratorio' };
-      
-      const mockMessage = { id: 'msg_1', orderId, senderId: 'user_1', senderName: 'Dr. Test', textContent: dto.textContent };
+
+      const mockMessage = {
+        id: 'msg_1',
+        orderId,
+        senderId: 'user_1',
+        senderName: 'Dr. Test',
+        textContent: dto.textContent,
+      };
 
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
       mockChatRepository.create.mockReturnValue(mockMessage);
       mockChatRepository.save.mockResolvedValue(mockMessage);
 
-      const result = await service.addChatMessage(tenantId, orderId, 'user_1', 'Dr. Test', dto);
+      const result = await service.addChatMessage(
+        tenantId,
+        orderId,
+        'user_1',
+        'Dr. Test',
+        dto,
+      );
 
       expect(chatRepository.create).toHaveBeenCalledWith({
         orderId,
@@ -273,7 +356,11 @@ describe('ProtesisService', () => {
     it('debería lanzar ForbiddenException en chat si el tenant no pertenece al caso', async () => {
       const tenantId = 'hacker_tenant';
       const orderId = 'order_123';
-      const mockOrder = { id: orderId, tenantId: 'clinica_test', performerTenantId: 'lab_test' };
+      const mockOrder = {
+        id: orderId,
+        tenantId: 'clinica_test',
+        performerTenantId: 'lab_test',
+      };
       const dto: SendMessageDto = { textContent: 'Hola' };
 
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
@@ -316,7 +403,10 @@ describe('ProtesisService', () => {
 
       const result = await service.createInsumo(tenantId, dto);
 
-      expect(insumoRepository.create).toHaveBeenCalledWith({ tenantId, ...dto });
+      expect(insumoRepository.create).toHaveBeenCalledWith({
+        tenantId,
+        ...dto,
+      });
       expect(result).toEqual(mockInsumo);
     });
   });
@@ -341,13 +431,17 @@ describe('ProtesisService', () => {
       const mockInsumo = { id: insumoId, tenantId: 'lab_test', stock: 2 };
       mockInsumoRepository.findOne.mockResolvedValue(mockInsumo);
 
-      await expect(service.updateStock(tenantId, insumoId, 10)).rejects.toThrow(ForbiddenException);
+      await expect(service.updateStock(tenantId, insumoId, 10)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('debería lanzar NotFoundException si el insumo no existe', async () => {
       mockInsumoRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.updateStock('tenant', 'invalid_id', 10)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updateStock('tenant', 'invalid_id', 10),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -355,8 +449,13 @@ describe('ProtesisService', () => {
     it('debería actualizar los datos de trazabilidad correctamente', async () => {
       const tenantId = 'lab_test';
       const orderId = 'order_123';
-      const mockOrder = { id: orderId, tenantId: 'clinica_test', performerTenantId: tenantId, conformidad: null };
-      
+      const mockOrder = {
+        id: orderId,
+        tenantId: 'clinica_test',
+        performerTenantId: tenantId,
+        conformidad: null,
+      };
+
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
       mockOrderRepository.save.mockImplementation((x) => Promise.resolve(x));
 
@@ -382,12 +481,14 @@ describe('ProtesisService', () => {
         performerTenantId: tenantId,
         conformidad: { isSigned: true },
       };
-      
+
       mockOrderRepository.findOne.mockResolvedValue(mockOrder);
 
       const dto = { technicianName: 'Pedro Gómez' };
 
-      await expect(service.updateTrazabilidad(tenantId, orderId, dto)).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.updateTrazabilidad(tenantId, orderId, dto),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -437,7 +538,9 @@ describe('ProtesisService', () => {
 
       const dto = { signedBy: 'Test', declaracionDoc: 'Doc' };
 
-      await expect(service.signConformidad(tenantId, orderId, dto)).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.signConformidad(tenantId, orderId, dto),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });

@@ -32,7 +32,16 @@ export class PatientAuditService {
 
     // Campos demográficos a comparar en un UPDATE
     if (params.action === 'UPDATE' && params.before) {
-      const trackedFields = ['dni', 'familyName', 'givenName', 'gender', 'birthDate', 'phone', 'email', 'address'];
+      const trackedFields = [
+        'dni',
+        'familyName',
+        'givenName',
+        'gender',
+        'birthDate',
+        'phone',
+        'email',
+        'address',
+      ];
       for (const field of trackedFields) {
         const prev = params.before[field];
         const curr = params.after[field];
@@ -48,7 +57,10 @@ export class PatientAuditService {
     entry.userId = params.userId;
     entry.userName = params.userName;
     entry.action = params.action;
-    entry.changedFields = Object.keys(changedFields).length > 0 ? changedFields : (undefined as any);
+    entry.changedFields =
+      Object.keys(changedFields).length > 0
+        ? changedFields
+        : (undefined as any);
     entry.payloadSnapshot = params.payloadSnapshot || (undefined as any);
 
     await this.auditRepository.save(entry);
@@ -58,7 +70,10 @@ export class PatientAuditService {
    * Devuelve el historial de auditoría de un paciente para el tenant dado.
    * Ordenado del más reciente al más antiguo.
    */
-  async getHistory(patientId: string, tenantId: string): Promise<PatientAuditEntity[]> {
+  async getHistory(
+    patientId: string,
+    tenantId: string,
+  ): Promise<PatientAuditEntity[]> {
     return this.auditRepository.find({
       where: { patientId, tenantId },
       order: { createdAt: 'DESC' },

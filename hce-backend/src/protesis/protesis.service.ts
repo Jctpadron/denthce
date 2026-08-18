@@ -1,4 +1,9 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import * as crypto from 'crypto';
@@ -119,7 +124,10 @@ export class ProtesisService {
   ) {}
 
   // Listar órdenes según el rol y tenant del usuario
-  async getOrders(tenantId: string, tenantType: 'clinica' | 'laboratorio' | string): Promise<ProtesisOrder[]> {
+  async getOrders(
+    tenantId: string,
+    tenantType: 'clinica' | 'laboratorio' | string,
+  ): Promise<ProtesisOrder[]> {
     if (tenantType === 'laboratorio') {
       return this.orderRepository.find({
         where: { performerTenantId: tenantId },
@@ -134,7 +142,10 @@ export class ProtesisService {
   }
 
   // Obtener detalle y chat de una orden específica, validando seguridad de tenencia
-  async getOrderDetails(tenantId: string, orderId: string): Promise<ProtesisOrder> {
+  async getOrderDetails(
+    tenantId: string,
+    orderId: string,
+  ): Promise<ProtesisOrder> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
       relations: { messages: true },
@@ -146,31 +157,40 @@ export class ProtesisService {
 
     // Validar aislamiento de datos (Zero-Trust)
     if (order.tenantId !== tenantId && order.performerTenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para acceder a esta orden');
+      throw new ForbiddenException(
+        'No tiene permisos para acceder a esta orden',
+      );
     }
 
     // Ordenar mensajes por fecha ascendente para el chat
     if (order.messages) {
-      order.messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      order.messages.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      );
     }
 
     return order;
   }
 
   // Crear una nueva orden (desde el odontólogo/clínica o laboratorio manual)
-  async createOrder(tenantId: string, dto: CreateOrderDto): Promise<ProtesisOrder> {
+  async createOrder(
+    tenantId: string,
+    dto: CreateOrderDto,
+  ): Promise<ProtesisOrder> {
     const isManual = dto.isManual === true;
     const order = this.orderRepository.create({
-      tenantId: isManual ? (dto.tenantId || 'external') : tenantId,
+      tenantId: isManual ? dto.tenantId || 'external' : tenantId,
       performerTenantId: isManual ? tenantId : dto.performerTenantId,
-      patientId: isManual ? (dto.patientId || 'external') : dto.patientId,
+      patientId: isManual ? dto.patientId || 'external' : dto.patientId,
       isManual,
       patientName: isManual ? dto.patientName : undefined,
       doctorName: isManual ? dto.doctorName : undefined,
       doctorMatricula: isManual ? dto.doctorMatricula : undefined,
       status: 'received',
       dentalWork: dto.dentalWork,
-      requestedDelivery: dto.requestedDelivery ? new Date(dto.requestedDelivery) : undefined,
+      requestedDelivery: dto.requestedDelivery
+        ? new Date(dto.requestedDelivery)
+        : undefined,
     });
 
     return this.orderRepository.save(order);
@@ -178,13 +198,13 @@ export class ProtesisService {
 
   // Mapa de transiciones válidas: [from] → [to, ...]
   static readonly VALID_TRANSITIONS: Record<string, string[]> = {
-    received:    ['designing', 'cancelled'],
-    designing:   ['processing', 'cancelled'],
-    processing:  ['ceramic', 'cancelled'],
-    ceramic:     ['ready', 'cancelled'],
-    ready:       ['delivered', 'cancelled'],
-    delivered:   [],
-    cancelled:   [],
+    received: ['designing', 'cancelled'],
+    designing: ['processing', 'cancelled'],
+    processing: ['ceramic', 'cancelled'],
+    ceramic: ['ready', 'cancelled'],
+    ready: ['delivered', 'cancelled'],
+    delivered: [],
+    cancelled: [],
   };
 
   // Estados terminales (no admiten más transiciones)
@@ -199,20 +219,26 @@ export class ProtesisService {
     userName?: string,
     reason?: string,
   ): Promise<ProtesisOrder> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Orden de prótesis no encontrada');
     }
 
     // Validar tenencia
     if (order.tenantId !== tenantId && order.performerTenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para modificar esta orden');
+      throw new ForbiddenException(
+        'No tiene permisos para modificar esta orden',
+      );
     }
 
     // Validar que el estado destino sea uno conocido
     const allowedNext = ProtesisService.VALID_TRANSITIONS[order.status];
     if (!allowedNext) {
-      throw new BadRequestException(`Estado actual "${order.status}" no tiene transiciones definidas`);
+      throw new BadRequestException(
+        `Estado actual "${order.status}" no tiene transiciones definidas`,
+      );
     }
 
     // Si es estado terminal, no se permiten más cambios
@@ -226,7 +252,7 @@ export class ProtesisService {
     if (!allowedNext.includes(status)) {
       throw new BadRequestException(
         `Transición inválida: de "${order.status}" a "${status}". ` +
-        `Transiciones permitidas: ${allowedNext.join(', ')}.`,
+          `Transiciones permitidas: ${allowedNext.join(', ')}.`,
       );
     }
 
@@ -241,7 +267,8 @@ export class ProtesisService {
       toStatus: status,
       changedBy: userSub || 'unknown',
       changedByName: userName || null,
-      actorType: order.performerTenantId === tenantId ? 'laboratorio' : 'clinica',
+      actorType:
+        order.performerTenantId === tenantId ? 'laboratorio' : 'clinica',
       reason: reason || null,
     });
 
@@ -256,14 +283,18 @@ export class ProtesisService {
     senderName: string,
     dto: SendMessageDto,
   ): Promise<ProtesisChat> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Orden no encontrada');
     }
 
     // Validar seguridad de tenencia
     if (order.tenantId !== tenantId && order.performerTenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para enviar mensajes en este chat');
+      throw new ForbiddenException(
+        'No tiene permisos para enviar mensajes en este chat',
+      );
     }
 
     const message = this.chatRepository.create({
@@ -286,7 +317,10 @@ export class ProtesisService {
   }
 
   // Crear un nuevo insumo de inventario
-  async createInsumo(tenantId: string, dto: CreateInsumoDto): Promise<ProtesisInsumo> {
+  async createInsumo(
+    tenantId: string,
+    dto: CreateInsumoDto,
+  ): Promise<ProtesisInsumo> {
     const insumo = this.insumoRepository.create({
       tenantId,
       ...dto,
@@ -295,19 +329,29 @@ export class ProtesisService {
   }
 
   // Actualizar la cantidad de stock de un insumo
-  async updateStock(tenantId: string, insumoId: string, stock: number): Promise<ProtesisInsumo> {
+  async updateStock(
+    tenantId: string,
+    insumoId: string,
+    stock: number,
+  ): Promise<ProtesisInsumo> {
     if (!Number.isFinite(stock) || stock < 0) {
-      throw new BadRequestException('El stock debe ser un número mayor o igual a 0.');
+      throw new BadRequestException(
+        'El stock debe ser un número mayor o igual a 0.',
+      );
     }
 
-    const insumo = await this.insumoRepository.findOne({ where: { id: insumoId } });
+    const insumo = await this.insumoRepository.findOne({
+      where: { id: insumoId },
+    });
     if (!insumo) {
       throw new NotFoundException('Insumo no encontrado en el almacén');
     }
 
     // Validar aislamiento de datos (Zero-Trust)
     if (insumo.tenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para modificar el stock de este insumo');
+      throw new ForbiddenException(
+        'No tiene permisos para modificar el stock de este insumo',
+      );
     }
 
     insumo.stock = stock;
@@ -315,13 +359,21 @@ export class ProtesisService {
   }
 
   // Actualizar datos de un insumo (incluyendo precio)
-  async updateInsumo(tenantId: string, insumoId: string, dto: UpdateInsumoDto): Promise<ProtesisInsumo> {
-    const insumo = await this.insumoRepository.findOne({ where: { id: insumoId } });
+  async updateInsumo(
+    tenantId: string,
+    insumoId: string,
+    dto: UpdateInsumoDto,
+  ): Promise<ProtesisInsumo> {
+    const insumo = await this.insumoRepository.findOne({
+      where: { id: insumoId },
+    });
     if (!insumo) {
       throw new NotFoundException('Insumo no encontrado');
     }
     if (insumo.tenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para modificar este insumo');
+      throw new ForbiddenException(
+        'No tiene permisos para modificar este insumo',
+      );
     }
     Object.assign(insumo, dto);
     return this.insumoRepository.save(insumo);
@@ -357,18 +409,26 @@ export class ProtesisService {
     limitDate.setDate(today.getDate() + 3);
 
     const criticalOrders = orders.filter((order) => {
-      if (order.status === 'delivered' || order.status === 'cancelled') return false;
+      if (order.status === 'delivered' || order.status === 'cancelled')
+        return false;
       if (!order.requestedDelivery) return false;
       const delivery = new Date(order.requestedDelivery);
-      return delivery.getTime() >= today.getTime() - (24 * 60 * 60 * 1000) && delivery.getTime() <= limitDate.getTime();
+      return (
+        delivery.getTime() >= today.getTime() - 24 * 60 * 60 * 1000 &&
+        delivery.getTime() <= limitDate.getTime()
+      );
     });
 
     // 4. Insumos en alerta de stock (stock <= minStock)
     const insumos = await this.insumoRepository.find({ where: { tenantId } });
-    const lowStockCount = insumos.filter((insumo) => insumo.stock <= insumo.minStock).length;
+    const lowStockCount = insumos.filter(
+      (insumo) => insumo.stock <= insumo.minStock,
+    ).length;
 
     return {
-      activeOrdersCount: orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length,
+      activeOrdersCount: orders.filter(
+        (o) => o.status !== 'delivered' && o.status !== 'cancelled',
+      ).length,
       statusCounts,
       criticalOrdersCount: criticalOrders.length,
       lowStockCount,
@@ -376,7 +436,10 @@ export class ProtesisService {
   }
 
   // Obtener historial de órdenes completadas (entregadas o canceladas)
-  async getHistoryOrders(tenantId: string, tenantType: string): Promise<ProtesisOrder[]> {
+  async getHistoryOrders(
+    tenantId: string,
+    tenantType: string,
+  ): Promise<ProtesisOrder[]> {
     const terminalStatuses = ProtesisService.TERMINAL_STATUSES;
     if (tenantType === 'laboratorio') {
       return this.orderRepository.find({
@@ -392,13 +455,20 @@ export class ProtesisService {
   }
 
   // Obtener timeline de estados de una orden específica
-  async getOrderStatusHistory(tenantId: string, orderId: string): Promise<ProtesisStatusHistory[]> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+  async getOrderStatusHistory(
+    tenantId: string,
+    orderId: string,
+  ): Promise<ProtesisStatusHistory[]> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Orden de prótesis no encontrada');
     }
     if (order.tenantId !== tenantId && order.performerTenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para acceder a esta orden');
+      throw new ForbiddenException(
+        'No tiene permisos para acceder a esta orden',
+      );
     }
     return this.statusHistoryRepository.find({
       where: { orderId },
@@ -412,19 +482,25 @@ export class ProtesisService {
     orderId: string,
     dto: UpdateTrazabilidadDto,
   ): Promise<ProtesisOrder> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Orden no encontrada');
     }
 
     // Validar aislamiento multi-tenant
     if (order.tenantId !== tenantId && order.performerTenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para modificar esta orden');
+      throw new ForbiddenException(
+        'No tiene permisos para modificar esta orden',
+      );
     }
 
     // Validar si ya está firmada la conformidad
     if (order.conformidad?.isSigned) {
-      throw new ForbiddenException('No se puede modificar la trazabilidad de una orden con conformidad ya firmada');
+      throw new ForbiddenException(
+        'No se puede modificar la trazabilidad de una orden con conformidad ya firmada',
+      );
     }
 
     order.trazabilidad = {
@@ -440,7 +516,11 @@ export class ProtesisService {
   // --- Métodos Financieros ---
 
   // Fijar presupuesto final (solo laboratorio-admin)
-  async setPresupuestoFinal(tenantId: string, orderId: string, presupuestoFinal: number): Promise<ProtesisOrder> {
+  async setPresupuestoFinal(
+    tenantId: string,
+    orderId: string,
+    presupuestoFinal: number,
+  ): Promise<ProtesisOrder> {
     const order = await this.findOrder(tenantId, orderId);
     order.presupuestoFinal = presupuestoFinal;
     if (!order.presupuestoEstimado) {
@@ -450,14 +530,23 @@ export class ProtesisService {
   }
 
   // Fijar presupuesto estimado (clínica)
-  async setPresupuestoEstimado(tenantId: string, orderId: string, presupuestoEstimado: number): Promise<ProtesisOrder> {
+  async setPresupuestoEstimado(
+    tenantId: string,
+    orderId: string,
+    presupuestoEstimado: number,
+  ): Promise<ProtesisOrder> {
     const order = await this.findOrder(tenantId, orderId);
     order.presupuestoEstimado = presupuestoEstimado;
     return this.orderRepository.save(order);
   }
 
   // Registrar un pago (laboratorio-operador)
-  async registrarPago(tenantId: string, orderId: string, dto: RegistrarPagoDto, registradoPor: string): Promise<ProtesisPago> {
+  async registrarPago(
+    tenantId: string,
+    orderId: string,
+    dto: RegistrarPagoDto,
+    registradoPor: string,
+  ): Promise<ProtesisPago> {
     const order = await this.findOrder(tenantId, orderId);
 
     const pago = new ProtesisPago();
@@ -478,18 +567,29 @@ export class ProtesisService {
   }
 
   // Registrar consumo de insumo (laboratorio-operador)
-  async registrarConsumo(tenantId: string, orderId: string, dto: RegistrarConsumoDto, registradoPor: string): Promise<ProtesisConsumoInsumo> {
+  async registrarConsumo(
+    tenantId: string,
+    orderId: string,
+    dto: RegistrarConsumoDto,
+    registradoPor: string,
+  ): Promise<ProtesisConsumoInsumo> {
     const order = await this.findOrder(tenantId, orderId);
 
     // Validar que el insumo exista dentro del tenant
-    const insumo = await this.insumoRepository.findOne({ where: { id: dto.insumoId, tenantId } });
+    const insumo = await this.insumoRepository.findOne({
+      where: { id: dto.insumoId, tenantId },
+    });
     if (!insumo) {
-      throw new NotFoundException('Insumo no encontrado o no pertenece a este laboratorio');
+      throw new NotFoundException(
+        'Insumo no encontrado o no pertenece a este laboratorio',
+      );
     }
 
     // Validar stock suficiente
     if (insumo.stock < dto.cantidad) {
-      throw new BadRequestException(`Stock insuficiente: disponible ${insumo.stock}, requerido ${dto.cantidad}`);
+      throw new BadRequestException(
+        `Stock insuficiente: disponible ${insumo.stock}, requerido ${dto.cantidad}`,
+      );
     }
 
     const costoUnitario = dto.costoUnitario ?? insumo.precioUnitario ?? 0;
@@ -515,7 +615,10 @@ export class ProtesisService {
   async getFinanzas(tenantId: string, orderId: string): Promise<any> {
     const order = await this.findOrder(tenantId, orderId);
 
-    const pagos = await this.pagoRepository.find({ where: { orderId: order.id }, order: { createdAt: 'DESC' } });
+    const pagos = await this.pagoRepository.find({
+      where: { orderId: order.id },
+      order: { createdAt: 'DESC' },
+    });
     const consumos = await this.consumoRepository.find({
       where: { orderId: order.id },
       relations: { insumo: true },
@@ -523,8 +626,14 @@ export class ProtesisService {
     });
 
     const totalPagado = pagos.reduce((sum, p) => sum + Number(p.monto), 0);
-    const totalConsumos = consumos.reduce((sum, c) => sum + Number(c.costoTotal), 0);
-    const saldoPendiente = Math.max(0, (order.presupuestoFinal ?? order.presupuestoEstimado ?? 0) - totalPagado);
+    const totalConsumos = consumos.reduce(
+      (sum, c) => sum + Number(c.costoTotal),
+      0,
+    );
+    const saldoPendiente = Math.max(
+      0,
+      (order.presupuestoFinal ?? order.presupuestoEstimado ?? 0) - totalPagado,
+    );
 
     return {
       presupuestoEstimado: order.presupuestoEstimado,
@@ -546,10 +655,13 @@ export class ProtesisService {
     });
 
     const orderIds = orders.map((o) => o.id);
-    const pagos = await this.pagoRepository.find({ where: { orderId: In(orderIds) } });
+    const pagos = await this.pagoRepository.find({
+      where: { orderId: In(orderIds) },
+    });
     const pagoPorOrden: Record<string, number> = {};
     for (const p of pagos) {
-      pagoPorOrden[p.orderId] = (pagoPorOrden[p.orderId] || 0) + Number(p.monto);
+      pagoPorOrden[p.orderId] =
+        (pagoPorOrden[p.orderId] || 0) + Number(p.monto);
     }
 
     const resumenPorOrden = orders.map((o) => ({
@@ -559,7 +671,11 @@ export class ProtesisService {
       medico: o.doctorName,
       presupuesto: o.presupuestoFinal ?? o.presupuestoEstimado ?? 0,
       pagado: pagoPorOrden[o.id] || 0,
-      saldo: Math.max(0, (o.presupuestoFinal ?? o.presupuestoEstimado ?? 0) - (pagoPorOrden[o.id] || 0)),
+      saldo: Math.max(
+        0,
+        (o.presupuestoFinal ?? o.presupuestoEstimado ?? 0) -
+          (pagoPorOrden[o.id] || 0),
+      ),
       estadoPago: o.estadoPago,
     }));
 
@@ -570,24 +686,34 @@ export class ProtesisService {
 
   // --- Helpers ---
 
-  private async findOrder(tenantId: string, orderId: string): Promise<ProtesisOrder> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+  private async findOrder(
+    tenantId: string,
+    orderId: string,
+  ): Promise<ProtesisOrder> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Orden de prótesis no encontrada');
     }
     if (order.tenantId !== tenantId && order.performerTenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para acceder a esta orden');
+      throw new ForbiddenException(
+        'No tiene permisos para acceder a esta orden',
+      );
     }
     return order;
   }
 
   private async recalcularEstadoPago(orderId: string): Promise<void> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) return;
 
     const pagos = await this.pagoRepository.find({ where: { orderId } });
     const totalPagado = pagos.reduce((s, p) => s + Number(p.monto), 0);
-    const presupuesto = order.presupuestoFinal ?? order.presupuestoEstimado ?? 0;
+    const presupuesto =
+      order.presupuestoFinal ?? order.presupuestoEstimado ?? 0;
 
     let estadoPago: string;
     if (totalPagado <= 0) {
@@ -599,7 +725,11 @@ export class ProtesisService {
     }
 
     // Marcar como vencido si aplica
-    if (order.fechaVencimiento && new Date(order.fechaVencimiento) < new Date() && estadoPago !== 'paid') {
+    if (
+      order.fechaVencimiento &&
+      new Date(order.fechaVencimiento) < new Date() &&
+      estadoPago !== 'paid'
+    ) {
       estadoPago = 'overdue';
     }
 
@@ -612,23 +742,29 @@ export class ProtesisService {
     orderId: string,
     dto: SignConformidadDto,
   ): Promise<ProtesisOrder> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Orden no encontrada');
     }
 
     // Validar aislamiento multi-tenant
     if (order.tenantId !== tenantId && order.performerTenantId !== tenantId) {
-      throw new ForbiddenException('No tiene permisos para firmar la conformidad de esta orden');
+      throw new ForbiddenException(
+        'No tiene permisos para firmar la conformidad de esta orden',
+      );
     }
 
     // Validar si ya está firmada
     if (order.conformidad?.isSigned) {
-      throw new ForbiddenException('La conformidad ya ha sido firmada previamente');
+      throw new ForbiddenException(
+        'La conformidad ya ha sido firmada previamente',
+      );
     }
 
     const signedAt = new Date().toISOString();
-    
+
     // Generar hash digital SHA-256 combinando datos clave
     const hashData = JSON.stringify({
       orderId: order.id,
@@ -638,7 +774,7 @@ export class ProtesisService {
       signedBy: dto.signedBy,
       signedAt,
     });
-    
+
     const hash = crypto.createHash('sha256').update(hashData).digest('hex');
 
     order.conformidad = {

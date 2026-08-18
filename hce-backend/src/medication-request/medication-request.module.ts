@@ -9,10 +9,17 @@ import { PatientEntity } from '../patient/patient.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([MedicationRequestEntity, ClinicalResourceEntity, PatientEntity])
+    TypeOrmModule.forFeature([
+      MedicationRequestEntity,
+      ClinicalResourceEntity,
+      PatientEntity,
+    ]),
   ],
-  controllers: [MedicationRequestController, MedicationRequestSummaryController],
+  controllers: [
+    MedicationRequestController,
+    MedicationRequestSummaryController,
+  ],
   providers: [MedicationRequestService],
-  exports: [MedicationRequestService]
+  exports: [MedicationRequestService],
 })
 export class MedicationRequestModule {}

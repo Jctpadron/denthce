@@ -1,6 +1,17 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, Res,
-  UploadedFile, UseInterceptors, BadRequestException,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -14,8 +25,12 @@ import { OdontologyPdfService } from './odontology-pdf.service';
 
 // Tipos permitidos: imágenes (radiografías/fotos) y documentos.
 const ALLOWED_MIME_TYPES = [
-  'image/jpeg', 'image/png', 'image/webp', 'image/gif',
-  'application/pdf', 'application/msword',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+  'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
@@ -37,7 +52,8 @@ export class OdontologyController {
   @Roles('medico', 'enfermero', 'recepcionista', 'administrador')
   async createResource(
     @Param('patientId') patientId: string,
-    @Body() body: { resourceType: string; payload: any; encounterId?: string | null },
+    @Body()
+    body: { resourceType: string; payload: any; encounterId?: string | null },
     @Request() req: any,
   ) {
     return this.odontologyService.saveResource(
@@ -55,7 +71,10 @@ export class OdontologyController {
     @Body() body: { patientIds: string[] },
     @Request() req: any,
   ) {
-    return this.odontologyService.enrichPatients(body?.patientIds || [], req.user.tenantId);
+    return this.odontologyService.enrichPatients(
+      body?.patientIds || [],
+      req.user.tenantId,
+    );
   }
 
   @Post('patient/:patientId/upload')
@@ -65,18 +84,28 @@ export class OdontologyController {
       storage: diskStorage({
         destination: (_req, _file, cb) => {
           const uploadsDir = join(process.cwd(), 'uploads');
-          if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+          if (!fs.existsSync(uploadsDir))
+            fs.mkdirSync(uploadsDir, { recursive: true });
           cb(null, uploadsDir);
         },
         filename: (_req, file, cb) => {
           const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          cb(null, `odo-${uniqueSuffix}${extname(file.originalname).toLowerCase()}`);
+          cb(
+            null,
+            `odo-${uniqueSuffix}${extname(file.originalname).toLowerCase()}`,
+          );
         },
       }),
       limits: { fileSize: MAX_FILE_SIZE_BYTES },
       fileFilter: (_req, file, cb) => {
         if (ALLOWED_MIME_TYPES.includes(file.mimetype)) cb(null, true);
-        else cb(new BadRequestException(`Tipo de archivo no permitido: ${file.mimetype}. Se aceptan imágenes (JPG, PNG, WebP) y documentos (PDF, DOC, DOCX).`), false);
+        else
+          cb(
+            new BadRequestException(
+              `Tipo de archivo no permitido: ${file.mimetype}. Se aceptan imágenes (JPG, PNG, WebP) y documentos (PDF, DOC, DOCX).`,
+            ),
+            false,
+          );
       },
     }),
   )
@@ -90,7 +119,12 @@ export class OdontologyController {
     if (!file) throw new BadRequestException('No se recibió ningún archivo.');
     return this.odontologyService.saveFile(
       patientId,
-      { originalname: file.originalname, filename: file.filename, mimetype: file.mimetype, size: file.size },
+      {
+        originalname: file.originalname,
+        filename: file.filename,
+        mimetype: file.mimetype,
+        size: file.size,
+      },
       description,
       category,
       req.user.tenantId,
@@ -103,7 +137,10 @@ export class OdontologyController {
     @Param('patientId') patientId: string,
     @Request() req: any,
   ) {
-    return this.odontologyService.getResourcesByPatient(patientId, req.user.tenantId);
+    return this.odontologyService.getResourcesByPatient(
+      patientId,
+      req.user.tenantId,
+    );
   }
 
   @Get('patient/:patientId/report/pdf')
@@ -114,16 +151,25 @@ export class OdontologyController {
     @Res() res: any,
   ) {
     try {
-      const patient = await this.odontologyService.getPatient(patientId, req.user.tenantId);
-      const resources = await this.odontologyService.getResourcesByPatient(patientId, req.user.tenantId);
-      const buffer = await this.odontologyPdfService.generatePdf(patient, resources);
-      
+      const patient = await this.odontologyService.getPatient(
+        patientId,
+        req.user.tenantId,
+      );
+      const resources = await this.odontologyService.getResourcesByPatient(
+        patientId,
+        req.user.tenantId,
+      );
+      const buffer = await this.odontologyPdfService.generatePdf(
+        patient,
+        resources,
+      );
+
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="hc_odontologica_${patient.dni}.pdf"`,
         'Content-Length': buffer.length,
       });
-      
+
       res.end(buffer);
     } catch (err) {
       console.error('Error generando PDF de Odontología:', err);

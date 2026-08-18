@@ -6,9 +6,7 @@ import { AppointmentEntity } from '../appointment/appointment.entity';
 import { TenantConfigEntity } from '../tenant/tenant-config.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([AppointmentEntity, TenantConfigEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([AppointmentEntity, TenantConfigEntity])],
   controllers: [SlotController],
   providers: [SlotService],
   exports: [SlotService],

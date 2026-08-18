@@ -1,4 +1,10 @@
-import { Controller, Get, Query, UseGuards, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SisaService } from './sisa.service';
 
@@ -17,12 +23,11 @@ export class SisaController {
    * Verifica un paciente por DNI contra el padrón SISA.
    */
   @Get('verificar')
-  async verificar(
-    @Query('dni') dni: string,
-    @Query('gender') gender?: string,
-  ) {
+  async verificar(@Query('dni') dni: string, @Query('gender') gender?: string) {
     if (!dni || !/^\d{6,10}$/.test(dni.trim())) {
-      throw new BadRequestException('DNI inválido. Debe contener entre 6 y 10 dígitos numéricos.');
+      throw new BadRequestException(
+        'DNI inválido. Debe contener entre 6 y 10 dígitos numéricos.',
+      );
     }
     return this.sisaService.verificarPorDni(dni.trim(), gender);
   }

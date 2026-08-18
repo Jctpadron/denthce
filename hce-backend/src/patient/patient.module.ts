@@ -12,10 +12,29 @@ import { FileUploadController } from './file-upload.controller';
 import { FileUploadService } from './file-upload.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PatientEntity, PatientAuditEntity, ClinicalResourceEntity])],
-  providers: [PatientService, PatientAuditService, ClinicalResourceService, FileUploadService],
-  controllers: [PatientController, ClinicalResourceController, FileUploadController],
-  exports: [PatientService, PatientAuditService, ClinicalResourceService, FileUploadService],
+  imports: [
+    TypeOrmModule.forFeature([
+      PatientEntity,
+      PatientAuditEntity,
+      ClinicalResourceEntity,
+    ]),
+  ],
+  providers: [
+    PatientService,
+    PatientAuditService,
+    ClinicalResourceService,
+    FileUploadService,
+  ],
+  controllers: [
+    PatientController,
+    ClinicalResourceController,
+    FileUploadController,
+  ],
+  exports: [
+    PatientService,
+    PatientAuditService,
+    ClinicalResourceService,
+    FileUploadService,
+  ],
 })
 export class PatientModule {}
-

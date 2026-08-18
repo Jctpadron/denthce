@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PatientEntity } from './patient.entity';
@@ -12,7 +17,11 @@ export class PatientService {
     private readonly auditService: PatientAuditService,
   ) {}
 
-  async create(fhirPatient: any, tenantId: string, userCtx?: { userId: string; userName: string }): Promise<any> {
+  async create(
+    fhirPatient: any,
+    tenantId: string,
+    userCtx?: { userId: string; userName: string },
+  ): Promise<any> {
     const dni = this.extractDni(fhirPatient);
     const familyName = this.extractFamilyName(fhirPatient);
     const givenName = this.extractGivenName(fhirPatient);
@@ -20,14 +29,20 @@ export class PatientService {
     const birthDate = fhirPatient.birthDate;
 
     if (!dni || !familyName || !givenName || !birthDate) {
-      throw new BadRequestException('Campos obligatorios FHIR faltantes (identifier/DNI, name, birthDate).');
+      throw new BadRequestException(
+        'Campos obligatorios FHIR faltantes (identifier/DNI, name, birthDate).',
+      );
     }
 
     // La identidad demográfica es (dni, gender) por tenant: en Argentina dos personas distintas
     // pueden compartir el número de DNI con distinto sexo (Libreta de Enrolamiento / Cívica).
-    const existing = await this.patientRepository.findOne({ where: { dni, gender, tenantId } });
+    const existing = await this.patientRepository.findOne({
+      where: { dni, gender, tenantId },
+    });
     if (existing) {
-      throw new ConflictException(`El paciente con DNI ${dni} y sexo ${gender} ya se encuentra registrado en tu consultorio.`);
+      throw new ConflictException(
+        `El paciente con DNI ${dni} y sexo ${gender} ya se encuentra registrado en tu consultorio.`,
+      );
     }
 
     const entity = new PatientEntity();
@@ -38,13 +53,15 @@ export class PatientService {
     entity.givenName = givenName;
     entity.gender = gender;
     entity.birthDate = birthDate;
-    
+
     // Mapear recurso base
     const nowIso = new Date().toISOString();
     entity.payload = {
       resourceType: 'Patient',
       active: entity.active,
-      identifier: fhirPatient.identifier || [{ value: dni, system: 'http://hospital.gov/dni' }],
+      identifier: fhirPatient.identifier || [
+        { value: dni, system: 'http://hospital.gov/dni' },
+      ],
       name: fhirPatient.name || [{ family: familyName, given: [givenName] }],
       gender: gender,
       birthDate: birthDate,
@@ -53,18 +70,22 @@ export class PatientService {
       extension: fhirPatient.extension || [
         {
           url: 'http://hospital.gov/fhir/StructureDefinition/admission-date',
-          valueDateTime: nowIso
-        }
-      ]
+          valueDateTime: nowIso,
+        },
+      ],
     };
 
     const saved = await this.patientRepository.save(entity);
-    
+
     // Inyectar el ID generado por la base de datos en el payload retornado y sincronizar fecha de ingreso si es necesario
     saved.payload.id = saved.id;
-    
+
     // Asegurar que la extensión de fecha de ingreso coincida con la real de creación en base de datos
-    const admissionExt = saved.payload.extension?.find((ext: any) => ext.url === 'http://hospital.gov/fhir/StructureDefinition/admission-date');
+    const admissionExt = saved.payload.extension?.find(
+      (ext: any) =>
+        ext.url ===
+        'http://hospital.gov/fhir/StructureDefinition/admission-date',
+    );
     if (admissionExt && saved.createdAt) {
       admissionExt.valueDateTime = saved.createdAt.toISOString();
     }
@@ -92,29 +113,48 @@ export class PatientService {
   }
 
   async findOne(id: string, tenantId: string): Promise<any> {
-    const patient = await this.patientRepository.findOne({ where: { id, tenantId } });
+    const patient = await this.patientRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!patient) {
-      throw new NotFoundException(`Paciente con ID ${id} no encontrado en tu consultorio.`);
+      throw new NotFoundException(
+        `Paciente con ID ${id} no encontrado en tu consultorio.`,
+      );
     }
 
     const payload = { ...patient.payload, id: patient.id };
     if (!payload.extension) payload.extension = [];
-    
-    const hasAdmission = payload.extension.some((ext: any) => ext.url === 'http://hospital.gov/fhir/StructureDefinition/admission-date');
+
+    const hasAdmission = payload.extension.some(
+      (ext: any) =>
+        ext.url ===
+        'http://hospital.gov/fhir/StructureDefinition/admission-date',
+    );
     if (!hasAdmission) {
       payload.extension.push({
         url: 'http://hospital.gov/fhir/StructureDefinition/admission-date',
-        valueDateTime: patient.createdAt ? patient.createdAt.toISOString() : new Date().toISOString()
+        valueDateTime: patient.createdAt
+          ? patient.createdAt.toISOString()
+          : new Date().toISOString(),
       });
     }
 
     return payload;
   }
 
-  async update(id: string, fhirPatient: any, tenantId: string, userCtx?: { userId: string; userName: string }): Promise<any> {
-    const entity = await this.patientRepository.findOne({ where: { id, tenantId } });
+  async update(
+    id: string,
+    fhirPatient: any,
+    tenantId: string,
+    userCtx?: { userId: string; userName: string },
+  ): Promise<any> {
+    const entity = await this.patientRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!entity) {
-      throw new NotFoundException(`Paciente con ID ${id} no encontrado en tu consultorio.`);
+      throw new NotFoundException(
+        `Paciente con ID ${id} no encontrado en tu consultorio.`,
+      );
     }
 
     const dni = this.extractDni(fhirPatient);
@@ -124,14 +164,20 @@ export class PatientService {
     const birthDate = fhirPatient.birthDate;
 
     if (!dni || !familyName || !givenName || !birthDate) {
-      throw new BadRequestException('Campos obligatorios FHIR faltantes (identifier/DNI, name, birthDate).');
+      throw new BadRequestException(
+        'Campos obligatorios FHIR faltantes (identifier/DNI, name, birthDate).',
+      );
     }
 
     // Si cambia la identidad (dni o gender), verificar que no colisione con otro paciente del tenant.
     if (dni !== entity.dni || gender !== entity.gender) {
-      const existing = await this.patientRepository.findOne({ where: { dni, gender, tenantId } });
+      const existing = await this.patientRepository.findOne({
+        where: { dni, gender, tenantId },
+      });
       if (existing && existing.id !== entity.id) {
-        throw new ConflictException(`El paciente con DNI ${dni} y sexo ${gender} ya se encuentra registrado en tu consultorio.`);
+        throw new ConflictException(
+          `El paciente con DNI ${dni} y sexo ${gender} ya se encuentra registrado en tu consultorio.`,
+        );
       }
     }
 
@@ -143,13 +189,17 @@ export class PatientService {
 
     // Preservar o añadir la fecha de ingreso original
     const originalAdmissionDate = entity.payload.extension?.find(
-      (ext: any) => ext.url === 'http://hospital.gov/fhir/StructureDefinition/admission-date'
+      (ext: any) =>
+        ext.url ===
+        'http://hospital.gov/fhir/StructureDefinition/admission-date',
     );
     const newExtensions = fhirPatient.extension || [];
     const hasNewAdmissionDate = newExtensions.some(
-      (ext: any) => ext.url === 'http://hospital.gov/fhir/StructureDefinition/admission-date'
+      (ext: any) =>
+        ext.url ===
+        'http://hospital.gov/fhir/StructureDefinition/admission-date',
     );
-    
+
     const finalExtensions = [...newExtensions];
     if (!hasNewAdmissionDate) {
       if (originalAdmissionDate) {
@@ -157,7 +207,9 @@ export class PatientService {
       } else {
         finalExtensions.push({
           url: 'http://hospital.gov/fhir/StructureDefinition/admission-date',
-          valueDateTime: entity.createdAt ? entity.createdAt.toISOString() : new Date().toISOString()
+          valueDateTime: entity.createdAt
+            ? entity.createdAt.toISOString()
+            : new Date().toISOString(),
         });
       }
     }
@@ -167,13 +219,15 @@ export class PatientService {
       ...entity.payload,
       ...fhirPatient,
       id: entity.id,
-      identifier: fhirPatient.identifier || [{ value: dni, system: 'http://hospital.gov/dni' }],
+      identifier: fhirPatient.identifier || [
+        { value: dni, system: 'http://hospital.gov/dni' },
+      ],
       name: fhirPatient.name || [{ family: familyName, given: [givenName] }],
       gender: gender,
       birthDate: birthDate,
       telecom: fhirPatient.telecom || [],
       address: fhirPatient.address || [],
-      extension: finalExtensions
+      extension: finalExtensions,
     };
 
     // Snapshot del estado ANTERIOR para el diff de auditoría
@@ -183,8 +237,10 @@ export class PatientService {
       givenName: entity.givenName,
       gender: entity.gender,
       birthDate: entity.birthDate,
-      phone: entity.payload?.telecom?.find((t: any) => t.system === 'phone')?.value,
-      email: entity.payload?.telecom?.find((t: any) => t.system === 'email')?.value,
+      phone: entity.payload?.telecom?.find((t: any) => t.system === 'phone')
+        ?.value,
+      email: entity.payload?.telecom?.find((t: any) => t.system === 'email')
+        ?.value,
       address: entity.payload?.address?.[0]?.line?.join(' '),
     };
 
@@ -221,7 +277,16 @@ export class PatientService {
     return entity.payload;
   }
 
-  async search(query: { dni?: string; name?: string; age?: string; admissionDate?: string; gender?: string }, tenantId: string): Promise<any> {
+  async search(
+    query: {
+      dni?: string;
+      name?: string;
+      age?: string;
+      admissionDate?: string;
+      gender?: string;
+    },
+    tenantId: string,
+  ): Promise<any> {
     const qb = this.patientRepository.createQueryBuilder('patient');
 
     // Filtrar estrictamente por el tenant (aislamiento)
@@ -240,14 +305,18 @@ export class PatientService {
       );
     }
     if (query.age) {
-      qb.andWhere('EXTRACT(YEAR FROM AGE(patient.birth_date)) = :age', { age: parseInt(query.age) });
+      qb.andWhere('EXTRACT(YEAR FROM AGE(patient.birth_date)) = :age', {
+        age: parseInt(query.age),
+      });
     }
     if (query.admissionDate) {
-      qb.andWhere('DATE(patient.created_at) = :admissionDate', { admissionDate: query.admissionDate });
+      qb.andWhere('DATE(patient.created_at) = :admissionDate', {
+        admissionDate: query.admissionDate,
+      });
     }
 
     const patients = await qb.getMany();
-    
+
     // Retornar en formato Bundle de FHIR para búsquedas
     return {
       resourceType: 'Bundle',
@@ -256,11 +325,17 @@ export class PatientService {
       entry: patients.map((p) => {
         const payload = { ...p.payload, id: p.id };
         if (!payload.extension) payload.extension = [];
-        const hasAdmission = payload.extension.some((ext: any) => ext.url === 'http://hospital.gov/fhir/StructureDefinition/admission-date');
+        const hasAdmission = payload.extension.some(
+          (ext: any) =>
+            ext.url ===
+            'http://hospital.gov/fhir/StructureDefinition/admission-date',
+        );
         if (!hasAdmission) {
           payload.extension.push({
             url: 'http://hospital.gov/fhir/StructureDefinition/admission-date',
-            valueDateTime: p.createdAt ? p.createdAt.toISOString() : new Date().toISOString()
+            valueDateTime: p.createdAt
+              ? p.createdAt.toISOString()
+              : new Date().toISOString(),
           });
         }
         return {
@@ -274,7 +349,9 @@ export class PatientService {
   // --- Auxiliares para procesamiento FHIR ---
   private extractDni(fhirPatient: any): string | null {
     const identifiers = fhirPatient.identifier || [];
-    const dniIdentifier = identifiers.find((id: any) => id.system === 'http://hospital.gov/dni') || identifiers.find((id: any) => id.value);
+    const dniIdentifier =
+      identifiers.find((id: any) => id.system === 'http://hospital.gov/dni') ||
+      identifiers.find((id: any) => id.value);
     return dniIdentifier ? dniIdentifier.value : null;
   }
 
@@ -288,6 +365,6 @@ export class PatientService {
     const names = fhirPatient.name || [];
     const primaryName = names[0] || {};
     const givens = primaryName.given || [];
-    return Array.isArray(givens) ? givens.join(' ') : (givens || null);
+    return Array.isArray(givens) ? givens.join(' ') : givens || null;
   }
 }

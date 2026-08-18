@@ -1,6 +1,15 @@
 import {
-  Controller, Get, Post, Param, Body, UseGuards, Request, Res,
-  UploadedFile, UseInterceptors, BadRequestException,
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  UseGuards,
+  Request,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -8,7 +17,10 @@ import type { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { OdontologyPatientSignatureService, ActorCtx } from './odontology-patient-signature.service';
+import {
+  OdontologyPatientSignatureService,
+  ActorCtx,
+} from './odontology-patient-signature.service';
 
 const MAX_SIGNATURE_BYTES = 2 * 1024 * 1024; // 2 MB (una firma monocroma pesa mucho menos)
 
@@ -40,7 +52,11 @@ export class OdontologyPatientSignatureController {
       limits: { fileSize: MAX_SIGNATURE_BYTES },
       fileFilter: (_req, file, cb) => {
         if (file.mimetype === 'image/png') cb(null, true);
-        else cb(new BadRequestException('La firma debe ser una imagen PNG.'), false);
+        else
+          cb(
+            new BadRequestException('La firma debe ser una imagen PNG.'),
+            false,
+          );
       },
     }),
   )
@@ -51,7 +67,8 @@ export class OdontologyPatientSignatureController {
     @Body() body: { encounterId?: string; deviceInfo?: string },
     @Request() req: any,
   ) {
-    if (!file) throw new BadRequestException('No se recibió la imagen de la firma.');
+    if (!file)
+      throw new BadRequestException('No se recibió la imagen de la firma.');
     return this.service.register(this.ctx(req), patientId, resourceId, file, {
       encounterId: body?.encounterId,
       deviceInfo: body?.deviceInfo,
@@ -87,7 +104,11 @@ export class OdontologyPatientSignatureController {
     @Param('encounterId') encounterId: string,
     @Request() req: any,
   ) {
-    return this.service.getByEncounter(req.user.tenantId, patientId, encounterId);
+    return this.service.getByEncounter(
+      req.user.tenantId,
+      patientId,
+      encounterId,
+    );
   }
 
   /** Descarga autenticada del PNG de la firma (ePHI). Auditada. */
@@ -99,7 +120,11 @@ export class OdontologyPatientSignatureController {
     @Request() req: any,
     @Res() res: Response,
   ) {
-    const { stream, mimeType } = await this.service.getImage(this.ctx(req), patientId, id);
+    const { stream, mimeType } = await this.service.getImage(
+      this.ctx(req),
+      patientId,
+      id,
+    );
     res.setHeader('Content-Type', mimeType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');

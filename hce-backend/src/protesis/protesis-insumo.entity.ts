@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('protesis_insumos')
 export class ProtesisInsumo {
@@ -20,7 +26,13 @@ export class ProtesisInsumo {
   @Column({ type: 'float', name: 'min_stock', default: 1 })
   minStock: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'precio_unitario', nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    name: 'precio_unitario',
+    nullable: true,
+  })
   precioUnitario?: number | null;
 
   @Column({ default: 'Unidad' })
@@ -28,10 +40,10 @@ export class ProtesisInsumo {
 
   @Column({ type: 'jsonb', name: 'additional_meta', nullable: true })
   additionalMeta?: {
-    height?: number;     // Altura en mm para bloques/discos de zirconio (ej. 14, 18, 22)
-    color?: string;      // Color VITA (ej. A2, B1)
-    lotNumber?: string;  // Trazabilidad de lote sanitario
-    brand?: string;      // Marca comercial del insumo
+    height?: number; // Altura en mm para bloques/discos de zirconio (ej. 14, 18, 22)
+    color?: string; // Color VITA (ej. A2, B1)
+    lotNumber?: string; // Trazabilidad de lote sanitario
+    brand?: string; // Marca comercial del insumo
     [key: string]: any;
   } | null;
 

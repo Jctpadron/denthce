@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * Firma de conformidad del PACIENTE por prestación realizada (evidencia médico-legal, append-only).
@@ -72,10 +78,18 @@ export class OdontologyPatientSignatureEntity {
   sourceIp: string | null;
 
   // --- Mapeo FHIR (valores fijos hoy → default de columna, no hardcode) ---
-  @Column({ name: 'signature_type_system', type: 'varchar', default: 'urn:iso-astm:E1762-95:2013' })
+  @Column({
+    name: 'signature_type_system',
+    type: 'varchar',
+    default: 'urn:iso-astm:E1762-95:2013',
+  })
   signatureTypeSystem: string;
 
-  @Column({ name: 'signature_type_code', type: 'varchar', default: '1.2.840.10065.1.12.1.7' })
+  @Column({
+    name: 'signature_type_code',
+    type: 'varchar',
+    default: '1.2.840.10065.1.12.1.7',
+  })
   signatureTypeCode: string;
 
   @Column({ name: 'sig_format', type: 'varchar', default: 'image/png' })

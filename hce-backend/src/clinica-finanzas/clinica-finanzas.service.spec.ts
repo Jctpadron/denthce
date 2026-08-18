@@ -17,6 +17,7 @@ describe('ClinicaFinanzasService', () => {
   let presupuestoItemRepo: jest.Mocked<Repository<ClinicalPresupuestoItem>>;
   let pagoRepo: jest.Mocked<Repository<ClinicalPago>>;
   let patientRepo: jest.Mocked<Repository<PatientEntity>>;
+  let gastoRepo: jest.Mocked<Repository<ClinicalGasto>>;
 
   const tenantId = 'clinica-test';
   const patientId = '2037da20-c722-4714-8697-552adda33d5f';
@@ -35,6 +36,12 @@ describe('ClinicaFinanzasService', () => {
       create: jest.fn(),
       count: jest.fn(),
       remove: jest.fn(),
+      createQueryBuilder: jest.fn(() => ({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ total: '0' }),
+      })),
     };
     const presupuestoItemRepository = {
       save: jest.fn(),
@@ -61,21 +68,39 @@ describe('ClinicaFinanzasService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ClinicaFinanzasService,
-        { provide: getRepositoryToken(ClinicalPrecio), useValue: precioRepository },
-        { provide: getRepositoryToken(ClinicalPresupuesto), useValue: presupuestoRepository },
-        { provide: getRepositoryToken(ClinicalPresupuestoItem), useValue: presupuestoItemRepository },
+        {
+          provide: getRepositoryToken(ClinicalPrecio),
+          useValue: precioRepository,
+        },
+        {
+          provide: getRepositoryToken(ClinicalPresupuesto),
+          useValue: presupuestoRepository,
+        },
+        {
+          provide: getRepositoryToken(ClinicalPresupuestoItem),
+          useValue: presupuestoItemRepository,
+        },
         { provide: getRepositoryToken(ClinicalPago), useValue: pagoRepository },
-        { provide: getRepositoryToken(ClinicalGasto), useValue: gastoRepository },
-        { provide: getRepositoryToken(PatientEntity), useValue: patientRepository },
+        {
+          provide: getRepositoryToken(ClinicalGasto),
+          useValue: gastoRepository,
+        },
+        {
+          provide: getRepositoryToken(PatientEntity),
+          useValue: patientRepository,
+        },
       ],
     }).compile();
 
     service = module.get(ClinicaFinanzasService);
     precioRepo = module.get(getRepositoryToken(ClinicalPrecio));
     presupuestoRepo = module.get(getRepositoryToken(ClinicalPresupuesto));
-    presupuestoItemRepo = module.get(getRepositoryToken(ClinicalPresupuestoItem));
+    presupuestoItemRepo = module.get(
+      getRepositoryToken(ClinicalPresupuestoItem),
+    );
     pagoRepo = module.get(getRepositoryToken(ClinicalPago));
     patientRepo = module.get(getRepositoryToken(PatientEntity));
+    gastoRepo = module.get(getRepositoryToken(ClinicalGasto));
 
     void precioRepo;
   });
@@ -86,7 +111,13 @@ describe('ClinicaFinanzasService', () => {
         tenantId,
         {
           patientId: 'paciente-seleccionado-en-ui',
-          items: [{ snomedCode: '123', snomedDisplay: 'Consulta', precioUnitario: 1000 }],
+          items: [
+            {
+              snomedCode: '123',
+              snomedDisplay: 'Consulta',
+              precioUnitario: 1000,
+            },
+          ],
         },
         'doctor_julio',
       ),
@@ -104,13 +135,21 @@ describe('ClinicaFinanzasService', () => {
         tenantId,
         {
           patientId,
-          items: [{ snomedCode: '123', snomedDisplay: 'Consulta', precioUnitario: 1000 }],
+          items: [
+            {
+              snomedCode: '123',
+              snomedDisplay: 'Consulta',
+              precioUnitario: 1000,
+            },
+          ],
         },
         'doctor_julio',
       ),
     ).rejects.toThrow(NotFoundException);
 
-    expect(patientRepo.exists).toHaveBeenCalledWith({ where: { id: patientId, tenantId } });
+    expect(patientRepo.exists).toHaveBeenCalledWith({
+      where: { id: patientId, tenantId },
+    });
     expect(presupuestoRepo.save).not.toHaveBeenCalled();
   });
 
@@ -154,7 +193,9 @@ describe('ClinicaFinanzasService', () => {
       ),
     ).rejects.toThrow(NotFoundException);
 
-    expect(patientRepo.exists).toHaveBeenCalledWith({ where: { id: patientId, tenantId } });
+    expect(patientRepo.exists).toHaveBeenCalledWith({
+      where: { id: patientId, tenantId },
+    });
     expect(pagoRepo.save).not.toHaveBeenCalled();
   });
 
@@ -223,7 +264,9 @@ describe('ClinicaFinanzasService', () => {
         estado: 'aceptado',
       } as any);
       pagoRepo.find.mockResolvedValue(
-        yaPagado > 0 ? ([{ monto: String(yaPagado.toFixed(2)) }] as any) : ([] as any),
+        yaPagado > 0
+          ? ([{ monto: String(yaPagado.toFixed(2)) }] as any)
+          : ([] as any),
       );
     };
 
@@ -293,6 +336,102 @@ describe('ClinicaFinanzasService', () => {
       );
 
       expect(pagoRepo.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('definicion de deuda', () => {
+    const pres = (estado: string, total: number, pagado: number) => ({
+      id: `id-${estado}-${total}`,
+      numero: `PRES-${total}`,
+      estado,
+      total: String(total.toFixed(2)),
+      fechaEmision: new Date('2026-07-30'),
+      pagos:
+        pagado > 0
+          ? [{ monto: String(pagado.toFixed(2)), anuladoAt: null }]
+          : [],
+    });
+
+    it('deudaActual nunca es negativa aunque haya sobrepago', async () => {
+      // Caso real de produccion: PRES-0001, total 45112, cobrado 45300.
+      // Antes devolvia deudaActual = -188.
+      presupuestoRepo.find.mockResolvedValue([
+        pres('pagado', 45112, 45300),
+      ] as any);
+
+      const cc = await service.getCuentaCorriente(tenantId, patientId);
+
+      expect(cc.deudaActual).toBe(0);
+      expect(cc.excedentePagado).toBeCloseTo(188, 2);
+    });
+
+    it('el excedente de un presupuesto NO compensa la deuda de otro', async () => {
+      // Sobrepago de 188 en uno + deuda de 1000 en otro.
+      // Antes: 1000 - 188 = 812. Un moroso se veia menos moroso.
+      presupuestoRepo.find.mockResolvedValue([
+        pres('pagado', 45112, 45300),
+        pres('aceptado', 1000, 0),
+      ] as any);
+
+      const cc = await service.getCuentaCorriente(tenantId, patientId);
+
+      expect(cc.deudaActual).toBe(1000);
+    });
+
+    it('no cuenta como deuda los presupuestos en borrador ni cancelados', async () => {
+      presupuestoRepo.find.mockResolvedValue([
+        pres('borrador', 80000, 0),
+        pres('cancelado', 95000, 0),
+        pres('aceptado', 70000, 0),
+      ] as any);
+
+      const cc = await service.getCuentaCorriente(tenantId, patientId);
+
+      expect(cc.deudaActual).toBe(70000);
+    });
+
+    it('cuenta como deuda los presupuestos vencidos', async () => {
+      presupuestoRepo.find.mockResolvedValue([
+        pres('vencido', 5000, 1000),
+      ] as any);
+
+      const cc = await service.getCuentaCorriente(tenantId, patientId);
+
+      expect(cc.deudaActual).toBe(4000);
+    });
+
+    it('el dashboard incluye la deuda vencida y filtra por tenant', async () => {
+      presupuestoRepo.find.mockResolvedValue([
+        { id: 'v1', total: '5000.00', estado: 'vencido' },
+      ] as any);
+      pagoRepo.find.mockResolvedValue([] as any);
+      gastoRepo.find.mockResolvedValue([] as any);
+
+      const dash = await service.getDashboard(tenantId);
+
+      expect(dash.deudaTotal).toBe(5000);
+      // El filtro de estados debe incluir 'vencido': es un FindOperator In(),
+      // asi que se inspecciona su valor interno.
+      const estadosPedidos = (presupuestoRepo.find.mock.calls[0][0] as any)
+        .where.estado;
+      expect(estadosPedidos.value).toContain('vencido');
+    });
+
+    it('pacientesMorosos cuenta pacientes distintos, no presupuestos', async () => {
+      presupuestoRepo.find.mockResolvedValue([] as any);
+      pagoRepo.find.mockResolvedValue([] as any);
+      gastoRepo.find.mockResolvedValue([] as any);
+      // Un paciente con 3 presupuestos vencidos => 1 moroso.
+      (presupuestoRepo.createQueryBuilder as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ total: '1' }),
+      });
+
+      const dash = await service.getDashboard(tenantId);
+
+      expect(dash.pacientesMorosos).toBe(1);
     });
   });
 });

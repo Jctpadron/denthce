@@ -4,7 +4,11 @@ import { Repository } from 'typeorm';
 import { PatientService } from './patient.service';
 import { PatientEntity } from './patient.entity';
 import { PatientAuditService } from './patient-audit.service';
-import { ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 
 /**
  * Suite exhaustiva del flujo de ALTA de paciente en adelante.
@@ -30,8 +34,18 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
   const TENANT_B = 'tenant-clinica-b';
 
   // Helper: construye un recurso FHIR Patient mínimo válido.
-  const fhirPatient = (over: Partial<{ dni: string; gender: string; family: string; given: string; birthDate: string }> = {}) => ({
-    identifier: [{ value: over.dni ?? '30111222', system: 'http://hospital.gov/dni' }],
+  const fhirPatient = (
+    over: Partial<{
+      dni: string;
+      gender: string;
+      family: string;
+      given: string;
+      birthDate: string;
+    }> = {},
+  ) => ({
+    identifier: [
+      { value: over.dni ?? '30111222', system: 'http://hospital.gov/dni' },
+    ],
     name: [{ family: over.family ?? 'Pérez', given: [over.given ?? 'Juan'] }],
     gender: over.gender ?? 'male',
     birthDate: over.birthDate ?? '1985-03-12',
@@ -44,7 +58,10 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
       update: jest.fn(),
       createQueryBuilder: jest.fn(),
     };
-    const mockAudit = { logChange: jest.fn().mockResolvedValue(undefined), getHistory: jest.fn() };
+    const mockAudit = {
+      logChange: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,10 +92,14 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
       repo.findOne.mockResolvedValue(null); // no existe duplicado
       wireSave();
 
-      const result = await service.create(fhirPatient({ gender: 'female' }), TENANT_A, {
-        userId: 'u1',
-        userName: 'Dra. Ana',
-      });
+      const result = await service.create(
+        fhirPatient({ gender: 'female' }),
+        TENANT_A,
+        {
+          userId: 'u1',
+          userName: 'Dra. Ana',
+        },
+      );
 
       expect(result.resourceType).toBe('Patient');
       expect(result.gender).toBe('female');
@@ -96,7 +117,10 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
 
       const payload = fhirPatient();
       delete (payload as any).gender;
-      const result = await service.create(payload, TENANT_A, { userId: 'u1', userName: 'Dra. Ana' });
+      const result = await service.create(payload, TENANT_A, {
+        userId: 'u1',
+        userName: 'Dra. Ana',
+      });
 
       expect(result.gender).toBe('unknown');
     });
@@ -107,18 +131,31 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
       repo.findOne.mockResolvedValue(null);
       wireSave();
 
-      const r = await service.create(fhirPatient({ dni: '20999888', gender: 'male' }), TENANT_A, {
-        userId: 'u1',
-        userName: 'Recepción',
-      });
+      const r = await service.create(
+        fhirPatient({ dni: '20999888', gender: 'male' }),
+        TENANT_A,
+        {
+          userId: 'u1',
+          userName: 'Recepción',
+        },
+      );
       expect(r.gender).toBe('male');
     });
 
     it('segundo alta (female) con MISMO DNI y distinto género se permite y persiste correctamente', async () => {
-      const varonExistente = { id: 'uuid-male', dni: '20999888', gender: 'male', tenantId: TENANT_A } as PatientEntity;
+      const varonExistente = {
+        id: 'uuid-male',
+        dni: '20999888',
+        gender: 'male',
+        tenantId: TENANT_A,
+      } as PatientEntity;
       repo.findOne.mockImplementation((options: any) => {
         const where = options?.where || {};
-        if (where.dni === '20999888' && where.gender === 'male' && where.tenantId === TENANT_A) {
+        if (
+          where.dni === '20999888' &&
+          where.gender === 'male' &&
+          where.tenantId === TENANT_A
+        ) {
           return Promise.resolve(varonExistente);
         }
         return Promise.resolve(null);
@@ -126,9 +163,14 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
       wireSave();
 
       const r = await service.create(
-        fhirPatient({ dni: '20999888', gender: 'female', family: 'Gómez', given: 'Juana' }),
+        fhirPatient({
+          dni: '20999888',
+          gender: 'female',
+          family: 'Gómez',
+          given: 'Juana',
+        }),
         TENANT_A,
-        { userId: 'u1', userName: 'Recepción' }
+        { userId: 'u1', userName: 'Recepción' },
       );
       expect(r.gender).toBe('female');
       expect(r.id).toBe('uuid-generado');
@@ -140,11 +182,20 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
       // Con la regla ACTUAL { dni, tenantId } este caso también da Conflict (lookup encuentra fila).
       // Con la regla OBJETIVO { dni, gender, tenantId } sigue siendo Conflict (misma tupla exacta),
       // por lo que esta aserción es estable ante el cambio de diseño.
-      const mismo = { id: 'uuid-x', dni: '27333444', gender: 'male', tenantId: TENANT_A } as PatientEntity;
+      const mismo = {
+        id: 'uuid-x',
+        dni: '27333444',
+        gender: 'male',
+        tenantId: TENANT_A,
+      } as PatientEntity;
       repo.findOne.mockResolvedValue(mismo);
 
       await expect(
-        service.create(fhirPatient({ dni: '27333444', gender: 'male' }), TENANT_A, { userId: 'u1', userName: 'X' }),
+        service.create(
+          fhirPatient({ dni: '27333444', gender: 'male' }),
+          TENANT_A,
+          { userId: 'u1', userName: 'X' },
+        ),
       ).rejects.toThrow(ConflictException);
     });
   });
@@ -153,19 +204,25 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
     it('falta identifier/DNI → BadRequest', async () => {
       const p = fhirPatient();
       delete (p as any).identifier;
-      await expect(service.create(p, TENANT_A)).rejects.toThrow(BadRequestException);
+      await expect(service.create(p, TENANT_A)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('falta name (family) → BadRequest', async () => {
       const p = fhirPatient();
       delete (p as any).name;
-      await expect(service.create(p, TENANT_A)).rejects.toThrow(BadRequestException);
+      await expect(service.create(p, TENANT_A)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('falta birthDate → BadRequest', async () => {
       const p = fhirPatient();
       delete (p as any).birthDate;
-      await expect(service.create(p, TENANT_A)).rejects.toThrow(BadRequestException);
+      await expect(service.create(p, TENANT_A)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -174,7 +231,10 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
       repo.findOne.mockResolvedValue(null);
       wireSave();
 
-      await service.create(fhirPatient(), TENANT_A, { userId: 'doctor_julio-sub', userName: 'doctor_julio' });
+      await service.create(fhirPatient(), TENANT_A, {
+        userId: 'doctor_julio-sub',
+        userName: 'doctor_julio',
+      });
 
       expect(audit.logChange).toHaveBeenCalledTimes(1);
       const call = audit.logChange.mock.calls[0][0];
@@ -201,20 +261,31 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
     it('findOne filtra SIEMPRE por tenant: un paciente de A no es visible desde B (NotFound)', async () => {
       // El repo, consultado con tenantId=B, no encuentra el paciente de A.
       repo.findOne.mockResolvedValue(null);
-      await expect(service.findOne('uuid-de-A', TENANT_B)).rejects.toThrow(NotFoundException);
-      expect(repo.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-de-A', tenantId: TENANT_B } });
+      await expect(service.findOne('uuid-de-A', TENANT_B)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { id: 'uuid-de-A', tenantId: TENANT_B },
+      });
     });
 
     it('update filtra por tenant: no se puede editar un paciente de A con token de B (NotFound)', async () => {
       repo.findOne.mockResolvedValue(null);
-      await expect(service.update('uuid-de-A', fhirPatient(), TENANT_B)).rejects.toThrow(NotFoundException);
-      expect(repo.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-de-A', tenantId: TENANT_B } });
+      await expect(
+        service.update('uuid-de-A', fhirPatient(), TENANT_B),
+      ).rejects.toThrow(NotFoundException);
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { id: 'uuid-de-A', tenantId: TENANT_B },
+      });
     });
 
     it('el alta sella el tenantId del token en la entidad (no se puede inyectar otro)', async () => {
       repo.findOne.mockResolvedValue(null);
       wireSave();
-      await service.create(fhirPatient(), TENANT_A, { userId: 'u', userName: 'U' });
+      await service.create(fhirPatient(), TENANT_A, {
+        userId: 'u',
+        userName: 'U',
+      });
       const savedEntity = repo.save.mock.calls[0][0] as any;
       expect(savedEntity.tenantId).toBe(TENANT_A);
     });
@@ -222,8 +293,18 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
 
   describe('Búsqueda por DNI (NO se toca; desambiguación humana en grilla)', () => {
     it('devuelve un Bundle searchset con AMBAS personas cuando un DNI tiene 2 sexos', async () => {
-      const varon = { id: 'm1', dni: '20999888', createdAt: new Date(), payload: { resourceType: 'Patient', gender: 'male', extension: [] } };
-      const mujer = { id: 'f1', dni: '20999888', createdAt: new Date(), payload: { resourceType: 'Patient', gender: 'female', extension: [] } };
+      const varon = {
+        id: 'm1',
+        dni: '20999888',
+        createdAt: new Date(),
+        payload: { resourceType: 'Patient', gender: 'male', extension: [] },
+      };
+      const mujer = {
+        id: 'f1',
+        dni: '20999888',
+        createdAt: new Date(),
+        payload: { resourceType: 'Patient', gender: 'female', extension: [] },
+      };
       const qb: any = {
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
@@ -239,7 +320,9 @@ describe('PatientService — flujo de alta (turnos WhatsApp / clave dni+gender)'
       const genders = bundle.entry.map((e: any) => e.resource.gender).sort();
       expect(genders).toEqual(['female', 'male']);
       // La búsqueda SIEMPRE filtra por tenant (Zero Trust)
-      expect(qb.where).toHaveBeenCalledWith('patient.tenant_id = :tenantId', { tenantId: TENANT_A });
+      expect(qb.where).toHaveBeenCalledWith('patient.tenant_id = :tenantId', {
+        tenantId: TENANT_A,
+      });
     });
   });
 });

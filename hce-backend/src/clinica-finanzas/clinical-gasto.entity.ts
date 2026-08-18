@@ -1,4 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('clinica_gastos')
 export class ClinicalGasto {
@@ -17,7 +22,11 @@ export class ClinicalGasto {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   monto: number;
 
-  @Column({ name: 'fecha_gasto', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'fecha_gasto',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   fechaGasto: Date;
 
   @Column({ name: 'metodo_pago', length: 50 })
@@ -29,7 +38,12 @@ export class ClinicalGasto {
   @Column({ type: 'varchar', name: 'insumo_id', nullable: true })
   insumoId?: string | null;
 
-  @Column({ type: 'varchar', name: 'registered_by', length: 100, nullable: true })
+  @Column({
+    type: 'varchar',
+    name: 'registered_by',
+    length: 100,
+    nullable: true,
+  })
   registeredBy?: string | null;
 
   @CreateDateColumn({ name: 'created_at' })

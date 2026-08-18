@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import { AppointmentEntity } from './appointment.entity';
 import { PatientEntity } from '../patient/patient.entity';
@@ -28,14 +32,24 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
   const mockWebhook = { dispatch: jest.fn() };
   const mockModules = { isEnabled: jest.fn() };
 
-  const actor = { actorId: 'u1', actorName: 'Dr. Test', isServiceAccount: false };
+  const actor = {
+    actorId: 'u1',
+    actorName: 'Dr. Test',
+    isServiceAccount: false,
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AppointmentService,
-        { provide: getRepositoryToken(AppointmentEntity), useValue: mockApptRepo },
-        { provide: getRepositoryToken(PatientEntity), useValue: mockPatientRepo },
+        {
+          provide: getRepositoryToken(AppointmentEntity),
+          useValue: mockApptRepo,
+        },
+        {
+          provide: getRepositoryToken(PatientEntity),
+          useValue: mockPatientRepo,
+        },
         { provide: AppointmentAuditService, useValue: mockAudit },
         { provide: WebhookService, useValue: mockWebhook },
         { provide: ModulesService, useValue: mockModules },
@@ -49,18 +63,29 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
 
   describe('changeStatus', () => {
     it('rechaza un estado inválido (no permite "cancelled" por esta vía)', async () => {
-      await expect(service.changeStatus('a1', 'cancelled', 't1', actor)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.changeStatus('a1', 'cancelled', 't1', actor),
+      ).rejects.toThrow(BadRequestException);
       expect(mockApptRepo.findOne).not.toHaveBeenCalled();
     });
 
     it('lanza NotFound si el turno no pertenece al tenant (aislamiento ZT)', async () => {
       mockApptRepo.findOne.mockResolvedValue(null);
-      await expect(service.changeStatus('a1', 'arrived', 't1', actor)).rejects.toThrow(NotFoundException);
-      expect(mockApptRepo.findOne).toHaveBeenCalledWith({ where: { id: 'a1', tenantId: 't1' } });
+      await expect(
+        service.changeStatus('a1', 'arrived', 't1', actor),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockApptRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 'a1', tenantId: 't1' },
+      });
     });
 
     it('marca llegada y persiste la prioridad en entidad y payload, auditando UPDATE', async () => {
-      const appt: any = { id: 'a1', tenantId: 't1', status: 'booked', payload: { status: 'booked' } };
+      const appt: any = {
+        id: 'a1',
+        tenantId: 't1',
+        status: 'booked',
+        payload: { status: 'booked' },
+      };
       mockApptRepo.findOne.mockResolvedValue(appt);
       mockApptRepo.save.mockImplementation(async (e: any) => e);
 
@@ -70,20 +95,38 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
       expect(res.priority).toBe(2);
       expect(appt.priority).toBe(2);
       expect(mockAudit.log).toHaveBeenCalledWith(
-        expect.objectContaining({ appointmentId: 'a1', tenantId: 't1', action: 'UPDATE' }),
+        expect.objectContaining({
+          appointmentId: 'a1',
+          tenantId: 't1',
+          action: 'UPDATE',
+        }),
       );
     });
 
     it('rechaza una prioridad fuera de rango (1-5)', async () => {
-      const appt: any = { id: 'a1', tenantId: 't1', status: 'booked', payload: {} };
+      const appt: any = {
+        id: 'a1',
+        tenantId: 't1',
+        status: 'booked',
+        payload: {},
+      };
       mockApptRepo.findOne.mockResolvedValue(appt);
-      await expect(service.changeStatus('a1', 'arrived', 't1', actor, 9)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.changeStatus('a1', 'arrived', 't1', actor, 9),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('rechaza una prioridad no numérica (evita 500 al guardar en columna INT)', async () => {
-      const appt: any = { id: 'a1', tenantId: 't1', status: 'booked', payload: {} };
+      const appt: any = {
+        id: 'a1',
+        tenantId: 't1',
+        status: 'booked',
+        payload: {},
+      };
       mockApptRepo.findOne.mockResolvedValue(appt);
-      await expect(service.changeStatus('a1', 'arrived', 't1', actor, 'abc' as any)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.changeStatus('a1', 'arrived', 't1', actor, 'abc' as any),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -100,19 +143,29 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
     });
 
     it('no permite recordatorio de un turno ya atendido', async () => {
-      mockApptRepo.findOne.mockResolvedValue({ id: 'a1', tenantId: 't1', status: 'fulfilled' });
-      await expect(service.sendReminder('a1', 't1')).rejects.toThrow(BadRequestException);
+      mockApptRepo.findOne.mockResolvedValue({
+        id: 'a1',
+        tenantId: 't1',
+        status: 'fulfilled',
+      });
+      await expect(service.sendReminder('a1', 't1')).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockWebhook.dispatch).not.toHaveBeenCalled();
     });
 
     it('lanza NotFound si el turno no es del tenant', async () => {
       mockApptRepo.findOne.mockResolvedValue(null);
-      await expect(service.sendReminder('a1', 't1')).rejects.toThrow(NotFoundException);
+      await expect(service.sendReminder('a1', 't1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('rechaza con Forbidden si la clínica NO contrató el módulo WhatsApp', async () => {
       mockModules.isEnabled.mockResolvedValue(false);
-      await expect(service.sendReminder('a1', 't1')).rejects.toThrow(ForbiddenException);
+      await expect(service.sendReminder('a1', 't1')).rejects.toThrow(
+        ForbiddenException,
+      );
       expect(mockWebhook.dispatch).not.toHaveBeenCalled();
       // ni siquiera consulta el turno: el gate corta antes
       expect(mockApptRepo.findOne).not.toHaveBeenCalled();
@@ -122,7 +175,13 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
   describe('gate de webhook en cancel (módulo WhatsApp)', () => {
     it('NO despacha webhook si la clínica no contrató WhatsApp', async () => {
       mockModules.isEnabled.mockResolvedValue(false);
-      const appt: any = { id: 'a1', tenantId: 't1', status: 'booked', payload: {}, originChannel: 'recepcion' };
+      const appt: any = {
+        id: 'a1',
+        tenantId: 't1',
+        status: 'booked',
+        payload: {},
+        originChannel: 'recepcion',
+      };
       mockApptRepo.findOne.mockResolvedValue(appt);
       mockApptRepo.save.mockImplementation(async (e: any) => e);
 
@@ -132,13 +191,23 @@ describe('AppointmentService — transición de estado / triaje / recordatorio',
 
     it('despacha webhook de cancelación si SÍ contrató WhatsApp', async () => {
       mockModules.isEnabled.mockResolvedValue(true);
-      const appt: any = { id: 'a1', tenantId: 't1', status: 'booked', payload: {}, originChannel: 'recepcion' };
+      const appt: any = {
+        id: 'a1',
+        tenantId: 't1',
+        status: 'booked',
+        payload: {},
+        originChannel: 'recepcion',
+      };
       mockApptRepo.findOne.mockResolvedValue(appt);
       mockApptRepo.save.mockImplementation(async (e: any) => e);
       mockWebhook.dispatch.mockResolvedValue(undefined);
 
       await service.cancel('a1', 'motivo', 't1', actor);
-      expect(mockWebhook.dispatch).toHaveBeenCalledWith('CANCEL', expect.anything(), 't1');
+      expect(mockWebhook.dispatch).toHaveBeenCalledWith(
+        'CANCEL',
+        expect.anything(),
+        't1',
+      );
     });
   });
 });

@@ -11,9 +11,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: process.env.NODE_ENV === 'production'
-      ? ['log', 'error', 'warn']
-      : ['log', 'error', 'warn', 'debug', 'verbose'],
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['log', 'error', 'warn']
+        : ['log', 'error', 'warn', 'debug', 'verbose'],
   });
 
   // Asegurar que la carpeta uploads exista y servirla como estática
@@ -30,18 +31,27 @@ async function bootstrap() {
   // demasiado bajo (se agotaba al abrir pantallas con listas). Se sube a 1000/15min.
   // TODO (backlog REQ-001-INF-1.13/1.14): configurar trust proxy + keyear por usuario/tenant
   // en vez de IP (detrás de Cloudflare todas las requests comparten la IP del proxy).
-  app.use(rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 1000,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { statusCode: 429, message: 'Demasiadas solicitudes. Intente nuevamente en 15 minutos.' },
-  }));
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 1000,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        statusCode: 429,
+        message: 'Demasiadas solicitudes. Intente nuevamente en 15 minutos.',
+      },
+    }),
+  );
 
   // CORS restringido
   const allowedOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',')
-    : ['http://localhost:5173', 'http://localhost:3000', 'https://app.systia.ar'];
+    : [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://app.systia.ar',
+      ];
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
@@ -55,17 +65,22 @@ async function bootstrap() {
   });
 
   // Validation Pipe global
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   // Exception Filter global
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Swagger / OpenAPI
-  if (process.env.NODE_ENV !== 'production' || process.env.SWAGGER_ENABLED === 'true') {
+  if (
+    process.env.NODE_ENV !== 'production' ||
+    process.env.SWAGGER_ENABLED === 'true'
+  ) {
     const config = new DocumentBuilder()
       .setTitle('DentaCloud HCE API')
       .setDescription('API REST de Historia Clínica Electrónica DentaCloud')

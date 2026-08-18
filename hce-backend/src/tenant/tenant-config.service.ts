@@ -34,11 +34,17 @@ export class TenantConfigService {
     return this.repo.save(config);
   }
 
-  async saveLogoUrl(tenantId: string, logoUrl: string): Promise<TenantConfigEntity> {
+  async saveLogoUrl(
+    tenantId: string,
+    logoUrl: string,
+  ): Promise<TenantConfigEntity> {
     return this.updateConfig(tenantId, { logoUrl });
   }
 
-  async saveSignatureUrl(tenantId: string, signatureUrl: string): Promise<TenantConfigEntity> {
+  async saveSignatureUrl(
+    tenantId: string,
+    signatureUrl: string,
+  ): Promise<TenantConfigEntity> {
     return this.updateConfig(tenantId, { signatureUrl });
   }
 }

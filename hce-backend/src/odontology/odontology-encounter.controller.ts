@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -26,10 +34,20 @@ export class OdontologyEncounterController {
   @Roles('medico', 'enfermero', 'administrador')
   async open(
     @Param('patientId') patientId: string,
-    @Body() body: { appointmentId?: string | null; classCode?: string; reasonText?: string },
+    @Body()
+    body: {
+      appointmentId?: string | null;
+      classCode?: string;
+      reasonText?: string;
+    },
     @Request() req: any,
   ) {
-    return this.service.open(patientId, body || {}, req.user.tenantId, this.getUserCtx(req));
+    return this.service.open(
+      patientId,
+      body || {},
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 
   /** Visita activa del paciente (o { active: null }). */
@@ -66,7 +84,12 @@ export class OdontologyEncounterController {
     @Param('id') id: string,
     @Request() req: any,
   ) {
-    return this.service.sign(id, patientId, req.user.tenantId, this.getUserCtx(req));
+    return this.service.sign(
+      id,
+      patientId,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 
   /** Cancelar una visita en curso (las prestaciones se desvinculan a legacy). */
@@ -77,7 +100,12 @@ export class OdontologyEncounterController {
     @Param('id') id: string,
     @Request() req: any,
   ) {
-    return this.service.cancel(id, patientId, req.user.tenantId, this.getUserCtx(req));
+    return this.service.cancel(
+      id,
+      patientId,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 
   /** Historial de auditoría de la visita (apertura/firma/cancelación/addenda). */
@@ -100,6 +128,12 @@ export class OdontologyEncounterController {
     @Body() body: { text: string },
     @Request() req: any,
   ) {
-    return this.service.addAddenda(id, patientId, body?.text, req.user.tenantId, this.getUserCtx(req));
+    return this.service.addAddenda(
+      id,
+      patientId,
+      body?.text,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 }

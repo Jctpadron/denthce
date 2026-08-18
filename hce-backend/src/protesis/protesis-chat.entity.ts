@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ProtesisOrder } from './protesis-order.entity';
 
 @Entity('protesis_chats')
@@ -29,7 +36,9 @@ export class ProtesisChat {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => ProtesisOrder, (order) => order.messages, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ProtesisOrder, (order) => order.messages, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'order_id' })
   order: ProtesisOrder;
 }

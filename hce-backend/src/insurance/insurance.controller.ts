@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -40,8 +50,14 @@ export class InsuranceController {
    */
   @Get('patient/:patientId/coverage')
   @Roles('medico', 'recepcionista', 'administrador')
-  async getCoverages(@Param('patientId') patientId: string, @Request() req: any) {
-    return this.insuranceService.getCoveragesByPatient(patientId, req.user.tenantId);
+  async getCoverages(
+    @Param('patientId') patientId: string,
+    @Request() req: any,
+  ) {
+    return this.insuranceService.getCoveragesByPatient(
+      patientId,
+      req.user.tenantId,
+    );
   }
 
   /**
@@ -53,7 +69,8 @@ export class InsuranceController {
   @Roles('medico', 'recepcionista', 'administrador')
   async createCoverage(
     @Param('patientId') patientId: string,
-    @Body() body: {
+    @Body()
+    body: {
       insuranceCompanyId: string;
       nroAfiliado: string;
       plan?: string;
@@ -63,7 +80,11 @@ export class InsuranceController {
     },
     @Request() req: any,
   ) {
-    return this.insuranceService.createCoverage(patientId, req.user.tenantId, body);
+    return this.insuranceService.createCoverage(
+      patientId,
+      req.user.tenantId,
+      body,
+    );
   }
 
   /**
@@ -75,7 +96,8 @@ export class InsuranceController {
   async updateCoverage(
     @Param('patientId') patientId: string,
     @Param('covId') covId: string,
-    @Body() body: {
+    @Body()
+    body: {
       insuranceCompanyId?: string;
       nroAfiliado?: string;
       plan?: string;
@@ -86,7 +108,12 @@ export class InsuranceController {
     },
     @Request() req: any,
   ) {
-    return this.insuranceService.updateCoverage(covId, patientId, req.user.tenantId, body);
+    return this.insuranceService.updateCoverage(
+      covId,
+      patientId,
+      req.user.tenantId,
+      body,
+    );
   }
 
   /**
@@ -100,6 +127,10 @@ export class InsuranceController {
     @Param('covId') covId: string,
     @Request() req: any,
   ) {
-    return this.insuranceService.deleteCoverage(covId, patientId, req.user.tenantId);
+    return this.insuranceService.deleteCoverage(
+      covId,
+      patientId,
+      req.user.tenantId,
+    );
   }
 }

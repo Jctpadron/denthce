@@ -56,14 +56,15 @@ import { HealthModule } from './health/health.module';
       username: process.env.DB_USER || 'hce_admin',
       password: process.env.DB_PASSWORD || 'hce_secure_password_2026',
       database: process.env.DB_NAME || 'hce_fhir',
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
       entities: [
-        PatientEntity, 
-        PatientAuditEntity, 
-        ClinicalResourceEntity, 
-        TenantConfigEntity, 
-        EncounterEntity, 
-        MedicationRequestEntity, 
+        PatientEntity,
+        PatientAuditEntity,
+        ClinicalResourceEntity,
+        TenantConfigEntity,
+        EncounterEntity,
+        MedicationRequestEntity,
         OdontologyResourceEntity,
         OdontologyEncounterEntity,
         OdontologyEncounterAuditEntity,
@@ -86,7 +87,7 @@ import { HealthModule } from './health/health.module';
         ClinicalPresupuesto,
         ClinicalPresupuestoItem,
         ClinicalPago,
-        ClinicalGasto
+        ClinicalGasto,
       ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: process.env.DB_LOGGING === 'true',
@@ -111,7 +112,3 @@ import { HealthModule } from './health/health.module';
   providers: [AppService],
 })
 export class AppModule {}
-
-
-
-

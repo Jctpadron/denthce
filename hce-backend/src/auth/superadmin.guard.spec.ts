@@ -21,7 +21,9 @@ describe('SuperAdminGuard', () => {
   });
 
   it('rechaza a un administrador clínico (no es superadmin)', () => {
-    expect(() => guard.canActivate(ctx(['administrador']))).toThrow(ForbiddenException);
+    expect(() => guard.canActivate(ctx(['administrador']))).toThrow(
+      ForbiddenException,
+    );
   });
 
   it('rechaza si no hay roles', () => {

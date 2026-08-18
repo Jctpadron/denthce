@@ -9,7 +9,9 @@ import { ModulesService } from './modules.service';
  * Exporta ModulesService para que otros módulos (Appointment, etc.) gateen sus features.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([PlatformModuleEntity, TenantModuleEntity])],
+  imports: [
+    TypeOrmModule.forFeature([PlatformModuleEntity, TenantModuleEntity]),
+  ],
   providers: [ModulesService],
   exports: [ModulesService],
 })

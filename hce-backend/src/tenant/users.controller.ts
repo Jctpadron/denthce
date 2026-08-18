@@ -42,7 +42,9 @@ export class UsersController {
     }
 
     if (role !== 'recepcionista' && role !== 'enfermero') {
-      throw new BadRequestException('El rol asignado debe ser recepcionista o enfermero.');
+      throw new BadRequestException(
+        'El rol asignado debe ser recepcionista o enfermero.',
+      );
     }
 
     // El tenantId del nuevo usuario será el del doctor actual

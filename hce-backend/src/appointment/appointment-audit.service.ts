@@ -36,7 +36,10 @@ export class AppointmentAuditService {
     await this.auditRepository.save(entry);
   }
 
-  async getHistory(appointmentId: string, tenantId: string): Promise<AppointmentAuditEntity[]> {
+  async getHistory(
+    appointmentId: string,
+    tenantId: string,
+  ): Promise<AppointmentAuditEntity[]> {
     return this.auditRepository.find({
       where: { appointmentId, tenantId },
       order: { createdAt: 'DESC' },

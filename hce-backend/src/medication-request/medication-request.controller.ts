@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { MedicationRequestService } from './medication-request.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -7,7 +17,9 @@ import { Roles } from '../auth/roles.decorator';
 @Controller('fhir/r4/Patient/:patientId/MedicationRequest')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class MedicationRequestController {
-  constructor(private readonly medicationRequestService: MedicationRequestService) {}
+  constructor(
+    private readonly medicationRequestService: MedicationRequestService,
+  ) {}
 
   private getUserCtx(req: any) {
     return {
@@ -31,16 +43,17 @@ export class MedicationRequestController {
     @Body() dto: any,
     @Request() req: any,
   ) {
-    return this.medicationRequestService.create(patientId, dto, req.user.tenantId);
+    return this.medicationRequestService.create(
+      patientId,
+      dto,
+      req.user.tenantId,
+    );
   }
 
   /** GET /fhir/r4/Patient/:patientId/MedicationRequest — Listar recetas del paciente */
   @Get()
   @Roles('medico', 'recepcionista', 'administrador')
-  async findAll(
-    @Param('patientId') patientId: string,
-    @Request() req: any,
-  ) {
+  async findAll(@Param('patientId') patientId: string, @Request() req: any) {
     return this.medicationRequestService.findAll(patientId, req.user.tenantId);
   }
 
@@ -75,6 +88,10 @@ export class MedicationRequestController {
     @Param('id') id: string,
     @Request() req: any,
   ) {
-    return this.medicationRequestService.sign(id, req.user.tenantId, this.getUserCtx(req));
+    return this.medicationRequestService.sign(
+      id,
+      req.user.tenantId,
+      this.getUserCtx(req),
+    );
   }
 }

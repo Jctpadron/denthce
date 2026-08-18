@@ -11,7 +11,17 @@ import { PlatformModule } from '../platform/platform.module';
 import { PatientEntity } from '../patient/patient.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClinicalPrecio, ClinicalPresupuesto, ClinicalPresupuestoItem, ClinicalPago, ClinicalGasto, PatientEntity]), PlatformModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      ClinicalPrecio,
+      ClinicalPresupuesto,
+      ClinicalPresupuestoItem,
+      ClinicalPago,
+      ClinicalGasto,
+      PatientEntity,
+    ]),
+    PlatformModule,
+  ],
   providers: [ClinicaFinanzasService],
   controllers: [ClinicaFinanzasController],
   exports: [ClinicaFinanzasService],

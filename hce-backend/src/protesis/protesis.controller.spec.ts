@@ -1,6 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProtesisController } from './protesis.controller';
-import { ProtesisService, CreateOrderDto, SendMessageDto, CreateInsumoDto } from './protesis.service';
+import {
+  ProtesisService,
+  CreateOrderDto,
+  SendMessageDto,
+  CreateInsumoDto,
+} from './protesis.service';
 import { ModulesService } from '../platform/modules.service';
 
 describe('ProtesisController', () => {
@@ -85,7 +90,10 @@ describe('ProtesisController', () => {
 
       await controller.getOrderDetails('order_123', mockReq);
 
-      expect(service.getOrderDetails).toHaveBeenCalledWith('clinica_test', 'order_123');
+      expect(service.getOrderDetails).toHaveBeenCalledWith(
+        'clinica_test',
+        'order_123',
+      );
     });
   });
 
@@ -123,9 +131,21 @@ describe('ProtesisController', () => {
       };
       mockProtesisService.updateStatus.mockResolvedValue({});
 
-      await controller.updateStatus('order_123', 'designing', undefined, mockReq);
+      await controller.updateStatus(
+        'order_123',
+        'designing',
+        undefined,
+        mockReq,
+      );
 
-      expect(service.updateStatus).toHaveBeenCalledWith('lab_test', 'order_123', 'designing', 'unknown', 'Usuario', undefined);
+      expect(service.updateStatus).toHaveBeenCalledWith(
+        'lab_test',
+        'order_123',
+        'designing',
+        'unknown',
+        'Usuario',
+        undefined,
+      );
     });
   });
 
@@ -216,7 +236,11 @@ describe('ProtesisController', () => {
 
       await controller.updateStock('insumo_1', 12, mockReq);
 
-      expect(service.updateStock).toHaveBeenCalledWith('lab_test', 'insumo_1', 12);
+      expect(service.updateStock).toHaveBeenCalledWith(
+        'lab_test',
+        'insumo_1',
+        12,
+      );
     });
   });
 
@@ -228,7 +252,11 @@ describe('ProtesisController', () => {
 
       await controller.updateTrazabilidad('order_123', dto, mockReq);
 
-      expect(service.updateTrazabilidad).toHaveBeenCalledWith('lab_test', 'order_123', dto);
+      expect(service.updateTrazabilidad).toHaveBeenCalledWith(
+        'lab_test',
+        'order_123',
+        dto,
+      );
     });
   });
 
@@ -240,7 +268,11 @@ describe('ProtesisController', () => {
 
       await controller.signConformidad('order_123', dto, mockReq);
 
-      expect(service.signConformidad).toHaveBeenCalledWith('lab_test', 'order_123', dto);
+      expect(service.signConformidad).toHaveBeenCalledWith(
+        'lab_test',
+        'order_123',
+        dto,
+      );
     });
   });
 });

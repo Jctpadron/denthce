@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ModulesService } from '../platform/modules.service';
 import { REQUIRED_MODULE_KEY } from './requires-module.decorator';
@@ -21,17 +26,20 @@ export class ModulesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const moduleKey = this.reflector.getAllAndOverride<string>(REQUIRED_MODULE_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const moduleKey = this.reflector.getAllAndOverride<string>(
+      REQUIRED_MODULE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!moduleKey) return true; // endpoint sin gate de módulo
 
     const user = context.switchToHttp().getRequest().user;
     // El Super Admin gestiona la plataforma cross-tenant: no se le aplica el gate.
     if (user?.roles?.includes('superadmin')) return true;
 
-    const enabled = await this.modulesService.isEnabled(user?.tenantId, moduleKey);
+    const enabled = await this.modulesService.isEnabled(
+      user?.tenantId,
+      moduleKey,
+    );
     if (!enabled) {
       throw new ForbiddenException({
         statusCode: 403,

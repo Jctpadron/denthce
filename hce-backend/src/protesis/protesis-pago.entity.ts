@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ProtesisOrder } from './protesis-order.entity';
 
 @Entity('protesis_pagos')
@@ -12,7 +19,11 @@ export class ProtesisPago {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   monto: number;
 
-  @Column({ name: 'fecha_pago', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'fecha_pago',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   fechaPago: Date;
 
   @Column({ name: 'metodo_pago', length: 50 })
@@ -30,7 +41,9 @@ export class ProtesisPago {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => ProtesisOrder, (order) => order.pagos, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ProtesisOrder, (order) => order.pagos, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'order_id' })
   order: ProtesisOrder;
 }

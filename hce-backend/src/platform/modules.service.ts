@@ -26,7 +26,9 @@ export class ModulesService {
    */
   async isEnabled(tenantId: string, moduleKey: string): Promise<boolean> {
     if (!tenantId) return false;
-    const tm = await this.tenantModuleRepo.findOne({ where: { tenantId, moduleKey } });
+    const tm = await this.tenantModuleRepo.findOne({
+      where: { tenantId, moduleKey },
+    });
     if (!tm || !tm.enabled) return false;
     if (tm.expiresAt && tm.expiresAt.getTime() <= Date.now()) return false;
     return true;
@@ -34,7 +36,9 @@ export class ModulesService {
 
   /** Lista las keys de los módulos activos de una clínica (para el dashboard / front). */
   async enabledModules(tenantId: string): Promise<string[]> {
-    const rows = await this.tenantModuleRepo.find({ where: { tenantId, enabled: true } });
+    const rows = await this.tenantModuleRepo.find({
+      where: { tenantId, enabled: true },
+    });
     const now = Date.now();
     return rows
       .filter((r) => !r.expiresAt || r.expiresAt.getTime() > now)
@@ -43,6 +47,8 @@ export class ModulesService {
 
   /** Catálogo completo de módulos contratables. */
   async catalog(): Promise<PlatformModuleEntity[]> {
-    return this.platformModuleRepo.find({ order: { isBase: 'DESC', key: 'ASC' } });
+    return this.platformModuleRepo.find({
+      order: { isBase: 'DESC', key: 'ASC' },
+    });
   }
 }

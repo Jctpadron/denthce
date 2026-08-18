@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 /**
  * InsuranceCompanyEntity (`insurance_companies`).
@@ -7,7 +14,10 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
  * Se pre-pobla con el seed de obras sociales relevantes para Jujuy/NOA al iniciar.
  */
 @Entity('insurance_companies')
-@Index('uq_insurance_rnos', ['rnos'], { unique: true, where: '"rnos" IS NOT NULL AND "rnos" != \'\'' })
+@Index('uq_insurance_rnos', ['rnos'], {
+  unique: true,
+  where: '"rnos" IS NOT NULL AND "rnos" != \'\'',
+})
 export class InsuranceCompanyEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

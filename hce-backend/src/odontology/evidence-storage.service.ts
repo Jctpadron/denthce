@@ -3,7 +3,11 @@ import { join } from 'path';
 import * as fs from 'fs';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 
 /**
  * Almacenamiento de blobs de EVIDENCIA CLÍNICA (firmas PNG + adjuntos RX/PDF), agnóstico del backend.
@@ -36,15 +40,23 @@ export class EvidenceStorageService {
   }
 
   /** Guarda el blob. `category` = 'signatures' | 'attachments'. */
-  async put(category: string, tenantId: string, key: string, buffer: Buffer, contentType: string): Promise<void> {
+  async put(
+    category: string,
+    tenantId: string,
+    key: string,
+    buffer: Buffer,
+    contentType: string,
+  ): Promise<void> {
     if (this.useS3) {
-      await this.client().send(new PutObjectCommand({
-        Bucket: this.bucket,
-        Key: this.s3Key(category, tenantId, key),
-        Body: buffer,
-        ContentType: contentType,
-        ServerSideEncryption: 'AES256',
-      }));
+      await this.client().send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: this.s3Key(category, tenantId, key),
+          Body: buffer,
+          ContentType: contentType,
+          ServerSideEncryption: 'AES256',
+        }),
+      );
     } else {
       const dir = join(this.localBase, category);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -53,12 +65,19 @@ export class EvidenceStorageService {
   }
 
   /** Devuelve un stream legible del blob, ruteando según el backend con que se guardó la fila. */
-  async getStream(backend: string, category: string, tenantId: string, key: string): Promise<Readable> {
+  async getStream(
+    backend: string,
+    category: string,
+    tenantId: string,
+    key: string,
+  ): Promise<Readable> {
     if (backend === 's3') {
-      const r = await this.client().send(new GetObjectCommand({
-        Bucket: this.bucket,
-        Key: this.s3Key(category, tenantId, key),
-      }));
+      const r = await this.client().send(
+        new GetObjectCommand({
+          Bucket: this.bucket,
+          Key: this.s3Key(category, tenantId, key),
+        }),
+      );
       return r.Body as Readable;
     }
     return createReadStream(join(this.localBase, category, key));

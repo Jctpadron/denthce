@@ -1,4 +1,11 @@
-import { Controller, Get, Query, UseGuards, Request, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Request,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SlotService } from './slot.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -18,7 +25,9 @@ export class SlotController {
     @Query('status') status?: string,
   ) {
     if (status !== 'free') {
-      throw new BadRequestException('Solo se permite la búsqueda de slots libres (status=free).');
+      throw new BadRequestException(
+        'Solo se permite la búsqueda de slots libres (status=free).',
+      );
     }
 
     // Resolver specialtyId quitando cualquier prefijo de system "system|{uuid}"
@@ -28,7 +37,9 @@ export class SlotController {
     }
 
     if (!specialtyId) {
-      throw new BadRequestException('El parámetro specialty (especialidad) es obligatorio.');
+      throw new BadRequestException(
+        'El parámetro specialty (especialidad) es obligatorio.',
+      );
     }
 
     // Resolver rangos start=ge... y start=lt...
@@ -46,10 +57,17 @@ export class SlotController {
     }
 
     if (!startDateStr || !endDateStr) {
-      throw new BadRequestException('Es obligatorio especificar los rangos de fecha de inicio start=ge... y fin start=lt...');
+      throw new BadRequestException(
+        'Es obligatorio especificar los rangos de fecha de inicio start=ge... y fin start=lt...',
+      );
     }
 
-    return this.slotService.findAvailableSlots(specialtyId, startDateStr, endDateStr, req.user.tenantId);
+    return this.slotService.findAvailableSlots(
+      specialtyId,
+      startDateStr,
+      endDateStr,
+      req.user.tenantId,
+    );
   }
 
   @Get('Practitioner')

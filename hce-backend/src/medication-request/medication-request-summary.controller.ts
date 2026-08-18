@@ -11,7 +11,9 @@ import { Roles } from '../auth/roles.decorator';
 @Controller('fhir/r4/MedicationRequest')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class MedicationRequestSummaryController {
-  constructor(private readonly medicationRequestService: MedicationRequestService) {}
+  constructor(
+    private readonly medicationRequestService: MedicationRequestService,
+  ) {}
 
   /**
    * GET /fhir/r4/MedicationRequest?status=draft

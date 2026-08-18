@@ -1,4 +1,10 @@
-import { Injectable, Logger, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
@@ -25,13 +31,18 @@ export class ClinichatOrchestrationService {
     return process.env.PLATFORM_SYNC_SECRET || 'test_secret_123';
   }
   private get configUrl(): string {
-    return process.env.CLINICHAT_CONFIG_URL || 'http://localhost:3000/api/public/hooks/configure-hce-integration';
+    return (
+      process.env.CLINICHAT_CONFIG_URL ||
+      'http://localhost:3000/api/public/hooks/configure-hce-integration'
+    );
   }
   private get fhirBaseUrl(): string {
     return process.env.HCE_FHIR_BASE_URL || 'https://api.systia.ar/fhir/r4';
   }
   private get keycloakTokenUrl(): string {
-    const issuer = process.env.KEYCLOAK_ISSUER_URL || 'https://auth.systia.ar/realms/hce-realm';
+    const issuer =
+      process.env.KEYCLOAK_ISSUER_URL ||
+      'https://auth.systia.ar/realms/hce-realm';
     return `${issuer}/protocol/openid-connect/token`;
   }
 
@@ -44,7 +55,8 @@ export class ClinichatOrchestrationService {
   /** Asegura el hce_webhook_secret de la clínica (lo genera si no existe). */
   private async ensureWebhookSecret(tenantId: string): Promise<string> {
     const config = await this.tenantConfigRepo.findOne({ where: { tenantId } });
-    if (!config) throw new BadRequestException(`Clínica "${tenantId}" sin configuración.`);
+    if (!config)
+      throw new BadRequestException(`Clínica "${tenantId}" sin configuración.`);
     if (config.hceWebhookSecret) return config.hceWebhookSecret;
     const secret = crypto.randomBytes(32).toString('hex');
     config.hceWebhookSecret = secret;
@@ -55,32 +67,53 @@ export class ClinichatOrchestrationService {
   /** Firma el body con HMAC-SHA256 y lo POSTea al endpoint de CliniChat. */
   private async dispatch(payload: any): Promise<void> {
     const body = JSON.stringify(payload);
-    const signature = crypto.createHmac('sha256', this.platformSecret).update(body).digest('hex');
+    const signature = crypto
+      .createHmac('sha256', this.platformSecret)
+      .update(body)
+      .digest('hex');
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
       const res = await fetch(this.configUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-HCE-Platform-Signature': `sha256=${signature}` },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-HCE-Platform-Signature': `sha256=${signature}`,
+        },
         body,
         signal: controller.signal,
       });
       const text = await res.text().catch(() => '');
       if (!res.ok) {
-        this.logger.error(`[orquestacion] CliniChat respondió ${res.status}: ${text}`);
+        this.logger.error(
+          `[orquestacion] CliniChat respondió ${res.status}: ${text}`,
+        );
         const msg =
-          res.status === 401 ? 'Firma de plataforma rechazada por CliniChat.'
-          : res.status === 404 ? 'Código de enlace (pairing code) no encontrado en CliniChat.'
-          : `CliniChat rechazó la configuración (${res.status}).`;
+          res.status === 401
+            ? 'Firma de plataforma rechazada por CliniChat.'
+            : res.status === 404
+              ? 'Código de enlace (pairing code) no encontrado en CliniChat.'
+              : `CliniChat rechazó la configuración (${res.status}).`;
         throw new HttpException(msg, HttpStatus.BAD_GATEWAY);
       }
-      this.logger.log(`[orquestacion] CliniChat configurado OK (${payload.action}) para ${payload.hce_tenant_id}.`);
+      this.logger.log(
+        `[orquestacion] CliniChat configurado OK (${payload.action}) para ${payload.hce_tenant_id}.`,
+      );
     } catch (e: any) {
       if (e instanceof HttpException) throw e;
-      if (e?.name === 'AbortError') throw new HttpException('Timeout al contactar a CliniChat.', HttpStatus.GATEWAY_TIMEOUT);
-      this.logger.error(`[orquestacion] Error contactando a CliniChat: ${e?.message}`);
-      throw new HttpException('No se pudo contactar a CliniChat.', HttpStatus.BAD_GATEWAY);
+      if (e?.name === 'AbortError')
+        throw new HttpException(
+          'Timeout al contactar a CliniChat.',
+          HttpStatus.GATEWAY_TIMEOUT,
+        );
+      this.logger.error(
+        `[orquestacion] Error contactando a CliniChat: ${e?.message}`,
+      );
+      throw new HttpException(
+        'No se pudo contactar a CliniChat.',
+        HttpStatus.BAD_GATEWAY,
+      );
     } finally {
       clearTimeout(timeoutId);
     }
@@ -90,7 +123,10 @@ export class ClinichatOrchestrationService {
    * Anexa WhatsApp: genera service-account + webhook secret y configura CliniChat por pairing code.
    */
   async enableWhatsapp(tenantId: string, pairingCode: string): Promise<void> {
-    if (!pairingCode) throw new BadRequestException('El código de enlace (pairing code) es obligatorio para anexar WhatsApp.');
+    if (!pairingCode)
+      throw new BadRequestException(
+        'El código de enlace (pairing code) es obligatorio para anexar WhatsApp.',
+      );
     const sa = await this.keycloakAdmin.createClinicServiceAccount(tenantId);
     const webhookSecret = await this.ensureWebhookSecret(tenantId);
     await this.dispatch({

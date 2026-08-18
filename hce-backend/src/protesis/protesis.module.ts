@@ -11,7 +11,17 @@ import { ProtesisController } from './protesis.controller';
 import { PlatformModule } from '../platform/platform.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProtesisOrder, ProtesisChat, ProtesisInsumo, ProtesisStatusHistory, ProtesisPago, ProtesisConsumoInsumo]), PlatformModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      ProtesisOrder,
+      ProtesisChat,
+      ProtesisInsumo,
+      ProtesisStatusHistory,
+      ProtesisPago,
+      ProtesisConsumoInsumo,
+    ]),
+    PlatformModule,
+  ],
   providers: [ProtesisService],
   controllers: [ProtesisController],
   exports: [ProtesisService],

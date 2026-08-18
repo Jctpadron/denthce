@@ -20,7 +20,9 @@ export class SisaService {
 
   constructor() {
     this.isMock = process.env.SISA_MOCK !== 'false';
-    this.baseUrl = process.env.SISA_BASE_URL || 'https://sisa.msal.gov.ar/sisa/services/rest/';
+    this.baseUrl =
+      process.env.SISA_BASE_URL ||
+      'https://sisa.msal.gov.ar/sisa/services/rest/';
     this.sisaUser = process.env.SISA_USER || '';
     this.sisaPassword = process.env.SISA_PASSWORD || '';
   }
@@ -30,7 +32,10 @@ export class SisaService {
    * @param dni DNI sin puntos ni espacios
    * @param gender 'male' | 'female' — requerido por la API de SISA
    */
-  async verificarPorDni(dni: string, gender?: string): Promise<SisaVerificationResult> {
+  async verificarPorDni(
+    dni: string,
+    gender?: string,
+  ): Promise<SisaVerificationResult> {
     if (this.isMock) {
       return this.getMockResult(dni);
     }
@@ -41,7 +46,11 @@ export class SisaService {
 
       const response = await fetch(url);
       if (!response.ok) {
-        return { status: 'error', message: 'SISA no disponible', source: 'sisa-real' };
+        return {
+          status: 'error',
+          message: 'SISA no disponible',
+          source: 'sisa-real',
+        };
       }
 
       const data: any = await response.json();
@@ -60,10 +69,18 @@ export class SisaService {
           rnos: data.rnos || null,
         };
       } else {
-        return { status: 'not_found', message: 'DNI no encontrado en SISA', source: 'sisa-real' };
+        return {
+          status: 'not_found',
+          message: 'DNI no encontrado en SISA',
+          source: 'sisa-real',
+        };
       }
     } catch (err) {
-      return { status: 'error', message: 'Error conectando con SISA', source: 'sisa-real' };
+      return {
+        status: 'error',
+        message: 'Error conectando con SISA',
+        source: 'sisa-real',
+      };
     }
   }
 
@@ -74,11 +91,41 @@ export class SisaService {
 
     if (lastDigit % 2 === 0) {
       const mockData: Record<string, Partial<SisaVerificationResult>> = {
-        '2': { apellido: 'GARCIA', nombre: 'CARLOS MARTIN', sexo: 'male', cobertura: 'OSDE', rnos: '800801' },
-        '4': { apellido: 'RODRIGUEZ', nombre: 'MARIA ELENA', sexo: 'female', cobertura: 'PAMI', rnos: '500001' },
-        '6': { apellido: 'MARTINEZ', nombre: 'JUAN PABLO', sexo: 'male', cobertura: 'IOMA', rnos: '300601' },
-        '8': { apellido: 'FERNANDEZ', nombre: 'ANA LUCIA', sexo: 'female', cobertura: 'Swiss Medical', rnos: '800101' },
-        '0': { apellido: 'LOPEZ', nombre: 'PEDRO DANIEL', sexo: 'male', cobertura: 'Galeno', rnos: '800001' },
+        '2': {
+          apellido: 'GARCIA',
+          nombre: 'CARLOS MARTIN',
+          sexo: 'male',
+          cobertura: 'OSDE',
+          rnos: '800801',
+        },
+        '4': {
+          apellido: 'RODRIGUEZ',
+          nombre: 'MARIA ELENA',
+          sexo: 'female',
+          cobertura: 'PAMI',
+          rnos: '500001',
+        },
+        '6': {
+          apellido: 'MARTINEZ',
+          nombre: 'JUAN PABLO',
+          sexo: 'male',
+          cobertura: 'IOMA',
+          rnos: '300601',
+        },
+        '8': {
+          apellido: 'FERNANDEZ',
+          nombre: 'ANA LUCIA',
+          sexo: 'female',
+          cobertura: 'Swiss Medical',
+          rnos: '800101',
+        },
+        '0': {
+          apellido: 'LOPEZ',
+          nombre: 'PEDRO DANIEL',
+          sexo: 'male',
+          cobertura: 'Galeno',
+          rnos: '800001',
+        },
       };
       const mock = mockData[String(lastDigit)] || mockData['2'];
       return {

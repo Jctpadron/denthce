@@ -3,7 +3,8 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 @Injectable()
 export class KeycloakAdminService {
   private readonly logger = new Logger(KeycloakAdminService.name);
-  private readonly keycloakUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
+  private readonly keycloakUrl =
+    process.env.KEYCLOAK_URL || 'http://localhost:8080';
   private readonly realm = 'hce-realm';
 
   /**
@@ -28,7 +29,9 @@ export class KeycloakAdminService {
 
       if (!response.ok) {
         // Si falla, intentamos con Client Credentials en hce-realm como fallback
-        this.logger.warn('Fallo autenticación password de master, intentando con client_credentials...');
+        this.logger.warn(
+          'Fallo autenticación password de master, intentando con client_credentials...',
+        );
         return await this.getClientCredentialsToken();
       }
 
@@ -73,7 +76,13 @@ export class KeycloakAdminService {
     firstName: string;
     lastName: string;
     /** Rol a asignar. El SuperAdmin lo usa con 'administrador' (clínica) o 'laboratorio-admin' (laboratorio). */
-    role: 'recepcionista' | 'enfermero' | 'administrador' | 'medico' | 'laboratorio-operador' | 'laboratorio-admin';
+    role:
+      | 'recepcionista'
+      | 'enfermero'
+      | 'administrador'
+      | 'medico'
+      | 'laboratorio-operador'
+      | 'laboratorio-admin';
     tenantId: string;
   }): Promise<any> {
     const token = await this.getAdminToken();
@@ -208,7 +217,13 @@ export class KeycloakAdminService {
       if (rolesRes.ok) {
         const rolesData = await rolesRes.json();
         const clinicalRoleObj = rolesData.find((r: any) =>
-          ['medico', 'enfermero', 'recepcionista', 'administrador', 'paciente'].includes(r.name),
+          [
+            'medico',
+            'enfermero',
+            'recepcionista',
+            'administrador',
+            'paciente',
+          ].includes(r.name),
         );
         if (clinicalRoleObj) {
           role = clinicalRoleObj.name;
@@ -239,8 +254,14 @@ export class KeycloakAdminService {
    * Devuelve { clientId, clientSecret } para entregárselos a CliniChat (Fase 4B).
    * Idempotente: si el client ya existe, recupera su secret en lugar de fallar.
    */
-  async createClinicServiceAccount(tenantId: string): Promise<{ clientId: string; clientSecret: string; tenantId: string }> {
-    if (!tenantId) throw new HttpException('tenantId es obligatorio.', HttpStatus.BAD_REQUEST);
+  async createClinicServiceAccount(
+    tenantId: string,
+  ): Promise<{ clientId: string; clientSecret: string; tenantId: string }> {
+    if (!tenantId)
+      throw new HttpException(
+        'tenantId es obligatorio.',
+        HttpStatus.BAD_REQUEST,
+      );
     const token = await this.getAdminToken();
     const clientId = `clinichat-${tenantId}`;
     const base = `${this.keycloakUrl}/admin/realms/${this.realm}`;
@@ -281,36 +302,62 @@ export class KeycloakAdminService {
     if (!createRes.ok && createRes.status !== 409) {
       const err = await createRes.text();
       this.logger.error(`Error creando client ${clientId}: ${err}`);
-      throw new HttpException('No se pudo crear el service-account en Keycloak.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'No se pudo crear el service-account en Keycloak.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     // 2. Resolver el id interno del client.
-    const listRes = await fetch(`${base}/clients?clientId=${encodeURIComponent(clientId)}`, { headers: authH });
+    const listRes = await fetch(
+      `${base}/clients?clientId=${encodeURIComponent(clientId)}`,
+      { headers: authH },
+    );
     const clients = await listRes.json();
     const internalId = clients?.[0]?.id;
     if (!internalId) {
-      throw new HttpException('No se pudo resolver el client recién creado.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'No se pudo resolver el client recién creado.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     // 3. Obtener el client_secret.
-    const secretRes = await fetch(`${base}/clients/${internalId}/client-secret`, { headers: authH });
+    const secretRes = await fetch(
+      `${base}/clients/${internalId}/client-secret`,
+      { headers: authH },
+    );
     const secretData = await secretRes.json();
     const clientSecret = secretData?.value;
     if (!clientSecret) {
-      throw new HttpException('No se pudo obtener el client_secret.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'No se pudo obtener el client_secret.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     // 4. Service-account user del client.
-    const saUserRes = await fetch(`${base}/clients/${internalId}/service-account-user`, { headers: authH });
+    const saUserRes = await fetch(
+      `${base}/clients/${internalId}/service-account-user`,
+      { headers: authH },
+    );
     const saUser = await saUserRes.json();
     if (!saUser?.id) {
-      throw new HttpException('No se pudo resolver el usuario del service-account.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'No se pudo resolver el usuario del service-account.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     // 5. Asignar el rol de realm `servicio-turnos` (mínimo privilegio).
-    const roleRes = await fetch(`${base}/roles/servicio-turnos`, { headers: authH });
+    const roleRes = await fetch(`${base}/roles/servicio-turnos`, {
+      headers: authH,
+    });
     if (!roleRes.ok) {
-      throw new HttpException('El rol "servicio-turnos" no existe en el realm.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'El rol "servicio-turnos" no existe en el realm.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
     const roleData = await roleRes.json();
     await fetch(`${base}/users/${saUser.id}/role-mappings/realm`, {
@@ -319,7 +366,9 @@ export class KeycloakAdminService {
       body: JSON.stringify([roleData]),
     });
 
-    this.logger.log(`Service-account ${clientId} listo (rol servicio-turnos + mapper tenant_id).`);
+    this.logger.log(
+      `Service-account ${clientId} listo (rol servicio-turnos + mapper tenant_id).`,
+    );
     return { clientId, clientSecret, tenantId };
   }
 }

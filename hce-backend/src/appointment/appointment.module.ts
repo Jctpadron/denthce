@@ -11,7 +11,11 @@ import { PlatformModule } from '../platform/platform.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AppointmentEntity, PatientEntity, AppointmentAuditEntity]),
+    TypeOrmModule.forFeature([
+      AppointmentEntity,
+      PatientEntity,
+      AppointmentAuditEntity,
+    ]),
     WebhookModule,
     PlatformModule,
   ],

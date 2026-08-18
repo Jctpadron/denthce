@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ClinicalResourceEntity } from './clinical-resource.entity';
@@ -35,7 +39,9 @@ export class ClinicalResourceService {
     }
 
     // Verificar que el paciente exista y pertenezca al mismo tenant
-    const patient = await this.patientRepository.findOne({ where: { id: patientId, tenantId } });
+    const patient = await this.patientRepository.findOne({
+      where: { id: patientId, tenantId },
+    });
     if (!patient) {
       throw new NotFoundException('Paciente no encontrado en tu consultorio.');
     }
@@ -64,11 +70,12 @@ export class ClinicalResourceService {
         where: { patientId, resourceType, tenantId },
       });
 
-      entity = resources.find((r) => {
-        const rTooth = r.payload.bodySite?.coding?.[0]?.code;
-        const rFace = r.payload.bodySite?.coding?.[1]?.code;
-        return rTooth === toothCode && rFace === faceCode;
-      }) || null;
+      entity =
+        resources.find((r) => {
+          const rTooth = r.payload.bodySite?.coding?.[0]?.code;
+          const rFace = r.payload.bodySite?.coding?.[1]?.code;
+          return rTooth === toothCode && rFace === faceCode;
+        }) || null;
     }
 
     if (!entity) {
@@ -88,9 +95,14 @@ export class ClinicalResourceService {
     return saved.payload;
   }
 
-  async getResourcesByPatient(patientId: string, tenantId: string): Promise<any[]> {
+  async getResourcesByPatient(
+    patientId: string,
+    tenantId: string,
+  ): Promise<any[]> {
     // Verificar que el paciente exista y pertenezca al mismo tenant
-    const patient = await this.patientRepository.findOne({ where: { id: patientId, tenantId } });
+    const patient = await this.patientRepository.findOne({
+      where: { id: patientId, tenantId },
+    });
     if (!patient) {
       throw new NotFoundException('Paciente no encontrado en tu consultorio.');
     }
@@ -104,7 +116,9 @@ export class ClinicalResourceService {
   }
 
   async deleteResource(id: string, tenantId: string): Promise<any> {
-    const resource = await this.resourceRepository.findOne({ where: { id, tenantId } });
+    const resource = await this.resourceRepository.findOne({
+      where: { id, tenantId },
+    });
     if (!resource) {
       throw new NotFoundException('Recurso clínico no encontrado.');
     }
