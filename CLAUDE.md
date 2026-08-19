@@ -67,4 +67,4 @@ Los convoco con la herramienta **Agent** (`subagent_type`):
 - Reportar resultados con fidelidad: si un test falla, mostrarlo con su output; no declarar "hecho" sin verificar.
 
 ## Documentos clave
-- `AGENTS.md` — gobernanza. `tablero_control.md` — avance (61% global). `docs/backlog.json` — backlog. `docs/design/`, `docs/specs/` — entregables de diseño. `docs/walkthroughs/` — bitácora de cambios.
+- `AGENTS.md` — gobernanza. `tablero_control.md` — avance (66% global, 77/116 tareas). `docs/backlog.json` — backlog. `docs/design/`, `docs/specs/` — entregables de diseño. `docs/walkthroughs/` — bitácora de cambios.
