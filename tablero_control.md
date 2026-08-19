@@ -19,16 +19,19 @@ Este es un **documento bidireccional y vivo**:
 | Módulo / Componente | Tareas Completadas | Tareas Totales | Progreso | Estado |
 | :--- | :---: | :---: | :---: | :--- |
 | **0. Orquestación y Diseño de Agentes** | 5 | 5 | `[██████████] 100%` | Completado |
-| **1. Infraestructura y Seguridad (Zero Trust)** | 10 | 10 | `[██████████] 100%` | Completado |
+| **1. Infraestructura y Seguridad (Zero Trust)** | 10 | 13 | `[████████░░] 77%` | En Progreso |
 | **2. Registro Demográfico (FHIR Patient)** | 6 | 6 | `[██████████] 100%` | Completado |
 | **3. Historia Clínica y Notas SOAP (FHIR Encounter)** | 12 | 12 | `[██████████] 100%` | Completado |
-| **4. Receta Electrónica y Vademécum (CDS Hooks)** | 4 | 6 | `[███████░░░] 67%` | En Progreso |
-| **5. Agenda, Citas y Admisión Hospitalaria** | 5 | 5 | `[██████████] 100%` | Completado (versión consultorio) |
+| **4. Receta Electrónica y Vademécum (CDS Hooks)** | 3 | 6 | `[█████░░░░░] 50%` | En Progreso |
+| **5. Agenda, Citas y Admisión Hospitalaria** | 5 | 5 | `[██████████] 100%` | Completado |
 | **6. Integración LIS (Laboratorio) y PACS (Imágenes)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **7. Portal del Paciente y Telemedicina (WebRTC)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
 | **8. IA Clínica y Scribe Ambiental (WhisperX/Berta)** | 0 | 5 | `[░░░░░░░░░░] 0%` | Pendiente |
-| **9. HC Odontológica PAMI (módulo aislado)** | 11 | 11 | `[██████████] 100%` | Completado |
-| **PROGRESO GLOBAL DEL PROYECTO** | **53** | **70** | `[████████░░] 76%` | **En Progreso** |
+| **9. Historia Clínica Odontológica PAMI (módulo aislado)** | 11 | 11 | `[██████████] 100%` | Completado |
+| **10. Módulo Protesistas Dentales (DentaLab)** | 12 | 12 | `[██████████] 100%` | Completado |
+| **11. Auditoría integral y remediación** | 7 | 19 | `[████░░░░░░] 37%` | En Progreso |
+| **12. Finanzas Clínicas y Presupuestos** | 6 | 12 | `[█████░░░░░] 50%` | En Progreso |
+| **PROGRESO GLOBAL DEL PROYECTO** | **77** | **116** | `[███████░░░] 66%` | **En Progreso** |
 
 ---
 
@@ -58,6 +61,11 @@ Este es un **documento bidireccional y vivo**:
 - [x] **Tarea 1.8:** Implementación de aislamiento lógico multi-inquilino (Multi-tenancy) a nivel de base de datos y backend REST API para profesionales independientes y clínicas. *(Prioridad: Alta)*
 - [x] **Tarea 1.9:** Implementación de la API de creación y listado de sub-usuarios en el backend conectada a Keycloak Admin API con atributos multi-inquilino. *(Prioridad: Alta)*
 - [x] **Tarea 1.10:** Interfaz de usuario en React para la Gestión de Personal (Secretarias/Enfermeros) y asignación automática al consultorio del doctor. *(Prioridad: Alta)*
+- [ ] **Tarea 1.12:** Cifrado en reposo del volumen que aloja ePHI (`private-uploads`: firmas PNG + adjuntos RX/PDF). En AWS EB/EC2: EBS encryption (KMS). Migración futura a S3 con SSE-KMS + presigned GET de corta vida (el diseño ya es storage-agnóstico). *(Prioridad: Alta)*
+- [ ] **Tarea 1.13:** Configurar `trust proxy` en `main.ts` para que `req.ip` capture la IP real detrás de Cloudflare Tunnel + reverse proxy. Hoy el `source_ip` de la firma de conformidad guarda la IP del proxy → degrada el valor probatorio (no repudio). *(Prioridad: Media)*
+- [ ] **Tarea 1.14:** Rate limit poco realista: 100 req/15min **por IP** (`main.ts:30`). Sin `trust proxy`, toda una clínica comparte un mismo bucket → 429 en uso normal; además el 429 se emite antes del middleware CORS y el navegador no puede leer el cuerpo. Keyear por usuario/tenant. *(Prioridad: Alta — en progreso: límite subido 100→1000 como paliativo)*
+
+> ℹ️ **Nota de registro (2026-08-19).** La **1.11** existía en el backlog describiendo el mismo hallazgo que **AUD.8** (`/uploads` sirve ePHI sin autenticación). Se marcó `duplicado` con `superseded_by: REQ-011-AUD-8` y **queda excluida del conteo**: se cerraba dos veces e inflaba el denominador. La canónica es AUD.8.
 
 ---
 
@@ -97,14 +105,16 @@ Este es un **documento bidireccional y vivo**:
 - [x] **Tarea 4.1:** Creación del endpoint compatible con el recurso `MedicationRequest` de FHIR. *(Prioridad: Alta)*
 - [x] **Tarea 4.2:** Integración de la base de datos de vademécum nacional/comercial (principios activos, dosis y presentaciones). *(Prioridad: Alta)*
 - [x] **Tarea 4.3:** Implementación del motor de reglas **CDS Hooks** para alertar sobre interacciones fármaco-fármaco y fármaco-alergias del paciente. *(Prioridad: Alta)*
-- [x] **Tarea 4.5:** Panel de firma digital y emisión de recetas en PDF con códigos QR de validación farmacéutica. *(Prioridad: Alta)*
-- [ ] **Tarea 4.6:** Implementación del Kardex de enfermería y registro de administración de medicamentos (eMAR / MAR). *(Prioridad: Media)*
-- [ ] **Tarea 4.7:** Conciliación de medicamentos en altas hospitalarias. *(Prioridad: Media)*
+- [ ] **Tarea 4.4:** Panel de firma digital y emisión de recetas en PDF con códigos QR de validación farmacéutica. *(Prioridad: Alta)*
+- [ ] **Tarea 4.5:** Implementación del Kardex de enfermería y registro de administración de medicamentos (eMAR / MAR). *(Prioridad: Media)*
+- [ ] **Tarea 4.6:** Conciliación de medicamentos en altas hospitalarias. *(Prioridad: Media)*
+
+> ⚠️ **Corrección de registro (2026-08-19).** La numeración de este módulo estaba corrida contra `docs/backlog.json` (el tablero saltaba de 4.3 a 4.5 y tenía una 4.7 inexistente), de modo que cada checkbox marcaba la tarea equivocada. **La 4.4 estaba sobredeclarada:** la firma digital SÍ existe (hash SHA-256, `signedBy`/`signedAt` y extensiones FHIR en `medication-request.service.ts`), pero **no existe la emisión en PDF** (`pdfkit` solo se usa en `odontology-pdf.service.ts`) **ni el QR** (`qrCodeData` apunta a `dentariehr.gov`, dominio inexistente; el frontend solo pinta el ícono `QrCode` de lucide-react). Vuelve a pendiente hasta desglosarla o completarla.
 
 ---
 
 ### Módulo 5: Agenda, Citas y Admisión Hospitalaria
-*Control operativo de la ocupación, disponibilidad de profesionales y flujos de atención.*
+*Control operativo de la ocupación, disponibilidad de profesionales y flujos de atención. **Versión consultorio:** las tareas 5.4/5.5 hospitalarias quedaron fuera de alcance por decisión de producto (2026-06-13).*
 
 - [x] **Tarea 5.1:** Endpoint compatible con el recurso `Appointment` de FHIR para reserva y cancelación de turnos. *(Prioridad: Alta)* *(Backend: `appointment/` con idempotencia, anti-double-booking, auditoría y webhooks CliniChat. + `PATCH /:id/status` para transiciones llegada/atendido/ausente.)*
 - [x] **Tarea 5.2:** Calendario visual interactivo para administración médica por profesional y consultorio. *(Prioridad: Alta)* *(Frontend `components/agenda/`: vista Día/Semana desde scheduleJson, alta/cancelación/cambio de estado. Walkthrough `2026-06-13_modulo5_agenda_visual.md`.)*
@@ -177,8 +187,8 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
-### Módulo Protesistas Dentales (DentaLab / ProtesisChat)
-*Módulo para laboratorios dentales y protesistas, integrable con la HCE mediante entitlements y aislado lógicamente. Responsable: Gemini.*
+### Módulo 10: Protesistas Dentales (DentaLab / ProtesisChat)
+*Módulo para laboratorios dentales y protesistas, integrable con la HCE mediante entitlements y aislado lógicamente. Responsable: Gemini. (Cuenta como Módulo 10 desde el 2026-08-19.)*
 
 - [x] **PRO.1:** Modelado de datos en NestJS compatible con FHIR R4: `DeviceRequest` (órdenes) y `Communication` (chat y mensajería clínica). *(Prioridad: Alta)*
 - [x] **PRO.2:** Backend APIs: Controladores y servicios para gestión de trabajos de prótesis y chat. *(Prioridad: Alta)*
@@ -226,8 +236,8 @@ Este es un **documento bidireccional y vivo**:
 
 ---
 
-### Iniciativa transversal: Auditoría integral y remediación (2026-08-17)
-*Auditoría con 5 subagentes (security/revisor/ux/architect/qa) + punto cero del repositorio. **Handoff canónico:** `docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md`. Responsable: Claude. **(Fuera del conteo de los 70.)***
+### Módulo 11: Auditoría integral y remediación (2026-08-17)
+*Auditoría con 5 subagentes (security/revisor/ux/architect/qa) + punto cero del repositorio. **Handoff canónico:** `docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md`. Responsable: Claude. **(Cuenta como Módulo 11 desde el 2026-08-19.)***
 
 **Hecho el 2026-08-17:**
 
@@ -253,6 +263,26 @@ Este es un **documento bidireccional y vivo**:
 - [ ] **AUD.17:** **Desactivar las 2 claves root de AWS.** Requiere inventario humano (IAM → Last used). Orden seguro en `aws/iam/README.md`. *(Prioridad: Alta)*
 - [ ] **AUD.18:** Decisiones de producto que bloquean sus ADR: (a) ¿se vende a clínicas multi-profesional? Hoy `Practitioner` se sintetiza desde `tenant_config` — **un profesional por clínica cableado en la capa de datos**; (b) ¿qué pasa con la Ficha Clínica general, hoy inalcanzable desde el menú, lo que deja las alertas de alergia sin datos posibles? *(Prioridad: Alta)*
 - [ ] **AUD.19:** Avisar a los tenants activos del cambio de números (deuda negativa → 0, `deudaTotal` sube al incluir vencidos, `pacientesMorosos` baja) y decidir qué hacer con el sobrepago histórico de $188 en `PRES-0001`. *(Prioridad: Media)*
+
+---
+
+### Módulo 12: Finanzas Clínicas y Presupuestos
+*Presupuesto odontológico, Estado Contable con pagos dinámicos, ficha de atención, firma de conformidad y adjuntos. En producción desde el 2026-07-28. Handoff: `docs/walkthroughs/2026-07-27_presupuesto_estado_contable_ficha_firma_adjuntos.md`. Responsable: Claude.*
+
+> ℹ️ **Alta de registro (2026-08-19).** Estas tareas existían en `docs/backlog.json` pero **nunca se listaron en el tablero**, así que su avance era invisible acá. Además estaban numeradas `REQ-009-FIN-9.x`, colisionando con la HC Odontológica (Módulo 9): se renumeraron a `REQ-012-FIN-12.x`. Las descripciones largas se abrevian con «…»; el texto íntegro vive en `docs/backlog.json`.
+
+- [x] **Tarea 12.1:** Modal presupuesto — pestaña Estado Contable: resumen Total/Pagado/Saldo vivo, valor de cuota, grilla de pagos (Fecha·Importe·Saldo decreciente), registrar pago y transiciones de estado (presentar/aceptar/cancelar). Front-only reusando endpoints de Finanzas (cuenta-corriente, pago). *(Prioridad: Alta)*
+- [x] **Tarea 12.2:** Ficha de Atención real: filtrar tratamientos realizados (Procedure con status completed) excluyendo patologías previas (Condition) que se colaban desde la capa Existente. Columnas Fecha·Código·Nº diente·Cara·Firma (pendiente). *(Prioridad: Alta)*
+- [x] **Tarea 12.3:** Firma de conformidad del paciente POR cada tratamiento realizado: captura manuscrita en canvas → PNG, tabla append-only odontology_patient_signatures (puntero de almacenamiento agnóstico local→S3 + hash SHA-256). Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. BLOQUEANTES de es… *(Prioridad: Alta)*
+- [x] **Tarea 12.4:** Adjuntos RX/PDF (imágenes+PDF) al presupuesto y a cada prestación: tabla polimórfica clinical_attachments, soft-delete, validación magic-bytes, descarga por endpoint autenticado con filtro tenant. Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. Mapeo DocumentReference (no Media… *(Prioridad: Alta)*
+- [ ] **Tarea 12.5:** Tests unitarios de clinica-finanzas.service (TDD ausente en lógica financiera crítica): pago sobre cada estado no-pagable (400), aislamiento cross-tenant (404), borrado con pagos (bloqueado), recálculo de estado en_curso/pagado, getCuentaCorriente (saldo, max(0,...)). *(Prioridad: Media)*
+- [ ] **Tarea 12.6:** Robustez de API: validar precioUnitario>0 y cantidad>=1 en el backend (createPresupuesto/updatePresupuesto). Hoy el front lo valida pero el backend usa cantidad||1 y no valida precio → un cliente directo puede crear items con precio 0. *(Prioridad: Media)*
+- [ ] **Tarea 12.7:** Recaptura/supersede de firma de conformidad (si el paciente firmó mal). El andamiaje existe (columna superseded_by, trigger que permite marcarlo una vez, acción de auditoría PATIENT_SIGN_SUPERSEDE), pero falta el método de servicio que ejecute el supersede; hoy la 2da firma sobre una prestación l… *(Prioridad: Baja)*
+- [x] **Tarea 12.8:** Fan-out de requests en la Ficha del modal: al abrir la pestaña Ficha se dispara 1 GET de firma por prestación + 1 GET de adjuntos por prestación (N+N). Para un paciente con muchas prestaciones completadas puede acercarse al límite de rate. Batchear: endpoint que devuelva firmas vigentes por lista… *(Prioridad: Media)*
+- [ ] **Tarea 12.9:** Reemplazar el window.prompt de anulación de pago por un modal del design-system (motivo + confirmación), estilable y mobile-safe. *(Prioridad: Baja)*
+- [ ] **Tarea 12.10:** Revisar con security si el logger.warn de anularPago (incluye monto y motivo del pago) debe redactar/omitir datos sensibles en el pipeline de logs. *(Prioridad: Baja)*
+- [x] **Tarea 12.11:** `getCuentaCorriente`: la `deudaActual` global sumaba TODOS los presupuestos (incluidos cancelados) y no clampaba el sobrepago por presupuesto, asi que un excedente compensaba la deuda de otro. **RESUELTO por AUD.6** (`ESTADOS_DEVENGAN_DEUDA` + `saldoDePresupuesto()` + `excedentePagado`), desplegado en `prod-backend-20260818` y cubierto por `clinica-finanzas.service.spec.ts`. *(Prioridad: Baja)*
+- [ ] **Tarea 12.12:** patientId no validado como UUID en los DTOs de finanzas → un valor no-UUID da 500 genérico en vez de 400. Defensa en profundidad (el front siempre manda UUID). *(Prioridad: Baja)*
 
 ---
 

@@ -86,25 +86,35 @@ def sync_markdown_to_json():
             md_content = f.read()
             
         lines = md_content.splitlines()
-        task_regex = r'^\s*-\s*\[([ xX])\]\s*\*\*Tarea\s+([0-9.]+):\*\*'
-        
+        task_regex = r'^\s*-\s*\[([ xX])\]\s*\*\*Tarea\s+([0-9.]+[a-z]?):\*\*'
+        module_regex = r'^###\s*Módulo\s+(\d+)\s*:'
+
+        # La clave es (modulo_id, codigo). El codigo solo NO alcanza: el mismo
+        # numero de tarea existe en modulos distintos (p. ej. 9.5 en Odontologia
+        # y 9.5 en Finanzas), y matchear por el sufijo del ID marcaba tareas
+        # ajenas como completadas. Ver docs/walkthroughs/2026-08-19_saneamiento_del_registro.md
         updated_tasks = {}
+        current_module = None
         for line in lines:
+            m_mod = re.match(module_regex, line)
+            if m_mod:
+                current_module = int(m_mod.group(1))
+                continue
             match = re.match(task_regex, line)
-            if match:
-                completed = match[1].trim().toLowerCase() == 'x' if hasattr(match[1], 'trim') else match[1].strip().lower() == 'x'
-                code = match[2]
-                updated_tasks[code] = completed
-                
+            if match and current_module is not None:
+                completed = match.group(1).strip().lower() == 'x'
+                updated_tasks[(current_module, match.group(2))] = completed
+
         # Actualizar en el backlog JSON
         changed = False
         for task in backlog:
-            # Mapear el ID de la tarea a su código (ej: REQ-001-INF-1.1 -> 1.1)
-            code_parts = task["id"].split("-")
-            code = code_parts[-1] if code_parts else ""
-            if code in updated_tasks:
+            # Mapear la tarea a su clave (modulo_id, codigo).
+            # Ej: REQ-001-INF-1.1 del modulo 1 -> (1, "1.1")
+            code = task["id"].split("-")[-1]
+            key = (task.get("modulo_id"), code)
+            if key in updated_tasks:
                 old_state = task["estado"]
-                new_state = "completado" if updated_tasks[code] else "pendiente"
+                new_state = "completado" if updated_tasks[key] else "pendiente"
                 if old_state == "completado" and new_state == "pendiente":
                     task["estado"] = "pendiente"
                     changed = True
@@ -136,12 +146,17 @@ def rebuild_markdown_from_json():
         completed_global = 0
         
         for task in backlog:
+            # Las entradas marcadas "duplicado" apuntan a otra tarea via superseded_by
+            # y NO se cuentan: inflaban el denominador y se cerraban dos veces.
+            if task.get("estado") == "duplicado":
+                continue
+
             m_id = task["modulo_id"]
             m_name = task["modulo_nombre"]
-            
+
             if m_id not in module_stats:
                 module_stats[m_id] = {"name": m_name, "total": 0, "completed": 0}
-                
+
             module_stats[m_id]["total"] += 1
             total_global += 1
             if task["estado"] == "completado":
@@ -149,18 +164,26 @@ def rebuild_markdown_from_json():
                 completed_global += 1
                 
         # 2. Modificar las marcas de checkbox en las líneas de tareas
-        task_regex = r'^(\s*-\s*\[)[ xX](\]\s*\*\*Tarea\s+([0-9.]+):\*\*)'
+        task_regex = r'^(\s*-\s*\[)[ xX](\]\s*\*\*Tarea\s+([0-9.]+[a-z]?):\*\*)'
+        module_regex = r'^###\s*Módulo\s+(\d+)\s*:'
+        current_module = None
         for i, line in enumerate(lines):
+            m_mod = re.match(module_regex, line)
+            if m_mod:
+                current_module = int(m_mod.group(1))
+                continue
             match = re.match(task_regex, line)
-            if match:
-                prefix = match[1]
-                suffix = match[2]
-                code = match[3]
-                
-                # Buscar estado en backlog JSON
+            if match and current_module is not None:
+                prefix = match.group(1)
+                suffix = match.group(2)
+                code = match.group(3)
+
+                # Buscar el estado por (modulo_id, codigo). endswith() sobre el ID
+                # confundia modulos distintos: "2.1" tambien matchea REQ-012-FIN-12.1
+                # y "0.1" matchea REQ-010-PRO-10.1.
                 is_completed = False
                 for task in backlog:
-                    if task["id"].endswith(code):
+                    if task["modulo_id"] == current_module and task["id"].split("-")[-1] == code:
                         is_completed = task["estado"] == "completado"
                         break
                 
@@ -204,9 +227,10 @@ def rebuild_markdown_from_json():
             
             lines[table_start:table_end] = new_table
 
-        # Escribir de vuelta al disco
+        # Escribir de vuelta al disco. El newline final es obligatorio: sin el,
+        # cada corrida del runner ensuciaba el diff del tablero con un cambio fantasma.
         with open(TABLERO_PATH, "w", encoding="utf-8") as f:
-            f.write("\n".join(lines))
+            f.write("\n".join(lines) + "\n")
             
     except Exception as e:
         print("Error reconstruyendo Markdown:", e)

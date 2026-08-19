@@ -44,3 +44,11 @@ testing/scripts/*.pdf
 # Capturas sueltas de trabajo.
 hce-frontend/*.png
 img/*.jpeg
+
+# Bytecode de Python (se regenera; estaba versionado por error).
+__pycache__/
+*.pyc
+
+# Respaldo local previo al saneamiento del registro (2026-08-19).
+# Redundante: el estado previo vive en git (commit 51a8084). Es red local, no historia.
+docs/_snapshot-registro-*/
