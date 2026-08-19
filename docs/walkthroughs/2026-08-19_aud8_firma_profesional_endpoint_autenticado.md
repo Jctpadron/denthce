@@ -83,11 +83,37 @@ Se agregó un estado `'ausente'`: **hay firma registrada pero el blob no se pudo
 - Se rechaza un archivo cuyo contenido no es la imagen que declara (PHP disfrazado de PNG) y un tipo fuera de la whitelist (SVG con `onload`).
 - El endpoint declara roles: `paciente` y `laboratorio-operador` **no** pueden leer la firma.
 
+### ⚠️ Bug que sólo apareció en runtime (y por qué importa)
+
+Con el stack levantado, el backend **no arrancaba**:
+
+```
+DataTypeNotSupportedError: Data type "Object" in
+"TenantConfigEntity.signatureStorageKey" is not supported by "postgres" database.
+```
+
+Las columnas nuevas se declararon `string | null` **sin `type` explícito**. TypeORM infiere el tipo desde el metadata de TypeScript, y una unión emite `Object`, que Postgres rechaza. La entidad ya resolvía esto en `hceWebhookSecret` con `type: 'varchar'`; las nuevas no lo copiaron.
+
+**Ni el build ni los 200 tests lo detectaron**: los tests mockean el repositorio, así que nunca se construye el `DataSource` real. Sólo aparece al conectar con Postgres — es decir, **habría tumbado producción en el arranque del deploy**.
+
+Corregido agregando `type: 'varchar'` a las cuatro columnas. Es exactamente el caso que justifica la regla del playbook: *ninguna pantalla o feature se da por terminada porque compila*.
+
 ### Lo que NO se pudo verificar
 
-**No hay verificación contra el stack corriendo:** Docker Desktop no estaba levantado, así que no se pudo probar contra Postgres + Keycloak reales. Los tests de HTTP corren con Nest en proceso y guards simulados: cubren enrutamiento, headers, guardas y resolución de tenant, pero **no** el JWT real de Keycloak ni la escritura en la base.
+La verificación con el stack real quedó **a medio camino**, y conviene ser preciso sobre hasta dónde llegó:
 
-**Antes de desplegar hay que:** aplicar el SQL en local, levantar el stack, subir una firma, verificar que se ve, verificar que `GET /api/tenant/signature` sin token da 401, y recién ahí correr la migración en prod.
+| Paso | Estado |
+| :-- | :-- |
+| Aplicar el SQL en la base local | ✅ **hecho** — y corrido **dos veces** para confirmar que es idempotente (regla 3 del protocolo) |
+| Columnas creadas con el tipo correcto | ✅ verificado con `\d tenant_config` |
+| Arranque del backend contra Postgres real | ✅ **tras corregir el bug de arriba** |
+| Subir una firma y verla en la UI | ❌ **no verificado** |
+| `GET /api/tenant/signature` sin token → 401 | ❌ **no verificado** |
+| Migrador contra datos reales | ❌ **no verificado** |
+
+**Por qué se cortó:** el disco `C:` de la máquina de desarrollo llegó a **100 % de uso, 0 bytes libres**, lo que tumbó Docker Desktop (`input/output error` en el snapshotter de containerd, y después "Docker Desktop is unable to start"). No es un problema del código.
+
+**Antes de desplegar hay que completar** las tres filas en ❌.
 
 ---
 

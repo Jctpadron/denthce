@@ -75,18 +75,42 @@ export class TenantConfigEntity {
 
   // Punteros al almacén privado. `select: false` para que no viajen en el GET de config:
   // son metadatos de almacenamiento, no configuración que el frontend deba conocer.
-  @Column({ name: 'signature_storage_key', nullable: true, select: false })
+  //
+  // `type: 'varchar'` es OBLIGATORIO en las columnas `string | null`: TypeORM infiere el
+  // tipo del metadata de TypeScript, y una unión emite `Object`, que Postgres rechaza al
+  // arrancar (DataTypeNotSupportedError). Mismo motivo por el que `hceWebhookSecret` lo declara.
+  @Column({
+    name: 'signature_storage_key',
+    type: 'varchar',
+    nullable: true,
+    select: false,
+  })
   signatureStorageKey: string | null;
 
   /** 'local' | 's3' — con qué backend se guardó, para rutear la lectura. */
-  @Column({ name: 'signature_storage_backend', nullable: true, select: false })
+  @Column({
+    name: 'signature_storage_backend',
+    type: 'varchar',
+    nullable: true,
+    select: false,
+  })
   signatureStorageBackend: string | null;
 
-  @Column({ name: 'signature_content_type', nullable: true, select: false })
+  @Column({
+    name: 'signature_content_type',
+    type: 'varchar',
+    nullable: true,
+    select: false,
+  })
   signatureContentType: string | null;
 
   /** SHA-256 del blob: integridad y trazabilidad de la firma profesional. */
-  @Column({ name: 'signature_hash', nullable: true, select: false })
+  @Column({
+    name: 'signature_hash',
+    type: 'varchar',
+    nullable: true,
+    select: false,
+  })
   signatureHash: string | null;
 
   // Integración CliniChat
