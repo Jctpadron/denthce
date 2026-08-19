@@ -9,14 +9,17 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname, join } from 'path';
+import type { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { TenantConfigService } from './tenant-config.service';
+import { TenantSignatureService } from './tenant-signature.service';
 import { ModulesService } from '../platform/modules.service';
 import * as fs from 'fs';
 
@@ -34,6 +37,7 @@ export class TenantConfigController {
   constructor(
     private readonly tenantService: TenantConfigService,
     private readonly modulesService: ModulesService,
+    private readonly signatureService: TenantSignatureService,
   ) {}
 
   /**
@@ -149,17 +153,9 @@ export class TenantConfigController {
   @Roles('administrador', 'medico')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (_req, _file, cb) => {
-          const dir = join(process.cwd(), 'uploads', 'signatures');
-          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-          cb(null, dir);
-        },
-        filename: (req: any, file, cb) => {
-          const tenantId = req.user?.tenantId || 'unknown';
-          cb(null, `signature-${tenantId}.png`);
-        },
-      }),
+      // En memoria (no a disco): hace falta el buffer para el hash y los magic-bytes,
+      // y así el blob nunca toca la carpeta pública.
+      storage: memoryStorage(),
       limits: { fileSize: 500 * 1024 }, // 500 KB
       fileFilter: (_req, file, cb) => {
         if (['image/png', 'image/jpeg', 'image/webp'].includes(file.mimetype)) {
@@ -180,7 +176,26 @@ export class TenantConfigController {
     @Request() req: any,
   ) {
     if (!file) throw new BadRequestException('No se recibió ningún archivo.');
-    const signatureUrl = `http://localhost:3000/uploads/signatures/${file.filename}`;
-    return this.tenantService.saveSignatureUrl(req.user.tenantId, signatureUrl);
+    return this.signatureService.save(req.user.tenantId, file);
+  }
+
+  /**
+   * GET /api/tenant/signature
+   * Descarga autenticada de la firma del profesional. Reemplaza a la estática pública
+   * `/uploads/signatures/signature-<tenantId>.png`, que servía ePHI sin autenticación
+   * y con nombre predecible (AUD.8).
+   *
+   * El tenant sale del JWT: no hay parámetro que permita pedir la firma de otra clínica.
+   */
+  @Get('signature')
+  @Roles('administrador', 'medico')
+  async getSignature(@Request() req: any, @Res() res: Response) {
+    const { stream, mimeType } = await this.signatureService.getStream(
+      req.user.tenantId,
+    );
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, no-store');
+    stream.pipe(res);
   }
 }

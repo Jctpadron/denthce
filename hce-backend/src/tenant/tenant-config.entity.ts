@@ -66,9 +66,28 @@ export class TenantConfigEntity {
   })
   scheduleJson: Record<string, string>;
 
-  // Firma Digital
+  // Firma Digital del profesional.
+  // `signature_url` YA NO guarda una URL absoluta al estático público: guarda la ruta
+  // del endpoint autenticado (`/api/tenant/signature`) y sirve de indicador de "hay firma
+  // cargada" para el frontend. El blob vive en el almacén PRIVADO (EvidenceStorageService).
   @Column({ name: 'signature_url', nullable: true })
   signatureUrl: string;
+
+  // Punteros al almacén privado. `select: false` para que no viajen en el GET de config:
+  // son metadatos de almacenamiento, no configuración que el frontend deba conocer.
+  @Column({ name: 'signature_storage_key', nullable: true, select: false })
+  signatureStorageKey: string | null;
+
+  /** 'local' | 's3' — con qué backend se guardó, para rutear la lectura. */
+  @Column({ name: 'signature_storage_backend', nullable: true, select: false })
+  signatureStorageBackend: string | null;
+
+  @Column({ name: 'signature_content_type', nullable: true, select: false })
+  signatureContentType: string | null;
+
+  /** SHA-256 del blob: integridad y trazabilidad de la firma profesional. */
+  @Column({ name: 'signature_hash', nullable: true, select: false })
+  signatureHash: string | null;
 
   // Integración CliniChat
   @Column({ name: 'hce_webhook_secret', type: 'varchar', nullable: true })
