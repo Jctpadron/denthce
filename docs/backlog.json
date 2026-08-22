@@ -671,7 +671,14 @@
       "ux"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Verificacion de estado real (parcial): la FIRMA digital existe (hash SHA-256, signedBy/signedAt y extensiones FHIR en medication-request.service.ts). NO existe la emision en PDF (pdfkit solo se usa en odontology-pdf.service.ts) ni la generacion de codigo QR (qrCodeData es un string hacia dentariehr.gov, dominio inexistente; el frontend solo muestra el icono QrCode de lucide-react). El tablero la marcaba [x] de forma sobredeclarada. Pendiente de decision: desglosar o mantener.",
+        "entregables": []
+      }
+    ]
   },
   {
     "id": "REQ-004-RX-4.5",
@@ -679,13 +686,20 @@
     "modulo_nombre": "Receta Electrónica y Vademécum (CDS Hooks)",
     "descripcion": "Implementación del Kardex de enfermería y registro de administración de medicamentos (eMAR / MAR).",
     "prioridad": "media",
-    "estado": "completado",
+    "estado": "pendiente",
     "agentes_asignados": [
       "product",
       "ux"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Correccion de registro: figuraba 'completado' pero el Kardex/eMAR NO existe en el codigo (0 coincidencias de kardex/emar/MedicationAdministration en hce-backend/src y hce-frontend/src). El tablero ya lo daba por pendiente.",
+        "entregables": []
+      }
+    ]
   },
   {
     "id": "REQ-004-RX-4.6",
@@ -707,13 +721,24 @@
     "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
     "descripcion": "Endpoint compatible con el recurso Appointment de FHIR para reserva y cancelación de turnos.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "architect",
       "fhir-mcp"
     ],
-    "entregables": [],
-    "historial_auditoria": []
+    "entregables": [
+      "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero ya las marcaba completadas y la evidencia esta en el codigo (hce-frontend/src/components/agenda/{AgendaView,AgendaGrid,AppointmentModal,WaitingRoom}.tsx y hce-backend/src/appointment/ con POST :id/reminder y PATCH :id/status). El backlog habia quedado sin sincronizar.",
+        "entregables": [
+          "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+        ]
+      }
+    ]
   },
   {
     "id": "REQ-005-SCH-5.2",
@@ -721,12 +746,23 @@
     "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
     "descripcion": "Calendario visual interactivo para administración médica por profesional y consultorio.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "ux"
     ],
-    "entregables": [],
-    "historial_auditoria": []
+    "entregables": [
+      "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero ya las marcaba completadas y la evidencia esta en el codigo (hce-frontend/src/components/agenda/{AgendaView,AgendaGrid,AppointmentModal,WaitingRoom}.tsx y hce-backend/src/appointment/ con POST :id/reminder y PATCH :id/status). El backlog habia quedado sin sincronizar.",
+        "entregables": [
+          "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+        ]
+      }
+    ]
   },
   {
     "id": "REQ-005-SCH-5.3",
@@ -734,12 +770,23 @@
     "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
     "descripcion": "Automatización de recordatorios de citas vía SMS, Email o WhatsApp API.",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "integrations"
     ],
-    "entregables": [],
-    "historial_auditoria": []
+    "entregables": [
+      "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero ya las marcaba completadas y la evidencia esta en el codigo (hce-frontend/src/components/agenda/{AgendaView,AgendaGrid,AppointmentModal,WaitingRoom}.tsx y hce-backend/src/appointment/ con POST :id/reminder y PATCH :id/status). El backlog habia quedado sin sincronizar.",
+        "entregables": [
+          "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+        ]
+      }
+    ]
   },
   {
     "id": "REQ-005-SCH-5.4",
@@ -747,13 +794,24 @@
     "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
     "descripcion": "Módulo de Triaje Manchester/ESI para priorización de urgencias en guardia.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "product",
       "ux"
     ],
-    "entregables": [],
-    "historial_auditoria": []
+    "entregables": [
+      "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero ya las marcaba completadas y la evidencia esta en el codigo (hce-frontend/src/components/agenda/{AgendaView,AgendaGrid,AppointmentModal,WaitingRoom}.tsx y hce-backend/src/appointment/ con POST :id/reminder y PATCH :id/status). El backlog habia quedado sin sincronizar.",
+        "entregables": [
+          "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+        ]
+      }
+    ]
   },
   {
     "id": "REQ-005-SCH-5.5",
@@ -761,13 +819,24 @@
     "modulo_nombre": "Agenda, Citas y Admisión Hospitalaria",
     "descripcion": "Módulo de Internación: Bed Management (gestión de camas, estados de limpieza y ocupación) e indicaciones de enfermería.",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "product",
       "architect"
     ],
-    "entregables": [],
-    "historial_auditoria": []
+    "entregables": [
+      "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero ya las marcaba completadas y la evidencia esta en el codigo (hce-frontend/src/components/agenda/{AgendaView,AgendaGrid,AppointmentModal,WaitingRoom}.tsx y hce-backend/src/appointment/ con POST :id/reminder y PATCH :id/status). El backlog habia quedado sin sincronizar.",
+        "entregables": [
+          "docs/walkthroughs/2026-06-13_modulo5_agenda_visual.md"
+        ]
+      }
+    ]
   },
   {
     "id": "REQ-006-LIS-6.1",
@@ -977,18 +1046,299 @@
     "historial_auditoria": []
   },
   {
+    "id": "REQ-009-ODO-9.1",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Módulo backend aislado odontology/ con tabla propia odontology_clinical_resources y endpoints /odontology, filtrado por tenantId.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.2",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Pantalla OdontologyHC (búsqueda con padrón compartido) colgada del dashboard como servicio odonto-hc.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.3",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Odontograma de doble capa (existente rojo / a realizar azul) con catálogo de simbología centralizado (13 estados), glifos por tipo, barra agrupada, toast flotante y leyenda.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.4",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Anamnesis odontológica PAMI (cuestionario + higiene) con firma del paciente (QuestionnaireResponse).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.5",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Estado bucal general + diagnóstico presuntivo + plan + observaciones (Observation).",
+    "prioridad": "media",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.6",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Datos de afiliado / obra social (Coverage).",
+    "prioridad": "media",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.7",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Consentimiento informado con doble firma y matrícula (Consent).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.8",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Anexo de evolución (fecha / tratamiento / conformidad del afiliado).",
+    "prioridad": "media",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.9",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Exportación de la HC en PDF formato oficial PAMI (3 hojas).",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect",
+      "fhir-mcp"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.10a",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Quality Gates (security/qa): Diseño de tests unitarios/integración de controlador/servicio, validación de aislamiento tenant y firma de auditoría de seguridad.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "security",
+      "qa"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "REQ-009-ODO-9.10b",
+    "modulo_id": 9,
+    "modulo_nombre": "Historia Clínica Odontológica PAMI (módulo aislado)",
+    "descripcion": "Despliegue a AWS: Creación de la tabla odontology_clinical_resources en RDS, recompilación y publicación del backend.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "devops"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva en el backlog: el modulo existia solo en tablero_control.md y no tenia contraparte en backlog.json, lo que falseaba el avance global. Estado tomado del tablero.",
+        "entregables": [
+          "docs/walkthroughs/2026-05-29_hc_odontologica_modulo_aislado.md"
+        ]
+      }
+    ]
+  },
+  {
     "id": "REQ-010-PRO-10.1",
     "modulo_id": 10,
     "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
     "descripcion": "Modelado de datos en NestJS compatible con FHIR R4: DeviceRequest (órdenes) y Communication (chat y mensajería clínica) con doble tenencia.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "architect",
       "fhir-mcp"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero (PRO.1-PRO.5, responsable Gemini) ya las daba por hechas y la evidencia esta en el codigo: hce-backend/src/protesis/ (11 archivos: entities, controller, service + specs), hce-frontend/src/components/protesis/DentaLabPortal.tsx, components/odontology/ProtesisTab.tsx y three@0.184 para el visor STL. El backlog habia quedado sin sincronizar.",
+        "entregables": []
+      }
+    ]
   },
   {
     "id": "REQ-010-PRO-10.2",
@@ -996,12 +1346,19 @@
     "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
     "descripcion": "Backend APIs: Controladores y servicios para gestión de trabajos de prótesis y chat en NestJS.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "architect"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero (PRO.1-PRO.5, responsable Gemini) ya las daba por hechas y la evidencia esta en el codigo: hce-backend/src/protesis/ (11 archivos: entities, controller, service + specs), hce-frontend/src/components/protesis/DentaLabPortal.tsx, components/odontology/ProtesisTab.tsx y three@0.184 para el visor STL. El backlog habia quedado sin sincronizar.",
+        "entregables": []
+      }
+    ]
   },
   {
     "id": "REQ-010-PRO-10.3",
@@ -1009,13 +1366,20 @@
     "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
     "descripcion": "Frontend React: Pestaña 'Prótesis' en la HCE del odontólogo (OdontologyHC) para prescripciones y chat del caso.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "ux",
       "product"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero (PRO.1-PRO.5, responsable Gemini) ya las daba por hechas y la evidencia esta en el codigo: hce-backend/src/protesis/ (11 archivos: entities, controller, service + specs), hce-frontend/src/components/protesis/DentaLabPortal.tsx, components/odontology/ProtesisTab.tsx y three@0.184 para el visor STL. El backlog habia quedado sin sincronizar.",
+        "entregables": []
+      }
+    ]
   },
   {
     "id": "REQ-010-PRO-10.4",
@@ -1023,13 +1387,20 @@
     "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
     "descripcion": "Frontend React: Portal del Protesista (DentaLabPortal) que se activa dinámimante si el tenant es tipo 'laboratorio', con bandeja de órdenes y chat responsivo.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "ux",
       "product"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero (PRO.1-PRO.5, responsable Gemini) ya las daba por hechas y la evidencia esta en el codigo: hce-backend/src/protesis/ (11 archivos: entities, controller, service + specs), hce-frontend/src/components/protesis/DentaLabPortal.tsx, components/odontology/ProtesisTab.tsx y three@0.184 para el visor STL. El backlog habia quedado sin sincronizar.",
+        "entregables": []
+      }
+    ]
   },
   {
     "id": "REQ-010-PRO-10.5",
@@ -1037,13 +1408,20 @@
     "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
     "descripcion": "Visor 3D STL básico en el chat y drag & drop de archivos CAD/exocad.",
     "prioridad": "media",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "ux",
       "integrations"
     ],
     "entregables": [],
-    "historial_auditoria": []
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: el tablero (PRO.1-PRO.5, responsable Gemini) ya las daba por hechas y la evidencia esta en el codigo: hce-backend/src/protesis/ (11 archivos: entities, controller, service + specs), hce-frontend/src/components/protesis/DentaLabPortal.tsx, components/odontology/ProtesisTab.tsx y three@0.184 para el visor STL. El backlog habia quedado sin sincronizar.",
+        "entregables": []
+      }
+    ]
   },
   {
     "id": "REQ-010-PRO-10.6",
@@ -1142,8 +1520,74 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.1",
-    "modulo_id": 9,
+    "id": "REQ-010-PRO-10.10",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Módulo Financiero de Prótesis — Entidades Pago/ConsumoInsumo + campos presupuesto/estadoPago en orden + precioUnitario en insumo.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-06-16_modulo_financiero_protesis.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva: la tarea existia en tablero_control.md (PRO.10) y no tenia contraparte en backlog.json.",
+        "entregables": []
+      }
+    ]
+  },
+  {
+    "id": "REQ-010-PRO-10.11",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Backend endpoints financieros: presupuesto estimado/final, registrar pago, registrar consumo, finanzas por orden, cuenta corriente.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-06-16_modulo_financiero_protesis.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva: la tarea existia en tablero_control.md (PRO.11) y no tenia contraparte en backlog.json.",
+        "entregables": []
+      }
+    ]
+  },
+  {
+    "id": "REQ-010-PRO-10.12",
+    "modulo_id": 10,
+    "modulo_nombre": "Módulo Protesistas Dentales (DentaLab)",
+    "descripcion": "Frontend Financiero: pestaña Finanzas, Dashboard widgets, sub-tab Finanzas en detalle, modales Pago/Consumo.",
+    "prioridad": "alta",
+    "estado": "completado",
+    "agentes_asignados": [
+      "architect"
+    ],
+    "entregables": [
+      "docs/walkthroughs/2026-06-16_modulo_financiero_protesis.md"
+    ],
+    "historial_auditoria": [
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Alta retroactiva: la tarea existia en tablero_control.md (PRO.12) y no tenia contraparte en backlog.json.",
+        "entregables": []
+      }
+    ]
+  },
+  {
+    "id": "REQ-012-FIN-12.1",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Modal presupuesto — pestaña Estado Contable: resumen Total/Pagado/Saldo vivo, valor de cuota, grilla de pagos (Fecha·Importe·Saldo decreciente), registrar pago y transiciones de estado (presentar/aceptar/cancelar). Front-only reusando endpoints de Finanzas (cuenta-corriente, pago).",
     "prioridad": "alta",
@@ -1175,8 +1619,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.2",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.2",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Ficha de Atención real: filtrar tratamientos realizados (Procedure con status completed) excluyendo patologías previas (Condition) que se colaban desde la capa Existente. Columnas Fecha·Código·Nº diente·Cara·Firma (pendiente).",
     "prioridad": "alta",
@@ -1210,8 +1654,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.3",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.3",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Firma de conformidad del paciente POR cada tratamiento realizado: captura manuscrita en canvas → PNG, tabla append-only odontology_patient_signatures (puntero de almacenamiento agnóstico local→S3 + hash SHA-256). Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. BLOQUEANTES de esquema: signed_content_snapshot inmutable, +5 columnas FHIR (Provenance/Signature, código 1.2.840.10065.1.12.1.7), hash_algo, descarga por endpoint autenticado, auditoría PATIENT_SIGN/VIEW. Trigger append-only + GRANT.",
     "prioridad": "alta",
@@ -1258,8 +1702,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.4",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.4",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Adjuntos RX/PDF (imágenes+PDF) al presupuesto y a cada prestación: tabla polimórfica clinical_attachments, soft-delete, validación magic-bytes, descarga por endpoint autenticado con filtro tenant. Diseño listo; gates security y fhir-mcp APROBADOS con condiciones. Mapeo DocumentReference (no Media). BLOQUEANTES: magic-bytes, validación cross-tenant de owner_id polimórfico, +6 columnas FHIR (hash_algo bloqueante), auditoría ATTACH_UPLOAD/DOWNLOAD/DELETE.",
     "prioridad": "alta",
@@ -1311,7 +1755,7 @@
     "modulo_nombre": "Infraestructura y Seguridad (Zero Trust)",
     "descripcion": "Exposición de ePHI: /uploads se sirve estático SIN autenticación (main.ts). Cualquier archivo subido (incl. adjuntos de pacientes) es descargable por URL sin token ni filtro de tenant. Severidad Alta. Migrar los adjuntos ya subidos fuera de la estática pública y reemplazar express.static(/uploads) por un endpoint autenticado con rol + filtro tenant + auditoría de descarga.",
     "prioridad": "alta",
-    "estado": "pendiente",
+    "estado": "duplicado",
     "agentes_asignados": [
       "orchestrator",
       "security",
@@ -1330,12 +1774,19 @@
           "hce-backend/src/main.ts",
           "hce-backend/src/patient/file-upload.controller.ts"
         ]
+      },
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Marcada como duplicado de REQ-011-AUD-8: ambas describen el mismo hallazgo (/uploads sirve ePHI sin autenticacion, main.ts). Se conserva AUD-8 como canonica. Excluida del conteo para no inflar el denominador.",
+        "entregables": []
       }
-    ]
+    ],
+    "superseded_by": "REQ-011-AUD-8"
   },
   {
-    "id": "REQ-009-FIN-9.5",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.5",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Tests unitarios de clinica-finanzas.service (TDD ausente en lógica financiera crítica): pago sobre cada estado no-pagable (400), aislamiento cross-tenant (404), borrado con pagos (bloqueado), recálculo de estado en_curso/pagado, getCuentaCorriente (saldo, max(0,...)).",
     "prioridad": "media",
@@ -1358,8 +1809,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.6",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.6",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Robustez de API: validar precioUnitario>0 y cantidad>=1 en el backend (createPresupuesto/updatePresupuesto). Hoy el front lo valida pero el backend usa cantidad||1 y no valida precio → un cliente directo puede crear items con precio 0.",
     "prioridad": "media",
@@ -1433,8 +1884,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.7",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.7",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Recaptura/supersede de firma de conformidad (si el paciente firmó mal). El andamiaje existe (columna superseded_by, trigger que permite marcarlo una vez, acción de auditoría PATIENT_SIGN_SUPERSEDE), pero falta el método de servicio que ejecute el supersede; hoy la 2da firma sobre una prestación lanza 409. Baja.",
     "prioridad": "baja",
@@ -1491,8 +1942,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.8",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.8",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Fan-out de requests en la Ficha del modal: al abrir la pestaña Ficha se dispara 1 GET de firma por prestación + 1 GET de adjuntos por prestación (N+N). Para un paciente con muchas prestaciones completadas puede acercarse al límite de rate. Batchear: endpoint que devuelva firmas vigentes por lista de resourceIds (o por paciente) y adjuntos por lista de owners, para pasar los datos hacia abajo en 1-2 requests en vez de 2N.",
     "prioridad": "media",
@@ -1525,8 +1976,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.9",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.9",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Reemplazar el window.prompt de anulación de pago por un modal del design-system (motivo + confirmación), estilable y mobile-safe.",
     "prioridad": "baja",
@@ -1549,8 +2000,8 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.10",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.10",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "Revisar con security si el logger.warn de anularPago (incluye monto y motivo del pago) debe redactar/omitir datos sensibles en el pipeline de logs.",
     "prioridad": "baja",
@@ -1573,12 +2024,12 @@
     ]
   },
   {
-    "id": "REQ-009-FIN-9.11",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.11",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "getCuentaCorriente: deudaActual global suma total de TODOS los presupuestos (incluye cancelados) y no clampa el sobrepago por-presupuesto → un sobrepago compensa deuda de otro y los cancelados inflan la deuda. El saldo por-presupuesto (lo que muestra el modal) es correcto; solo afecta el total global.",
     "prioridad": "baja",
-    "estado": "pendiente",
+    "estado": "completado",
     "agentes_asignados": [
       "qa",
       "architect"
@@ -1594,12 +2045,20 @@
         "entregables": [
           "hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts"
         ]
+      },
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Cierre retroactivo: resuelto por AUD.6 (definicion canonica de deuda) y desplegado en prod-backend-20260818. Verificado en hce-backend/src/clinica-finanzas/clinica-finanzas.service.ts: ESTADOS_DEVENGAN_DEUDA filtra borradores y cancelados, saldoDePresupuesto() clampa el sobrepago por presupuesto y el excedente se reporta aparte en excedentePagado. Cubierto por spec (clinica-finanzas.service.spec.ts).",
+        "entregables": [
+          "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
+        ]
       }
     ]
   },
   {
-    "id": "REQ-009-FIN-9.12",
-    "modulo_id": 9,
+    "id": "REQ-012-FIN-12.12",
+    "modulo_id": 12,
     "modulo_nombre": "Finanzas Clínicas y Presupuestos",
     "descripcion": "patientId no validado como UUID en los DTOs de finanzas → un valor no-UUID da 500 genérico en vez de 400. Defensa en profundidad (el front siempre manda UUID).",
     "prioridad": "baja",
@@ -1625,7 +2084,7 @@
   {
     "id": "REQ-011-AUD-1",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.1: Punto cero del repositorio (PR #3): produccion se compilaba desde archivos SIN commitear, no era reconstruible ni reversible desde git. 163 pendientes -> 0, 7 ramas muertas eliminadas, copia fantasma del backend (115 archivos) y 13 MB de evidencia clinica sacados de git. Respaldo: rama snapshot/pre-limpieza-2026-08-17.",
     "prioridad": "alta",
     "estado": "completado",
@@ -1650,7 +2109,7 @@
   {
     "id": "REQ-011-AUD-2",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.2: Guard de trazabilidad en deploy-aws.ps1 (PR #4): bloquea empaquetar o desplegar desde un arbol sucio, -RequireTag y log de procedencia.",
     "prioridad": "alta",
     "estado": "completado",
@@ -1674,7 +2133,7 @@
   {
     "id": "REQ-011-AUD-3",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.3: Tags de produccion por componente. Eliminado el desfasaje frontend 03/08 vs backend 30/07.",
     "prioridad": "alta",
     "estado": "completado",
@@ -1698,7 +2157,7 @@
   {
     "id": "REQ-011-AUD-4",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.4: CI verde (PR #6): primera corrida verde desde 2026-06-18. test-backend ya no depende de lint; los 172 tests no se ejecutaron en GitHub durante dos meses. Baseline de lint congelado con trinquete --max-warnings; prettier resuelto de raiz (117 archivos).",
     "prioridad": "alta",
     "estado": "completado",
@@ -1723,7 +2182,7 @@
   {
     "id": "REQ-011-AUD-5",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.5: Validacion de pagos (NaN, fecha invalida, fecha futura) + rechazo de sobrepago (PR #5). Desplegado en prod-backend-20260817.",
     "prioridad": "alta",
     "estado": "completado",
@@ -1748,7 +2207,7 @@
   {
     "id": "REQ-011-AUD-6",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.6: Definicion canonica de deuda: clamp, filtro ESTADOS_DEVENGAN_DEUDA, vencido en dashboard, morosos por COUNT(DISTINCT paciente). Bug reproducido contra prod (deudaActual -188 -> 0). Desplegado en prod-backend-20260818.",
     "prioridad": "alta",
     "estado": "completado",
@@ -1773,7 +2232,7 @@
   {
     "id": "REQ-011-AUD-7",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.7: Usuario IAM denthce-deploy de minimo privilegio (PR #7, #8). Antes: cero usuarios IAM y dos claves root activas. Deny explicito sobre evidencia clinica, IAM y RDS, verificado.",
     "prioridad": "alta",
     "estado": "completado",
@@ -1798,7 +2257,7 @@
   {
     "id": "REQ-011-AUD-8",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.8: CRITICO: /uploads sirve ePHI sin autenticacion (radiografias y firma del odontologo con nombre predecible). Migrar a EvidenceStorageService. Orden obligatorio: firma+adjuntos de paciente -> separar /uploads/logos (publico por diseno) -> documentos odontologicos con lectura dual -> quitar express.static.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -1817,13 +2276,19 @@
         "entregables": [
           "docs/walkthroughs/2026-08-17_pendientes_seguridad_critica_y_deuda_estructural.md"
         ]
+      },
+      {
+        "timestamp": "2026-08-19T00:00:00Z",
+        "agente": "orchestrator",
+        "accion": "Absorbe a REQ-001-INF-1.11, que registraba el mismo hallazgo por duplicado.",
+        "entregables": []
       }
     ]
   },
   {
     "id": "REQ-011-AUD-9",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.9: CRITICO: rotar secretos. Clave RDS de produccion en 8 archivos de testing/scripts, admin de Keycloak y client_secret en keycloak-admin.service.ts. Secuencia de 4 pasos: env con fallback -> deploy -> setear variable -> rotar -> quitar fallback. Complementa GOV.6.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -1848,7 +2313,7 @@
   {
     "id": "REQ-011-AUD-10",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.10: CRITICO: contrasenas semilla vivas en produccion (patron {username}_pass_2026, temporary:false) + ROPC habilitado + realm sin MFA, sin password policy y sin anti-fuerza bruta.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -1872,7 +2337,7 @@
   {
     "id": "REQ-011-AUD-11",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.11: CRITICO: hceWebhookSecret devuelto a cualquier rol autenticado por GET /api/tenant/config. Falta select:false + DTO de proyeccion.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -1896,7 +2361,7 @@
   {
     "id": "REQ-011-AUD-12",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.12: CRITICO: DTOs como interface, el ValidationPipe no valida nada. Habilita mass-assignment cross-tenant. Mitigacion inmediata sin riesgo: invertir el spread create({...dto, tenantId}). Migracion a clases con class-validator endpoint por endpoint, nunca global.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -1921,7 +2386,7 @@
   {
     "id": "REQ-011-AUD-13",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.13: RolesGuard fail-open (sin @Roles permite) y /api/sisa/verificar sin @Roles, habilitando enumeracion del padron RENAPER. Pasar a deny-by-default con modo sombra previo.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -1945,7 +2410,7 @@
   {
     "id": "REQ-011-AUD-14",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.14: deleteFile ignora el tenant: un medico de cualquier clinica borra archivos de otra. Soft-delete + auditoria.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -1970,7 +2435,7 @@
   {
     "id": "REQ-011-AUD-15",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.15: Deuda estructural: sin paginacion en ningun service, sin transacciones en operaciones multi-tabla, sin migraciones versionadas, tenantId de doble semantica con AUTH_STRICT=false, sin auditoria de lectura de ePHI, rate limit por IP compartido entre tenants.",
     "prioridad": "media",
     "estado": "pendiente",
@@ -1995,7 +2460,7 @@
   {
     "id": "REQ-011-AUD-16",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.16: 13 bugs reales de React congelados como warn (3 render impuro, 8 componentes que se remontan y pierden el foco, 2 mutacion). Listados con archivo y linea en hce-frontend/eslint.config.js. Corregir y volver a error.",
     "prioridad": "media",
     "estado": "pendiente",
@@ -2020,7 +2485,7 @@
   {
     "id": "REQ-011-AUD-17",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.17: Desactivar las 2 claves root de AWS. Requiere inventario humano (IAM -> Last used). Orden seguro en aws/iam/README.md.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -2045,7 +2510,7 @@
   {
     "id": "REQ-011-AUD-18",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.18: Decisiones de producto que bloquean sus ADR: (a) se vende a clinicas multi-profesional? Hoy Practitioner se sintetiza desde tenant_config, un profesional por clinica cableado en la capa de datos; (b) que pasa con la Ficha Clinica general, hoy inalcanzable desde el menu, lo que deja las alertas de alergia sin datos posibles.",
     "prioridad": "alta",
     "estado": "pendiente",
@@ -2069,7 +2534,7 @@
   {
     "id": "REQ-011-AUD-19",
     "modulo_id": 11,
-    "modulo_nombre": "Auditoria integral y remediacion (transversal)",
+    "modulo_nombre": "Auditoría integral y remediación",
     "descripcion": "AUD.19: Avisar a los tenants del cambio de numeros (deuda negativa -> 0, deudaTotal sube al incluir vencidos, pacientesMorosos baja) y decidir que hacer con el sobrepago historico de $188 en PRES-0001.",
     "prioridad": "media",
     "estado": "pendiente",
