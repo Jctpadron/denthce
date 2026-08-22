@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import keycloak from '../utils/keycloak-config';
 import { useTheme, type TenantConfig } from '../context/ThemeContext';
@@ -31,9 +31,52 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
   const logoInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(config.logoUrl);
-  const [signaturePreview, setSignaturePreview] = useState<string | null>(config.signatureUrl);
+  // La firma ya NO se sirve por una URL pública: se descarga del endpoint autenticado
+  // y se muestra como object URL. Un <img src> plano no puede mandar el token (AUD.8).
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  // 'ausente' = hay firma registrada pero el blob no se pudo traer (típicamente,
+  // una firma vieja que la migración de AUD.8 no encontró en disco).
+  const [signatureState, setSignatureState] = useState<'cargando' | 'lista' | 'ausente'>('cargando');
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingSignature, setUploadingSignature] = useState(false);
+
+  /**
+   * Descarga la firma del profesional con el token y la expone como object URL.
+   * Es una función PURA respecto del estado (no llama setState): así puede invocarse
+   * desde un efecto sin disparar renders en cascada (react-hooks/set-state-in-effect).
+   */
+  const cargarFirma = useCallback(async (): Promise<string | null> => {
+    try {
+      const res = await axios.get(import.meta.env.VITE_API_URL + '/api/tenant/signature', {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
+        responseType: 'blob',
+      });
+      return URL.createObjectURL(res.data);
+    } catch {
+      // 404 = todavía no hay firma, o quedó pendiente de resubir tras la migración de AUD.8.
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!config.signatureUrl) return;
+    let cancelado = false;
+    let creada: string | null = null;
+    void (async () => {
+      const url = await cargarFirma();
+      if (cancelado) {
+        if (url) URL.revokeObjectURL(url);
+        return;
+      }
+      creada = url;
+      setSignaturePreview(url);
+      setSignatureState(url ? 'lista' : 'ausente');
+    })();
+    return () => {
+      cancelado = true;
+      if (creada) URL.revokeObjectURL(creada);
+    };
+  }, [config.signatureUrl, cargarFirma]);
 
   const update = (field: keyof TenantConfig, value: any) => {
     setForm(f => ({ ...f, [field]: value }));
@@ -88,8 +131,14 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
       const res = await axios.post(import.meta.env.VITE_API_URL + '/api/tenant/signature', fd, {
         headers: { Authorization: `Bearer ${keycloak.token}`, 'Content-Type': 'multipart/form-data' },
       });
-      setSignaturePreview(res.data.signatureUrl);
+      // El backend ya no devuelve una URL descargable, sino la ruta del endpoint
+      // autenticado. La imagen se pide aparte, con el token.
       update('signatureUrl', res.data.signatureUrl);
+      const previa = signaturePreview;
+      const url = await cargarFirma();
+      setSignaturePreview(url);
+      setSignatureState(url ? 'lista' : 'ausente');
+      if (previa) URL.revokeObjectURL(previa);
       await reload();
     } catch (e: any) {
       alert(e?.response?.data?.message || 'Error al subir la firma.');
@@ -415,17 +464,30 @@ export const BrandingSettings: React.FC<{ onClose?: () => void }> = ({ onClose }
                   justifyContent: 'center',
                 }}
               >
-                {signaturePreview ? (
+                {config.signatureUrl && signaturePreview ? (
                   <img
                     src={signaturePreview}
                     alt="Firma"
                     style={{ maxHeight: '100px', maxWidth: '300px', objectFit: 'contain', filter: 'contrast(1.2)' }}
                   />
+                ) : config.signatureUrl && signatureState === 'cargando' ? (
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-muted)' }}>
+                    Cargando firma...
+                  </p>
+                ) : config.signatureUrl && signatureState === 'ausente' ? (
+                  <div>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⚠️</div>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-muted)' }}>
+                      No pudimos recuperar tu firma guardada. Hacé clic para subirla de nuevo.
+                    </p>
+                  </div>
                 ) : (
                   <div>
                     <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✍️</div>
                     <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-muted)' }}>
-                      {uploadingSignature ? 'Subiendo firma...' : 'Hacé clic para subir imagen de firma (PNG/JPG, fondo blanco o transparente)'}
+                      {uploadingSignature
+                        ? 'Subiendo firma...'
+                        : 'Hacé clic para subir imagen de firma (PNG/JPG, fondo blanco o transparente)'}
                     </p>
                   </div>
                 )}
