@@ -1,12 +1,6 @@
 const { Client } = require('pg');
-const client = new Client({
-  host: 'hce-database-3.cmhgma6u2fhs.us-east-1.rds.amazonaws.com',
-  port: 5432,
-  user: 'hce_admin',
-  password: '*AndreA335*',
-  database: 'keycloak_db',
-  ssl: { rejectUnauthorized: false }
-});
+const { remoteConfig } = require('./db-config');
+const client = new Client(remoteConfig('keycloak_db'));
 
 async function main() {
   console.log('Conectándose a la base de datos...');
