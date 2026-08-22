@@ -446,6 +446,11 @@ export class InsuranceService implements OnApplicationBootstrap {
 
     Object.assign(coverage, {
       ...data,
+      // La identidad del registro no se toma del body (AUD.12): el spread
+      // podia reescribir tenantId/patientId y mudar la cobertura a otra
+      // clinica. Van DESPUES del spread para que siempre ganen.
+      tenantId: coverage.tenantId,
+      patientId: coverage.patientId,
       nombreTitular:
         data.esTitular !== false
           ? null

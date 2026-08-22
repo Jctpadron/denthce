@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository, UpdateResult } from 'typeorm';
 import { InsuranceService } from './insurance.service';
 import { InsuranceCompanyEntity } from './insurance-company.entity';
 import { PatientCoverageEntity } from './patient-coverage.entity';
@@ -174,6 +174,46 @@ describe('InsuranceService', () => {
       );
       expect(result.nroAfiliado).toBe('54321');
       expect(result.principal).toBe(true);
+    });
+
+    it('NO deja mover la cobertura a otro tenant desde el body (AUD.12)', async () => {
+      // El findOne ya filtro por tenant, asi que no hay lectura ajena; el
+      // riesgo es de ESCRITURA: el Object.assign con el spread del body podia
+      // reescribir el tenantId y "mudar" la cobertura a otra clinica.
+      const existingCoverage = {
+        id: 'c1',
+        patientId: PATIENT_1,
+        tenantId: TENANT_A,
+        principal: false,
+        nroAfiliado: '12345',
+      } as PatientCoverageEntity;
+
+      coverageRepo.findOne.mockResolvedValue(existingCoverage);
+      coverageRepo.update.mockResolvedValue({} as UpdateResult);
+      coverageRepo.save.mockImplementation(
+        (entidad: DeepPartial<PatientCoverageEntity>) =>
+          Promise.resolve(entidad as PatientCoverageEntity),
+      );
+
+      // El body trae claves de identidad que no le corresponden.
+      const dataMaliciosa = {
+        nroAfiliado: '54321',
+        tenantId: TENANT_B,
+        patientId: 'patient-uuid-ajeno',
+      } as unknown as Parameters<typeof service.updateCoverage>[3];
+
+      const result = await service.updateCoverage(
+        'c1',
+        PATIENT_1,
+        TENANT_A,
+        dataMaliciosa,
+      );
+
+      expect(result.tenantId).toBe(TENANT_A);
+      expect(result.tenantId).not.toBe(TENANT_B);
+      expect(result.patientId).toBe(PATIENT_1);
+      // El campo legitimo si se actualiza.
+      expect(result.nroAfiliado).toBe('54321');
     });
 
     it('debería lanzar NotFoundException si la cobertura no existe o no pertenece al tenant/patient', async () => {

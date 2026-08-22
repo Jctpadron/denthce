@@ -1,14 +1,24 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository } from 'typeorm';
-import { ClinicaFinanzasService } from './clinica-finanzas.service';
+import { DeepPartial, Repository } from 'typeorm';
+import {
+  ClinicaFinanzasService,
+  CreateGastoDto,
+} from './clinica-finanzas.service';
 import { ClinicalGasto } from './clinical-gasto.entity';
 import { ClinicalPago } from './clinical-pago.entity';
 import { ClinicalPrecio } from './clinical-precio.entity';
 import { ClinicalPresupuestoItem } from './clinical-presupuesto-item.entity';
 import { ClinicalPresupuesto } from './clinical-presupuesto.entity';
 import { PatientEntity } from '../patient/patient.entity';
+
+/**
+ * El body real no esta limitado a CreateGastoDto: al ser una `interface`, el
+ * ValidationPipe no descarta las propiedades de mas. Este tipo modela ese
+ * escenario sin recurrir a `any`.
+ */
+type GastoConExtras = CreateGastoDto & Record<string, unknown>;
 
 describe('ClinicaFinanzasService', () => {
   let service: ClinicaFinanzasService;
@@ -432,6 +442,61 @@ describe('ClinicaFinanzasService', () => {
       const dash = await service.getDashboard(tenantId);
 
       expect(dash.pacientesMorosos).toBe(1);
+    });
+  });
+  describe('mass-assignment cross-tenant (AUD.12)', () => {
+    /** El repo devuelve tal cual lo que se le arma, para poder inspeccionarlo. */
+    const mockearGastoRepo = () => {
+      gastoRepo.create.mockImplementation(
+        (dto?: DeepPartial<ClinicalGasto>) => dto as ClinicalGasto,
+      );
+      gastoRepo.save.mockImplementation((entidad: DeepPartial<ClinicalGasto>) =>
+        Promise.resolve(entidad as ClinicalGasto),
+      );
+    };
+
+    // El DTO es una `interface`, de modo que el ValidationPipe global no la
+    // valida ni la filtra: lo que venga en el body llega intacto al service.
+    // La unica defensa es el orden del spread en el create().
+    it('registrarGasto ignora un tenantId inyectado en el body', async () => {
+      mockearGastoRepo();
+
+      // Un body que intenta declarar su propio tenant.
+      const dtoMalicioso: GastoConExtras = {
+        categoria: 'insumos',
+        descripcion: 'gasto inyectado',
+        monto: 100,
+        metodoPago: 'efectivo',
+        tenantId: 'clinica-ajena',
+      };
+
+      const gasto = await service.registrarGasto(
+        tenantId,
+        dtoMalicioso,
+        'user-1',
+      );
+
+      // El tenant del JWT manda, siempre.
+      expect(gasto.tenantId).toBe(tenantId);
+      expect(gasto.tenantId).not.toBe('clinica-ajena');
+    });
+
+    it('registrarGasto tampoco deja pisar registeredBy', async () => {
+      mockearGastoRepo();
+
+      const gasto = await service.registrarGasto(
+        tenantId,
+        {
+          categoria: 'insumos',
+          descripcion: 'x',
+          monto: 10,
+          metodoPago: 'efectivo',
+          registeredBy: 'otro-usuario',
+        } as GastoConExtras,
+        'user-real',
+      );
+
+      expect(gasto.registeredBy).toBe('user-real');
     });
   });
 });
