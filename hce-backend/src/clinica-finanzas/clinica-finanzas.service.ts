@@ -544,9 +544,13 @@ export class ClinicaFinanzasService {
     dto: CreateGastoDto,
     userId: string,
   ): Promise<ClinicalGasto> {
+    // El spread va PRIMERO y el tenantId del JWT despues, para que un
+    // tenantId inyectado en el body no pueda pisarlo (AUD.12). CreateGastoDto
+    // es una `interface`, de modo que el ValidationPipe no filtra el body:
+    // este orden es la unica defensa. Mismo patron que createPrecio.
     const gasto = this.gastoRepo.create({
-      tenantId,
       ...dto,
+      tenantId,
       fechaGasto: dto.fechaGasto || new Date(),
       registeredBy: userId,
     });

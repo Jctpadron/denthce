@@ -1,26 +1,13 @@
 const { Client } = require('pg');
-
-// Configuración por defecto: base de datos local
-const configLocal = {
-  host: 'localhost',
-  port: 5432,
-  user: 'hce_admin',
-  password: 'hce_secure_password_2026',
-  database: 'hce_fhir',
-};
-
-// Configuración de producción (RDS AWS)
-const configProd = {
-  host: 'hce-database-3.cmhgma6u2fhs.us-east-1.rds.amazonaws.com',
-  port: 5432,
-  user: 'hce_admin',
-  password: '*AndreA335*',
-  database: 'hce_fhir',
-  ssl: { rejectUnauthorized: false },
-};
+const { remoteConfig, localConfig } = require('./db-config');
 
 const isProd = process.env.ENV_PROD === 'true';
-const client = new Client(isProd ? configProd : configLocal);
+
+// La config se resuelve de forma perezosa: remoteConfig() aborta si faltan
+// DB_HOST/DB_PASSWORD (AUD.9), y no debe hacerlo cuando se corre contra local.
+const client = new Client(
+  isProd ? remoteConfig('hce_fhir') : localConfig('hce_fhir'),
+);
 
 async function run() {
   console.log(`Conectando a base de datos de ${isProd ? 'PRODUCCIÓN (RDS)' : 'DESARROLLO (Local)'}...`);

@@ -4,15 +4,9 @@
 // Uso:  node testing/scripts/create_odontology_tables.js
 // =============================================================================
 const { Client } = require('pg');
+const { remoteConfig } = require('./db-config');
 
-const client = new Client({
-  host: 'hce-database-3.cmhgma6u2fhs.us-east-1.rds.amazonaws.com',
-  port: 5432,
-  user: 'hce_admin',
-  password: '*AndreA335*',
-  database: 'hce_fhir', // base principal de la app
-  ssl: { rejectUnauthorized: false },
-});
+const client = new Client(remoteConfig('hce_fhir'));
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS odontology_clinical_resources (

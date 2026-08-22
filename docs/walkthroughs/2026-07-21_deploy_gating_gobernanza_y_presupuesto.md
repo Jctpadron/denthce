@@ -25,7 +25,7 @@ Se desplegó `main` a prod (backend EB `Odontocloud-env` app `odontocloud` + fro
 
 ## 4. Tareas GOV abiertas (en el tablero)
 - **GOV.5:** `deploy.yml` (CI) desalineado (app `hce-backend`/env `HceBackend-env` vs real `odontocloud`/`Odontocloud-env`). Nunca se usó; deploy real por PowerShell/CLI. Alinear o retirar.
-- **GOV.6:** secretos REALES hardcodeados en repo+history (DB pass `*AndreA335*` real, admin Keycloak, client_secret). Detalle en `docs/security/remediacion-secretos-hardcodeados.md`. **Requiere ROTACIÓN** (no solo borrar). Prioridad Alta.
+- **GOV.6:** secretos REALES hardcodeados en repo+history (clave de la base de producción, admin Keycloak, client_secret — los valores NO se transcriben acá). Detalle en `docs/security/remediacion-secretos-hardcodeados.md`. **Requiere ROTACIÓN** (no solo borrar). Prioridad Alta.
 - **GOV.7:** runner de migraciones automático (hoy SQL manual sin `schema_migrations`).
 - **GOV.8:** provisioning Keycloak — resuelto (ADMIN_EDIT); pendiente declarar `tenant_id` como atributo gestionado.
 
