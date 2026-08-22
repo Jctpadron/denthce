@@ -21,6 +21,7 @@ import {
   OdontologyPatientSignatureService,
   ActorCtx,
 } from './odontology-patient-signature.service';
+import { enviarBlob } from '../common/enviar-blob.util';
 
 const MAX_SIGNATURE_BYTES = 2 * 1024 * 1024; // 2 MB (una firma monocroma pesa mucho menos)
 
@@ -128,6 +129,6 @@ export class OdontologyPatientSignatureController {
     res.setHeader('Content-Type', mimeType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');
-    stream.pipe(res);
+    enviarBlob(stream, res, 'firma del paciente');
   }
 }

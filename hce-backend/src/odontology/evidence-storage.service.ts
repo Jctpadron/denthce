@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { join } from 'path';
 import * as fs from 'fs';
 import { createReadStream } from 'fs';
@@ -80,6 +80,21 @@ export class EvidenceStorageService {
       );
       return r.Body as Readable;
     }
-    return createReadStream(join(this.localBase, category, key));
+    // Verificar ANTES de crear el stream. Si el archivo no está,
+    // `createReadStream` no falla acá: emite 'error' de forma asincrónica, y
+    // para entonces el controller ya hizo pipe(res). Un stream que emite
+    // 'error' sin listener mata el proceso entero (pasó con la firma del
+    // profesional: la fila apuntaba a un blob que ya no existía).
+    //
+    // Que la referencia quede huérfana es esperable, no excepcional:
+    // `private-uploads/` no es un volumen y el filesystem de EB es efímero.
+    const ruta = join(this.localBase, category, key);
+    if (!fs.existsSync(ruta)) {
+      // El mensaje no menciona la ruta: no se filtra la estructura del disco.
+      throw new NotFoundException(
+        'No pudimos recuperar el archivo guardado. Es posible que haya que volver a cargarlo.',
+      );
+    }
+    return createReadStream(ruta);
   }
 }

@@ -22,6 +22,7 @@ import { Roles } from '../auth/roles.decorator';
 import { ClinicalAttachmentService } from './clinical-attachment.service';
 import type { AttachmentOwnerType } from './clinical-attachment.entity';
 import type { ActorCtx } from './odontology-patient-signature.service';
+import { enviarBlob } from '../common/enviar-blob.util';
 
 const ALLOWED = ['image/jpeg', 'image/png', 'application/pdf'];
 const MAX_BYTES = 15 * 1024 * 1024; // 15 MB
@@ -123,7 +124,7 @@ export class ClinicalAttachmentController {
       'Content-Disposition',
       `${disposition}; filename="${encodeURIComponent(filename)}"`,
     );
-    stream.pipe(res);
+    enviarBlob(stream, res, 'adjunto clinico');
   }
 
   @Delete('attachment/:id')

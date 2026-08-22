@@ -22,6 +22,7 @@ import { TenantConfigService } from './tenant-config.service';
 import { TenantSignatureService } from './tenant-signature.service';
 import { ModulesService } from '../platform/modules.service';
 import * as fs from 'fs';
+import { enviarBlob } from '../common/enviar-blob.util';
 
 const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
@@ -196,6 +197,6 @@ export class TenantConfigController {
     res.setHeader('Content-Type', mimeType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');
-    stream.pipe(res);
+    enviarBlob(stream, res, 'firma del profesional');
   }
 }
